@@ -7,6 +7,8 @@ import { NetDailyPnLChart } from '@/components/dashboard/NetDailyPnLChart';
 import { TradeTimePerformanceChart } from '@/components/dashboard/TradeTimePerformanceChart';
 import { TradeDurationPerformanceChart } from '@/components/dashboard/TradeDurationPerformanceChart';
 import { MonthlyPerformanceCalendar } from '@/components/dashboard/MonthlyPerformanceCalendar';
+import { InstrumentAnalysisChart } from '@/components/dashboard/InstrumentAnalysisChart';
+import { LongShortAnalysisChart } from '@/components/dashboard/LongShortAnalysisChart';
 import { useTradesContext } from '@/contexts/TradesContext';
 import { motion } from 'framer-motion';
 const Dashboard = () => {
@@ -127,6 +129,14 @@ const Dashboard = () => {
         </div>
         <div className="lg:col-span-1">
           <TradeDurationPerformanceChart />
+        </div>
+
+        {/* Row 4: Instrument Analysis (2 cols) | Long/Short Analysis (1 col) */}
+        <div className="lg:col-span-2">
+          <InstrumentAnalysisChart />
+        </div>
+        <div className="lg:col-span-1">
+          <LongShortAnalysisChart />
         </div>
       </div>
     </div>
