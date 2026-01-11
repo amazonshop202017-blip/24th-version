@@ -13,6 +13,9 @@ interface TradesContextType {
     dayWinRate: number;
     avgWin: number;
     avgLoss: number;
+    totalProfits: number;
+    totalLosses: number;
+    profitFactor: number;
   };
   addTrade: (data: TradeFormData) => Trade;
   updateTrade: (id: string, data: TradeFormData) => void;

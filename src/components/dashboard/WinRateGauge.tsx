@@ -2,10 +2,13 @@ import { motion } from 'framer-motion';
 
 interface WinRateGaugeProps {
   value: number;
+  label: string;
+  winners?: number;
+  losers?: number;
   size?: number;
 }
 
-export const WinRateGauge = ({ value, size = 180 }: WinRateGaugeProps) => {
+export const WinRateGauge = ({ value, label, winners, losers, size = 180 }: WinRateGaugeProps) => {
   const clampedValue = Math.min(100, Math.max(0, value));
   const strokeWidth = 14;
   const radius = (size - strokeWidth) / 2;
@@ -73,18 +76,25 @@ export const WinRateGauge = ({ value, size = 180 }: WinRateGaugeProps) => {
           />
         )}
         
-        {/* Center text */}
+        {/* Center text - lighter color */}
         <text
           x={centerX}
           y={centerY + 8}
           textAnchor="middle"
-          className="fill-foreground font-mono font-bold"
+          className="fill-muted-foreground font-mono font-bold"
           style={{ fontSize: size * 0.16 }}
         >
           {clampedValue.toFixed(1)}%
         </text>
       </svg>
-      <span className="text-sm text-muted-foreground -mt-2">Win Rate</span>
+      <span className="text-sm text-muted-foreground -mt-2">{label}</span>
+      {winners !== undefined && losers !== undefined && (
+        <div className="flex items-center gap-2 mt-1 text-xs">
+          <span className="profit-text font-medium">{winners}W</span>
+          <span className="text-muted-foreground">/</span>
+          <span className="loss-text font-medium">{losers}L</span>
+        </div>
+      )}
     </div>
   );
 };

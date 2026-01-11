@@ -68,13 +68,19 @@ export const useTrades = () => {
   }, [trades]);
 
   // Stats calculations using the new calculateTradeMetrics
+  const winningTrades = trades.filter(t => calculateTradeMetrics(t).netPnl > 0);
+  const losingTrades = trades.filter(t => calculateTradeMetrics(t).netPnl < 0);
+  
+  const totalProfits = winningTrades.reduce((sum, t) => sum + calculateTradeMetrics(t).netPnl, 0);
+  const totalLosses = Math.abs(losingTrades.reduce((sum, t) => sum + calculateTradeMetrics(t).netPnl, 0));
+  
   const stats = {
     netPnl: trades.reduce((sum, t) => sum + calculateTradeMetrics(t).netPnl, 0),
     totalTrades: trades.length,
-    winningTrades: trades.filter(t => calculateTradeMetrics(t).netPnl > 0).length,
-    losingTrades: trades.filter(t => calculateTradeMetrics(t).netPnl < 0).length,
+    winningTrades: winningTrades.length,
+    losingTrades: losingTrades.length,
     tradeWinRate: trades.length > 0 
-      ? (trades.filter(t => calculateTradeMetrics(t).netPnl > 0).length / trades.length) * 100 
+      ? (winningTrades.length / trades.length) * 100 
       : 0,
     dayWinRate: (() => {
       const dayPnl = trades.reduce((acc, t) => {
@@ -87,14 +93,15 @@ export const useTrades = () => {
       if (days.length === 0) return 0;
       return (days.filter(p => p > 0).length / days.length) * 100;
     })(),
-    avgWin: (() => {
-      const wins = trades.filter(t => calculateTradeMetrics(t).netPnl > 0);
-      return wins.length > 0 ? wins.reduce((s, t) => s + calculateTradeMetrics(t).netPnl, 0) / wins.length : 0;
-    })(),
-    avgLoss: (() => {
-      const losses = trades.filter(t => calculateTradeMetrics(t).netPnl < 0);
-      return losses.length > 0 ? losses.reduce((s, t) => s + calculateTradeMetrics(t).netPnl, 0) / losses.length : 0;
-    })(),
+    avgWin: winningTrades.length > 0 
+      ? totalProfits / winningTrades.length 
+      : 0,
+    avgLoss: losingTrades.length > 0 
+      ? -(totalLosses / losingTrades.length) 
+      : 0,
+    totalProfits,
+    totalLosses,
+    profitFactor: totalLosses > 0 ? totalProfits / totalLosses : (totalProfits > 0 ? Infinity : 0),
   };
 
   return {

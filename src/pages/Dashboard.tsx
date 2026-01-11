@@ -1,7 +1,7 @@
-import { DollarSign, TrendingUp, Calendar } from 'lucide-react';
-import { StatCard } from '@/components/dashboard/StatCard';
+import { DollarSign } from 'lucide-react';
 import { RecentTrades } from '@/components/dashboard/RecentTrades';
 import { WinRateGauge } from '@/components/dashboard/WinRateGauge';
+import { ProfitFactorRing } from '@/components/dashboard/ProfitFactorRing';
 import { useTradesContext } from '@/contexts/TradesContext';
 import { motion } from 'framer-motion';
 
@@ -27,34 +27,68 @@ const Dashboard = () => {
       </motion.div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard
-          label="Net P&L"
-          value={formatCurrency(stats.netPnl)}
-          icon={<DollarSign className="w-6 h-6" />}
-          trend={stats.netPnl >= 0 ? 'profit' : 'loss'}
-          delay={0}
-        />
+        {/* Net P&L with Total Trades */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0 }}
+          className="glass-card rounded-2xl p-6 relative overflow-hidden"
+        >
+          <div className="absolute top-0 right-0 w-32 h-32 opacity-5 transform translate-x-8 -translate-y-8">
+            <DollarSign className="w-full h-full" />
+          </div>
+          <div className="relative z-10">
+            <p className="stat-label mb-2">Net P&L</p>
+            <p className={`stat-value ${stats.netPnl >= 0 ? 'profit-text' : 'loss-text'}`}>
+              {formatCurrency(stats.netPnl)}
+            </p>
+            <p className="text-xs text-muted-foreground mt-2">
+              Total Trades: {stats.totalTrades}
+            </p>
+          </div>
+        </motion.div>
+
+        {/* Trade Win Rate */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.1 }}
           className="glass-card rounded-2xl p-6 flex items-center justify-center"
         >
-          <WinRateGauge value={stats.tradeWinRate} />
+          <WinRateGauge 
+            value={stats.tradeWinRate} 
+            label="Trade Win Rate"
+            winners={stats.winningTrades}
+            losers={stats.losingTrades}
+          />
         </motion.div>
-        <StatCard
-          label="Day Win Rate"
-          value={`${stats.dayWinRate.toFixed(1)}%`}
-          icon={<Calendar className="w-6 h-6" />}
-          trend={stats.dayWinRate >= 50 ? 'profit' : stats.dayWinRate > 0 ? 'loss' : 'neutral'}
-          delay={0.2}
-        />
-        <StatCard
-          label="Total Trades"
-          value={stats.totalTrades}
-          icon={<TrendingUp className="w-6 h-6" />}
-          delay={0.3}
-        />
+
+        {/* Day Win Rate */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.2 }}
+          className="glass-card rounded-2xl p-6 flex items-center justify-center"
+        >
+          <WinRateGauge 
+            value={stats.dayWinRate} 
+            label="Day Win Rate"
+          />
+        </motion.div>
+
+        {/* Profit Factor */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.3 }}
+          className="glass-card rounded-2xl p-6 flex items-center justify-center"
+        >
+          <ProfitFactorRing 
+            profitFactor={stats.profitFactor}
+            totalProfits={stats.totalProfits}
+            totalLosses={stats.totalLosses}
+          />
+        </motion.div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
