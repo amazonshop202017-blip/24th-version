@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from 'react-router-dom';
-import { LayoutDashboard, LineChart, ListOrdered, BarChart3 } from 'lucide-react';
+import { LayoutDashboard, LineChart, ListOrdered, BarChart3, Settings } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 
@@ -7,6 +7,7 @@ const navItems = [
   { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
   { icon: ListOrdered, label: 'Trades', path: '/trades' },
   { icon: BarChart3, label: 'Analytics', path: '/analytics' },
+  { icon: Settings, label: 'Settings', path: '/settings' },
 ];
 
 export const Sidebar = () => {
