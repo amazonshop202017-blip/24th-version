@@ -74,7 +74,7 @@ export const DailyCumulativePnLChart = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
-        className="glass-card rounded-xl p-4"
+        className="glass-card rounded-xl p-4 h-full flex flex-col min-h-[380px]"
       >
         <div className="flex items-center gap-2 mb-4">
           <h3 className="text-sm font-medium text-muted-foreground">Daily net cumulative P&L</h3>
@@ -87,7 +87,7 @@ export const DailyCumulativePnLChart = () => {
             </TooltipContent>
           </UITooltip>
         </div>
-        <div className="h-[200px] flex items-center justify-center text-muted-foreground text-sm">
+        <div className="flex-1 flex items-center justify-center text-muted-foreground text-sm">
           Add trades to see your equity curve
         </div>
       </motion.div>
@@ -99,7 +99,7 @@ export const DailyCumulativePnLChart = () => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
-      className="glass-card rounded-xl p-4"
+      className="glass-card rounded-xl p-4 h-full flex flex-col min-h-[380px]"
     >
       <div className="flex items-center gap-2 mb-4">
         <h3 className="text-sm font-medium text-muted-foreground">Daily net cumulative P&L</h3>
@@ -113,7 +113,7 @@ export const DailyCumulativePnLChart = () => {
         </UITooltip>
       </div>
       
-      <div className="h-[200px]">
+      <div className="flex-1">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart
             data={chartData}

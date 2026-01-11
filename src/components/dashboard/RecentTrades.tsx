@@ -114,7 +114,7 @@ export const RecentTrades = () => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: 0.3 }}
-      className="glass-card rounded-2xl p-6"
+      className="glass-card rounded-2xl p-6 h-full min-h-[380px]"
     >
       <Tabs defaultValue="recent" className="w-full">
         <TabsList className="w-full mb-4">
