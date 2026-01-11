@@ -1,6 +1,7 @@
-import { DollarSign, TrendingUp, Calendar, Target } from 'lucide-react';
+import { DollarSign, TrendingUp, Calendar } from 'lucide-react';
 import { StatCard } from '@/components/dashboard/StatCard';
 import { RecentTrades } from '@/components/dashboard/RecentTrades';
+import { WinRateGauge } from '@/components/dashboard/WinRateGauge';
 import { useTradesContext } from '@/contexts/TradesContext';
 import { motion } from 'framer-motion';
 
@@ -33,13 +34,14 @@ const Dashboard = () => {
           trend={stats.netPnl >= 0 ? 'profit' : 'loss'}
           delay={0}
         />
-        <StatCard
-          label="Trade Win Rate"
-          value={`${stats.tradeWinRate.toFixed(1)}%`}
-          icon={<Target className="w-6 h-6" />}
-          trend={stats.tradeWinRate >= 50 ? 'profit' : stats.tradeWinRate > 0 ? 'loss' : 'neutral'}
-          delay={0.1}
-        />
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.1 }}
+          className="glass-card rounded-2xl p-6 flex items-center justify-center"
+        >
+          <WinRateGauge value={stats.tradeWinRate} />
+        </motion.div>
         <StatCard
           label="Day Win Rate"
           value={`${stats.dayWinRate.toFixed(1)}%`}
