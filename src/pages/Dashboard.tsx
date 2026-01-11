@@ -3,6 +3,7 @@ import { WinRateGauge } from '@/components/dashboard/WinRateGauge';
 import { ProfitFactorRing } from '@/components/dashboard/ProfitFactorRing';
 import { AvgWinLossRatio } from '@/components/dashboard/AvgWinLossRatio';
 import { DailyCumulativePnLChart } from '@/components/dashboard/DailyCumulativePnLChart';
+import { NetDailyPnLChart } from '@/components/dashboard/NetDailyPnLChart';
 import { TradeTimePerformanceChart } from '@/components/dashboard/TradeTimePerformanceChart';
 import { TradeDurationPerformanceChart } from '@/components/dashboard/TradeDurationPerformanceChart';
 import { MonthlyPerformanceCalendar } from '@/components/dashboard/MonthlyPerformanceCalendar';
@@ -105,6 +106,8 @@ const Dashboard = () => {
       </div>
 
       <DailyCumulativePnLChart />
+
+      <NetDailyPnLChart />
 
       <TradeTimePerformanceChart />
 
