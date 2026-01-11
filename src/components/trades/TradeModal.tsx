@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Plus, Trash2, Calendar, Search, TrendingUp, TrendingDown, Settings, Target } from 'lucide-react';
+import { X, Plus, Trash2, Calendar, Search, TrendingUp, TrendingDown, Settings, Target, Wallet } from 'lucide-react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -13,6 +13,7 @@ import { useTradeModal } from '@/contexts/TradeModalContext';
 import { useTradesContext } from '@/contexts/TradesContext';
 import { useTagsContext } from '@/contexts/TagsContext';
 import { useStrategiesContext } from '@/contexts/StrategiesContext';
+import { useAccountsContext } from '@/contexts/AccountsContext';
 import { TradeFormData, TradeEntry, calculateTradeMetrics } from '@/types/trade';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
@@ -32,6 +33,7 @@ export const TradeModal = () => {
   const { addTrade, updateTrade } = useTradesContext();
   const { tags } = useTagsContext();
   const { strategies } = useStrategiesContext();
+  const { accounts } = useAccountsContext();
   const navigate = useNavigate();
 
   const [symbol, setSymbol] = useState('');
@@ -110,7 +112,7 @@ export const TradeModal = () => {
   const calculatedSide = metrics.positionSide || 'LONG';
 
   const handleSubmit = () => {
-    if (!symbol.trim() || entries.length === 0) return;
+    if (!symbol.trim()) return;
 
     const tradeData: TradeFormData = {
       symbol: symbol.trim(),
@@ -294,12 +296,33 @@ export const TradeModal = () => {
                 </div>
                 <div>
                   <Label className="text-xs mb-1 block">Account</Label>
-                  <Input
-                    placeholder="Account..."
-                    value={accountName}
-                    onChange={(e) => setAccountName(e.target.value)}
-                    className="h-8 text-sm bg-input border-border"
-                  />
+                  {accounts.length === 0 ? (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        closeModal();
+                        navigate('/settings');
+                      }}
+                      className="w-full h-8 text-xs"
+                    >
+                      <Wallet className="w-3 h-3 mr-1.5" />
+                      Add Account
+                    </Button>
+                  ) : (
+                    <Select value={accountName || "none"} onValueChange={(val) => setAccountName(val === "none" ? "" : val)}>
+                      <SelectTrigger className="h-8 text-sm bg-input border-border">
+                        <SelectValue placeholder="Select..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">None</SelectItem>
+                        {accounts.map((a) => (
+                          <SelectItem key={a.id} value={a.name}>{a.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
                 </div>
               </div>
 
@@ -488,20 +511,19 @@ export const TradeModal = () => {
                       ))}
                     </AnimatePresence>
                   </div>
-                </div>
-
-                {/* Add Trade Button - Always visible */}
-                <div className="flex justify-end mt-4">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={addEntry}
-                    className="gap-2"
-                  >
-                    <Plus className="w-4 h-4" />
-                    Add Row
-                  </Button>
+                  {/* Add Entry Button - Below the last row */}
+                  <div className="p-3 border-t border-border">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={addEntry}
+                      className="gap-2"
+                    >
+                      <Plus className="w-4 h-4" />
+                      Add Entry
+                    </Button>
+                  </div>
                 </div>
               </TabsContent>
 
@@ -510,7 +532,7 @@ export const TradeModal = () => {
                   placeholder="Add notes about this trade..."
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
-                  className="min-h-[300px] bg-input border-border resize-none"
+                  className="min-h-[300px] h-full bg-input border-border resize-none p-3"
                 />
               </TabsContent>
             </Tabs>

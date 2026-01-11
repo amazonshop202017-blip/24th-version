@@ -7,6 +7,7 @@ import { TradeModalProvider } from "@/contexts/TradeModalContext";
 import { TradesProvider } from "@/contexts/TradesContext";
 import { TagsProvider } from "@/contexts/TagsContext";
 import { StrategiesProvider } from "@/contexts/StrategiesContext";
+import { AccountsProvider } from "@/contexts/AccountsContext";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { TradeModal } from "@/components/trades/TradeModal";
 import Dashboard from "./pages/Dashboard";
@@ -25,24 +26,26 @@ const App = () => (
       <TagsProvider>
         <StrategiesProvider>
           <TradesProvider>
-            <TradeModalProvider>
-              <Toaster />
-              <Sonner />
-              <BrowserRouter>
-                <AppLayout>
-                  <Routes>
-                    <Route path="/" element={<Dashboard />} />
-                    <Route path="/trades" element={<Trades />} />
-                    <Route path="/strategies" element={<Strategies />} />
-                    <Route path="/strategies/:id" element={<StrategyDetail />} />
-                    <Route path="/analytics" element={<Analytics />} />
-                    <Route path="/settings" element={<Settings />} />
-                    <Route path="*" element={<NotFound />} />
-                  </Routes>
-                </AppLayout>
-                <TradeModal />
-              </BrowserRouter>
-            </TradeModalProvider>
+            <AccountsProvider>
+              <TradeModalProvider>
+                <Toaster />
+                <Sonner />
+                <BrowserRouter>
+                  <AppLayout>
+                    <Routes>
+                      <Route path="/" element={<Dashboard />} />
+                      <Route path="/trades" element={<Trades />} />
+                      <Route path="/strategies" element={<Strategies />} />
+                      <Route path="/strategies/:id" element={<StrategyDetail />} />
+                      <Route path="/analytics" element={<Analytics />} />
+                      <Route path="/settings" element={<Settings />} />
+                      <Route path="*" element={<NotFound />} />
+                    </Routes>
+                  </AppLayout>
+                  <TradeModal />
+                </BrowserRouter>
+              </TradeModalProvider>
+            </AccountsProvider>
           </TradesProvider>
         </StrategiesProvider>
       </TagsProvider>
