@@ -1,7 +1,8 @@
 import { useMemo } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, Cell } from 'recharts';
 import { motion } from 'framer-motion';
-import { useTradesContext } from '@/contexts/TradesContext';
+import { useFilteredTradesContext } from '@/contexts/TradesContext';
+import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
 import { calculateTradeMetrics } from '@/types/trade';
 import { Info } from 'lucide-react';
 import { Tooltip as UITooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -13,7 +14,8 @@ interface DirectionData {
 }
 
 export const LongShortAnalysisChart = () => {
-  const { trades } = useTradesContext();
+  const { filteredTrades: trades } = useFilteredTradesContext();
+  const { currencyConfig } = useGlobalFilters();
 
   const chartData = useMemo(() => {
     if (trades.length === 0) return [];
@@ -69,9 +71,9 @@ export const LongShortAnalysisChart = () => {
 
   const formatCurrency = (value: number) => {
     if (Math.abs(value) >= 1000) {
-      return `${value >= 0 ? '' : '-'}$${(Math.abs(value) / 1000).toFixed(1)}k`;
+      return `${value >= 0 ? '' : '-'}${currencyConfig.symbol}${(Math.abs(value) / 1000).toFixed(1)}k`;
     }
-    return `${value >= 0 ? '' : '-'}$${Math.abs(value).toFixed(0)}`;
+    return `${value >= 0 ? '' : '-'}${currencyConfig.symbol}${Math.abs(value).toFixed(0)}`;
   };
 
   if (chartData.length === 0) {

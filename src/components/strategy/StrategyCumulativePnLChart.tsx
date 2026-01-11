@@ -3,6 +3,7 @@ import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceL
 import { motion } from 'framer-motion';
 import { Info } from 'lucide-react';
 import { Trade, calculateTradeMetrics } from '@/types/trade';
+import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
 import { format, parseISO } from 'date-fns';
 
 interface StrategyCumulativePnLChartProps {
@@ -10,6 +11,8 @@ interface StrategyCumulativePnLChartProps {
 }
 
 const StrategyCumulativePnLChart = ({ trades }: StrategyCumulativePnLChartProps) => {
+  const { currencyConfig } = useGlobalFilters();
+  
   const chartData = useMemo(() => {
     if (trades.length === 0) return [];
 
@@ -102,7 +105,7 @@ const StrategyCumulativePnLChart = ({ trades }: StrategyCumulativePnLChartProps)
               tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
               axisLine={false}
               tickLine={false}
-              tickFormatter={(value) => `₹${value.toFixed(0)}`}
+              tickFormatter={(value) => `${currencyConfig.symbol}${value.toFixed(0)}`}
               width={60}
             />
             <Tooltip
@@ -114,7 +117,7 @@ const StrategyCumulativePnLChart = ({ trades }: StrategyCumulativePnLChartProps)
               }}
               labelFormatter={(label) => `Date: ${label}`}
               formatter={(value: number, name: string) => {
-                const formattedValue = `₹${value.toFixed(2)}`;
+                const formattedValue = `${currencyConfig.symbol}${value.toFixed(2)}`;
                 const displayName = name === 'cumulativePnl' ? 'Cumulative P&L' : 'Daily P&L';
                 return [formattedValue, displayName];
               }}

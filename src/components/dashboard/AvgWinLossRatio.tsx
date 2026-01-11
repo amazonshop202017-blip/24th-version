@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
 
 interface AvgWinLossRatioProps {
   avgWin: number;
@@ -6,6 +7,8 @@ interface AvgWinLossRatioProps {
 }
 
 export const AvgWinLossRatio = ({ avgWin, avgLoss }: AvgWinLossRatioProps) => {
+  const { currencyConfig } = useGlobalFilters();
+  
   const absLoss = Math.abs(avgLoss);
   const ratio = absLoss > 0 ? avgWin / absLoss : avgWin > 0 ? Infinity : 0;
   const total = avgWin + absLoss;
@@ -19,7 +22,7 @@ export const AvgWinLossRatio = ({ avgWin, avgLoss }: AvgWinLossRatioProps) => {
   };
 
   const formatCurrency = (value: number) => {
-    return `$${Math.abs(value).toFixed(1)}`;
+    return `${currencyConfig.symbol}${Math.abs(value).toFixed(1)}`;
   };
 
   return (

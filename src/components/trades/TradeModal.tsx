@@ -15,6 +15,7 @@ import { useTradesContext } from '@/contexts/TradesContext';
 import { useTagsContext } from '@/contexts/TagsContext';
 import { useStrategiesContext } from '@/contexts/StrategiesContext';
 import { useAccountsContext } from '@/contexts/AccountsContext';
+import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
 import { TradeFormData, TradeEntry, calculateTradeMetrics } from '@/types/trade';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
@@ -35,6 +36,7 @@ export const TradeModal = () => {
   const { tags } = useTagsContext();
   const { strategies } = useStrategiesContext();
   const { accounts } = useAccountsContext();
+  const { currencyConfig } = useGlobalFilters();
   const navigate = useNavigate();
 
   const [symbol, setSymbol] = useState('');
@@ -251,7 +253,7 @@ export const TradeModal = () => {
                       "font-mono font-bold text-sm",
                       isWin ? "profit-text" : "loss-text"
                     )}>
-                      ₹{metrics.netPnl.toFixed(2)}
+                      {currencyConfig.symbol}{metrics.netPnl.toFixed(2)}
                     </span>
                     <span className={cn(
                       "text-[10px]",
@@ -272,19 +274,19 @@ export const TradeModal = () => {
                 <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-[10px] text-muted-foreground pt-1">
                   <div>
                     <span className="block">Gross</span>
-                    <span className="font-mono text-foreground">₹{metrics.grossPnl.toFixed(2)}</span>
+                    <span className="font-mono text-foreground">{currencyConfig.symbol}{metrics.grossPnl.toFixed(2)}</span>
                   </div>
                   <div className="text-right">
                     <span className="block">Charges</span>
-                    <span className="font-mono text-foreground">₹{metrics.totalCharges.toFixed(2)}</span>
+                    <span className="font-mono text-foreground">{currencyConfig.symbol}{metrics.totalCharges.toFixed(2)}</span>
                   </div>
                   <div>
                     <span className="block">Avg Entry</span>
-                    <span className="font-mono text-foreground">₹{metrics.avgEntryPrice.toFixed(2)}</span>
+                    <span className="font-mono text-foreground">{currencyConfig.symbol}{metrics.avgEntryPrice.toFixed(2)}</span>
                   </div>
                   <div className="text-right">
                     <span className="block">Avg Exit</span>
-                    <span className="font-mono text-foreground">₹{metrics.avgExitPrice.toFixed(2)}</span>
+                    <span className="font-mono text-foreground">{currencyConfig.symbol}{metrics.avgExitPrice.toFixed(2)}</span>
                   </div>
                 </div>
               </div>
@@ -522,7 +524,7 @@ export const TradeModal = () => {
                             className="h-8 text-xs bg-input border-border"
                           />
                           <div className="relative">
-                            <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">₹</span>
+                            <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">{currencyConfig.symbol}</span>
                             <Input
                               type="number"
                               placeholder="100"
@@ -532,7 +534,7 @@ export const TradeModal = () => {
                             />
                           </div>
                           <div className="relative">
-                            <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">₹</span>
+                            <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">{currencyConfig.symbol}</span>
                             <Input
                               type="number"
                               placeholder="0"
@@ -609,7 +611,7 @@ export const TradeModal = () => {
               <div className="glass-card rounded-xl p-2.5">
                 <Label className="text-[10px] mb-1 block text-muted-foreground">Risk</Label>
                 <div className="relative">
-                  <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">₹</span>
+                  <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">{currencyConfig.symbol}</span>
                   <Input
                     type="number"
                     placeholder="1,000"
@@ -622,7 +624,7 @@ export const TradeModal = () => {
               <div className="glass-card rounded-xl p-2.5">
                 <Label className="text-[10px] mb-1 block text-muted-foreground">Target</Label>
                 <div className="relative">
-                  <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">₹</span>
+                  <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">{currencyConfig.symbol}</span>
                   <Input
                     type="number"
                     placeholder="2,000"
@@ -640,7 +642,7 @@ export const TradeModal = () => {
               <div className="glass-card rounded-xl p-3">
                 <Label className="text-xs mb-1.5 block text-muted-foreground">Position MAE</Label>
                 <div className="relative">
-                  <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">₹</span>
+                  <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">{currencyConfig.symbol}</span>
                   <Input
                     type="number"
                     placeholder="0"
@@ -656,7 +658,7 @@ export const TradeModal = () => {
               <div className="glass-card rounded-xl p-3">
                 <Label className="text-xs mb-1.5 block text-muted-foreground">Position MFE</Label>
                 <div className="relative">
-                  <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">₹</span>
+                  <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">{currencyConfig.symbol}</span>
                   <Input
                     type="number"
                     placeholder="0"
@@ -672,7 +674,7 @@ export const TradeModal = () => {
               <div className="glass-card rounded-xl p-3">
                 <Label className="text-xs mb-1.5 block text-muted-foreground">Potential MAE</Label>
                 <div className="relative">
-                  <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">₹</span>
+                  <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">{currencyConfig.symbol}</span>
                   <Input
                     type="number"
                     placeholder="0"
@@ -688,7 +690,7 @@ export const TradeModal = () => {
               <div className="glass-card rounded-xl p-3">
                 <Label className="text-xs mb-1.5 block text-muted-foreground">Potential MFE</Label>
                 <div className="relative">
-                  <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">₹</span>
+                  <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">{currencyConfig.symbol}</span>
                   <Input
                     type="number"
                     placeholder="0"

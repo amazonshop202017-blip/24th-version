@@ -157,12 +157,12 @@ export const MonthlyPerformanceCalendar = () => {
   }, [currentMonth, dayStatsMap]);
 
   const formatCurrency = (value: number) => {
-    const prefix = value >= 0 ? '$' : '-$';
+    const prefix = value >= 0 ? currencyConfig.symbol : `-${currencyConfig.symbol}`;
     return `${prefix}${Math.abs(value).toFixed(0)}`;
   };
 
   const formatCurrencyDecimal = (value: number) => {
-    const prefix = value >= 0 ? '$' : '-$';
+    const prefix = value >= 0 ? currencyConfig.symbol : `-${currencyConfig.symbol}`;
     return `${prefix}${Math.abs(value).toFixed(2)}`;
   };
 

@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
-import { useTradesContext } from '@/contexts/TradesContext';
+import { useFilteredTradesContext } from '@/contexts/TradesContext';
+import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
 import { calculateTradeMetrics } from '@/types/trade';
 import { motion } from 'framer-motion';
 import { Info } from 'lucide-react';
@@ -71,7 +72,8 @@ const formatDurationAxis = (minutes: number): string => {
 };
 
 export const TradeDurationPerformanceChart = () => {
-  const { trades } = useTradesContext();
+  const { filteredTrades: trades } = useFilteredTradesContext();
+  const { currencyConfig } = useGlobalFilters();
 
   const chartData = useMemo(() => {
     const data: ChartDataPoint[] = [];
@@ -110,7 +112,7 @@ export const TradeDurationPerformanceChart = () => {
   }, [trades]);
 
   const formatCurrency = (value: number) => {
-    const prefix = value >= 0 ? '$' : '-$';
+    const prefix = value >= 0 ? currencyConfig.symbol : `-${currencyConfig.symbol}`;
     return `${prefix}${Math.abs(value).toFixed(0)}`;
   };
 
