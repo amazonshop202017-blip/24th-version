@@ -7,23 +7,30 @@ export const useTrades = () => {
   const [trades, setTrades] = useState<Trade[]>([]);
 
   useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      const parsed = JSON.parse(stored);
-      // Migrate old trades that don't have the entries array
-      const migrated = parsed.map((trade: any) => {
-        if (!trade.entries) {
-          // Old format - convert to new format
-          return {
-            ...trade,
-            instrument: trade.instrument || 'Equity',
-            entries: [],
-            notes: trade.notes || '',
-          };
-        }
-        return trade;
-      });
-      setTrades(migrated);
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        // Migrate old trades that don't have the entries array
+        const migrated = parsed.map((trade: any) => {
+          if (!trade.entries) {
+            // Old format - convert to new format
+            return {
+              ...trade,
+              instrument: trade.instrument || 'Equity',
+              entries: [],
+              notes: trade.notes || '',
+            };
+          }
+          return trade;
+        });
+        setTrades(migrated);
+        // Save migrated trades back to localStorage
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(migrated));
+      }
+    } catch (error) {
+      console.error('Error loading trades from localStorage:', error);
+      setTrades([]);
     }
   }, []);
 
