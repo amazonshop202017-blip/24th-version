@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
 import { useTradeModal } from '@/contexts/TradeModalContext';
 import { useTradesContext } from '@/contexts/TradesContext';
 import { useTagsContext } from '@/contexts/TagsContext';
@@ -46,6 +47,13 @@ export const TradeModal = () => {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [notes, setNotes] = useState('');
   const [activeTab, setActiveTab] = useState('trades');
+  
+  // Manual position metrics
+  const [positionMAE, setPositionMAE] = useState(0);
+  const [positionMFE, setPositionMFE] = useState(0);
+  const [potentialMAE, setPotentialMAE] = useState(0);
+  const [potentialMFE, setPotentialMFE] = useState(0);
+  const [missedTrade, setMissedTrade] = useState(false);
 
   useEffect(() => {
     if (editingTrade) {
@@ -58,6 +66,12 @@ export const TradeModal = () => {
       setStrategyId(editingTrade.strategyId || '');
       setSelectedTags(editingTrade.tags);
       setNotes(editingTrade.notes || '');
+      // Load manual position metrics
+      setPositionMAE(editingTrade.positionMAE || 0);
+      setPositionMFE(editingTrade.positionMFE || 0);
+      setPotentialMAE(editingTrade.potentialMAE || 0);
+      setPotentialMFE(editingTrade.potentialMFE || 0);
+      setMissedTrade(editingTrade.missedTrade || false);
     } else {
       resetForm();
     }
@@ -74,10 +88,15 @@ export const TradeModal = () => {
     setSelectedTags([]);
     setNotes('');
     setActiveTab('trades');
+    // Reset manual position metrics
+    setPositionMAE(0);
+    setPositionMFE(0);
+    setPotentialMAE(0);
+    setPotentialMFE(0);
+    setMissedTrade(false);
   };
 
   const addEntry = () => {
-    // Check first entry type and default new entry to opposite
     const firstEntry = entries[0];
     const newEntryType: 'BUY' | 'SELL' = firstEntry?.type === 'BUY' ? 'SELL' : 'BUY';
     
@@ -112,7 +131,7 @@ export const TradeModal = () => {
   const metrics = useMemo(() => {
     const formData: TradeFormData = {
       symbol,
-      side: 'LONG', // Will be overridden by calculated side
+      side: 'LONG',
       instrument,
       entries,
       tradeRisk,
@@ -121,11 +140,15 @@ export const TradeModal = () => {
       strategyId: strategyId || undefined,
       tags: selectedTags,
       notes,
+      positionMAE,
+      positionMFE,
+      potentialMAE,
+      potentialMFE,
+      missedTrade,
     };
     return calculateTradeMetrics(formData);
-  }, [symbol, instrument, entries, tradeRisk, tradeTarget, accountName, strategyId, selectedTags, notes]);
+  }, [symbol, instrument, entries, tradeRisk, tradeTarget, accountName, strategyId, selectedTags, notes, positionMAE, positionMFE, potentialMAE, potentialMFE, missedTrade]);
 
-  // Auto-calculated side from entries
   const calculatedSide = metrics.positionSide || 'LONG';
 
   const handleSubmit = () => {
@@ -142,6 +165,11 @@ export const TradeModal = () => {
       strategyId: strategyId || undefined,
       tags: selectedTags,
       notes: notes.trim(),
+      positionMAE,
+      positionMFE,
+      potentialMAE,
+      potentialMFE,
+      missedTrade,
     };
 
     if (editingTrade) {
@@ -163,10 +191,10 @@ export const TradeModal = () => {
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleDiscard()}>
-      <DialogContent className="max-w-6xl w-[95vw] p-0 bg-card border-border overflow-hidden max-h-[90vh]">
+      <DialogContent className="max-w-7xl w-[95vw] p-0 bg-card border-border overflow-hidden max-h-[90vh]">
         <div className="flex h-full max-h-[85vh]">
-          {/* Left Panel - Overview - Fixed, no scroll */}
-          <div className="w-[340px] min-w-[340px] border-r border-border p-4 bg-background/50 flex flex-col overflow-hidden">
+          {/* Left Panel - Overview & Inputs */}
+          <div className="w-[300px] min-w-[300px] border-r border-border p-4 bg-background/50 flex flex-col overflow-y-auto">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
                 <TrendingUp className="w-4 h-4 text-primary" />
@@ -203,6 +231,11 @@ export const TradeModal = () => {
               {metrics.openQuantity > 0 && (
                 <Badge variant="outline" className="px-2.5 py-0.5 text-xs">
                   {metrics.openQuantity} QTY
+                </Badge>
+              )}
+              {missedTrade && (
+                <Badge variant="outline" className="px-2.5 py-0.5 text-xs border-warning text-warning bg-warning/10">
+                  MISSED
                 </Badge>
               )}
             </div>
@@ -259,7 +292,7 @@ export const TradeModal = () => {
               </p>
             </div>
 
-            {/* Form Fields - Compact */}
+            {/* Form Fields */}
             <div className="space-y-2.5 flex-1">
               {/* Symbol */}
               <div>
@@ -275,7 +308,7 @@ export const TradeModal = () => {
                 </div>
               </div>
 
-              {/* Instrument - Single Row */}
+              {/* Instrument */}
               <div>
                 <Label className="text-xs mb-1 block">Instrument</Label>
                 <div className="flex gap-1">
@@ -297,7 +330,7 @@ export const TradeModal = () => {
                 </div>
               </div>
 
-              {/* Risk & Target - Side by Side */}
+              {/* Risk & Target */}
               <div className="grid grid-cols-2 gap-2">
                 <div>
                   <Label className="text-xs mb-1 block">Risk</Label>
@@ -439,43 +472,8 @@ export const TradeModal = () => {
             </div>
           </div>
 
-          {/* Right Panel - Trade Entries & Metrics */}
-          <div className="flex-1 p-5 overflow-y-auto flex flex-col min-w-0">
-            {/* MAE/MFE Metrics Section */}
-            <div className="glass-card rounded-xl p-3 mb-4">
-              <h3 className="text-xs font-medium text-muted-foreground mb-2">Position Metrics</h3>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1.5">
-                  <div className="flex justify-between items-center">
-                    <span className="text-[10px] text-muted-foreground">Position MAE</span>
-                    <span className={`font-mono text-xs ${metrics.positionMAE < 0 ? 'text-loss' : 'text-muted-foreground'}`}>
-                      ₹{metrics.positionMAE.toFixed(2)}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-[10px] text-muted-foreground">Potential MAE</span>
-                    <span className={`font-mono text-xs ${metrics.potentialMAE < 0 ? 'text-loss' : 'text-muted-foreground'}`}>
-                      ₹{metrics.potentialMAE.toFixed(2)}
-                    </span>
-                  </div>
-                </div>
-                <div className="space-y-1.5">
-                  <div className="flex justify-between items-center">
-                    <span className="text-[10px] text-muted-foreground">Position MFE</span>
-                    <span className={`font-mono text-xs ${metrics.positionMFE > 0 ? 'text-profit' : 'text-muted-foreground'}`}>
-                      ₹{metrics.positionMFE.toFixed(2)}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-[10px] text-muted-foreground">Potential MFE</span>
-                    <span className={`font-mono text-xs ${metrics.potentialMFE > 0 ? 'text-profit' : 'text-muted-foreground'}`}>
-                      ₹{metrics.potentialMFE.toFixed(2)}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
+          {/* Middle Panel - Trade Entries & Notes */}
+          <div className="flex-1 p-5 overflow-y-auto flex flex-col min-w-0 border-r border-border">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
               <TabsList className="w-fit mb-4">
                 <TabsTrigger value="trades">Trades</TabsTrigger>
@@ -493,7 +491,7 @@ export const TradeModal = () => {
                     <div>Charges</div>
                     <div></div>
                   </div>
-                  <div className="divide-y divide-border max-h-[300px] overflow-y-auto">
+                  <div className="divide-y divide-border max-h-[350px] overflow-y-auto">
                     <AnimatePresence>
                       {entries.map((entry, index) => (
                         <motion.div
@@ -579,7 +577,7 @@ export const TradeModal = () => {
                       ))}
                     </AnimatePresence>
                   </div>
-                  {/* Add Entry Button - Below the last row */}
+                  {/* Add Entry Button */}
                   <div className="p-3 border-t border-border">
                     <Button
                       type="button"
@@ -616,6 +614,106 @@ export const TradeModal = () => {
               >
                 {editingTrade ? 'Update' : 'Create'}
               </Button>
+            </div>
+          </div>
+
+          {/* Right Panel - Position Metrics (Manual Inputs) */}
+          <div className="w-[280px] min-w-[280px] p-4 bg-background/50 flex flex-col overflow-y-auto">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-8 h-8 rounded-lg bg-accent/20 flex items-center justify-center">
+                <Target className="w-4 h-4 text-accent-foreground" />
+              </div>
+              <h2 className="text-lg font-semibold">Position Metrics</h2>
+            </div>
+
+            {/* MAE/MFE Input Cards */}
+            <div className="space-y-3 flex-1">
+              {/* Position MAE */}
+              <div className="glass-card rounded-xl p-3">
+                <Label className="text-xs mb-1.5 block text-muted-foreground">Position MAE</Label>
+                <div className="relative">
+                  <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">₹</span>
+                  <Input
+                    type="number"
+                    placeholder="0"
+                    value={positionMAE || ''}
+                    onChange={(e) => setPositionMAE(parseFloat(e.target.value) || 0)}
+                    className="pl-6 h-9 text-sm bg-input border-border"
+                  />
+                </div>
+                <p className="text-[10px] text-muted-foreground mt-1.5">Maximum Adverse Excursion</p>
+              </div>
+
+              {/* Position MFE */}
+              <div className="glass-card rounded-xl p-3">
+                <Label className="text-xs mb-1.5 block text-muted-foreground">Position MFE</Label>
+                <div className="relative">
+                  <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">₹</span>
+                  <Input
+                    type="number"
+                    placeholder="0"
+                    value={positionMFE || ''}
+                    onChange={(e) => setPositionMFE(parseFloat(e.target.value) || 0)}
+                    className="pl-6 h-9 text-sm bg-input border-border"
+                  />
+                </div>
+                <p className="text-[10px] text-muted-foreground mt-1.5">Maximum Favorable Excursion</p>
+              </div>
+
+              {/* Potential MAE */}
+              <div className="glass-card rounded-xl p-3">
+                <Label className="text-xs mb-1.5 block text-muted-foreground">Potential MAE</Label>
+                <div className="relative">
+                  <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">₹</span>
+                  <Input
+                    type="number"
+                    placeholder="0"
+                    value={potentialMAE || ''}
+                    onChange={(e) => setPotentialMAE(parseFloat(e.target.value) || 0)}
+                    className="pl-6 h-9 text-sm bg-input border-border"
+                  />
+                </div>
+                <p className="text-[10px] text-muted-foreground mt-1.5">Planned maximum drawdown</p>
+              </div>
+
+              {/* Potential MFE */}
+              <div className="glass-card rounded-xl p-3">
+                <Label className="text-xs mb-1.5 block text-muted-foreground">Potential MFE</Label>
+                <div className="relative">
+                  <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">₹</span>
+                  <Input
+                    type="number"
+                    placeholder="0"
+                    value={potentialMFE || ''}
+                    onChange={(e) => setPotentialMFE(parseFloat(e.target.value) || 0)}
+                    className="pl-6 h-9 text-sm bg-input border-border"
+                  />
+                </div>
+                <p className="text-[10px] text-muted-foreground mt-1.5">Planned maximum gain</p>
+              </div>
+
+              {/* Missed Trade Checkbox */}
+              <div className="glass-card rounded-xl p-3 mt-4">
+                <div className="flex items-center space-x-3">
+                  <Checkbox
+                    id="missedTrade"
+                    checked={missedTrade}
+                    onCheckedChange={(checked) => setMissedTrade(checked === true)}
+                    className="h-5 w-5"
+                  />
+                  <div className="flex-1">
+                    <Label 
+                      htmlFor="missedTrade" 
+                      className="text-sm font-medium cursor-pointer"
+                    >
+                      Missed Trade
+                    </Label>
+                    <p className="text-[10px] text-muted-foreground mt-0.5">
+                      Mark if this trade was not taken
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
