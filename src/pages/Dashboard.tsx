@@ -2,9 +2,9 @@ import { RecentTrades } from '@/components/dashboard/RecentTrades';
 import { WinRateGauge } from '@/components/dashboard/WinRateGauge';
 import { ProfitFactorRing } from '@/components/dashboard/ProfitFactorRing';
 import { AvgWinLossRatio } from '@/components/dashboard/AvgWinLossRatio';
+import { DailyCumulativePnLChart } from '@/components/dashboard/DailyCumulativePnLChart';
 import { useTradesContext } from '@/contexts/TradesContext';
 import { motion } from 'framer-motion';
-
 const Dashboard = () => {
   const { stats } = useTradesContext();
 
@@ -101,6 +101,8 @@ const Dashboard = () => {
           />
         </motion.div>
       </div>
+
+      <DailyCumulativePnLChart />
 
       <div className="grid grid-cols-1 gap-6">
         <RecentTrades />
