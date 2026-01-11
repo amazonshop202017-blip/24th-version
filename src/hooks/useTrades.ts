@@ -9,7 +9,21 @@ export const useTrades = () => {
   useEffect(() => {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
-      setTrades(JSON.parse(stored));
+      const parsed = JSON.parse(stored);
+      // Migrate old trades that don't have the entries array
+      const migrated = parsed.map((trade: any) => {
+        if (!trade.entries) {
+          // Old format - convert to new format
+          return {
+            ...trade,
+            instrument: trade.instrument || 'Equity',
+            entries: [],
+            notes: trade.notes || '',
+          };
+        }
+        return trade;
+      });
+      setTrades(migrated);
     }
   }, []);
 

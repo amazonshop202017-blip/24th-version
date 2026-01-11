@@ -42,7 +42,7 @@ export type TradeFormData = Omit<Trade, 'id' | 'createdAt' | 'updatedAt'>;
 
 // Helper function to calculate trade metrics
 export function calculateTradeMetrics(trade: Trade | TradeFormData): TradeCalculations {
-  const entries = trade.entries;
+  const entries = trade.entries || [];
   const side = trade.side;
   
   // Separate buy and sell entries
