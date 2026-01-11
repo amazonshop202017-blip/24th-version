@@ -134,7 +134,7 @@ export const TradeTimePerformanceChart = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.5 }}
-        className="glass-card rounded-xl p-6"
+        className="glass-card rounded-xl p-6 h-full flex flex-col"
       >
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
@@ -170,7 +170,7 @@ export const TradeTimePerformanceChart = () => {
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
-        <div className="h-[300px] flex items-center justify-center text-muted-foreground">
+        <div className="flex-1 flex items-center justify-center text-muted-foreground">
           No trades to display
         </div>
       </motion.div>
@@ -182,7 +182,7 @@ export const TradeTimePerformanceChart = () => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: 0.5 }}
-      className="glass-card rounded-xl p-6"
+      className="glass-card rounded-xl p-6 h-full flex flex-col"
     >
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
@@ -219,7 +219,7 @@ export const TradeTimePerformanceChart = () => {
         </DropdownMenu>
       </div>
       
-      <div className="h-[300px]">
+      <div className="flex-1 min-h-[250px]">
         <ResponsiveContainer width="100%" height="100%">
           <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
             <CartesianGrid 
