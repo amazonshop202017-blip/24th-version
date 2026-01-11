@@ -88,11 +88,11 @@ export const WinRateGauge = ({ value, label, winners = 0, losers = 0, breakeven 
           </div>
         </div>
         
-        {/* Numbers below gauge */}
-        <div className="flex items-center justify-center gap-4 mt-1 text-xs font-medium">
+        {/* Numbers below gauge - aligned with chart edges */}
+        <div className="flex items-center justify-between w-full mt-1 text-xs font-medium" style={{ maxWidth: size }}>
           <Tooltip>
             <TooltipTrigger asChild>
-              <span className="profit-text cursor-help">{winners}</span>
+              <span className="profit-text cursor-help bg-profit/15 px-2 py-0.5 rounded-full">{winners}</span>
             </TooltipTrigger>
             <TooltipContent side="bottom" className="text-xs">
               Winners
@@ -101,7 +101,7 @@ export const WinRateGauge = ({ value, label, winners = 0, losers = 0, breakeven 
           
           <Tooltip>
             <TooltipTrigger asChild>
-              <span className="text-muted-foreground cursor-help">{breakeven}</span>
+              <span className="text-muted-foreground cursor-help bg-muted/50 px-2 py-0.5 rounded-full">{breakeven}</span>
             </TooltipTrigger>
             <TooltipContent side="bottom" className="text-xs">
               Breakeven
@@ -110,7 +110,7 @@ export const WinRateGauge = ({ value, label, winners = 0, losers = 0, breakeven 
           
           <Tooltip>
             <TooltipTrigger asChild>
-              <span className="loss-text cursor-help">{losers}</span>
+              <span className="loss-text cursor-help bg-loss/15 px-2 py-0.5 rounded-full">{losers}</span>
             </TooltipTrigger>
             <TooltipContent side="bottom" className="text-xs">
               Losers
