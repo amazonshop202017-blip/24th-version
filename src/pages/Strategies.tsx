@@ -1,15 +1,32 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Trash2, Edit2, Check, X, Target, ChevronRight } from 'lucide-react';
+import { Plus, Trash2, Edit2, Check, X, Target, ChevronRight, MoreVertical } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useStrategiesContext } from '@/contexts/StrategiesContext';
+import { useTradesContext } from '@/contexts/TradesContext';
 import { useNavigate } from 'react-router-dom';
-import { format } from 'date-fns';
+import { calculateStrategyStats } from '@/lib/strategyStats';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+
+const formatCurrency = (value: number) => {
+  const prefix = value >= 0 ? '$' : '-$';
+  return `${prefix}${Math.abs(value).toFixed(2)}`;
+};
+
+const formatPercent = (value: number) => {
+  return `${Math.round(value)}%`;
+};
 
 const Strategies = () => {
   const { strategies, addStrategy, removeStrategy, updateStrategy } = useStrategiesContext();
+  const { trades } = useTradesContext();
   const navigate = useNavigate();
   const [newName, setNewName] = useState('');
   const [newDescription, setNewDescription] = useState('');
@@ -17,6 +34,14 @@ const Strategies = () => {
   const [editName, setEditName] = useState('');
   const [editDescription, setEditDescription] = useState('');
   const [showAddForm, setShowAddForm] = useState(false);
+
+  // Calculate stats for all strategies
+  const strategiesWithStats = useMemo(() => {
+    return strategies.map(strategy => ({
+      ...strategy,
+      stats: calculateStrategyStats(strategy.id, trades),
+    }));
+  }, [strategies, trades]);
 
   const handleAddStrategy = () => {
     if (newName.trim()) {
@@ -104,9 +129,9 @@ const Strategies = () => {
         )}
       </AnimatePresence>
 
-      {/* Strategies List */}
-      <div className="glass-card rounded-2xl p-6">
-        <div className="flex items-center gap-3 mb-6">
+      {/* Strategies Table */}
+      <div className="glass-card rounded-2xl overflow-hidden">
+        <div className="flex items-center gap-3 p-6 border-b border-border">
           <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center">
             <Target className="w-5 h-5 text-primary" />
           </div>
@@ -123,18 +148,34 @@ const Strategies = () => {
             <p className="text-sm">Add your first strategy to start organizing trades</p>
           </div>
         ) : (
-          <div className="space-y-2">
+          <div className="overflow-x-auto">
+            {/* Table Header */}
+            <div className="grid grid-cols-[2fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr_auto] gap-4 px-6 py-3 bg-muted/30 border-b border-border text-xs font-medium text-muted-foreground uppercase tracking-wider">
+              <div>Title</div>
+              <div className="text-right">Missed Trades</div>
+              <div className="text-center">Shared Strategies</div>
+              <div className="text-right">Average Loser</div>
+              <div className="text-right">Average Winner</div>
+              <div className="text-right">Total Net P&L</div>
+              <div className="text-right">Profit Factor</div>
+              <div className="text-right">Trades</div>
+              <div className="text-right">Expectancy</div>
+              <div className="text-right">Win Rate</div>
+              <div className="w-8"></div>
+            </div>
+
+            {/* Table Body */}
             <AnimatePresence>
-              {strategies.map((strategy) => (
+              {strategiesWithStats.map((strategy) => (
                 <motion.div
                   key={strategy.id}
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, x: -20 }}
-                  className="flex items-center justify-between p-4 bg-input rounded-lg border border-border group hover:border-primary/50 transition-colors"
+                  className="grid grid-cols-[2fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr_auto] gap-4 px-6 py-4 border-b border-border hover:bg-muted/20 transition-colors group"
                 >
                   {editingId === strategy.id ? (
-                    <div className="flex-1 space-y-3">
+                    <div className="col-span-11 space-y-3">
                       <Input
                         value={editName}
                         onChange={(e) => setEditName(e.target.value)}
@@ -162,46 +203,113 @@ const Strategies = () => {
                     </div>
                   ) : (
                     <>
+                      {/* Title */}
                       <div 
-                        className="flex-1 cursor-pointer"
+                        className="flex items-center gap-3 cursor-pointer"
                         onClick={() => navigate(`/strategies/${strategy.id}`)}
                       >
-                        <div className="flex items-center gap-3">
-                          <div className="w-2 h-2 rounded-full bg-primary" />
-                          <span className="font-medium">{strategy.name}</span>
-                        </div>
-                        {strategy.description && (
-                          <p className="text-sm text-muted-foreground mt-1 ml-5">{strategy.description}</p>
-                        )}
-                        <p className="text-xs text-muted-foreground mt-1 ml-5">
-                          Created {format(new Date(strategy.createdAt), 'MMM dd, yyyy')}
-                        </p>
+                        <span className="font-medium text-foreground hover:text-primary transition-colors">
+                          {strategy.name.toUpperCase()}
+                        </span>
                       </div>
-                      <div className="flex items-center gap-1">
-                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              startEditing(strategy.id, strategy.name, strategy.description);
-                            }}
-                          >
-                            <Edit2 className="w-4 h-4" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              removeStrategy(strategy.id);
-                            }}
-                            className="text-loss hover:text-loss"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </div>
-                        <ChevronRight className="w-5 h-5 text-muted-foreground" />
+
+                      {/* Missed Trades */}
+                      <div className="text-right text-sm text-muted-foreground flex items-center justify-end">
+                        {strategy.stats.missedTrades}
+                      </div>
+
+                      {/* Shared Strategies */}
+                      <div className="text-center text-sm text-muted-foreground flex items-center justify-center">
+                        {strategy.stats.sharedStrategies}
+                      </div>
+
+                      {/* Average Loser */}
+                      <div className="text-right text-sm flex items-center justify-end">
+                        <span className={strategy.stats.avgLoser < 0 ? 'text-loss' : 'text-muted-foreground'}>
+                          {formatCurrency(strategy.stats.avgLoser)}
+                        </span>
+                      </div>
+
+                      {/* Average Winner */}
+                      <div className="text-right text-sm flex items-center justify-end">
+                        <span className={strategy.stats.avgWinner > 0 ? 'text-profit' : 'text-muted-foreground'}>
+                          {formatCurrency(strategy.stats.avgWinner)}
+                        </span>
+                      </div>
+
+                      {/* Total Net P&L */}
+                      <div className="text-right text-sm flex items-center justify-end">
+                        <span className={strategy.stats.totalNetPnL >= 0 ? 'text-profit' : 'text-loss'}>
+                          {formatCurrency(strategy.stats.totalNetPnL)}
+                        </span>
+                      </div>
+
+                      {/* Profit Factor */}
+                      <div className="text-right text-sm text-muted-foreground flex items-center justify-end">
+                        {strategy.stats.profitFactor.toFixed(2)}
+                      </div>
+
+                      {/* Trades */}
+                      <div className="text-right text-sm text-muted-foreground flex items-center justify-end">
+                        {strategy.stats.totalTrades}
+                      </div>
+
+                      {/* Expectancy */}
+                      <div className="text-right text-sm flex items-center justify-end">
+                        <span className={strategy.stats.expectancy >= 0 ? 'text-profit' : 'text-loss'}>
+                          {formatCurrency(strategy.stats.expectancy)}
+                        </span>
+                      </div>
+
+                      {/* Win Rate */}
+                      <div className="text-right text-sm text-muted-foreground flex items-center justify-end">
+                        {formatPercent(strategy.stats.winRate)}
+                      </div>
+
+                      {/* Actions */}
+                      <div className="flex items-center justify-end">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <MoreVertical className="w-4 h-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                navigate(`/strategies/${strategy.id}`);
+                              }}
+                            >
+                              <ChevronRight className="w-4 h-4 mr-2" />
+                              View Details
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                startEditing(strategy.id, strategy.name, strategy.description);
+                              }}
+                            >
+                              <Edit2 className="w-4 h-4 mr-2" />
+                              Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                removeStrategy(strategy.id);
+                              }}
+                              className="text-loss focus:text-loss"
+                            >
+                              <Trash2 className="w-4 h-4 mr-2" />
+                              Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </div>
                     </>
                   )}
