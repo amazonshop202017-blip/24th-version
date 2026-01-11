@@ -8,9 +8,9 @@ interface WinRateGaugeProps {
   size?: number;
 }
 
-export const WinRateGauge = ({ value, label, winners, losers, size = 180 }: WinRateGaugeProps) => {
+export const WinRateGauge = ({ value, label, winners, losers, size = 120 }: WinRateGaugeProps) => {
   const clampedValue = Math.min(100, Math.max(0, value));
-  const strokeWidth = 14;
+  const strokeWidth = size * 0.1;
   const radius = (size - strokeWidth) / 2;
   const centerX = size / 2;
   const centerY = size / 2;
@@ -87,9 +87,9 @@ export const WinRateGauge = ({ value, label, winners, losers, size = 180 }: WinR
           {clampedValue.toFixed(1)}%
         </text>
       </svg>
-      <span className="text-sm text-muted-foreground -mt-2">{label}</span>
+      <span className="text-xs text-muted-foreground -mt-1">{label}</span>
       {winners !== undefined && losers !== undefined && (
-        <div className="flex items-center gap-2 mt-1 text-xs">
+        <div className="flex items-center gap-1 mt-0.5 text-[10px]">
           <span className="profit-text font-medium">{winners}W</span>
           <span className="text-muted-foreground">/</span>
           <span className="loss-text font-medium">{losers}L</span>

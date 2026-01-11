@@ -27,23 +27,23 @@ const Dashboard = () => {
         </div>
       </motion.div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
         {/* Net P&L with Total Trades */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0 }}
-          className="glass-card rounded-2xl p-6 relative overflow-hidden"
+          className="glass-card rounded-2xl p-4 relative overflow-hidden"
         >
-          <div className="absolute top-0 right-0 w-32 h-32 opacity-5 transform translate-x-8 -translate-y-8">
+          <div className="absolute top-0 right-0 w-24 h-24 opacity-5 transform translate-x-6 -translate-y-6">
             <DollarSign className="w-full h-full" />
           </div>
           <div className="relative z-10">
-            <p className="stat-label mb-2">Net P&L</p>
-            <p className={`stat-value ${stats.netPnl >= 0 ? 'profit-text' : 'loss-text'}`}>
+            <p className="stat-label mb-1 text-xs">Net P&L</p>
+            <p className={`text-xl font-bold font-mono ${stats.netPnl >= 0 ? 'profit-text' : 'loss-text'}`}>
               {formatCurrency(stats.netPnl)}
             </p>
-            <p className="text-xs text-muted-foreground mt-2">
+            <p className="text-[10px] text-muted-foreground mt-1">
               Total Trades: {stats.totalTrades}
             </p>
           </div>
@@ -54,13 +54,14 @@ const Dashboard = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.1 }}
-          className="glass-card rounded-2xl p-6 flex items-center justify-center"
+          className="glass-card rounded-2xl p-4 flex items-center justify-center"
         >
           <WinRateGauge 
             value={stats.tradeWinRate} 
             label="Trade Win Rate"
             winners={stats.winningTrades}
             losers={stats.losingTrades}
+            size={100}
           />
         </motion.div>
 
@@ -69,11 +70,12 @@ const Dashboard = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.2 }}
-          className="glass-card rounded-2xl p-6 flex items-center justify-center"
+          className="glass-card rounded-2xl p-4 flex items-center justify-center"
         >
           <WinRateGauge 
             value={stats.dayWinRate} 
             label="Day Win Rate"
+            size={100}
           />
         </motion.div>
 
@@ -82,32 +84,32 @@ const Dashboard = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.3 }}
-          className="glass-card rounded-2xl p-6 flex items-center justify-center"
+          className="glass-card rounded-2xl p-4 flex items-center justify-center"
         >
           <ProfitFactorRing 
             profitFactor={stats.profitFactor}
             totalProfits={stats.totalProfits}
             totalLosses={stats.totalLosses}
+            size={100}
           />
         </motion.div>
-      </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2">
-          <RecentTrades />
-        </div>
-        
+        {/* Avg Win/Loss Ratio */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.4 }}
-          className="glass-card rounded-2xl p-6 flex items-center justify-center"
+          className="glass-card rounded-2xl p-4 flex items-center justify-center"
         >
           <AvgWinLossRatio 
             avgWin={stats.avgWin}
             avgLoss={stats.avgLoss}
           />
         </motion.div>
+      </div>
+
+      <div className="grid grid-cols-1 gap-6">
+        <RecentTrades />
       </div>
     </div>
   );

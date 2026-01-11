@@ -11,9 +11,9 @@ export const ProfitFactorRing = ({
   profitFactor, 
   totalProfits, 
   totalLosses, 
-  size = 80 
+  size = 70 
 }: ProfitFactorRingProps) => {
-  const strokeWidth = 8;
+  const strokeWidth = size * 0.1;
   const radius = (size - strokeWidth) / 2;
   const centerX = size / 2;
   const centerY = size / 2;
@@ -29,7 +29,7 @@ export const ProfitFactorRing = ({
   const lossDash = (lossPercent / 100) * circumference;
 
   return (
-    <div className="flex items-center gap-4">
+    <div className="flex flex-col items-center gap-2">
       <div className="relative" style={{ width: size, height: size }}>
         <svg width={size} height={size} className="-rotate-90">
           {/* Loss arc (red) - starts where profit ends */}
@@ -62,12 +62,9 @@ export const ProfitFactorRing = ({
         </svg>
       </div>
       
-      <div className="flex flex-col">
-        <div className="flex items-center gap-1">
-          <span className="text-sm text-muted-foreground">Profit factor</span>
-          <span className="text-muted-foreground/50 text-xs cursor-help" title="Total profits ÷ Total losses">ⓘ</span>
-        </div>
-        <span className="text-2xl font-bold font-mono text-foreground">
+      <div className="flex flex-col items-center">
+        <span className="text-xs text-muted-foreground">Profit Factor</span>
+        <span className="text-xl font-bold font-mono text-foreground">
           {profitFactor === Infinity ? '∞' : profitFactor.toFixed(2)}
         </span>
       </div>

@@ -25,21 +25,21 @@ export const AvgWinLossRatio = ({ avgWin, avgLoss }: AvgWinLossRatioProps) => {
 
   return (
     <div className="flex flex-col items-center w-full">
-      <p className="text-xs text-muted-foreground mb-3">Avg Win/Loss Trade</p>
+      <p className="text-xs text-muted-foreground mb-2">Avg Win/Loss</p>
       
       {/* Ratio Value */}
       <motion.p
         initial={{ opacity: 0, scale: 0.8 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5, delay: 0.2 }}
-        className="text-3xl font-bold font-mono mb-4"
+        className="text-xl font-bold font-mono mb-3"
       >
         {formatRatio(ratio)}
       </motion.p>
 
       {/* Bar Chart */}
-      <div className="w-full space-y-2">
-        <div className="flex h-3 rounded-full overflow-hidden bg-secondary">
+      <div className="w-full space-y-1.5">
+        <div className="flex h-2.5 rounded-full overflow-hidden bg-secondary">
           <motion.div
             initial={{ width: 0 }}
             animate={{ width: `${winPercent}%` }}
@@ -55,7 +55,7 @@ export const AvgWinLossRatio = ({ avgWin, avgLoss }: AvgWinLossRatioProps) => {
         </div>
 
         {/* Labels */}
-        <div className="flex justify-between text-xs">
+        <div className="flex justify-between text-[10px]">
           <span className="profit-text font-mono font-medium">
             {formatCurrency(avgWin)}
           </span>
