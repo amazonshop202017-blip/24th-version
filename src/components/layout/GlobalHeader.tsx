@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { format } from 'date-fns';
-import { DollarSign, CalendarIcon, ChevronDown, Wallet, Settings, Check } from 'lucide-react';
+import { CalendarIcon, ChevronDown, Wallet, Settings, Check, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import {
@@ -133,14 +133,15 @@ export const GlobalHeader = () => {
       </DropdownMenu>
 
       {/* Date Range Selector */}
-      <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
-        <PopoverTrigger asChild>
-          <Button variant="outline" className="gap-2 bg-background border-border min-w-[200px] justify-start">
-            <CalendarIcon className="w-4 h-4 text-muted-foreground" />
-            <span className="truncate">{getDateRangeLabel()}</span>
-            <ChevronDown className="w-4 h-4 text-muted-foreground ml-auto" />
-          </Button>
-        </PopoverTrigger>
+      <div className="flex items-center">
+        <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
+          <PopoverTrigger asChild>
+            <Button variant="outline" className={`gap-2 bg-background border-border min-w-[200px] justify-start ${datePreset !== 'all' ? 'rounded-r-none border-r-0' : ''}`}>
+              <CalendarIcon className="w-4 h-4 text-muted-foreground" />
+              <span className="truncate">{getDateRangeLabel()}</span>
+              <ChevronDown className="w-4 h-4 text-muted-foreground ml-auto" />
+            </Button>
+          </PopoverTrigger>
         <PopoverContent className="w-auto p-0 bg-popover border-border z-50" align="start">
           <div className="flex">
             {/* Calendar */}
@@ -186,16 +187,28 @@ export const GlobalHeader = () => {
           </div>
         </PopoverContent>
       </Popover>
+        {datePreset !== 'all' && (
+          <Button
+            variant="outline"
+            size="icon"
+            className="rounded-l-none border-l-0 bg-background border-border h-10 w-8"
+            onClick={() => applyDatePreset('all')}
+          >
+            <X className="w-4 h-4 text-muted-foreground hover:text-foreground" />
+          </Button>
+        )}
+      </div>
 
       {/* Account Filter */}
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="outline" className="gap-2 bg-background border-border min-w-[150px] justify-start">
-            <Wallet className="w-4 h-4 text-muted-foreground" />
-            <span className="truncate">{getAccountsLabel()}</span>
-            <ChevronDown className="w-4 h-4 text-muted-foreground ml-auto" />
-          </Button>
-        </DropdownMenuTrigger>
+      <div className="flex items-center">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" className={`gap-2 bg-background border-border min-w-[150px] justify-start ${!isAllAccountsSelected ? 'rounded-r-none border-r-0' : ''}`}>
+              <Wallet className="w-4 h-4 text-muted-foreground" />
+              <span className="truncate">{getAccountsLabel()}</span>
+              <ChevronDown className="w-4 h-4 text-muted-foreground ml-auto" />
+            </Button>
+          </DropdownMenuTrigger>
         <DropdownMenuContent align="start" className="bg-popover border-border z-50 min-w-[200px]">
           <DropdownMenuCheckboxItem
             checked={isAllAccountsSelected}
@@ -234,6 +247,17 @@ export const GlobalHeader = () => {
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
+        {!isAllAccountsSelected && (
+          <Button
+            variant="outline"
+            size="icon"
+            className="rounded-l-none border-l-0 bg-background border-border h-10 w-8"
+            onClick={() => setSelectedAccounts([])}
+          >
+            <X className="w-4 h-4 text-muted-foreground hover:text-foreground" />
+          </Button>
+        )}
+      </div>
     </div>
   );
 };
