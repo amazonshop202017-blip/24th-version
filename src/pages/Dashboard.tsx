@@ -57,6 +57,7 @@ const Dashboard = () => {
             label="Trade Win %"
             winners={stats.winningTrades}
             losers={stats.losingTrades}
+            breakeven={0}
           />
         </motion.div>
 
