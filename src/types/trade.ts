@@ -15,6 +15,7 @@ export interface Trade {
   entries: TradeEntry[];
   tradeRisk: number;
   accountName: string;
+  strategyId?: string;
   tags: string[];
   notes: string;
   createdAt: string;
@@ -36,6 +37,10 @@ export interface TradeCalculations {
   rFactor: number;
   isWin: boolean;
   returnPercent: number;
+  // Position tracking
+  positionSide: 'LONG' | 'SHORT' | null;
+  positionStatus: 'OPEN' | 'CLOSED';
+  openQuantity: number;
 }
 
 export type TradeFormData = Omit<Trade, 'id' | 'createdAt' | 'updatedAt'>;
@@ -43,7 +48,30 @@ export type TradeFormData = Omit<Trade, 'id' | 'createdAt' | 'updatedAt'>;
 // Helper function to calculate trade metrics
 export function calculateTradeMetrics(trade: Trade | TradeFormData): TradeCalculations {
   const entries = trade.entries || [];
-  const side = trade.side;
+  
+  // Sort entries by datetime to determine first entry
+  const sortedEntries = [...entries].sort((a, b) => 
+    new Date(a.datetime).getTime() - new Date(b.datetime).getTime()
+  );
+  
+  // Determine position side from first entry
+  const firstEntry = sortedEntries[0];
+  const positionSide: 'LONG' | 'SHORT' | null = firstEntry 
+    ? (firstEntry.type === 'BUY' ? 'LONG' : 'SHORT')
+    : null;
+  
+  // Calculate running position
+  let netPosition = 0; // positive = long, negative = short
+  for (const entry of sortedEntries) {
+    if (entry.type === 'BUY') {
+      netPosition += entry.quantity;
+    } else {
+      netPosition -= entry.quantity;
+    }
+  }
+  
+  const openQuantity = Math.abs(netPosition);
+  const positionStatus: 'OPEN' | 'CLOSED' = netPosition === 0 ? 'CLOSED' : 'OPEN';
   
   // Separate buy and sell entries
   const buyEntries = entries.filter(e => e.type === 'BUY');
@@ -58,6 +86,9 @@ export function calculateTradeMetrics(trade: Trade | TradeFormData): TradeCalcul
   
   const avgEntryPrice = totalBuyQty > 0 ? totalBuyCost / totalBuyQty : 0;
   const avgExitPrice = totalSellQty > 0 ? totalSellValue / totalSellQty : 0;
+  
+  // Use the auto-calculated side for P&L calculation
+  const side = positionSide || trade.side;
   
   // For LONG: profit when sell price > buy price
   // For SHORT: profit when buy price > sell price (sell first, buy to cover)
@@ -112,5 +143,8 @@ export function calculateTradeMetrics(trade: Trade | TradeFormData): TradeCalcul
     rFactor,
     isWin: netPnl > 0,
     returnPercent,
+    positionSide,
+    positionStatus,
+    openQuantity,
   };
 }

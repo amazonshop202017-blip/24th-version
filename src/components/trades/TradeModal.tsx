@@ -1,18 +1,18 @@
 import { useEffect, useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Plus, Trash2, Calendar, Search, TrendingUp, TrendingDown, Settings } from 'lucide-react';
+import { X, Plus, Trash2, Calendar, Search, TrendingUp, TrendingDown, Settings, Target } from 'lucide-react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useTradeModal } from '@/contexts/TradeModalContext';
 import { useTradesContext } from '@/contexts/TradesContext';
 import { useTagsContext } from '@/contexts/TagsContext';
+import { useStrategiesContext } from '@/contexts/StrategiesContext';
 import { TradeFormData, TradeEntry, calculateTradeMetrics } from '@/types/trade';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
@@ -31,14 +31,15 @@ export const TradeModal = () => {
   const { isOpen, editingTrade, closeModal } = useTradeModal();
   const { addTrade, updateTrade } = useTradesContext();
   const { tags } = useTagsContext();
+  const { strategies } = useStrategiesContext();
   const navigate = useNavigate();
 
   const [symbol, setSymbol] = useState('');
-  const [side, setSide] = useState<'LONG' | 'SHORT'>('LONG');
   const [instrument, setInstrument] = useState<'Equity' | 'Futures' | 'Options' | 'Crypto'>('Equity');
   const [entries, setEntries] = useState<TradeEntry[]>([defaultEntry()]);
   const [tradeRisk, setTradeRisk] = useState(0);
   const [accountName, setAccountName] = useState('');
+  const [strategyId, setStrategyId] = useState<string>('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [notes, setNotes] = useState('');
   const [activeTab, setActiveTab] = useState('trades');
@@ -46,11 +47,11 @@ export const TradeModal = () => {
   useEffect(() => {
     if (editingTrade) {
       setSymbol(editingTrade.symbol);
-      setSide(editingTrade.side);
       setInstrument(editingTrade.instrument);
       setEntries(editingTrade.entries.length > 0 ? editingTrade.entries : [defaultEntry()]);
       setTradeRisk(editingTrade.tradeRisk);
       setAccountName(editingTrade.accountName);
+      setStrategyId(editingTrade.strategyId || '');
       setSelectedTags(editingTrade.tags);
       setNotes(editingTrade.notes || '');
     } else {
@@ -60,11 +61,11 @@ export const TradeModal = () => {
 
   const resetForm = () => {
     setSymbol('');
-    setSide('LONG');
     setInstrument('Equity');
     setEntries([defaultEntry()]);
     setTradeRisk(0);
     setAccountName('');
+    setStrategyId('');
     setSelectedTags([]);
     setNotes('');
     setActiveTab('trades');
@@ -93,27 +94,32 @@ export const TradeModal = () => {
   const metrics = useMemo(() => {
     const formData: TradeFormData = {
       symbol,
-      side,
+      side: 'LONG', // Will be overridden by calculated side
       instrument,
       entries,
       tradeRisk,
       accountName,
+      strategyId: strategyId || undefined,
       tags: selectedTags,
       notes,
     };
     return calculateTradeMetrics(formData);
-  }, [symbol, side, instrument, entries, tradeRisk, accountName, selectedTags, notes]);
+  }, [symbol, instrument, entries, tradeRisk, accountName, strategyId, selectedTags, notes]);
+
+  // Auto-calculated side from entries
+  const calculatedSide = metrics.positionSide || 'LONG';
 
   const handleSubmit = () => {
     if (!symbol.trim() || entries.length === 0) return;
 
     const tradeData: TradeFormData = {
       symbol: symbol.trim(),
-      side,
+      side: calculatedSide,
       instrument,
       entries,
       tradeRisk,
       accountName: accountName.trim(),
+      strategyId: strategyId || undefined,
       tags: selectedTags,
       notes: notes.trim(),
     };
@@ -137,11 +143,11 @@ export const TradeModal = () => {
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleDiscard()}>
-      <DialogContent className="max-w-5xl p-0 bg-card border-border overflow-hidden max-h-[90vh]">
+      <DialogContent className="max-w-6xl w-[95vw] p-0 bg-card border-border overflow-hidden max-h-[90vh]">
         <div className="flex h-full max-h-[85vh]">
-          {/* Left Panel - Overview */}
-          <div className="w-80 border-r border-border p-5 space-y-5 overflow-y-auto bg-background/50">
-            <div className="flex items-center gap-3">
+          {/* Left Panel - Overview - Fixed, no scroll */}
+          <div className="w-[340px] min-w-[340px] border-r border-border p-4 bg-background/50 flex flex-col overflow-hidden">
+            <div className="flex items-center gap-3 mb-4">
               <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
                 <TrendingUp className="w-4 h-4 text-primary" />
               </div>
@@ -150,52 +156,67 @@ export const TradeModal = () => {
               </h2>
             </div>
 
-            {/* Win/Loss & Side Badges */}
-            <div className="flex gap-2">
+            {/* Status & Side Badges */}
+            <div className="flex gap-2 mb-4">
               <Badge 
                 variant="outline" 
                 className={cn(
-                  "px-3 py-1",
-                  isWin ? "border-profit text-profit bg-profit/10" : "border-loss text-loss bg-loss/10"
+                  "px-2.5 py-0.5 text-xs",
+                  metrics.positionStatus === 'OPEN' 
+                    ? "border-primary text-primary bg-primary/10" 
+                    : "border-muted-foreground text-muted-foreground bg-muted/10"
                 )}
               >
-                {isWin ? 'Win' : metrics.netPnl < 0 ? 'Loss' : 'Breakeven'}
+                {metrics.positionStatus}
               </Badge>
-              <Badge variant="outline" className="px-3 py-1">
-                {side}
+              <Badge 
+                variant="outline" 
+                className={cn(
+                  "px-2.5 py-0.5 text-xs",
+                  calculatedSide === 'LONG' 
+                    ? "border-profit text-profit bg-profit/10" 
+                    : "border-loss text-loss bg-loss/10"
+                )}
+              >
+                {calculatedSide}
               </Badge>
+              {metrics.openQuantity > 0 && (
+                <Badge variant="outline" className="px-2.5 py-0.5 text-xs">
+                  {metrics.openQuantity} QTY
+                </Badge>
+              )}
             </div>
 
             {/* Overview Card */}
-            <div className="glass-card rounded-xl p-4 space-y-3">
-              <h3 className="text-sm font-medium text-muted-foreground">Overview</h3>
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <span className="text-sm text-muted-foreground">Net</span>
-                  <div className="flex items-center gap-2">
+            <div className="glass-card rounded-xl p-3 mb-3">
+              <h3 className="text-xs font-medium text-muted-foreground mb-2">Overview</h3>
+              <div className="space-y-1.5">
+                <div className="flex justify-between items-center">
+                  <span className="text-xs text-muted-foreground">Net</span>
+                  <div className="flex items-center gap-1.5">
                     <span className={cn(
-                      "font-mono font-bold",
+                      "font-mono font-bold text-sm",
                       isWin ? "profit-text" : "loss-text"
                     )}>
                       ₹{metrics.netPnl.toFixed(2)}
                     </span>
                     <span className={cn(
-                      "text-xs",
+                      "text-[10px]",
                       isWin ? "profit-text" : "loss-text"
                     )}>
-                      {returnPercent >= 0 ? '+' : ''}{returnPercent.toFixed(2)}%
+                      {returnPercent >= 0 ? '+' : ''}{returnPercent.toFixed(1)}%
                     </span>
                   </div>
                 </div>
-                <div className="flex justify-between text-sm">
+                <div className="flex justify-between text-xs">
                   <span className="text-muted-foreground">R Factor</span>
                   <span className="font-mono">{metrics.rFactor.toFixed(2)}</span>
                 </div>
                 <div className={cn(
-                  "h-1.5 rounded-full mt-2",
+                  "h-1 rounded-full",
                   isWin ? "bg-profit" : metrics.netPnl < 0 ? "bg-loss" : "bg-muted"
                 )} />
-                <div className="flex justify-between text-xs text-muted-foreground pt-2">
+                <div className="flex justify-between text-[10px] text-muted-foreground pt-1">
                   <div>
                     <span className="block">Gross</span>
                     <span className="font-mono text-foreground">₹{metrics.grossPnl.toFixed(2)}</span>
@@ -209,172 +230,179 @@ export const TradeModal = () => {
             </div>
 
             {/* Duration Card */}
-            <div className="glass-card rounded-xl p-4 space-y-2">
-              <h3 className="text-sm font-medium text-muted-foreground">Duration</h3>
-              <p className="text-lg font-semibold">{metrics.duration}</p>
-              <p className="text-xs text-muted-foreground flex items-center gap-1">
-                <Calendar className="w-3 h-3" />
-                {metrics.openDate ? format(new Date(metrics.openDate), 'MMM dd, yyyy, HH:mm') : '-'} - {metrics.closeDate ? format(new Date(metrics.closeDate), 'MMM dd, yyyy, HH:mm') : '-'}
+            <div className="glass-card rounded-xl p-3 mb-3">
+              <h3 className="text-xs font-medium text-muted-foreground mb-1">Duration</h3>
+              <p className="text-sm font-semibold">{metrics.duration}</p>
+              <p className="text-[10px] text-muted-foreground flex items-center gap-1 mt-0.5">
+                <Calendar className="w-2.5 h-2.5" />
+                {metrics.openDate ? format(new Date(metrics.openDate), 'MMM dd, HH:mm') : '-'} - {metrics.closeDate ? format(new Date(metrics.closeDate), 'MMM dd, HH:mm') : '-'}
               </p>
             </div>
 
-            {/* Symbol */}
-            <div className="space-y-2">
-              <Label className="text-sm">Symbol</Label>
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input
-                  placeholder="CRUDEOIL"
-                  value={symbol}
-                  onChange={(e) => setSymbol(e.target.value.toUpperCase())}
-                  className="pl-9 bg-input border-border"
-                />
+            {/* Form Fields - Compact */}
+            <div className="space-y-2.5 flex-1">
+              {/* Symbol */}
+              <div>
+                <Label className="text-xs mb-1 block">Symbol</Label>
+                <div className="relative">
+                  <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+                  <Input
+                    placeholder="CRUDEOIL"
+                    value={symbol}
+                    onChange={(e) => setSymbol(e.target.value.toUpperCase())}
+                    className="pl-8 h-8 text-sm bg-input border-border"
+                  />
+                </div>
               </div>
-            </div>
 
-            {/* Instrument */}
-            <div className="space-y-2">
-              <Label className="text-sm">Instrument</Label>
-              <div className="flex flex-wrap gap-2">
-                {(['Equity', 'Futures', 'Options', 'Crypto'] as const).map((type) => (
-                  <Button
-                    key={type}
-                    type="button"
-                    variant={instrument === type ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => setInstrument(type)}
-                    className={cn(
-                      "text-xs",
-                      instrument === type && "bg-primary text-primary-foreground"
-                    )}
-                  >
-                    {type}
-                  </Button>
-                ))}
-              </div>
-            </div>
-
-            {/* Side */}
-            <div className="space-y-2">
-              <Label className="text-sm">Side</Label>
-              <div className="flex gap-2">
-                <Button
-                  type="button"
-                  variant={side === 'LONG' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setSide('LONG')}
-                  className={cn(side === 'LONG' && "bg-profit hover:bg-profit/90")}
-                >
-                  Long
-                </Button>
-                <Button
-                  type="button"
-                  variant={side === 'SHORT' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setSide('SHORT')}
-                  className={cn(side === 'SHORT' && "bg-loss hover:bg-loss/90")}
-                >
-                  Short
-                </Button>
-              </div>
-            </div>
-
-            {/* Risk */}
-            <div className="space-y-2">
-              <Label className="text-sm">Risk</Label>
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">₹</span>
-                <Input
-                  type="number"
-                  placeholder="1,000"
-                  value={tradeRisk || ''}
-                  onChange={(e) => setTradeRisk(parseFloat(e.target.value) || 0)}
-                  className="pl-7 bg-input border-border"
-                />
-              </div>
-            </div>
-
-            {/* Broker Account */}
-            <div className="space-y-2">
-              <Label className="text-sm">Broker Account</Label>
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input
-                  placeholder="Account name..."
-                  value={accountName}
-                  onChange={(e) => setAccountName(e.target.value)}
-                  className="pl-9 bg-input border-border"
-                />
-              </div>
-            </div>
-
-            {/* Tags */}
-            <div className="space-y-2">
-              <Label className="text-sm">Tags</Label>
-              {tags.length === 0 ? (
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    closeModal();
-                    navigate('/settings');
-                  }}
-                  className="w-full text-xs"
-                >
-                  <Settings className="w-3 h-3 mr-2" />
-                  Manage Tags
-                </Button>
-              ) : (
-                <div className="flex flex-wrap gap-2">
-                  {tags.map((tag) => (
-                    <Badge
-                      key={tag}
-                      variant={selectedTags.includes(tag) ? 'default' : 'outline'}
+              {/* Instrument - Single Row */}
+              <div>
+                <Label className="text-xs mb-1 block">Instrument</Label>
+                <div className="flex gap-1">
+                  {(['Equity', 'Futures', 'Options', 'Crypto'] as const).map((type) => (
+                    <Button
+                      key={type}
+                      type="button"
+                      variant={instrument === type ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setInstrument(type)}
                       className={cn(
-                        "cursor-pointer transition-all",
-                        selectedTags.includes(tag) && "bg-primary text-primary-foreground"
+                        "text-[10px] h-7 px-2 flex-1",
+                        instrument === type && "bg-primary text-primary-foreground"
                       )}
-                      onClick={() => toggleTag(tag)}
                     >
-                      {tag}
-                    </Badge>
+                      {type}
+                    </Button>
                   ))}
-                  <Badge
+                </div>
+              </div>
+
+              {/* Risk & Account - Side by Side */}
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <Label className="text-xs mb-1 block">Risk</Label>
+                  <div className="relative">
+                    <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">₹</span>
+                    <Input
+                      type="number"
+                      placeholder="1,000"
+                      value={tradeRisk || ''}
+                      onChange={(e) => setTradeRisk(parseFloat(e.target.value) || 0)}
+                      className="pl-6 h-8 text-sm bg-input border-border"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <Label className="text-xs mb-1 block">Account</Label>
+                  <Input
+                    placeholder="Account..."
+                    value={accountName}
+                    onChange={(e) => setAccountName(e.target.value)}
+                    className="h-8 text-sm bg-input border-border"
+                  />
+                </div>
+              </div>
+
+              {/* Strategy */}
+              <div>
+                <Label className="text-xs mb-1 block">Strategy</Label>
+                {strategies.length === 0 ? (
+                  <Button
+                    type="button"
                     variant="outline"
-                    className="cursor-pointer"
+                    size="sm"
+                    onClick={() => {
+                      closeModal();
+                      navigate('/strategies');
+                    }}
+                    className="w-full h-8 text-xs"
+                  >
+                    <Target className="w-3 h-3 mr-1.5" />
+                    Add Strategy
+                  </Button>
+                ) : (
+                  <Select value={strategyId} onValueChange={setStrategyId}>
+                    <SelectTrigger className="h-8 text-sm bg-input border-border">
+                      <SelectValue placeholder="Select strategy..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">None</SelectItem>
+                      {strategies.map((s) => (
+                        <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              </div>
+
+              {/* Tags */}
+              <div>
+                <Label className="text-xs mb-1 block">Tags</Label>
+                {tags.length === 0 ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
                     onClick={() => {
                       closeModal();
                       navigate('/settings');
                     }}
+                    className="w-full h-8 text-xs"
                   >
-                    <Plus className="w-3 h-3" />
-                  </Badge>
-                </div>
-              )}
+                    <Settings className="w-3 h-3 mr-1.5" />
+                    Manage Tags
+                  </Button>
+                ) : (
+                  <div className="flex flex-wrap gap-1">
+                    {tags.map((tag) => (
+                      <Badge
+                        key={tag}
+                        variant={selectedTags.includes(tag) ? 'default' : 'outline'}
+                        className={cn(
+                          "cursor-pointer text-[10px] px-1.5 py-0",
+                          selectedTags.includes(tag) && "bg-primary text-primary-foreground"
+                        )}
+                        onClick={() => toggleTag(tag)}
+                      >
+                        {tag}
+                      </Badge>
+                    ))}
+                    <Badge
+                      variant="outline"
+                      className="cursor-pointer text-[10px] px-1.5 py-0"
+                      onClick={() => {
+                        closeModal();
+                        navigate('/settings');
+                      }}
+                    >
+                      <Plus className="w-2.5 h-2.5" />
+                    </Badge>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
           {/* Right Panel - Trade Entries */}
-          <div className="flex-1 p-5 overflow-y-auto flex flex-col">
+          <div className="flex-1 p-5 overflow-y-auto flex flex-col min-w-0">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
               <TabsList className="w-fit mb-4">
                 <TabsTrigger value="trades">Trades</TabsTrigger>
                 <TabsTrigger value="notes">Notes</TabsTrigger>
               </TabsList>
 
-              <TabsContent value="trades" className="flex-1 mt-0">
+              <TabsContent value="trades" className="flex-1 mt-0 flex flex-col">
                 {/* Entries Table */}
-                <div className="glass-card rounded-xl overflow-hidden">
-                  <div className="grid grid-cols-[100px_1fr_120px_120px_100px_50px] gap-2 p-3 text-xs text-muted-foreground border-b border-border font-medium">
-                    <div>Buy / Sell</div>
+                <div className="glass-card rounded-xl overflow-hidden flex-1">
+                  <div className="grid grid-cols-[90px_1fr_100px_100px_90px_40px] gap-2 p-3 text-xs text-muted-foreground border-b border-border font-medium">
+                    <div>Type</div>
                     <div>Time</div>
                     <div>Quantity</div>
                     <div>Price</div>
                     <div>Charges</div>
                     <div></div>
                   </div>
-                  <div className="divide-y divide-border">
+                  <div className="divide-y divide-border max-h-[300px] overflow-y-auto">
                     <AnimatePresence>
                       {entries.map((entry, index) => (
                         <motion.div
@@ -382,7 +410,7 @@ export const TradeModal = () => {
                           initial={{ opacity: 0, y: -10 }}
                           animate={{ opacity: 1, y: 0 }}
                           exit={{ opacity: 0, x: -20 }}
-                          className="grid grid-cols-[100px_1fr_120px_120px_100px_50px] gap-2 p-3 items-center"
+                          className="grid grid-cols-[90px_1fr_100px_100px_90px_40px] gap-2 p-3 items-center"
                         >
                           <div className="flex gap-1">
                             <Button
@@ -391,7 +419,7 @@ export const TradeModal = () => {
                               size="sm"
                               onClick={() => updateEntry(entry.id, 'type', 'BUY')}
                               className={cn(
-                                "h-7 px-2 text-xs",
+                                "h-7 px-2 text-xs flex-1",
                                 entry.type === 'BUY' && "bg-profit hover:bg-profit/90"
                               )}
                             >
@@ -403,7 +431,7 @@ export const TradeModal = () => {
                               size="sm"
                               onClick={() => updateEntry(entry.id, 'type', 'SELL')}
                               className={cn(
-                                "h-7 px-2 text-xs",
+                                "h-7 px-2 text-xs flex-1",
                                 entry.type === 'SELL' && "bg-primary hover:bg-primary/90"
                               )}
                             >
@@ -462,7 +490,7 @@ export const TradeModal = () => {
                   </div>
                 </div>
 
-                {/* Add Trade Button */}
+                {/* Add Trade Button - Always visible */}
                 <div className="flex justify-end mt-4">
                   <Button
                     type="button"
@@ -472,7 +500,7 @@ export const TradeModal = () => {
                     className="gap-2"
                   >
                     <Plus className="w-4 h-4" />
-                    Trade
+                    Add Row
                   </Button>
                 </div>
               </TabsContent>
