@@ -191,7 +191,7 @@ export const TradeModal = () => {
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleDiscard()}>
-      <DialogContent className="max-w-7xl w-[95vw] p-0 bg-card border-border overflow-hidden max-h-[90vh]">
+      <DialogContent className="max-w-[1400px] w-[95vw] p-0 bg-card border-border overflow-hidden max-h-[90vh]">
         <div className="flex h-full max-h-[85vh]">
           {/* Left Panel - Overview & Inputs */}
           <div className="w-[300px] min-w-[300px] border-r border-border p-4 bg-background/50 flex flex-col overflow-y-auto">
@@ -269,7 +269,7 @@ export const TradeModal = () => {
                   "h-1 rounded-full",
                   isWin ? "bg-profit" : metrics.netPnl < 0 ? "bg-loss" : "bg-muted"
                 )} />
-                <div className="flex justify-between text-[10px] text-muted-foreground pt-1">
+                <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-[10px] text-muted-foreground pt-1">
                   <div>
                     <span className="block">Gross</span>
                     <span className="font-mono text-foreground">₹{metrics.grossPnl.toFixed(2)}</span>
@@ -277,6 +277,14 @@ export const TradeModal = () => {
                   <div className="text-right">
                     <span className="block">Charges</span>
                     <span className="font-mono text-foreground">₹{metrics.totalCharges.toFixed(2)}</span>
+                  </div>
+                  <div>
+                    <span className="block">Avg Entry</span>
+                    <span className="font-mono text-foreground">₹{metrics.avgEntryPrice.toFixed(2)}</span>
+                  </div>
+                  <div className="text-right">
+                    <span className="block">Avg Exit</span>
+                    <span className="font-mono text-foreground">₹{metrics.avgExitPrice.toFixed(2)}</span>
                   </div>
                 </div>
               </div>
@@ -327,36 +335,6 @@ export const TradeModal = () => {
                       {type}
                     </Button>
                   ))}
-                </div>
-              </div>
-
-              {/* Risk & Target */}
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <Label className="text-xs mb-1 block">Risk</Label>
-                  <div className="relative">
-                    <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">₹</span>
-                    <Input
-                      type="number"
-                      placeholder="1,000"
-                      value={tradeRisk || ''}
-                      onChange={(e) => setTradeRisk(parseFloat(e.target.value) || 0)}
-                      className="pl-6 h-8 text-sm bg-input border-border"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <Label className="text-xs mb-1 block">Target</Label>
-                  <div className="relative">
-                    <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">₹</span>
-                    <Input
-                      type="number"
-                      placeholder="2,000"
-                      value={tradeTarget || ''}
-                      onChange={(e) => setTradeTarget(parseFloat(e.target.value) || 0)}
-                      className="pl-6 h-8 text-sm bg-input border-border"
-                    />
-                  </div>
                 </div>
               </div>
 
@@ -618,12 +596,42 @@ export const TradeModal = () => {
           </div>
 
           {/* Right Panel - Position Metrics (Manual Inputs) */}
-          <div className="w-[280px] min-w-[280px] p-4 bg-background/50 flex flex-col overflow-y-auto">
+          <div className="w-[250px] min-w-[250px] p-4 pr-5 bg-background/50 flex flex-col overflow-y-auto">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-8 h-8 rounded-lg bg-accent/20 flex items-center justify-center">
                 <Target className="w-4 h-4 text-accent-foreground" />
               </div>
               <h2 className="text-lg font-semibold">Position Metrics</h2>
+            </div>
+
+            {/* Risk & Target at top of right panel */}
+            <div className="grid grid-cols-2 gap-2 mb-4">
+              <div className="glass-card rounded-xl p-2.5">
+                <Label className="text-[10px] mb-1 block text-muted-foreground">Risk</Label>
+                <div className="relative">
+                  <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">₹</span>
+                  <Input
+                    type="number"
+                    placeholder="1,000"
+                    value={tradeRisk || ''}
+                    onChange={(e) => setTradeRisk(parseFloat(e.target.value) || 0)}
+                    className="pl-5 h-8 text-sm bg-input border-border"
+                  />
+                </div>
+              </div>
+              <div className="glass-card rounded-xl p-2.5">
+                <Label className="text-[10px] mb-1 block text-muted-foreground">Target</Label>
+                <div className="relative">
+                  <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">₹</span>
+                  <Input
+                    type="number"
+                    placeholder="2,000"
+                    value={tradeTarget || ''}
+                    onChange={(e) => setTradeTarget(parseFloat(e.target.value) || 0)}
+                    className="pl-5 h-8 text-sm bg-input border-border"
+                  />
+                </div>
+              </div>
             </div>
 
             {/* MAE/MFE Input Cards */}
