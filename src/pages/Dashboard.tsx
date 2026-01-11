@@ -5,6 +5,7 @@ import { AvgWinLossRatio } from '@/components/dashboard/AvgWinLossRatio';
 import { DailyCumulativePnLChart } from '@/components/dashboard/DailyCumulativePnLChart';
 import { TradeTimePerformanceChart } from '@/components/dashboard/TradeTimePerformanceChart';
 import { TradeDurationPerformanceChart } from '@/components/dashboard/TradeDurationPerformanceChart';
+import { MonthlyPerformanceCalendar } from '@/components/dashboard/MonthlyPerformanceCalendar';
 import { useTradesContext } from '@/contexts/TradesContext';
 import { motion } from 'framer-motion';
 const Dashboard = () => {
@@ -108,6 +109,8 @@ const Dashboard = () => {
       <TradeTimePerformanceChart />
 
       <TradeDurationPerformanceChart />
+
+      <MonthlyPerformanceCalendar />
 
       <div className="grid grid-cols-1 gap-6">
         <RecentTrades />
