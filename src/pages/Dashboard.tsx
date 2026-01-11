@@ -105,18 +105,29 @@ const Dashboard = () => {
         </motion.div>
       </div>
 
-      <DailyCumulativePnLChart />
+      {/* 3-column grid layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        {/* Row 1: Recent Trades | Daily Cumulative P&L | Net Daily P&L */}
+        <div className="lg:col-span-1">
+          <RecentTrades />
+        </div>
+        <div className="lg:col-span-1">
+          <DailyCumulativePnLChart />
+        </div>
+        <div className="lg:col-span-1">
+          <NetDailyPnLChart />
+        </div>
 
-      <NetDailyPnLChart />
-
-      <TradeTimePerformanceChart />
-
-      <TradeDurationPerformanceChart />
-
-      <MonthlyPerformanceCalendar />
-
-      <div className="grid grid-cols-1 gap-6">
-        <RecentTrades />
+        {/* Row 2-3: Calendar (spans 2 cols × 2 rows) | Trade Time + Trade Duration (stacked in col 3) */}
+        <div className="lg:col-span-2 lg:row-span-2">
+          <MonthlyPerformanceCalendar />
+        </div>
+        <div className="lg:col-span-1">
+          <TradeTimePerformanceChart />
+        </div>
+        <div className="lg:col-span-1">
+          <TradeDurationPerformanceChart />
+        </div>
       </div>
     </div>
   );
