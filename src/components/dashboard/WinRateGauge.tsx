@@ -84,7 +84,7 @@ export const WinRateGauge = ({ value, label, winners = 0, losers = 0, breakeven 
           
           {/* Percentage in center */}
           <div className="absolute inset-0 flex items-end justify-center pb-0">
-            <span className="text-xl font-bold font-mono">{clampedValue.toFixed(2)}%</span>
+            <span className="font-bold font-mono" style={{ fontSize: 15 }}>{clampedValue.toFixed(2)}%</span>
           </div>
         </div>
         

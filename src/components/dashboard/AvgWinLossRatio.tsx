@@ -30,7 +30,8 @@ export const AvgWinLossRatio = ({ avgWin, avgLoss }: AvgWinLossRatioProps) => {
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5, delay: 0.2 }}
-          className="text-2xl font-bold font-mono"
+          className="font-bold font-mono"
+          style={{ fontSize: 20 }}
         >
           {formatRatio(ratio)}
         </motion.span>
