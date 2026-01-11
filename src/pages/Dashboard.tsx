@@ -4,6 +4,7 @@ import { ProfitFactorRing } from '@/components/dashboard/ProfitFactorRing';
 import { AvgWinLossRatio } from '@/components/dashboard/AvgWinLossRatio';
 import { DailyCumulativePnLChart } from '@/components/dashboard/DailyCumulativePnLChart';
 import { TradeTimePerformanceChart } from '@/components/dashboard/TradeTimePerformanceChart';
+import { TradeDurationPerformanceChart } from '@/components/dashboard/TradeDurationPerformanceChart';
 import { useTradesContext } from '@/contexts/TradesContext';
 import { motion } from 'framer-motion';
 const Dashboard = () => {
@@ -105,6 +106,8 @@ const Dashboard = () => {
       <DailyCumulativePnLChart />
 
       <TradeTimePerformanceChart />
+
+      <TradeDurationPerformanceChart />
 
       <div className="grid grid-cols-1 gap-6">
         <RecentTrades />
