@@ -1,9 +1,17 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Clock, BarChart2, AlertTriangle, Target, Tags, Calendar, TrendingUp, ChevronDown } from 'lucide-react';
+import { Clock, BarChart2, AlertTriangle, Target, Tags, Calendar, TrendingUp, ChevronDown, Zap, LayoutGrid, GitCompare } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-const reportTabs = [
+const mainTabs = [
+  { id: 'performance', label: 'Performance', icon: Zap, isNew: true },
+  { id: 'overview', label: 'Overview', icon: LayoutGrid },
+  { id: 'reports', label: 'Reports', icon: BarChart2, hasDropdown: true },
+  { id: 'compare', label: 'Compare', icon: GitCompare },
+  { id: 'calendar', label: 'Calendar', icon: Calendar },
+];
+
+const reportSubTabs = [
   { id: 'day-time', label: 'Day & Time', icon: Clock },
   { id: 'symbols', label: 'Symbols', icon: BarChart2 },
   { id: 'risk', label: 'Risk', icon: AlertTriangle },
@@ -14,90 +22,135 @@ const reportTabs = [
 ];
 
 const Reports = () => {
-  const [activeTab, setActiveTab] = useState('day-time');
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [activeMainTab, setActiveMainTab] = useState('reports');
+  const [activeReportTab, setActiveReportTab] = useState('day-time');
+  const [isReportsDropdownOpen, setIsReportsDropdownOpen] = useState(false);
 
-  const activeReport = reportTabs.find(tab => tab.id === activeTab);
+  const activeReport = reportSubTabs.find(tab => tab.id === activeReportTab);
+  const activeMain = mainTabs.find(tab => tab.id === activeMainTab);
 
   const handleSelectReport = (tabId: string) => {
-    setActiveTab(tabId);
-    setIsDropdownOpen(false);
+    setActiveReportTab(tabId);
+    setIsReportsDropdownOpen(false);
   };
+
+  const handleMainTabClick = (tab: typeof mainTabs[0]) => {
+    if (tab.hasDropdown) {
+      setIsReportsDropdownOpen(!isReportsDropdownOpen);
+      setActiveMainTab('reports');
+    } else {
+      setActiveMainTab(tab.id);
+      setIsReportsDropdownOpen(false);
+    }
+  };
+
+  const getContentInfo = () => {
+    if (activeMainTab === 'reports' && activeReport) {
+      return { icon: activeReport.icon, label: activeReport.label };
+    }
+    if (activeMain) {
+      return { icon: activeMain.icon, label: activeMain.label };
+    }
+    return null;
+  };
+
+  const contentInfo = getContentInfo();
 
   return (
     <div className="space-y-6">
-      {/* Reports Sub-Navigation Menu */}
-      <div className="relative">
-        <button
-          onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-          className={cn(
-            "flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
-            "bg-primary/10 text-primary hover:bg-primary/20",
-            isDropdownOpen && "bg-primary/20"
-          )}
-        >
-          {activeReport && <activeReport.icon className="w-4 h-4" />}
-          <span>Reports: {activeReport?.label}</span>
-          <ChevronDown className={cn(
-            "w-4 h-4 transition-transform duration-200",
-            isDropdownOpen && "rotate-180"
-          )} />
-        </button>
+      {/* Sub-Navigation Menu */}
+      <div className="flex items-center gap-1 border-b border-border pb-2">
+        {mainTabs.map((tab) => (
+          <div key={tab.id} className="relative">
+            <button
+              onClick={() => handleMainTabClick(tab)}
+              className={cn(
+                "flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
+                activeMainTab === tab.id
+                  ? "text-primary"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+              )}
+            >
+              <tab.icon className="w-4 h-4" />
+              <span>{tab.label}</span>
+              {tab.isNew && (
+                <span className="px-1.5 py-0.5 text-[10px] font-bold bg-primary text-primary-foreground rounded">
+                  NEW
+                </span>
+              )}
+              {tab.hasDropdown && (
+                <ChevronDown className={cn(
+                  "w-3.5 h-3.5 transition-transform duration-200",
+                  isReportsDropdownOpen && activeMainTab === 'reports' && "rotate-180"
+                )} />
+              )}
+            </button>
 
-        <AnimatePresence>
-          {isDropdownOpen && (
-            <>
-              {/* Backdrop to close dropdown */}
-              <div 
-                className="fixed inset-0 z-40" 
-                onClick={() => setIsDropdownOpen(false)} 
-              />
-              
-              {/* Dropdown Menu */}
+            {/* Active indicator */}
+            {activeMainTab === tab.id && (
               <motion.div
-                initial={{ opacity: 0, y: -8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
-                transition={{ duration: 0.15 }}
-                className="absolute left-0 top-full mt-2 z-50 min-w-[220px] py-2 rounded-lg border border-border bg-card shadow-xl"
-              >
-                {reportTabs.map((tab) => (
-                  <button
-                    key={tab.id}
-                    onClick={() => handleSelectReport(tab.id)}
-                    className={cn(
-                      "w-full flex items-center gap-3 px-4 py-2.5 text-sm text-left transition-colors",
-                      activeTab === tab.id
-                        ? "bg-primary/10 text-primary font-medium"
-                        : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
-                    )}
+                layoutId="activeTab"
+                className="absolute bottom-[-9px] left-0 right-0 h-0.5 bg-primary"
+              />
+            )}
+
+            {/* Reports Dropdown */}
+            <AnimatePresence>
+              {tab.hasDropdown && isReportsDropdownOpen && activeMainTab === 'reports' && (
+                <>
+                  <div 
+                    className="fixed inset-0 z-40" 
+                    onClick={() => setIsReportsDropdownOpen(false)} 
+                  />
+                  <motion.div
+                    initial={{ opacity: 0, y: -8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -8 }}
+                    transition={{ duration: 0.15 }}
+                    className="absolute left-0 top-full mt-3 z-50 min-w-[220px] py-2 rounded-lg border border-border bg-card shadow-xl"
                   >
-                    <tab.icon className="w-4 h-4 flex-shrink-0" />
-                    <span>{tab.label}</span>
-                  </button>
-                ))}
-              </motion.div>
-            </>
-          )}
-        </AnimatePresence>
+                    {reportSubTabs.map((subTab) => (
+                      <button
+                        key={subTab.id}
+                        onClick={() => handleSelectReport(subTab.id)}
+                        className={cn(
+                          "w-full flex items-center gap-3 px-4 py-2.5 text-sm text-left transition-colors",
+                          activeReportTab === subTab.id
+                            ? "bg-primary/10 text-primary font-medium"
+                            : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                        )}
+                      >
+                        <subTab.icon className="w-4 h-4 flex-shrink-0" />
+                        <span>{subTab.label}</span>
+                      </button>
+                    ))}
+                  </motion.div>
+                </>
+              )}
+            </AnimatePresence>
+          </div>
+        ))}
       </div>
 
-      {/* Report Content Placeholder */}
+      {/* Content Placeholder */}
       <motion.div
-        key={activeTab}
+        key={activeMainTab === 'reports' ? activeReportTab : activeMainTab}
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
         className="glass-card rounded-2xl p-12 flex flex-col items-center justify-center min-h-[400px]"
       >
-        {activeReport && (
+        {contentInfo && (
           <>
             <div className="w-20 h-20 rounded-2xl bg-primary/10 flex items-center justify-center mb-6">
-              <activeReport.icon className="w-10 h-10 text-primary" />
+              <contentInfo.icon className="w-10 h-10 text-primary" />
             </div>
-            <h3 className="text-2xl font-semibold mb-3">{activeReport.label}</h3>
+            <h3 className="text-2xl font-semibold mb-3">{contentInfo.label}</h3>
             <p className="text-muted-foreground text-center max-w-md">
-              Detailed {activeReport.label.toLowerCase()} analysis and insights will be displayed here.
+              {activeMainTab === 'reports' 
+                ? `Detailed ${contentInfo.label.toLowerCase()} analysis and insights will be displayed here.`
+                : `${contentInfo.label} content will be displayed here.`
+              }
             </p>
           </>
         )}
