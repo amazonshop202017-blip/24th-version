@@ -15,7 +15,7 @@ import Dashboard from "./pages/Dashboard";
 import Trades from "./pages/Trades";
 import Strategies from "./pages/Strategies";
 import StrategyDetail from "./pages/StrategyDetail";
-import Analytics from "./pages/Analytics";
+import Reports from "./pages/Reports";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
@@ -40,7 +40,7 @@ const App = () => (
                         <Route path="/trades" element={<Trades />} />
                         <Route path="/strategies" element={<Strategies />} />
                         <Route path="/strategies/:id" element={<StrategyDetail />} />
-                        <Route path="/analytics" element={<Analytics />} />
+                        <Route path="/reports/*" element={<Reports />} />
                         <Route path="/settings" element={<Settings />} />
                         <Route path="*" element={<NotFound />} />
                       </Routes>
