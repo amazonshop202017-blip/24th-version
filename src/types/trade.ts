@@ -17,6 +17,7 @@ export interface Trade {
   tradeTarget: number;
   accountName: string;
   strategyId?: string;
+  selectedChecklistItems?: string[];
   tags: string[];
   notes: string;
   createdAt: string;
@@ -27,6 +28,8 @@ export interface Trade {
   potentialMAE?: number;
   potentialMFE?: number;
   missedTrade?: boolean;
+  // Manual Gross P/L override
+  manualGrossPnl?: number;
 }
 
 // Calculated values (not stored, computed on-the-fly)

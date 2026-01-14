@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Trash2, Edit2, Check, X, Target, ChevronRight, MoreVertical } from 'lucide-react';
+import { Plus, Trash2, Edit2, Check, X, Target, ChevronRight, MoreVertical, ClipboardList } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -9,6 +9,7 @@ import { useFilteredTradesContext } from '@/contexts/TradesContext';
 import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
 import { useNavigate } from 'react-router-dom';
 import { calculateStrategyStats } from '@/lib/strategyStats';
+import { StrategyChecklistEditor } from '@/components/strategy/StrategyChecklistEditor';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,7 +18,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 
 const Strategies = () => {
-  const { strategies, addStrategy, removeStrategy, updateStrategy } = useStrategiesContext();
+  const { strategies, addStrategy, removeStrategy, updateStrategy, updateStrategyChecklist } = useStrategiesContext();
   const { filteredTrades } = useFilteredTradesContext();
   const { formatCurrency } = useGlobalFilters();
   const navigate = useNavigate();
@@ -27,6 +28,8 @@ const Strategies = () => {
   const [editName, setEditName] = useState('');
   const [editDescription, setEditDescription] = useState('');
   const [showAddForm, setShowAddForm] = useState(false);
+  const [checklistEditorOpen, setChecklistEditorOpen] = useState(false);
+  const [editingChecklistStrategy, setEditingChecklistStrategy] = useState<{ id: string; name: string; items: string[] } | null>(null);
 
   const formatPercent = (value: number) => {
     return `${Math.round(value)}%`;
@@ -68,6 +71,17 @@ const Strategies = () => {
     setEditingId(null);
     setEditName('');
     setEditDescription('');
+  };
+
+  const openChecklistEditor = (strategyId: string, strategyName: string, items: string[]) => {
+    setEditingChecklistStrategy({ id: strategyId, name: strategyName, items });
+    setChecklistEditorOpen(true);
+  };
+
+  const handleSaveChecklist = (items: string[]) => {
+    if (editingChecklistStrategy) {
+      updateStrategyChecklist(editingChecklistStrategy.id, items);
+    }
   };
 
   return (
@@ -292,6 +306,15 @@ const Strategies = () => {
                             <DropdownMenuItem
                               onClick={(e) => {
                                 e.stopPropagation();
+                                openChecklistEditor(strategy.id, strategy.name, strategy.checklistItems || []);
+                              }}
+                            >
+                              <ClipboardList className="w-4 h-4 mr-2" />
+                              Edit Checklist
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={(e) => {
+                                e.stopPropagation();
                                 removeStrategy(strategy.id);
                               }}
                               className="text-loss focus:text-loss"
@@ -310,6 +333,20 @@ const Strategies = () => {
           </div>
         )}
       </div>
+
+      {/* Checklist Editor Modal */}
+      {editingChecklistStrategy && (
+        <StrategyChecklistEditor
+          isOpen={checklistEditorOpen}
+          onClose={() => {
+            setChecklistEditorOpen(false);
+            setEditingChecklistStrategy(null);
+          }}
+          strategyName={editingChecklistStrategy.name}
+          checklistItems={editingChecklistStrategy.items}
+          onSave={handleSaveChecklist}
+        />
+      )}
     </div>
   );
 };
