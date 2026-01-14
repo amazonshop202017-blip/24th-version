@@ -22,6 +22,9 @@ export interface Trade {
   notes: string;
   createdAt: string;
   updatedAt: string;
+  // Stop Loss and Take Profit
+  stopLoss?: number;
+  takeProfit?: number;
   // Manual position metrics
   positionMAE?: number;
   positionMFE?: number;

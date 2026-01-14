@@ -131,6 +131,8 @@ export const TradeModal = () => {
       setNotes(editingTrade.notes || '');
       setTradeRisk(editingTrade.tradeRisk);
       setTradeTarget(editingTrade.tradeTarget || 0);
+      setStopLoss(editingTrade.stopLoss !== undefined ? editingTrade.stopLoss.toString() : '');
+      setTakeProfit(editingTrade.takeProfit !== undefined ? editingTrade.takeProfit.toString() : '');
       setPositionMAE(editingTrade.positionMAE || 0);
       setPositionMFE(editingTrade.positionMFE || 0);
       setPotentialMAE(editingTrade.potentialMAE || 0);
@@ -258,6 +260,8 @@ export const TradeModal = () => {
       selectedChecklistItems,
       tags: selectedTags,
       notes: notes.trim(),
+      stopLoss: stopLoss !== '' ? parseFloat(stopLoss) : undefined,
+      takeProfit: takeProfit !== '' ? parseFloat(takeProfit) : undefined,
       positionMAE,
       positionMFE,
       potentialMAE,
