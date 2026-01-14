@@ -1,5 +1,6 @@
 import { useEffect, useState, useMemo, useRef } from 'react';
-import { X, Calendar, Star, Settings2, Clock, ChevronDown, Check } from 'lucide-react';
+import { X, Calendar, Star, Settings2, Clock, ChevronDown, Check, Plus } from 'lucide-react';
+import { ScaleInOutModal } from './ScaleInOutModal';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -68,6 +69,9 @@ export const TradeModal = () => {
   const [potentialMAE, setPotentialMAE] = useState(0);
   const [potentialMFE, setPotentialMFE] = useState(0);
   const [missedTrade, setMissedTrade] = useState(false);
+
+  // Scale In/Out modal state
+  const [scaleModalOpen, setScaleModalOpen] = useState(false);
 
   // Get current strategy's checklist items
   const currentStrategyChecklist = useMemo(() => {
@@ -290,6 +294,17 @@ export const TradeModal = () => {
         ? prev.filter(i => i !== item)
         : [...prev, item]
     );
+  };
+
+  // Handle scale in/out modal save
+  const handleScaleInOutSave = (avgEntry: number, avgExit: number) => {
+    // Update entry and exit prices with averaged values
+    if (avgEntry > 0) {
+      setEntryPrice(avgEntry.toFixed(2));
+    }
+    if (avgExit > 0) {
+      setExitPrice(avgExit.toFixed(2));
+    }
   };
 
   // Calculated summary metrics - Fixed calculations
@@ -522,19 +537,30 @@ export const TradeModal = () => {
                   
                   <div className="space-y-1.5">
                     <Label className="text-xs text-muted-foreground">Entry Price *</Label>
-                    <Input
-                      type="text"
-                      inputMode="decimal"
-                      placeholder="0.00"
-                      value={entryPrice}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        if (val === '' || /^\d*\.?\d*$/.test(val)) {
-                          setEntryPrice(val);
-                        }
-                      }}
-                      className="h-10 bg-input border-border"
-                    />
+                    <div className="flex gap-1">
+                      <Input
+                        type="text"
+                        inputMode="decimal"
+                        placeholder="0.00"
+                        value={entryPrice}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          if (val === '' || /^\d*\.?\d*$/.test(val)) {
+                            setEntryPrice(val);
+                          }
+                        }}
+                        className="h-10 bg-input border-border flex-1"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        className="h-10 w-10 shrink-0"
+                        onClick={() => setScaleModalOpen(true)}
+                      >
+                        <Plus className="w-4 h-4" />
+                      </Button>
+                    </div>
                   </div>
 
                   <div className="space-y-1.5">
@@ -608,19 +634,30 @@ export const TradeModal = () => {
 
                   <div className="space-y-1.5">
                     <Label className="text-xs text-muted-foreground">Exit Price</Label>
-                    <Input
-                      type="text"
-                      inputMode="decimal"
-                      placeholder="0.00"
-                      value={exitPrice}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        if (val === '' || /^\d*\.?\d*$/.test(val)) {
-                          setExitPrice(val);
-                        }
-                      }}
-                      className="h-10 bg-input border-border"
-                    />
+                    <div className="flex gap-1">
+                      <Input
+                        type="text"
+                        inputMode="decimal"
+                        placeholder="0.00"
+                        value={exitPrice}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          if (val === '' || /^\d*\.?\d*$/.test(val)) {
+                            setExitPrice(val);
+                          }
+                        }}
+                        className="h-10 bg-input border-border flex-1"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        className="h-10 w-10 shrink-0"
+                        onClick={() => setScaleModalOpen(true)}
+                      >
+                        <Plus className="w-4 h-4" />
+                      </Button>
+                    </div>
                   </div>
 
                   {/* Gross P/L - Editable, comes before Net P/L */}
@@ -743,6 +780,17 @@ export const TradeModal = () => {
           </div>
         </div>
       </SheetContent>
+
+      {/* Scale In/Out Modal */}
+      <ScaleInOutModal
+        isOpen={scaleModalOpen}
+        onClose={() => setScaleModalOpen(false)}
+        onSave={handleScaleInOutSave}
+        initialEntryPrice={entryPrice}
+        initialQuantity={quantity}
+        initialExitPrice={exitPrice}
+        initialExitQuantity={quantity}
+      />
     </Sheet>
   );
 };
