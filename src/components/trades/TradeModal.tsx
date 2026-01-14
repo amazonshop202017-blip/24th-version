@@ -1,6 +1,5 @@
 import { useEffect, useState, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { X, Plus, Trash2, Calendar, Star, Settings2 } from 'lucide-react';
+import { X, Calendar, Star, Settings2, Clock } from 'lucide-react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -8,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
 import { useTradeModal } from '@/contexts/TradeModalContext';
 import { useTradesContext } from '@/contexts/TradesContext';
 import { useStrategiesContext } from '@/contexts/StrategiesContext';
@@ -28,7 +28,7 @@ const defaultEntry = (): TradeEntry => ({
 export const TradeModal = () => {
   const { isOpen, editingTrade, closeModal } = useTradeModal();
   const { addTrade, updateTrade } = useTradesContext();
-  const { strategies } = useStrategiesContext();
+  const { strategies, getStrategyById } = useStrategiesContext();
   const { accounts } = useAccountsContext();
   const { currencyConfig } = useGlobalFilters();
 
@@ -40,23 +40,25 @@ export const TradeModal = () => {
   
   // Trade Entry fields
   const [entryDate, setEntryDate] = useState('');
-  const [entryPrice, setEntryPrice] = useState<number>(0);
-  const [quantity, setQuantity] = useState<number>(0);
-  const [stopLoss, setStopLoss] = useState<number>(0);
-  const [takeProfit, setTakeProfit] = useState<number>(0);
+  const [entryPrice, setEntryPrice] = useState<string>('');
+  const [quantity, setQuantity] = useState<string>('');
+  const [stopLoss, setStopLoss] = useState<string>('');
+  const [takeProfit, setTakeProfit] = useState<string>('');
   
   // Trade Exit fields
   const [exitDate, setExitDate] = useState('');
-  const [exitPrice, setExitPrice] = useState<number>(0);
-  const [fees, setFees] = useState<number>(0);
+  const [exitPrice, setExitPrice] = useState<string>('');
+  const [fees, setFees] = useState<string>('');
+  const [manualGrossPnl, setManualGrossPnl] = useState<string>('');
   
-  // Additional fields (from original)
+  // Additional fields
   const [symbol, setSymbol] = useState('');
   const [accountName, setAccountName] = useState('');
   const [notes, setNotes] = useState('');
   const [tradeRisk, setTradeRisk] = useState(0);
   const [tradeTarget, setTradeTarget] = useState(0);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [selectedChecklistItems, setSelectedChecklistItems] = useState<string[]>([]);
   
   // Hidden fields for compatibility
   const [entries, setEntries] = useState<TradeEntry[]>([defaultEntry()]);
@@ -66,31 +68,42 @@ export const TradeModal = () => {
   const [potentialMFE, setPotentialMFE] = useState(0);
   const [missedTrade, setMissedTrade] = useState(false);
 
+  // Get current strategy's checklist items
+  const currentStrategyChecklist = useMemo(() => {
+    if (!strategyId) return [];
+    const strategy = getStrategyById(strategyId);
+    return strategy?.checklistItems || [];
+  }, [strategyId, getStrategyById]);
+
   // Sync simplified fields to entries format
   useEffect(() => {
     const newEntries: TradeEntry[] = [];
+    const entryPriceNum = parseFloat(entryPrice) || 0;
+    const quantityNum = parseFloat(quantity) || 0;
+    const exitPriceNum = parseFloat(exitPrice) || 0;
+    const feesNum = parseFloat(fees) || 0;
     
     // Entry transaction
-    if (entryDate && entryPrice > 0 && quantity > 0) {
+    if (entryDate && entryPriceNum >= 0 && quantityNum > 0) {
       newEntries.push({
         id: entries[0]?.id || crypto.randomUUID(),
         type: direction === 'LONG' ? 'BUY' : 'SELL',
         datetime: entryDate,
-        quantity: quantity,
-        price: entryPrice,
+        quantity: quantityNum,
+        price: entryPriceNum,
         charges: 0,
       });
     }
     
     // Exit transaction
-    if (exitDate && exitPrice > 0 && quantity > 0) {
+    if (exitDate && exitPriceNum >= 0 && quantityNum > 0) {
       newEntries.push({
         id: entries[1]?.id || crypto.randomUUID(),
         type: direction === 'LONG' ? 'SELL' : 'BUY',
         datetime: exitDate,
-        quantity: quantity,
-        price: exitPrice,
-        charges: fees,
+        quantity: quantityNum,
+        price: exitPriceNum,
+        charges: feesNum,
       });
     }
     
@@ -99,6 +112,13 @@ export const TradeModal = () => {
     }
   }, [entryDate, entryPrice, quantity, exitDate, exitPrice, fees, direction]);
 
+  // Reset checklist items when strategy changes
+  useEffect(() => {
+    if (!editingTrade) {
+      setSelectedChecklistItems([]);
+    }
+  }, [strategyId]);
+
   useEffect(() => {
     if (editingTrade) {
       setSymbol(editingTrade.symbol);
@@ -106,6 +126,7 @@ export const TradeModal = () => {
       setAccountName(editingTrade.accountName);
       setStrategyId(editingTrade.strategyId || '');
       setSelectedTags(editingTrade.tags);
+      setSelectedChecklistItems(editingTrade.selectedChecklistItems || []);
       setNotes(editingTrade.notes || '');
       setTradeRisk(editingTrade.tradeRisk);
       setTradeTarget(editingTrade.tradeTarget || 0);
@@ -127,16 +148,21 @@ export const TradeModal = () => {
         // Determine direction from first entry
         setDirection(firstEntry.type === 'BUY' ? 'LONG' : 'SHORT');
         setEntryDate(firstEntry.datetime);
-        setEntryPrice(firstEntry.price);
-        setQuantity(firstEntry.quantity);
+        setEntryPrice(firstEntry.price.toString());
+        setQuantity(firstEntry.quantity.toString());
         
         if (lastEntry && lastEntry.id !== firstEntry.id) {
           setExitDate(lastEntry.datetime);
-          setExitPrice(lastEntry.price);
-          setFees(lastEntry.charges);
+          setExitPrice(lastEntry.price.toString());
+          setFees(lastEntry.charges.toString());
         }
         
         setEntries(editingTrade.entries);
+      }
+
+      // Set manual gross P/L if it exists
+      if (editingTrade.manualGrossPnl !== undefined) {
+        setManualGrossPnl(editingTrade.manualGrossPnl.toString());
       }
     } else {
       resetForm();
@@ -150,16 +176,18 @@ export const TradeModal = () => {
     setAccountName('');
     setStrategyId('');
     setSelectedTags([]);
+    setSelectedChecklistItems([]);
     setNotes('');
     setDirection('LONG');
     setEntryDate(new Date().toISOString().slice(0, 16));
-    setEntryPrice(0);
-    setQuantity(0);
-    setStopLoss(0);
-    setTakeProfit(0);
+    setEntryPrice('');
+    setQuantity('');
+    setStopLoss('');
+    setTakeProfit('');
     setExitDate('');
-    setExitPrice(0);
-    setFees(0);
+    setExitPrice('');
+    setFees('');
+    setManualGrossPnl('');
     setTradeRisk(0);
     setTradeTarget(0);
     setEntries([defaultEntry()]);
@@ -191,8 +219,31 @@ export const TradeModal = () => {
     return calculateTradeMetrics(formData);
   }, [symbol, direction, instrument, entries, tradeRisk, tradeTarget, accountName, strategyId, selectedTags, notes, positionMAE, positionMFE, potentialMAE, potentialMFE, missedTrade]);
 
+  // Calculate actual gross and net P/L
+  const effectiveGrossPnl = manualGrossPnl !== '' ? parseFloat(manualGrossPnl) || 0 : metrics.grossPnl;
+  const effectiveNetPnl = effectiveGrossPnl - (parseFloat(fees) || 0);
+
+  // Calculate duration
+  const durationFormatted = useMemo(() => {
+    if (!entryDate || !exitDate) return '—';
+    const entryTime = new Date(entryDate).getTime();
+    const exitTime = new Date(exitDate).getTime();
+    if (isNaN(entryTime) || isNaN(exitTime) || exitTime < entryTime) return '—';
+    
+    const diffMs = exitTime - entryTime;
+    const totalMinutes = Math.floor(diffMs / (1000 * 60));
+    const days = Math.floor(totalMinutes / (60 * 24));
+    const hours = Math.floor((totalMinutes % (60 * 24)) / 60);
+    const mins = totalMinutes % 60;
+    
+    return `${days}D ${hours}H ${mins}M`;
+  }, [entryDate, exitDate]);
+
+  // Validation - minimum required fields
+  const canSave = symbol.trim() && entryDate && (parseFloat(entryPrice) >= 0) && (parseFloat(quantity) > 0);
+
   const handleSubmit = () => {
-    if (!symbol.trim()) return;
+    if (!canSave) return;
 
     const tradeData: TradeFormData = {
       symbol: symbol.trim(),
@@ -203,6 +254,7 @@ export const TradeModal = () => {
       tradeTarget,
       accountName: accountName.trim(),
       strategyId: strategyId || undefined,
+      selectedChecklistItems,
       tags: selectedTags,
       notes: notes.trim(),
       positionMAE,
@@ -210,6 +262,7 @@ export const TradeModal = () => {
       potentialMAE,
       potentialMFE,
       missedTrade,
+      manualGrossPnl: manualGrossPnl !== '' ? parseFloat(manualGrossPnl) : undefined,
     };
 
     if (editingTrade) {
@@ -224,6 +277,14 @@ export const TradeModal = () => {
   const handleDiscard = () => {
     closeModal();
     resetForm();
+  };
+
+  const toggleChecklistItem = (item: string) => {
+    setSelectedChecklistItems(prev => 
+      prev.includes(item) 
+        ? prev.filter(i => i !== item)
+        : [...prev, item]
+    );
   };
 
   // Calculated summary metrics
@@ -289,58 +350,63 @@ export const TradeModal = () => {
                   </div>
                 </div>
 
-                {/* Instrument */}
+                {/* Instrument - Free text input */}
                 <div className="space-y-1.5">
                   <Label className="text-xs text-muted-foreground">Instrument *</Label>
-                  <Select value={symbol || instrument} onValueChange={(val) => setSymbol(val)}>
-                    <SelectTrigger className="h-10 bg-input border-border">
-                      <SelectValue placeholder="Select instrument..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="USDJPY">USDJPY</SelectItem>
-                      <SelectItem value="EURUSD">EURUSD</SelectItem>
-                      <SelectItem value="GBPUSD">GBPUSD</SelectItem>
-                      <SelectItem value="BTCUSD">BTCUSD</SelectItem>
-                      <SelectItem value="SPY">SPY</SelectItem>
-                      <SelectItem value="AAPL">AAPL</SelectItem>
-                      <SelectItem value="TSLA">TSLA</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Input
+                    type="text"
+                    placeholder="e.g., EURUSD, CL, WTI, AAPL..."
+                    value={symbol}
+                    onChange={(e) => setSymbol(e.target.value)}
+                    className="h-10 bg-input border-border"
+                  />
                 </div>
 
                 {/* Setup & Setup Checklist */}
-                <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-3">
                   <div className="space-y-1.5">
-                    <Label className="text-xs text-muted-foreground">Setup *</Label>
+                    <Label className="text-xs text-muted-foreground">Setup</Label>
                     <Select value={strategyId || "none"} onValueChange={(val) => setStrategyId(val === "none" ? "" : val)}>
                       <SelectTrigger className="h-10 bg-input border-border">
                         <SelectValue placeholder="Select..." />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="none">None</SelectItem>
-                        <SelectItem value="reversal">Reversal</SelectItem>
-                        <SelectItem value="breakout">Breakout</SelectItem>
-                        <SelectItem value="trend">Trend Following</SelectItem>
                         {strategies.map((s) => (
                           <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                   </div>
-                  <div className="space-y-1.5">
-                    <Label className="text-xs text-muted-foreground">Setup Checklist</Label>
-                    <Select defaultValue="5of6">
-                      <SelectTrigger className="h-10 bg-input border-border">
-                        <SelectValue placeholder="Select..." />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="6of6">6 of 6</SelectItem>
-                        <SelectItem value="5of6">5 of 6</SelectItem>
-                        <SelectItem value="4of6">4 of 6</SelectItem>
-                        <SelectItem value="3of6">3 of 6</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
+                  
+                  {/* Strategy Checklist Selection */}
+                  {strategyId && currentStrategyChecklist.length > 0 && (
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <Label className="text-xs text-muted-foreground">Setup Checklist</Label>
+                        <span className="text-xs text-muted-foreground">
+                          {selectedChecklistItems.length} of {currentStrategyChecklist.length} selected
+                        </span>
+                      </div>
+                      <div className="space-y-2 bg-muted/30 rounded-lg p-3 max-h-32 overflow-y-auto">
+                        {currentStrategyChecklist.map((item, index) => (
+                          <div key={index} className="flex items-center gap-2">
+                            <Checkbox
+                              id={`checklist-${index}`}
+                              checked={selectedChecklistItems.includes(item)}
+                              onCheckedChange={() => toggleChecklistItem(item)}
+                            />
+                            <label 
+                              htmlFor={`checklist-${index}`}
+                              className="text-sm cursor-pointer flex-1"
+                            >
+                              {item}
+                            </label>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -383,25 +449,34 @@ export const TradeModal = () => {
                   
                   <div className="space-y-1.5">
                     <Label className="text-xs text-muted-foreground">Entry Price *</Label>
-                    <div className="relative">
-                      <Input
-                        type="number"
-                        placeholder="0.00"
-                        value={entryPrice || ''}
-                        onChange={(e) => setEntryPrice(parseFloat(e.target.value) || 0)}
-                        className="h-10 bg-input border-border pr-8"
-                      />
-                      <Plus className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                    </div>
+                    <Input
+                      type="text"
+                      inputMode="decimal"
+                      placeholder="0.00"
+                      value={entryPrice}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        if (val === '' || /^\d*\.?\d*$/.test(val)) {
+                          setEntryPrice(val);
+                        }
+                      }}
+                      className="h-10 bg-input border-border"
+                    />
                   </div>
 
                   <div className="space-y-1.5">
                     <Label className="text-xs text-muted-foreground">Quantity *</Label>
                     <Input
-                      type="number"
+                      type="text"
+                      inputMode="decimal"
                       placeholder="0.00"
-                      value={quantity || ''}
-                      onChange={(e) => setQuantity(parseFloat(e.target.value) || 0)}
+                      value={quantity}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        if (val === '' || /^\d*\.?\d*$/.test(val)) {
+                          setQuantity(val);
+                        }
+                      }}
                       className="h-10 bg-input border-border"
                     />
                   </div>
@@ -409,10 +484,16 @@ export const TradeModal = () => {
                   <div className="space-y-1.5">
                     <Label className="text-xs text-muted-foreground">Stop Loss</Label>
                     <Input
-                      type="number"
+                      type="text"
+                      inputMode="decimal"
                       placeholder="0.00"
-                      value={stopLoss || ''}
-                      onChange={(e) => setStopLoss(parseFloat(e.target.value) || 0)}
+                      value={stopLoss}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        if (val === '' || /^\d*\.?\d*$/.test(val)) {
+                          setStopLoss(val);
+                        }
+                      }}
                       className="h-10 bg-input border-border"
                     />
                   </div>
@@ -420,10 +501,16 @@ export const TradeModal = () => {
                   <div className="space-y-1.5">
                     <Label className="text-xs text-muted-foreground">Take Profit</Label>
                     <Input
-                      type="number"
+                      type="text"
+                      inputMode="decimal"
                       placeholder="0.00"
-                      value={takeProfit || ''}
-                      onChange={(e) => setTakeProfit(parseFloat(e.target.value) || 0)}
+                      value={takeProfit}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        if (val === '' || /^\d*\.?\d*$/.test(val)) {
+                          setTakeProfit(val);
+                        }
+                      }}
                       className="h-10 bg-input border-border"
                     />
                   </div>
@@ -434,7 +521,7 @@ export const TradeModal = () => {
                   <h4 className="text-sm font-medium text-foreground">Trade Exit</h4>
                   
                   <div className="space-y-1.5">
-                    <Label className="text-xs text-muted-foreground">Exit Date *</Label>
+                    <Label className="text-xs text-muted-foreground">Exit Date</Label>
                     <div className="relative">
                       <Input
                         type="datetime-local"
@@ -447,35 +534,47 @@ export const TradeModal = () => {
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label className="text-xs text-muted-foreground">Exit Price *</Label>
-                    <div className="relative">
-                      <Input
-                        type="number"
-                        placeholder="0.00"
-                        value={exitPrice || ''}
-                        onChange={(e) => setExitPrice(parseFloat(e.target.value) || 0)}
-                        className="h-10 bg-input border-border pr-8"
-                      />
-                      <Plus className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                    </div>
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <Label className="text-xs text-muted-foreground">Net P/L *</Label>
+                    <Label className="text-xs text-muted-foreground">Exit Price</Label>
                     <Input
                       type="text"
-                      value={`${currencyConfig.symbol}${metrics.netPnl.toFixed(2)}`}
-                      readOnly
-                      className="h-10 bg-muted/50 border-border text-muted-foreground"
+                      inputMode="decimal"
+                      placeholder="0.00"
+                      value={exitPrice}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        if (val === '' || /^\d*\.?\d*$/.test(val)) {
+                          setExitPrice(val);
+                        }
+                      }}
+                      className="h-10 bg-input border-border"
+                    />
+                  </div>
+
+                  {/* Gross P/L - Editable, comes before Net P/L */}
+                  <div className="space-y-1.5">
+                    <Label className="text-xs text-muted-foreground">Gross P/L</Label>
+                    <Input
+                      type="text"
+                      inputMode="decimal"
+                      placeholder={metrics.grossPnl.toFixed(2)}
+                      value={manualGrossPnl}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        if (val === '' || /^-?\d*\.?\d*$/.test(val)) {
+                          setManualGrossPnl(val);
+                        }
+                      }}
+                      className="h-10 bg-input border-border"
                     />
                   </div>
 
                   <div className="grid grid-cols-2 gap-2">
+                    {/* Net P/L - Read-only, calculated */}
                     <div className="space-y-1.5">
-                      <Label className="text-xs text-muted-foreground">Gross P/L *</Label>
+                      <Label className="text-xs text-muted-foreground">Net P/L</Label>
                       <Input
                         type="text"
-                        value={`${currencyConfig.symbol}${metrics.grossPnl.toFixed(2)}`}
+                        value={`${currencyConfig.symbol}${effectiveNetPnl.toFixed(2)}`}
                         readOnly
                         className="h-10 bg-muted/50 border-border text-muted-foreground text-sm"
                       />
@@ -483,10 +582,16 @@ export const TradeModal = () => {
                     <div className="space-y-1.5">
                       <Label className="text-xs text-muted-foreground">Fees</Label>
                       <Input
-                        type="number"
+                        type="text"
+                        inputMode="decimal"
                         placeholder="0.00"
-                        value={fees || ''}
-                        onChange={(e) => setFees(parseFloat(e.target.value) || 0)}
+                        value={fees}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          if (val === '' || /^\d*\.?\d*$/.test(val)) {
+                            setFees(val);
+                          }
+                        }}
                         className="h-10 bg-input border-border text-sm"
                       />
                     </div>
@@ -527,7 +632,7 @@ export const TradeModal = () => {
             <div className="flex items-center gap-2">
               <Button 
                 onClick={handleSubmit}
-                disabled={!symbol.trim()}
+                disabled={!canSave}
                 className="h-9 px-6 bg-foreground text-background hover:bg-foreground/90"
               >
                 Save
@@ -542,7 +647,13 @@ export const TradeModal = () => {
             </div>
 
             {/* Right - Summary Metrics */}
-            <div className="flex items-center gap-6 text-sm">
+            <div className="flex items-center gap-4 text-sm">
+              <div className="text-center">
+                <p className="text-xs text-muted-foreground flex items-center gap-1">
+                  <Clock className="w-3 h-3" /> Duration
+                </p>
+                <p className="font-semibold text-xs">{durationFormatted}</p>
+              </div>
               <div className="text-center">
                 <p className="text-xs text-muted-foreground">RRR</p>
                 <p className="font-semibold">{rrr}</p>

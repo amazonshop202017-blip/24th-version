@@ -5,6 +5,7 @@ export interface Strategy {
   name: string;
   description: string;
   createdAt: string;
+  checklistItems: string[];
 }
 
 interface StrategiesContextType {
@@ -12,6 +13,7 @@ interface StrategiesContextType {
   addStrategy: (name: string, description: string) => Strategy;
   removeStrategy: (id: string) => void;
   updateStrategy: (id: string, name: string, description: string) => void;
+  updateStrategyChecklist: (id: string, checklistItems: string[]) => void;
   getStrategyById: (id: string) => Strategy | undefined;
 }
 
@@ -46,6 +48,7 @@ export const StrategiesProvider = ({ children }: { children: ReactNode }) => {
       name: trimmedName,
       description: description.trim(),
       createdAt: new Date().toISOString(),
+      checklistItems: [],
     };
     saveStrategies([...strategies, newStrategy]);
     return newStrategy;
@@ -62,12 +65,18 @@ export const StrategiesProvider = ({ children }: { children: ReactNode }) => {
     ));
   }, [strategies, saveStrategies]);
 
+  const updateStrategyChecklist = useCallback((id: string, checklistItems: string[]) => {
+    saveStrategies(strategies.map(s => 
+      s.id === id ? { ...s, checklistItems } : s
+    ));
+  }, [strategies, saveStrategies]);
+
   const getStrategyById = useCallback((id: string) => {
     return strategies.find(s => s.id === id);
   }, [strategies]);
 
   return (
-    <StrategiesContext.Provider value={{ strategies, addStrategy, removeStrategy, updateStrategy, getStrategyById }}>
+    <StrategiesContext.Provider value={{ strategies, addStrategy, removeStrategy, updateStrategy, updateStrategyChecklist, getStrategyById }}>
       {children}
     </StrategiesContext.Provider>
   );
