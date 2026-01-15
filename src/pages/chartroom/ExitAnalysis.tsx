@@ -36,6 +36,9 @@ interface ExitAnalysisData {
   exitPercent: number;
   symbol: string;
   side: 'LONG' | 'SHORT';
+  // For rendering: separate positive and negative portions
+  greenBar: number; // updraw value (positive)
+  redBar: number;   // drawdown value (negative, will be plotted separately)
 }
 
 const ExitAnalysis = () => {
@@ -178,6 +181,10 @@ const ExitAnalysis = () => {
         exitPercent: Math.round(exitPercent * 10) / 10,
         symbol: trade.symbol,
         side: trade.side,
+        // greenBar is the positive portion (updraw), rendered from 0 upward
+        greenBar: Math.round(updraw * 10) / 10,
+        // redBar is the negative portion (drawdown), rendered from 0 downward
+        redBar: Math.round(drawdown * 10) / 10,
       };
     });
   }, [filteredTrades]);
@@ -310,40 +317,46 @@ const ExitAnalysis = () => {
                       padding: '8px 12px',
                     }}
                     labelStyle={{ color: 'hsl(var(--foreground))' }}
-                    formatter={(value: number, name: string) => {
-                      const labels: Record<string, string> = {
-                        updraw: 'Updraw',
-                        drawdown: 'Drawdown',
-                        exitPercent: 'Exit',
-                      };
-                      return [`${value.toFixed(1)}%`, labels[name] || name];
-                    }}
-                    labelFormatter={(label, payload) => {
-                      if (payload && payload.length > 0) {
-                        const data = payload[0].payload;
-                        return `Trade #${label} - ${data.symbol} (${data.side})`;
-                      }
-                      return `Trade #${label}`;
+                    content={({ active, payload, label }) => {
+                      if (!active || !payload || payload.length === 0) return null;
+                      const data = payload[0].payload as ExitAnalysisData;
+                      return (
+                        <div className="bg-card border border-border rounded-lg p-3 shadow-lg">
+                          <p className="text-foreground font-medium mb-2">
+                            Trade #{label} - {data.symbol} ({data.side})
+                          </p>
+                          <div className="space-y-1 text-sm">
+                            <p className="text-green-500">Updraw: {data.updraw.toFixed(1)}%</p>
+                            <p className="text-red-500">Drawdown: {data.drawdown.toFixed(1)}%</p>
+                            <p className="text-foreground">Exit: {data.exitPercent.toFixed(1)}%</p>
+                          </div>
+                        </div>
+                      );
                     }}
                   />
 
-                  {/* Updraw Bar (Green - positive values) */}
-                  <Bar dataKey="updraw" name="updraw" maxBarSize={30}>
-                    {exitAnalysisData.map((entry, index) => (
-                      <Cell
-                        key={`updraw-${index}`}
-                        fill="hsl(142, 71%, 45%)"
-                      />
+                  {/* Single visual bar per trade: green above 0, red below 0 */}
+                  {/* Using stackId ensures bars overlap at the same x position */}
+                  <Bar 
+                    dataKey="greenBar" 
+                    name="updraw" 
+                    stackId="trade"
+                    maxBarSize={24}
+                    fill="hsl(142, 71%, 45%)"
+                  >
+                    {exitAnalysisData.map((_, index) => (
+                      <Cell key={`green-${index}`} fill="hsl(142, 71%, 45%)" />
                     ))}
                   </Bar>
-
-                  {/* Drawdown Bar (Red - negative values) */}
-                  <Bar dataKey="drawdown" name="drawdown" maxBarSize={30}>
-                    {exitAnalysisData.map((entry, index) => (
-                      <Cell
-                        key={`drawdown-${index}`}
-                        fill="hsl(0, 84%, 60%)"
-                      />
+                  <Bar 
+                    dataKey="redBar" 
+                    name="drawdown" 
+                    stackId="trade"
+                    maxBarSize={24}
+                    fill="hsl(0, 84%, 60%)"
+                  >
+                    {exitAnalysisData.map((_, index) => (
+                      <Cell key={`red-${index}`} fill="hsl(0, 84%, 60%)" />
                     ))}
                   </Bar>
 
