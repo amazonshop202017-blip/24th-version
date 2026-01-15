@@ -919,10 +919,11 @@ export const TradeModal = () => {
               </div>
 
               {/* Price Level & Break Even Row */}
-              <div className="space-y-3">
-                <div className="flex items-center gap-4">
+              <div className="grid grid-cols-2 gap-4">
+                {/* Price Reached First */}
+                <div className="space-y-1.5">
                   <div className="flex items-center gap-1">
-                    <span className="text-sm font-medium text-foreground">Which level did the price reach first?</span>
+                    <Label className="text-xs text-muted-foreground">Which level did the price reach first?</Label>
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <Info className="w-3.5 h-3.5 text-muted-foreground cursor-help" />
@@ -932,10 +933,6 @@ export const TradeModal = () => {
                       </TooltipContent>
                     </Tooltip>
                   </div>
-                  <span className="text-sm font-medium text-foreground">Break Even</span>
-                </div>
-                <div className="flex gap-4">
-                  {/* Price Reached First Toggle */}
                   <div className="grid grid-cols-2 gap-0 border border-border rounded-lg overflow-hidden">
                     <button
                       type="button"
@@ -962,8 +959,11 @@ export const TradeModal = () => {
                       Stop Loss
                     </button>
                   </div>
+                </div>
 
-                  {/* Break Even Toggle */}
+                {/* Break Even */}
+                <div className="space-y-1.5">
+                  <Label className="text-xs text-muted-foreground">Break Even</Label>
                   <div className="grid grid-cols-2 gap-0 border border-border rounded-lg overflow-hidden">
                     <button
                       type="button"

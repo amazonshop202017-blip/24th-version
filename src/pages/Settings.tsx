@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Trash2, Edit2, Check, X, Tag, Wallet, TrendingUp, TrendingDown, ArrowLeftRight, BarChart3, MessageSquareText } from 'lucide-react';
+import { Plus, Trash2, Edit2, Check, X, Tag, Wallet, TrendingUp, TrendingDown, ArrowLeftRight, BarChart3, MessageSquareText, Settings as SettingsIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useTagsContext } from '@/contexts/TagsContext';
@@ -22,6 +22,9 @@ const Settings = () => {
     addTradeManagement, removeTradeManagement,
     addExitComment, removeExitComment,
   } = useCustomStats();
+
+  // Settings tab state
+  const [activeSettingsTab, setActiveSettingsTab] = useState<'main' | 'tags-comments'>('main');
   
   const [newTag, setNewTag] = useState('');
   const [editingTag, setEditingTag] = useState<string | null>(null);
@@ -171,531 +174,573 @@ const Settings = () => {
         <p className="text-muted-foreground">Manage your trading journal configuration</p>
       </div>
 
-      {/* Accounts Section */}
-      <div className="glass-card rounded-2xl p-6">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center">
-            <Wallet className="w-5 h-5 text-primary" />
-          </div>
-          <div>
-            <h2 className="text-xl font-semibold">Accounts Management</h2>
-            <p className="text-sm text-muted-foreground">Create and manage trading accounts with balance tracking</p>
-          </div>
-        </div>
-
-        <div className="flex gap-3 mb-6">
-          <Input
-            placeholder="Account name..."
-            value={newAccountName}
-            onChange={(e) => setNewAccountName(e.target.value)}
-            onKeyDown={handleAccountKeyDown}
-            className="bg-input border-border flex-1"
-          />
-          <div className="relative">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">₹</span>
-            <Input
-              type="number"
-              placeholder="Starting balance"
-              value={newAccountBalance}
-              onChange={(e) => setNewAccountBalance(e.target.value)}
-              onKeyDown={handleAccountKeyDown}
-              className="bg-input border-border w-40 pl-7"
-            />
-          </div>
-          <Button onClick={handleAddAccount} disabled={!newAccountName.trim() || !newAccountBalance}>
-            <Plus className="w-4 h-4 mr-2" />
-            Add Account
-          </Button>
-        </div>
-
-        {accountsWithStats.length === 0 ? (
-          <div className="text-center py-12 text-muted-foreground">
-            <Wallet className="w-12 h-12 mx-auto mb-4 opacity-30" />
-            <p>No accounts created yet</p>
-            <p className="text-sm">Add your first account above to start tracking balances</p>
-          </div>
-        ) : (
-          <div className="space-y-2">
-            <AnimatePresence>
-              {accountsWithStats.map((account) => (
-                <motion.div
-                  key={account.id}
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  className="flex items-center justify-between p-4 bg-input rounded-lg border border-border group"
-                >
-                  {editingAccount === account.id ? (
-                    <div className="flex items-center gap-2 flex-1">
-                      <Input
-                        value={editAccountName}
-                        onChange={(e) => setEditAccountName(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') saveAccountEdit();
-                          if (e.key === 'Escape') cancelAccountEdit();
-                        }}
-                        className="bg-background border-border h-8 flex-1"
-                        autoFocus
-                      />
-                      <div className="relative">
-                        <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">₹</span>
-                        <Input
-                          type="number"
-                          value={editAccountBalance}
-                          onChange={(e) => setEditAccountBalance(e.target.value)}
-                          className="bg-background border-border h-8 w-32 pl-6"
-                        />
-                      </div>
-                      <Button size="sm" variant="ghost" onClick={saveAccountEdit}>
-                        <Check className="w-4 h-4 text-profit" />
-                      </Button>
-                      <Button size="sm" variant="ghost" onClick={cancelAccountEdit}>
-                        <X className="w-4 h-4 text-loss" />
-                      </Button>
-                    </div>
-                  ) : (
-                    <>
-                      <div className="flex items-center gap-4 flex-1">
-                        <div className="flex items-center gap-3">
-                          <div className="w-2 h-2 rounded-full bg-primary" />
-                          <span className="font-medium">{account.name}</span>
-                        </div>
-                        <div className="flex items-center gap-6 text-sm">
-                          <div className="text-muted-foreground">
-                            <span className="text-xs">Starting:</span>{' '}
-                            <span className="font-mono text-foreground">₹{account.startingBalance.toLocaleString()}</span>
-                          </div>
-                          <div className="text-muted-foreground">
-                            <span className="text-xs">Current:</span>{' '}
-                            <span className="font-mono text-foreground">₹{account.currentBalance.toLocaleString()}</span>
-                          </div>
-                          <div className={cn(
-                            "flex items-center gap-1",
-                            account.pnl >= 0 ? "text-profit" : "text-loss"
-                          )}>
-                            {account.pnl >= 0 ? (
-                              <TrendingUp className="w-3 h-3" />
-                            ) : (
-                              <TrendingDown className="w-3 h-3" />
-                            )}
-                            <span className="font-mono text-sm">
-                              {account.roi >= 0 ? '+' : ''}{account.roi.toFixed(2)}%
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => setDepositWithdrawAccountId(account.id)}
-                          title="Deposit & Withdraw"
-                        >
-                          <ArrowLeftRight className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => startEditingAccount(account)}
-                        >
-                          <Edit2 className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => removeAccount(account.id)}
-                          className="text-loss hover:text-loss"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </>
-                  )}
-                </motion.div>
-              ))}
-            </AnimatePresence>
-          </div>
-        )}
+      {/* Settings Navigation Menu */}
+      <div className="flex gap-2 p-1 bg-muted/30 rounded-lg w-fit">
+        <button
+          onClick={() => setActiveSettingsTab('main')}
+          className={cn(
+            "flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors",
+            activeSettingsTab === 'main'
+              ? "bg-background text-foreground shadow-sm"
+              : "text-muted-foreground hover:text-foreground hover:bg-background/50"
+          )}
+        >
+          <SettingsIcon className="w-4 h-4" />
+          Main
+        </button>
+        <button
+          onClick={() => setActiveSettingsTab('tags-comments')}
+          className={cn(
+            "flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors",
+            activeSettingsTab === 'tags-comments'
+              ? "bg-background text-foreground shadow-sm"
+              : "text-muted-foreground hover:text-foreground hover:bg-background/50"
+          )}
+        >
+          <Tag className="w-4 h-4" />
+          Tags / Comments
+        </button>
       </div>
 
-      {/* Tags Section */}
-      <div className="glass-card rounded-2xl p-6">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center">
-            <Tag className="w-5 h-5 text-primary" />
-          </div>
-          <div>
-            <h2 className="text-xl font-semibold">Tags Management</h2>
-            <p className="text-sm text-muted-foreground">Create and manage tags for organizing your trades</p>
-          </div>
-        </div>
+      {/* Main Tab Content */}
+      {activeSettingsTab === 'main' && (
+        <>
+          {/* Accounts Section */}
+          <div className="glass-card rounded-2xl p-6">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center">
+                <Wallet className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <h2 className="text-xl font-semibold">Accounts Management</h2>
+                <p className="text-sm text-muted-foreground">Create and manage trading accounts with balance tracking</p>
+              </div>
+            </div>
 
-        <div className="flex gap-3 mb-6">
-          <Input
-            placeholder="Enter new tag name..."
-            value={newTag}
-            onChange={(e) => setNewTag(e.target.value)}
-            onKeyDown={handleKeyDown}
-            className="bg-input border-border flex-1"
-          />
-          <Button onClick={handleAddTag} disabled={!newTag.trim()}>
-            <Plus className="w-4 h-4 mr-2" />
-            Add Tag
-          </Button>
-        </div>
-
-        {tags.length === 0 ? (
-          <div className="text-center py-12 text-muted-foreground">
-            <Tag className="w-12 h-12 mx-auto mb-4 opacity-30" />
-            <p>No tags created yet</p>
-            <p className="text-sm">Add your first tag above to start organizing trades</p>
-          </div>
-        ) : (
-          <div className="space-y-2">
-            <AnimatePresence>
-              {tags.map((tag) => (
-                <motion.div
-                  key={tag}
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  className="flex items-center justify-between p-3 bg-input rounded-lg border border-border group"
-                >
-                  {editingTag === tag ? (
-                    <div className="flex items-center gap-2 flex-1">
-                      <Input
-                        value={editValue}
-                        onChange={(e) => setEditValue(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') saveEdit();
-                          if (e.key === 'Escape') cancelEdit();
-                        }}
-                        className="bg-background border-border h-8"
-                        autoFocus
-                      />
-                      <Button size="sm" variant="ghost" onClick={saveEdit}>
-                        <Check className="w-4 h-4 text-profit" />
-                      </Button>
-                      <Button size="sm" variant="ghost" onClick={cancelEdit}>
-                        <X className="w-4 h-4 text-loss" />
-                      </Button>
-                    </div>
-                  ) : (
-                    <>
-                      <div className="flex items-center gap-3">
-                        <div className="w-2 h-2 rounded-full bg-primary" />
-                        <span className="font-medium">{tag}</span>
-                      </div>
-                      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => startEditing(tag)}
-                        >
-                          <Edit2 className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => removeTag(tag)}
-                          className="text-loss hover:text-loss"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </>
-                  )}
-                </motion.div>
-              ))}
-            </AnimatePresence>
-          </div>
-        )}
-      </div>
-
-      {/* Custom Stats Section */}
-      <div className="glass-card rounded-2xl p-6">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center">
-            <BarChart3 className="w-5 h-5 text-primary" />
-          </div>
-          <div>
-            <h2 className="text-xl font-semibold">Custom Stats</h2>
-            <p className="text-sm text-muted-foreground">Manage dropdown options for trade Advanced Data</p>
-          </div>
-        </div>
-
-        <div className="space-y-6">
-          {/* Timeframe */}
-          <div className="space-y-3">
-            <h3 className="text-sm font-medium text-foreground">Timeframe</h3>
-            <div className="flex gap-3">
+            <div className="flex gap-3 mb-6">
               <Input
-                placeholder="Add new timeframe (e.g., 3M)..."
-                value={newTimeframe}
-                onChange={(e) => setNewTimeframe(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleAddTimeframe()}
+                placeholder="Account name..."
+                value={newAccountName}
+                onChange={(e) => setNewAccountName(e.target.value)}
+                onKeyDown={handleAccountKeyDown}
                 className="bg-input border-border flex-1"
               />
-              <Button onClick={handleAddTimeframe} disabled={!newTimeframe.trim()} size="sm">
-                <Plus className="w-4 h-4" />
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">₹</span>
+                <Input
+                  type="number"
+                  placeholder="Starting balance"
+                  value={newAccountBalance}
+                  onChange={(e) => setNewAccountBalance(e.target.value)}
+                  onKeyDown={handleAccountKeyDown}
+                  className="bg-input border-border w-40 pl-7"
+                />
+              </div>
+              <Button onClick={handleAddAccount} disabled={!newAccountName.trim() || !newAccountBalance}>
+                <Plus className="w-4 h-4 mr-2" />
+                Add Account
               </Button>
             </div>
-            <div className="flex flex-wrap gap-2">
-              {customStatsOptions.timeframes.map((item) => (
-                <div
-                  key={item}
-                  className="flex items-center gap-1.5 px-3 py-1.5 bg-muted/50 rounded-lg border border-border group"
-                >
-                  <span className="text-sm">{item}</span>
-                  <button
-                    onClick={() => removeTimeframe(item)}
-                    className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 hover:text-destructive"
-                  >
-                    <Trash2 className="w-3 h-3" />
-                  </button>
+
+            {accountsWithStats.length === 0 ? (
+              <div className="text-center py-12 text-muted-foreground">
+                <Wallet className="w-12 h-12 mx-auto mb-4 opacity-30" />
+                <p>No accounts created yet</p>
+                <p className="text-sm">Add your first account above to start tracking balances</p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <AnimatePresence>
+                  {accountsWithStats.map((account) => (
+                    <motion.div
+                      key={account.id}
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, x: -20 }}
+                      className="flex items-center justify-between p-4 bg-input rounded-lg border border-border group"
+                    >
+                      {editingAccount === account.id ? (
+                        <div className="flex items-center gap-2 flex-1">
+                          <Input
+                            value={editAccountName}
+                            onChange={(e) => setEditAccountName(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') saveAccountEdit();
+                              if (e.key === 'Escape') cancelAccountEdit();
+                            }}
+                            className="bg-background border-border h-8 flex-1"
+                            autoFocus
+                          />
+                          <div className="relative">
+                            <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">₹</span>
+                            <Input
+                              type="number"
+                              value={editAccountBalance}
+                              onChange={(e) => setEditAccountBalance(e.target.value)}
+                              className="bg-background border-border h-8 w-32 pl-6"
+                            />
+                          </div>
+                          <Button size="sm" variant="ghost" onClick={saveAccountEdit}>
+                            <Check className="w-4 h-4 text-profit" />
+                          </Button>
+                          <Button size="sm" variant="ghost" onClick={cancelAccountEdit}>
+                            <X className="w-4 h-4 text-loss" />
+                          </Button>
+                        </div>
+                      ) : (
+                        <>
+                          <div className="flex items-center gap-4 flex-1">
+                            <div className="flex items-center gap-3">
+                              <div className="w-2 h-2 rounded-full bg-primary" />
+                              <span className="font-medium">{account.name}</span>
+                            </div>
+                            <div className="flex items-center gap-6 text-sm">
+                              <div className="text-muted-foreground">
+                                <span className="text-xs">Starting:</span>{' '}
+                                <span className="font-mono text-foreground">₹{account.startingBalance.toLocaleString()}</span>
+                              </div>
+                              <div className="text-muted-foreground">
+                                <span className="text-xs">Current:</span>{' '}
+                                <span className="font-mono text-foreground">₹{account.currentBalance.toLocaleString()}</span>
+                              </div>
+                              <div className={cn(
+                                "flex items-center gap-1",
+                                account.pnl >= 0 ? "text-profit" : "text-loss"
+                              )}>
+                                {account.pnl >= 0 ? (
+                                  <TrendingUp className="w-3 h-3" />
+                                ) : (
+                                  <TrendingDown className="w-3 h-3" />
+                                )}
+                                <span className="font-mono text-sm">
+                                  {account.roi >= 0 ? '+' : ''}{account.roi.toFixed(2)}%
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => setDepositWithdrawAccountId(account.id)}
+                              title="Deposit & Withdraw"
+                            >
+                              <ArrowLeftRight className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => startEditingAccount(account)}
+                            >
+                              <Edit2 className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => removeAccount(account.id)}
+                              className="text-loss hover:text-loss"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </>
+                      )}
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+              </div>
+            )}
+          </div>
+        </>
+      )}
+
+      {/* Tags / Comments Tab Content */}
+      {activeSettingsTab === 'tags-comments' && (
+        <>
+          {/* Tags Section */}
+          <div className="glass-card rounded-2xl p-6">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center">
+                <Tag className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <h2 className="text-xl font-semibold">Tags Management</h2>
+                <p className="text-sm text-muted-foreground">Create and manage tags for organizing your trades</p>
+              </div>
+            </div>
+
+            <div className="flex gap-3 mb-6">
+              <Input
+                placeholder="Enter new tag name..."
+                value={newTag}
+                onChange={(e) => setNewTag(e.target.value)}
+                onKeyDown={handleKeyDown}
+                className="bg-input border-border flex-1"
+              />
+              <Button onClick={handleAddTag} disabled={!newTag.trim()}>
+                <Plus className="w-4 h-4 mr-2" />
+                Add Tag
+              </Button>
+            </div>
+
+            {tags.length === 0 ? (
+              <div className="text-center py-12 text-muted-foreground">
+                <Tag className="w-12 h-12 mx-auto mb-4 opacity-30" />
+                <p>No tags created yet</p>
+                <p className="text-sm">Add your first tag above to start organizing trades</p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <AnimatePresence>
+                  {tags.map((tag) => (
+                    <motion.div
+                      key={tag}
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, x: -20 }}
+                      className="flex items-center justify-between p-3 bg-input rounded-lg border border-border group"
+                    >
+                      {editingTag === tag ? (
+                        <div className="flex items-center gap-2 flex-1">
+                          <Input
+                            value={editValue}
+                            onChange={(e) => setEditValue(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') saveEdit();
+                              if (e.key === 'Escape') cancelEdit();
+                            }}
+                            className="bg-background border-border h-8"
+                            autoFocus
+                          />
+                          <Button size="sm" variant="ghost" onClick={saveEdit}>
+                            <Check className="w-4 h-4 text-profit" />
+                          </Button>
+                          <Button size="sm" variant="ghost" onClick={cancelEdit}>
+                            <X className="w-4 h-4 text-loss" />
+                          </Button>
+                        </div>
+                      ) : (
+                        <>
+                          <div className="flex items-center gap-3">
+                            <div className="w-2 h-2 rounded-full bg-primary" />
+                            <span className="font-medium">{tag}</span>
+                          </div>
+                          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => startEditing(tag)}
+                            >
+                              <Edit2 className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => removeTag(tag)}
+                              className="text-loss hover:text-loss"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </>
+                      )}
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+              </div>
+            )}
+          </div>
+
+          {/* Custom Stats Section */}
+          <div className="glass-card rounded-2xl p-6">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center">
+                <BarChart3 className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <h2 className="text-xl font-semibold">Custom Stats</h2>
+                <p className="text-sm text-muted-foreground">Manage dropdown options for trade Advanced Data</p>
+              </div>
+            </div>
+
+            <div className="space-y-6">
+              {/* Timeframe */}
+              <div className="space-y-3">
+                <h3 className="text-sm font-medium text-foreground">Timeframe</h3>
+                <div className="flex gap-3">
+                  <Input
+                    placeholder="Add new timeframe (e.g., 3M)..."
+                    value={newTimeframe}
+                    onChange={(e) => setNewTimeframe(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleAddTimeframe()}
+                    className="bg-input border-border flex-1"
+                  />
+                  <Button onClick={handleAddTimeframe} disabled={!newTimeframe.trim()} size="sm">
+                    <Plus className="w-4 h-4" />
+                  </Button>
                 </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Confluence */}
-          <div className="space-y-3">
-            <h3 className="text-sm font-medium text-foreground">Confluence</h3>
-            <div className="flex gap-3">
-              <Input
-                placeholder="Add new confluence..."
-                value={newConfluence}
-                onChange={(e) => setNewConfluence(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleAddConfluence()}
-                className="bg-input border-border flex-1"
-              />
-              <Button onClick={handleAddConfluence} disabled={!newConfluence.trim()} size="sm">
-                <Plus className="w-4 h-4" />
-              </Button>
-            </div>
-            {customStatsOptions.confluences.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No confluence options added yet</p>
-            ) : (
-              <div className="flex flex-wrap gap-2">
-                {customStatsOptions.confluences.map((item) => (
-                  <div
-                    key={item}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-muted/50 rounded-lg border border-border group"
-                  >
-                    <span className="text-sm">{item}</span>
-                    <button
-                      onClick={() => removeConfluence(item)}
-                      className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 hover:text-destructive"
-                    >
-                      <Trash2 className="w-3 h-3" />
-                    </button>
+                {customStatsOptions.timeframes.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">No timeframe options added yet</p>
+                ) : (
+                  <div className="flex flex-wrap gap-2">
+                    {customStatsOptions.timeframes.map((item) => (
+                      <div
+                        key={item}
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-muted/50 rounded-lg border border-border group"
+                      >
+                        <span className="text-sm">{item}</span>
+                        <button
+                          onClick={() => removeTimeframe(item)}
+                          className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 hover:text-destructive"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </button>
+                      </div>
+                    ))}
                   </div>
-                ))}
+                )}
               </div>
-            )}
-          </div>
 
-          {/* Pattern */}
-          <div className="space-y-3">
-            <h3 className="text-sm font-medium text-foreground">Pattern</h3>
-            <div className="flex gap-3">
-              <Input
-                placeholder="Add new pattern..."
-                value={newPattern}
-                onChange={(e) => setNewPattern(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleAddPattern()}
-                className="bg-input border-border flex-1"
-              />
-              <Button onClick={handleAddPattern} disabled={!newPattern.trim()} size="sm">
-                <Plus className="w-4 h-4" />
-              </Button>
-            </div>
-            {customStatsOptions.patterns.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No pattern options added yet</p>
-            ) : (
-              <div className="flex flex-wrap gap-2">
-                {customStatsOptions.patterns.map((item) => (
-                  <div
-                    key={item}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-muted/50 rounded-lg border border-border group"
-                  >
-                    <span className="text-sm">{item}</span>
-                    <button
-                      onClick={() => removePattern(item)}
-                      className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 hover:text-destructive"
-                    >
-                      <Trash2 className="w-3 h-3" />
-                    </button>
+              {/* Confluence */}
+              <div className="space-y-3">
+                <h3 className="text-sm font-medium text-foreground">Confluence</h3>
+                <div className="flex gap-3">
+                  <Input
+                    placeholder="Add new confluence..."
+                    value={newConfluence}
+                    onChange={(e) => setNewConfluence(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleAddConfluence()}
+                    className="bg-input border-border flex-1"
+                  />
+                  <Button onClick={handleAddConfluence} disabled={!newConfluence.trim()} size="sm">
+                    <Plus className="w-4 h-4" />
+                  </Button>
+                </div>
+                {customStatsOptions.confluences.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">No confluence options added yet</p>
+                ) : (
+                  <div className="flex flex-wrap gap-2">
+                    {customStatsOptions.confluences.map((item) => (
+                      <div
+                        key={item}
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-muted/50 rounded-lg border border-border group"
+                      >
+                        <span className="text-sm">{item}</span>
+                        <button
+                          onClick={() => removeConfluence(item)}
+                          className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 hover:text-destructive"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </button>
+                      </div>
+                    ))}
                   </div>
-                ))}
+                )}
               </div>
-            )}
-          </div>
 
-          {/* Preparation */}
-          <div className="space-y-3">
-            <h3 className="text-sm font-medium text-foreground">Preparation</h3>
-            <div className="flex gap-3">
-              <Input
-                placeholder="Add new preparation..."
-                value={newPreparation}
-                onChange={(e) => setNewPreparation(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleAddPreparation()}
-                className="bg-input border-border flex-1"
-              />
-              <Button onClick={handleAddPreparation} disabled={!newPreparation.trim()} size="sm">
-                <Plus className="w-4 h-4" />
-              </Button>
-            </div>
-            {customStatsOptions.preparations.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No preparation options added yet</p>
-            ) : (
-              <div className="flex flex-wrap gap-2">
-                {customStatsOptions.preparations.map((item) => (
-                  <div
-                    key={item}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-muted/50 rounded-lg border border-border group"
-                  >
-                    <span className="text-sm">{item}</span>
-                    <button
-                      onClick={() => removePreparation(item)}
-                      className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 hover:text-destructive"
-                    >
-                      <Trash2 className="w-3 h-3" />
-                    </button>
+              {/* Pattern */}
+              <div className="space-y-3">
+                <h3 className="text-sm font-medium text-foreground">Pattern</h3>
+                <div className="flex gap-3">
+                  <Input
+                    placeholder="Add new pattern..."
+                    value={newPattern}
+                    onChange={(e) => setNewPattern(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleAddPattern()}
+                    className="bg-input border-border flex-1"
+                  />
+                  <Button onClick={handleAddPattern} disabled={!newPattern.trim()} size="sm">
+                    <Plus className="w-4 h-4" />
+                  </Button>
+                </div>
+                {customStatsOptions.patterns.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">No pattern options added yet</p>
+                ) : (
+                  <div className="flex flex-wrap gap-2">
+                    {customStatsOptions.patterns.map((item) => (
+                      <div
+                        key={item}
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-muted/50 rounded-lg border border-border group"
+                      >
+                        <span className="text-sm">{item}</span>
+                        <button
+                          onClick={() => removePattern(item)}
+                          className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 hover:text-destructive"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </button>
+                      </div>
+                    ))}
                   </div>
-                ))}
+                )}
               </div>
-            )}
-          </div>
-        </div>
-      </div>
 
-      {/* Trade Advance Comments Section */}
-      <div className="glass-card rounded-2xl p-6">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center">
-            <MessageSquareText className="w-5 h-5 text-primary" />
-          </div>
-          <div>
-            <h2 className="text-xl font-semibold">Trade Advance Comments</h2>
-            <p className="text-sm text-muted-foreground">Manage dropdown options for trade comments</p>
-          </div>
-        </div>
-
-        <div className="space-y-6">
-          {/* Entry Comments */}
-          <div className="space-y-3">
-            <h3 className="text-sm font-medium text-foreground">Entry Comments</h3>
-            <div className="flex gap-3">
-              <Input
-                placeholder="Add new entry comment..."
-                value={newEntryComment}
-                onChange={(e) => setNewEntryComment(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleAddEntryComment()}
-                className="bg-input border-border flex-1"
-              />
-              <Button onClick={handleAddEntryComment} disabled={!newEntryComment.trim()} size="sm">
-                <Plus className="w-4 h-4" />
-              </Button>
-            </div>
-            {customStatsOptions.entryComments.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No entry comment options added yet</p>
-            ) : (
-              <div className="flex flex-wrap gap-2">
-                {customStatsOptions.entryComments.map((item) => (
-                  <div
-                    key={item}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-muted/50 rounded-lg border border-border group"
-                  >
-                    <span className="text-sm">{item}</span>
-                    <button
-                      onClick={() => removeEntryComment(item)}
-                      className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 hover:text-destructive"
-                    >
-                      <Trash2 className="w-3 h-3" />
-                    </button>
+              {/* Preparation */}
+              <div className="space-y-3">
+                <h3 className="text-sm font-medium text-foreground">Preparation</h3>
+                <div className="flex gap-3">
+                  <Input
+                    placeholder="Add new preparation..."
+                    value={newPreparation}
+                    onChange={(e) => setNewPreparation(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleAddPreparation()}
+                    className="bg-input border-border flex-1"
+                  />
+                  <Button onClick={handleAddPreparation} disabled={!newPreparation.trim()} size="sm">
+                    <Plus className="w-4 h-4" />
+                  </Button>
+                </div>
+                {customStatsOptions.preparations.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">No preparation options added yet</p>
+                ) : (
+                  <div className="flex flex-wrap gap-2">
+                    {customStatsOptions.preparations.map((item) => (
+                      <div
+                        key={item}
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-muted/50 rounded-lg border border-border group"
+                      >
+                        <span className="text-sm">{item}</span>
+                        <button
+                          onClick={() => removePreparation(item)}
+                          className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 hover:text-destructive"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </button>
+                      </div>
+                    ))}
                   </div>
-                ))}
+                )}
               </div>
-            )}
+            </div>
           </div>
 
-          {/* Trade Management */}
-          <div className="space-y-3">
-            <h3 className="text-sm font-medium text-foreground">Trade Management</h3>
-            <div className="flex gap-3">
-              <Input
-                placeholder="Add new trade management..."
-                value={newTradeManagement}
-                onChange={(e) => setNewTradeManagement(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleAddTradeManagement()}
-                className="bg-input border-border flex-1"
-              />
-              <Button onClick={handleAddTradeManagement} disabled={!newTradeManagement.trim()} size="sm">
-                <Plus className="w-4 h-4" />
-              </Button>
-            </div>
-            {customStatsOptions.tradeManagements.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No trade management options added yet</p>
-            ) : (
-              <div className="flex flex-wrap gap-2">
-                {customStatsOptions.tradeManagements.map((item) => (
-                  <div
-                    key={item}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-muted/50 rounded-lg border border-border group"
-                  >
-                    <span className="text-sm">{item}</span>
-                    <button
-                      onClick={() => removeTradeManagement(item)}
-                      className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 hover:text-destructive"
-                    >
-                      <Trash2 className="w-3 h-3" />
-                    </button>
-                  </div>
-                ))}
+          {/* Trade Advance Comments Section */}
+          <div className="glass-card rounded-2xl p-6">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center">
+                <MessageSquareText className="w-5 h-5 text-primary" />
               </div>
-            )}
-          </div>
+              <div>
+                <h2 className="text-xl font-semibold">Trade Advance Comments</h2>
+                <p className="text-sm text-muted-foreground">Manage dropdown options for trade comments</p>
+              </div>
+            </div>
 
-          {/* Exit Comments */}
-          <div className="space-y-3">
-            <h3 className="text-sm font-medium text-foreground">Exit Comments</h3>
-            <div className="flex gap-3">
-              <Input
-                placeholder="Add new exit comment..."
-                value={newExitComment}
-                onChange={(e) => setNewExitComment(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleAddExitComment()}
-                className="bg-input border-border flex-1"
-              />
-              <Button onClick={handleAddExitComment} disabled={!newExitComment.trim()} size="sm">
-                <Plus className="w-4 h-4" />
-              </Button>
-            </div>
-            {customStatsOptions.exitComments.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No exit comment options added yet</p>
-            ) : (
-              <div className="flex flex-wrap gap-2">
-                {customStatsOptions.exitComments.map((item) => (
-                  <div
-                    key={item}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-muted/50 rounded-lg border border-border group"
-                  >
-                    <span className="text-sm">{item}</span>
-                    <button
-                      onClick={() => removeExitComment(item)}
-                      className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 hover:text-destructive"
-                    >
-                      <Trash2 className="w-3 h-3" />
-                    </button>
+            <div className="space-y-6">
+              {/* Entry Comments */}
+              <div className="space-y-3">
+                <h3 className="text-sm font-medium text-foreground">Entry Comments</h3>
+                <div className="flex gap-3">
+                  <Input
+                    placeholder="Add new entry comment..."
+                    value={newEntryComment}
+                    onChange={(e) => setNewEntryComment(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleAddEntryComment()}
+                    className="bg-input border-border flex-1"
+                  />
+                  <Button onClick={handleAddEntryComment} disabled={!newEntryComment.trim()} size="sm">
+                    <Plus className="w-4 h-4" />
+                  </Button>
+                </div>
+                {customStatsOptions.entryComments.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">No entry comment options added yet</p>
+                ) : (
+                  <div className="flex flex-wrap gap-2">
+                    {customStatsOptions.entryComments.map((item) => (
+                      <div
+                        key={item}
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-muted/50 rounded-lg border border-border group"
+                      >
+                        <span className="text-sm">{item}</span>
+                        <button
+                          onClick={() => removeEntryComment(item)}
+                          className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 hover:text-destructive"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </button>
+                      </div>
+                    ))}
                   </div>
-                ))}
+                )}
               </div>
-            )}
+
+              {/* Trade Management */}
+              <div className="space-y-3">
+                <h3 className="text-sm font-medium text-foreground">Trade Management</h3>
+                <div className="flex gap-3">
+                  <Input
+                    placeholder="Add new trade management..."
+                    value={newTradeManagement}
+                    onChange={(e) => setNewTradeManagement(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleAddTradeManagement()}
+                    className="bg-input border-border flex-1"
+                  />
+                  <Button onClick={handleAddTradeManagement} disabled={!newTradeManagement.trim()} size="sm">
+                    <Plus className="w-4 h-4" />
+                  </Button>
+                </div>
+                {customStatsOptions.tradeManagements.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">No trade management options added yet</p>
+                ) : (
+                  <div className="flex flex-wrap gap-2">
+                    {customStatsOptions.tradeManagements.map((item) => (
+                      <div
+                        key={item}
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-muted/50 rounded-lg border border-border group"
+                      >
+                        <span className="text-sm">{item}</span>
+                        <button
+                          onClick={() => removeTradeManagement(item)}
+                          className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 hover:text-destructive"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Exit Comments */}
+              <div className="space-y-3">
+                <h3 className="text-sm font-medium text-foreground">Exit Comments</h3>
+                <div className="flex gap-3">
+                  <Input
+                    placeholder="Add new exit comment..."
+                    value={newExitComment}
+                    onChange={(e) => setNewExitComment(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleAddExitComment()}
+                    className="bg-input border-border flex-1"
+                  />
+                  <Button onClick={handleAddExitComment} disabled={!newExitComment.trim()} size="sm">
+                    <Plus className="w-4 h-4" />
+                  </Button>
+                </div>
+                {customStatsOptions.exitComments.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">No exit comment options added yet</p>
+                ) : (
+                  <div className="flex flex-wrap gap-2">
+                    {customStatsOptions.exitComments.map((item) => (
+                      <div
+                        key={item}
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-muted/50 rounded-lg border border-border group"
+                      >
+                        <span className="text-sm">{item}</span>
+                        <button
+                          onClick={() => removeExitComment(item)}
+                          className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 hover:text-destructive"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
+        </>
+      )}
 
       {/* Deposit/Withdraw Modal */}
       {depositWithdrawAccountId && (() => {
