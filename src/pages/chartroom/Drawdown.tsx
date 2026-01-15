@@ -78,7 +78,122 @@ const Drawdown = () => {
     return min < 0 ? min * 1.1 : -100; // Add 10% padding below
   }, [drawdownData]);
 
-  // Format currency
+  // Calculate drawdown metrics
+  const drawdownMetrics = useMemo(() => {
+    if (drawdownData.length === 0) {
+      return {
+        worstDrawdown: 0,
+        averageDrawdown: 0,
+        currentDrawdown: 0,
+        topToBottom: 0,
+        bottomToTop: 0,
+      };
+    }
+
+    // 1. Worst Drawdown - the most negative drawdown value (displayed as positive)
+    const worstDrawdown = Math.abs(Math.min(...drawdownData.map(d => d.drawdown)));
+
+    // 2. Current Drawdown - the latest drawdown value (displayed as positive)
+    const currentDrawdown = Math.abs(drawdownData[drawdownData.length - 1].drawdown);
+
+    // 3. Average Drawdown - average of the bottom of each drawdown phase
+    // A phase starts when drawdown goes below 0 and ends when it returns to 0
+    const phaseBottoms: number[] = [];
+    let inPhase = false;
+    let phaseBottom = 0;
+
+    for (let i = 0; i < drawdownData.length; i++) {
+      const dd = drawdownData[i].drawdown;
+      
+      if (dd < 0) {
+        // We're in a drawdown phase
+        if (!inPhase) {
+          inPhase = true;
+          phaseBottom = dd;
+        } else {
+          // Track the deepest point in this phase
+          if (dd < phaseBottom) {
+            phaseBottom = dd;
+          }
+        }
+      } else if (dd === 0 && inPhase) {
+        // Phase ended, record the bottom
+        phaseBottoms.push(Math.abs(phaseBottom));
+        inPhase = false;
+        phaseBottom = 0;
+      }
+    }
+
+    // If we're still in a phase at the end, count it
+    if (inPhase) {
+      phaseBottoms.push(Math.abs(phaseBottom));
+    }
+
+    const averageDrawdown = phaseBottoms.length > 0 
+      ? phaseBottoms.reduce((sum, val) => sum + val, 0) / phaseBottoms.length 
+      : 0;
+
+    // 4. Top to Bottom - trades from last peak (0) to the worst drawdown point
+    // 5. Bottom to Top - trades from worst point to recovery (0)
+    // We focus on the most recent complete or ongoing drawdown phase for these metrics
+    
+    let topToBottom = 0;
+    let bottomToTop = 0;
+
+    // Find the last peak (drawdown = 0) before the most recent/ongoing phase
+    let lastPeakIndex = -1;
+    let worstPointIndex = -1;
+    let worstValue = 0;
+    let recoveryIndex = -1;
+
+    // Find the last drawdown phase
+    for (let i = drawdownData.length - 1; i >= 0; i--) {
+      if (drawdownData[i].drawdown === 0) {
+        if (lastPeakIndex === -1 && worstPointIndex !== -1) {
+          // Found recovery point after we found a bottom
+          recoveryIndex = i;
+        }
+        if (worstPointIndex === -1) {
+          // Haven't found a drawdown yet, keep looking back
+          continue;
+        }
+        // Found the start of the phase we're measuring
+        lastPeakIndex = i;
+        break;
+      } else {
+        // In drawdown
+        if (drawdownData[i].drawdown < worstValue) {
+          worstValue = drawdownData[i].drawdown;
+          worstPointIndex = i;
+        }
+      }
+    }
+
+    // If we found a complete phase pattern
+    if (lastPeakIndex !== -1 && worstPointIndex !== -1) {
+      topToBottom = worstPointIndex - lastPeakIndex;
+    } else if (worstPointIndex !== -1) {
+      // Phase started from the beginning (no previous peak at 0)
+      topToBottom = worstPointIndex + 1;
+    }
+
+    if (recoveryIndex !== -1 && worstPointIndex !== -1) {
+      bottomToTop = recoveryIndex - worstPointIndex;
+    } else if (worstPointIndex !== -1 && drawdownData[drawdownData.length - 1].drawdown === 0) {
+      // Current position is at 0, so we recovered
+      bottomToTop = (drawdownData.length - 1) - worstPointIndex;
+    }
+
+    return {
+      worstDrawdown,
+      averageDrawdown,
+      currentDrawdown,
+      topToBottom,
+      bottomToTop,
+    };
+  }, [drawdownData]);
+
+  // Format currency for display (always positive for metrics)
   const formatCurrency = (value: number) => {
     const absValue = Math.abs(value);
     if (absValue >= 1000) {
@@ -87,14 +202,18 @@ const Drawdown = () => {
     return `${value < 0 ? '-' : ''}$${absValue.toFixed(0)}`;
   };
 
-  // Placeholder metric values
-  const placeholderMetrics = [
-    { label: 'Worst Drawdown', value: '$1,355.88', hasInfo: false },
-    { label: 'Average Drawdown', value: '$253.37', hasInfo: false },
-    { label: 'Current Drawdown', value: '-$89.84', hasInfo: false },
-    { label: 'Top to Bottom', value: '11', hasInfo: true },
-    { label: 'Bottom to Top', value: '11', hasInfo: true },
-    { label: 'Return to Drawdown', value: '2.67', hasInfo: false },
+  const formatMetricCurrency = (value: number) => {
+    return `$${value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  };
+
+  // Calculated metric values
+  const metrics = [
+    { label: 'Worst Drawdown', value: formatMetricCurrency(drawdownMetrics.worstDrawdown), hasInfo: false },
+    { label: 'Average Drawdown', value: formatMetricCurrency(drawdownMetrics.averageDrawdown), hasInfo: false },
+    { label: 'Current Drawdown', value: formatMetricCurrency(drawdownMetrics.currentDrawdown), hasInfo: false },
+    { label: 'Top to Bottom', value: String(drawdownMetrics.topToBottom), hasInfo: true, tooltip: 'Number of trades from the last equity peak to the worst drawdown point' },
+    { label: 'Bottom to Top', value: String(drawdownMetrics.bottomToTop), hasInfo: true, tooltip: 'Number of trades from the worst drawdown point to recovery' },
+    { label: 'Return to Drawdown', value: 'Releasing soon', hasInfo: false },
   ];
 
   return (
@@ -202,7 +321,7 @@ const Drawdown = () => {
 
       {/* Metrics Cards */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-        {placeholderMetrics.map((metric) => (
+        {metrics.map((metric) => (
           <Card key={metric.label} className="bg-card border-border">
             <CardContent className="p-4">
               <div className="flex items-center gap-1 mb-1">
@@ -215,7 +334,7 @@ const Drawdown = () => {
                         <Info className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
                       </TooltipTrigger>
                       <TooltipContent>
-                        <p>Metric explanation coming soon</p>
+                        <p>{metric.tooltip || 'Metric explanation coming soon'}</p>
                       </TooltipContent>
                     </UITooltip>
                   </TooltipProvider>
