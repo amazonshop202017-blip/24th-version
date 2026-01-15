@@ -131,22 +131,39 @@ export function calculateTradeMetrics(trade: Trade | TradeFormData): TradeCalcul
   const totalSellValue = sellEntries.reduce((sum, e) => sum + (e.quantity * e.price), 0);
   const totalCharges = entries.reduce((sum, e) => sum + e.charges, 0);
   
-  const avgEntryPrice = totalBuyQty > 0 ? totalBuyCost / totalBuyQty : 0;
-  const avgExitPrice = totalSellQty > 0 ? totalSellValue / totalSellQty : 0;
+  // Use the stored side or auto-calculated side for calculations
+  const side = trade.side || positionSide || 'LONG';
   
-  // Use the auto-calculated side for P&L calculation
-  const side = positionSide || trade.side;
-  
-  // For LONG: profit when sell price > buy price
-  // For SHORT: profit when buy price > sell price (sell first, buy to cover)
-  let calculatedGrossPnl = 0;
-  const closedQty = Math.min(totalBuyQty, totalSellQty);
+  // Calculate average prices based on trade direction
+  // LONG: Entry = BUY, Exit = SELL
+  // SHORT: Entry = SELL, Exit = BUY
+  let avgEntryPrice: number;
+  let avgExitPrice: number;
+  let closedQty: number;
   
   if (side === 'LONG') {
-    calculatedGrossPnl = (avgExitPrice - avgEntryPrice) * closedQty;
+    avgEntryPrice = totalBuyQty > 0 ? totalBuyCost / totalBuyQty : 0;
+    avgExitPrice = totalSellQty > 0 ? totalSellValue / totalSellQty : 0;
+    closedQty = Math.min(totalBuyQty, totalSellQty);
   } else {
-    // SHORT: sell first, buy to close
-    calculatedGrossPnl = (avgEntryPrice - avgExitPrice) * closedQty;
+    // SHORT: Entry is SELL, Exit is BUY
+    avgEntryPrice = totalSellQty > 0 ? totalSellValue / totalSellQty : 0;
+    avgExitPrice = totalBuyQty > 0 ? totalBuyCost / totalBuyQty : 0;
+    closedQty = Math.min(totalBuyQty, totalSellQty);
+  }
+  
+  // Calculate Gross P&L based on direction
+  // LONG: Profit = Exit Price - Entry Price
+  // SHORT: Profit = Entry Price - Exit Price
+  let calculatedGrossPnl = 0;
+  
+  if (closedQty > 0 && avgEntryPrice > 0 && avgExitPrice > 0) {
+    if (side === 'LONG') {
+      calculatedGrossPnl = (avgExitPrice - avgEntryPrice) * closedQty;
+    } else {
+      // SHORT: sell high, buy low to profit
+      calculatedGrossPnl = (avgEntryPrice - avgExitPrice) * closedQty;
+    }
   }
   
   // Use manual Gross P/L if provided, otherwise use calculated
@@ -175,7 +192,9 @@ export function calculateTradeMetrics(trade: Trade | TradeFormData): TradeCalcul
   // R-Factor
   const rFactor = trade.tradeRisk > 0 ? netPnl / trade.tradeRisk : 0;
   
-  // Return percentage
+  // Return percentage - use the correct invested amount based on direction
+  // LONG: invested = what you bought (totalBuyCost)
+  // SHORT: invested = what you sold (totalSellValue)
   const investedAmount = side === 'LONG' ? totalBuyCost : totalSellValue;
   const returnPercent = investedAmount > 0 ? (netPnl / investedAmount) * 100 : 0;
   
