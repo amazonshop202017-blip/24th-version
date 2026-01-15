@@ -963,7 +963,9 @@ export const TradeModal = () => {
 
                 {/* Break Even */}
                 <div className="space-y-1.5">
-                  <Label className="text-xs text-muted-foreground">Break Even</Label>
+                  <div className="flex items-center gap-1">
+                    <Label className="text-xs text-muted-foreground">Break Even</Label>
+                  </div>
                   <div className="grid grid-cols-2 gap-0 border border-border rounded-lg overflow-hidden">
                     <button
                       type="button"
