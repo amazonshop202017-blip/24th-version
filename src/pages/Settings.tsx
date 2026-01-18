@@ -6,13 +6,16 @@ import { Input } from '@/components/ui/input';
 import { useTagsContext } from '@/contexts/TagsContext';
 import { useAccountsContext } from '@/contexts/AccountsContext';
 import { useCustomStats } from '@/contexts/CustomStatsContext';
+import { useTradesContext } from '@/contexts/TradesContext';
 import { cn } from '@/lib/utils';
 import DepositWithdrawModal from '@/components/settings/DepositWithdrawModal';
-
+import { importMT5Trades } from '@/lib/mt5Import';
+import { toast } from 'sonner';
 const Settings = () => {
   const { tags, addTag, removeTag, updateTag } = useTagsContext();
   const { accounts, addAccount, removeAccount, updateAccount, getAllAccountsWithStats, addTransaction, getTransactionsForAccount } = useAccountsContext();
-  const { 
+  const { addTrade } = useTradesContext();
+  const {
     options: customStatsOptions,
     addTimeframe, removeTimeframe,
     addConfluence, removeConfluence,
@@ -53,11 +56,32 @@ const Settings = () => {
     fileInputRef.current?.click();
   };
 
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file && importAccountId) {
-      console.log('Selected file:', file.name, 'for account:', importAccountId);
-      // TODO: Process the imported file
+      // Find the account name
+      const account = accounts.find(a => a.id === importAccountId);
+      if (!account) {
+        toast.error('Account not found');
+        return;
+      }
+
+      toast.info(`Importing trades from ${file.name}...`);
+
+      const result = await importMT5Trades(
+        file,
+        account.name,
+        importAccountId,
+        addTrade
+      );
+
+      if (result.success) {
+        toast.success(
+          `Successfully imported ${result.tradesImported} trades${result.rowsSkipped > 0 ? ` (${result.rowsSkipped} rows skipped)` : ''}`
+        );
+      } else {
+        toast.error(result.errors[0] || 'Failed to import trades');
+      }
     }
     // Reset
     if (fileInputRef.current) {
