@@ -260,8 +260,12 @@ export const TradeModal = () => {
     } else {
       resetForm();
       // Auto-select account when exactly one account is selected in global filter (Add Trade only)
+      // globalSelectedAccounts contains account NAMES, so we need to find the matching account ID
       if (!isAllAccountsSelected && globalSelectedAccounts.length === 1) {
-        setSelectedAccountId(globalSelectedAccounts[0]);
+        const matchedAccount = accounts.find(a => a.name === globalSelectedAccounts[0]);
+        if (matchedAccount) {
+          setSelectedAccountId(matchedAccount.id);
+        }
       }
     }
   }, [editingTrade, isOpen]);
