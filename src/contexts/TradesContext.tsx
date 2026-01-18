@@ -1,4 +1,4 @@
-import { createContext, useContext, ReactNode, useMemo } from 'react';
+import { createContext, useContext, ReactNode, useMemo, useCallback } from 'react';
 import { useTrades } from '@/hooks/useTrades';
 import { Trade, TradeFormData, calculateTradeMetrics } from '@/types/trade';
 import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
