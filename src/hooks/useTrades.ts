@@ -26,13 +26,34 @@ export const useTrades = () => {
           }
           
           // Migration 2: Backfill savedRMultiple for trades that don't have it
-          // Only calculate if trade has tradeRisk > 0 and we can compute netPnl
+          // Use correct R-Multiple formula: (Exit - Entry) / (Entry - SL) for LONG
+          // and (Entry - Exit) / (SL - Entry) for SHORT
           if (updated.savedRMultiple === undefined || updated.savedRMultiple === null) {
             const metrics = calculateTradeMetrics(updated);
-            if (updated.tradeRisk > 0 && metrics.positionStatus === 'CLOSED') {
+            // Only compute if trade has stopLoss, entry, exit and is closed
+            if (updated.stopLoss !== undefined && 
+                metrics.avgEntryPrice > 0 && 
+                metrics.avgExitPrice > 0 && 
+                metrics.positionStatus === 'CLOSED') {
+              const side = updated.side || metrics.positionSide || 'LONG';
+              let rMultiple = 0;
+              
+              if (side === 'LONG') {
+                const risk = metrics.avgEntryPrice - updated.stopLoss;
+                if (risk > 0) {
+                  rMultiple = (metrics.avgExitPrice - metrics.avgEntryPrice) / risk;
+                }
+              } else {
+                // SHORT
+                const risk = updated.stopLoss - metrics.avgEntryPrice;
+                if (risk > 0) {
+                  rMultiple = (metrics.avgEntryPrice - metrics.avgExitPrice) / risk;
+                }
+              }
+              
               updated = {
                 ...updated,
-                savedRMultiple: metrics.netPnl / updated.tradeRisk,
+                savedRMultiple: rMultiple,
               };
             }
           }
