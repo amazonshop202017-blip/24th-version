@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Trash2, Edit2, Check, X, Tag, Wallet, TrendingUp, TrendingDown, ArrowLeftRight, BarChart3, MessageSquareText, Settings as SettingsIcon, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -43,6 +43,28 @@ const Settings = () => {
   
   // Deposit/Withdraw modal state
   const [depositWithdrawAccountId, setDepositWithdrawAccountId] = useState<string | null>(null);
+
+  // Import file state
+  const [importAccountId, setImportAccountId] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleImportClick = (accountId: string) => {
+    setImportAccountId(accountId);
+    fileInputRef.current?.click();
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && importAccountId) {
+      console.log('Selected file:', file.name, 'for account:', importAccountId);
+      // TODO: Process the imported file
+    }
+    // Reset
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+    setImportAccountId(null);
+  };
 
   // Custom Stats input state
   const [newTimeframe, setNewTimeframe] = useState('');
@@ -205,6 +227,15 @@ const Settings = () => {
 
   return (
     <div className="space-y-8 animate-fade-in">
+      {/* Hidden file input for import */}
+      <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleFileSelect}
+        accept=".csv,.htm,.html"
+        className="hidden"
+      />
+      
       <div>
         <h1 className="text-3xl font-bold text-foreground mb-2">Settings</h1>
         <p className="text-muted-foreground">Manage your trading journal configuration</p>
@@ -368,10 +399,7 @@ const Settings = () => {
                                   <p className="text-xs text-muted-foreground px-2 py-1 font-medium">Select Broker</p>
                                   <button
                                     className="w-full text-left px-3 py-2 text-sm rounded-md hover:bg-muted transition-colors flex items-center gap-2"
-                                    onClick={() => {
-                                      // TODO: Implement MT5 import
-                                      console.log('Import from MT5 for account:', account.id);
-                                    }}
+                                    onClick={() => handleImportClick(account.id)}
                                   >
                                     <span className="w-2 h-2 rounded-full bg-blue-500" />
                                     MT5
