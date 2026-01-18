@@ -32,7 +32,6 @@ import TradeManagement from "./pages/chartroom/TradeManagement";
 const queryClient = new QueryClient();
 
 // App component with all providers properly nested
-// TradesProvider must wrap AccountsProvider since AccountsProvider uses useTradesContext
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>

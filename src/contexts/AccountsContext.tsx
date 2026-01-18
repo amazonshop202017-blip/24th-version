@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
-import { useTradesContext } from '@/contexts/TradesContext';
+import { useTradesContext } from './TradesContext';
 import { calculateTradeMetrics } from '@/types/trade';
 
 export interface Account {
@@ -45,10 +45,9 @@ const STORAGE_KEY = 'trading-journal-accounts';
 const TRANSACTIONS_STORAGE_KEY = 'trading-journal-transactions';
 
 export const AccountsProvider = ({ children }: { children: ReactNode }) => {
-  // Get trades from context for account stats calculation
-  const { trades } = useTradesContext();
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const { trades } = useTradesContext();
 
   useEffect(() => {
     try {
