@@ -135,31 +135,44 @@ const TradeManagement = () => {
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload as ChartDataPoint;
+      
+      // Format value safely, hiding if NaN or undefined
+      const formatValue = (value: number | null | undefined): string | null => {
+        if (value === null || value === undefined || isNaN(value)) return null;
+        return value.toFixed(2);
+      };
+      
+      const actualValue = formatValue(data.cumulativeActual);
+      const setForgetValue = formatValue(data.cumulativeSetForget);
+      const potentialValue = formatValue(data.cumulativePotential);
+      
       return (
         <div className="bg-card border border-border rounded-lg p-3 shadow-lg">
-          <p className="text-sm font-medium text-foreground mb-2">Trade ID: {data.tradeId.slice(0, 8)}...</p>
-          <div className="space-y-1 text-sm">
-            <p className="text-muted-foreground">
-              Actual R: <span className={data.actualR >= 0 ? 'text-green-500' : 'text-red-500'}>{data.actualR}</span>
-            </p>
-            <p className="text-muted-foreground">
-              Cumulative Actual: <span className={data.cumulativeActual >= 0 ? 'text-green-500' : 'text-red-500'}>{data.cumulativeActual}</span>
-            </p>
-            <p className="text-muted-foreground">
-              Set & Forget R: <span className={data.setForgetR >= 0 ? 'text-green-500' : 'text-red-500'}>{data.setForgetR}</span>
-            </p>
-            <p className="text-muted-foreground">
-              Cumulative Set & Forget: <span className={data.cumulativeSetForget >= 0 ? 'text-green-500' : 'text-red-500'}>{data.cumulativeSetForget}</span>
-            </p>
-            {data.potentialR !== null && (
-              <>
-                <p className="text-muted-foreground">
-                  Potential R: <span className={data.potentialR >= 0 ? 'text-green-500' : 'text-red-500'}>{data.potentialR}</span>
-                </p>
-                <p className="text-muted-foreground">
-                  Cumulative Potential: <span className={(data.cumulativePotential ?? 0) >= 0 ? 'text-green-500' : 'text-red-500'}>{data.cumulativePotential}</span>
-                </p>
-              </>
+          <p className="text-sm font-medium text-foreground mb-3">Trade #{data.tradeIndex}</p>
+          <div className="space-y-2 text-sm">
+            {actualValue !== null && (
+              <div className="flex items-center justify-between gap-4">
+                <span className="text-muted-foreground">Actual Performance:</span>
+                <span className={parseFloat(actualValue) >= 0 ? 'text-green-500 font-medium' : 'text-red-500 font-medium'}>
+                  {actualValue} R
+                </span>
+              </div>
+            )}
+            {setForgetValue !== null && (
+              <div className="flex items-center justify-between gap-4">
+                <span className="text-muted-foreground">Set & Forget Performance:</span>
+                <span className={parseFloat(setForgetValue) >= 0 ? 'text-green-500 font-medium' : 'text-red-500 font-medium'}>
+                  {setForgetValue} R
+                </span>
+              </div>
+            )}
+            {potentialValue !== null && (
+              <div className="flex items-center justify-between gap-4">
+                <span className="text-muted-foreground">Potential Performance:</span>
+                <span className={parseFloat(potentialValue) >= 0 ? 'text-green-500 font-medium' : 'text-red-500 font-medium'}>
+                  {potentialValue} R
+                </span>
+              </div>
             )}
           </div>
         </div>
