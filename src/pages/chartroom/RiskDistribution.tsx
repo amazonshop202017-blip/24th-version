@@ -67,8 +67,8 @@ const RiskDistribution = () => {
   }, [filteredTrades]);
 
   // Get trade values from SAVED trade data (NOT recalculated)
-  // - R-Multiple: use trade.rMultiple (saved value from trade popup)
-  // - Return (%): use trade.savedReturnPercent (saved value based on account balance at trade time)
+  // - R-Multiple: use trade.savedRMultiple (stored value from trade popup)
+  // - Return (%): use trade.savedReturnPercent (stored value based on account balance at trade time)
   const tradeValues = useMemo(() => {
     return closedTrades
       .map(trade => {
