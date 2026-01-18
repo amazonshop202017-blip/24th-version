@@ -200,27 +200,8 @@ export function calculateTradeMetrics(trade: Trade | TradeFormData): TradeCalcul
     duration = `${days} days ${hours} hours ${mins} mins`;
   }
   
-  // R-Multiple (R-Factor) - calculated using exit price relative to risk (Entry - SL)
-  // LONG: R = (Exit - Entry) / (Entry - SL)
-  // SHORT: R = (Entry - Exit) / (SL - Entry)
-  // Positive = profitable, Negative = loss (can be less than -1 if exit is beyond SL)
-  let rFactor = 0;
-  const stopLossPrice = trade.stopLoss;
-  
-  if (stopLossPrice !== undefined && avgEntryPrice > 0 && avgExitPrice > 0 && positionStatus === 'CLOSED') {
-    if (side === 'LONG') {
-      const risk = avgEntryPrice - stopLossPrice;
-      if (risk > 0) {
-        rFactor = (avgExitPrice - avgEntryPrice) / risk;
-      }
-    } else {
-      // SHORT
-      const risk = stopLossPrice - avgEntryPrice;
-      if (risk > 0) {
-        rFactor = (avgEntryPrice - avgExitPrice) / risk;
-      }
-    }
-  }
+  // R-Factor
+  const rFactor = trade.tradeRisk > 0 ? netPnl / trade.tradeRisk : 0;
   
   // Return percentage - use the correct invested amount based on direction
   // LONG: invested = what you bought (totalBuyCost)
