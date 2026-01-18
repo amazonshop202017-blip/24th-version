@@ -163,31 +163,36 @@ const RiskDistribution = () => {
       isWinningBucket: true,
     });
     
-    // Create a map for quick lookup
+    // Create a map for quick lookup using rangeStart as key
     const bucketsMap = new Map<number, BucketData>();
     buckets.forEach(b => bucketsMap.set(b.sortOrder, b));
     
-    // Place trades into buckets
+    // Place trades into buckets using EXACT bucket calculation
     tradeValues.forEach(({ value, isWin, isLoss, isBreakeven }) => {
-      let bucketSortOrder: number;
+      // R-Multiple bucketing: bucketStart = Math.floor(value / 0.5) * 0.5
+      // Return % bucketing: bucketStart = Math.floor(value / 0.25) * 0.25
+      const bucketStart = Math.floor(value / bucketSize) * bucketSize;
+      // Round to avoid floating point issues
+      const bucketKey = Math.round(bucketStart * 100) / 100;
       
+      // Handle overflow buckets
+      let targetBucket: BucketData | undefined;
       if (value < minBucket) {
-        bucketSortOrder = minBucket - 1;
+        targetBucket = bucketsMap.get(minBucket - 1);
       } else if (value >= maxBucket) {
-        bucketSortOrder = maxBucket + 1;
+        targetBucket = bucketsMap.get(maxBucket + 1);
       } else {
-        // Find the correct bucket
-        bucketSortOrder = Math.floor(value / bucketSize) * bucketSize;
-        // Handle floating point precision
-        bucketSortOrder = Math.round(bucketSortOrder * 100) / 100;
+        targetBucket = bucketsMap.get(bucketKey);
       }
       
-      const bucket = bucketsMap.get(bucketSortOrder);
-      if (bucket) {
-        bucket.tradeCount++;
-        if (isWin) bucket.winCount++;
-        if (isLoss) bucket.lossCount++;
-        if (isBreakeven) bucket.breakevenCount++;
+      if (targetBucket) {
+        targetBucket.tradeCount++;
+        if (isWin) targetBucket.winCount++;
+        if (isLoss) targetBucket.lossCount++;
+        if (isBreakeven) targetBucket.breakevenCount++;
+      } else {
+        // Debug: log if bucket not found (should not happen)
+        console.warn(`R-Multiple bucket not found for value ${value}, bucketKey ${bucketKey}`);
       }
     });
     
