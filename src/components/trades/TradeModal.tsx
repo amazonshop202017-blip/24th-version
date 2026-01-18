@@ -470,10 +470,10 @@ export const TradeModal = () => {
       savedReturnPercent: editingTrade && !pnlFieldsChanged 
         ? editingTrade.savedReturnPercent 
         : calculatedReturnPercent,
-      // Save R-Multiple - for new trades, always calculate; for edits, update if P/L changed
+      // Save R-Multiple - use the same value displayed in the footer (rMultipleCalculated)
       savedRMultiple: editingTrade && !pnlFieldsChanged
         ? editingTrade.savedRMultiple
-        : (tradeRisk > 0 ? effectiveNetPnl / tradeRisk : 0),
+        : (rMultipleCalculated ?? undefined),
       // Account snapshot - save accountId and balance at trade creation time
       accountId: editingTrade && !pnlFieldsChanged
         ? editingTrade.accountId
