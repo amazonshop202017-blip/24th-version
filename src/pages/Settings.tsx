@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Trash2, Edit2, Check, X, Tag, Wallet, TrendingUp, TrendingDown, ArrowLeftRight, BarChart3, MessageSquareText, Settings as SettingsIcon } from 'lucide-react';
+import { Plus, Trash2, Edit2, Check, X, Tag, Wallet, TrendingUp, TrendingDown, ArrowLeftRight, BarChart3, MessageSquareText, Settings as SettingsIcon, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useTagsContext } from '@/contexts/TagsContext';
@@ -355,6 +355,30 @@ const Settings = () => {
                             </div>
                           </div>
                           <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <div className="relative group/import">
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                title="Import Trades"
+                              >
+                                <Download className="w-4 h-4" />
+                              </Button>
+                              <div className="absolute right-0 top-full mt-1 w-40 bg-popover border border-border rounded-lg shadow-lg opacity-0 invisible group-hover/import:opacity-100 group-hover/import:visible transition-all z-50">
+                                <div className="p-2">
+                                  <p className="text-xs text-muted-foreground px-2 py-1 font-medium">Select Broker</p>
+                                  <button
+                                    className="w-full text-left px-3 py-2 text-sm rounded-md hover:bg-muted transition-colors flex items-center gap-2"
+                                    onClick={() => {
+                                      // TODO: Implement MT5 import
+                                      console.log('Import from MT5 for account:', account.id);
+                                    }}
+                                  >
+                                    <span className="w-2 h-2 rounded-full bg-blue-500" />
+                                    MT5
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
                             <Button
                               size="sm"
                               variant="ghost"
