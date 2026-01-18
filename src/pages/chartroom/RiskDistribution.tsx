@@ -68,17 +68,42 @@ const RiskDistribution = () => {
     const maxBucket = displayType === 'rMultiple' ? 10 : 10;
     const minBucket = displayType === 'rMultiple' ? -5 : -10;
     
-    // Initialize buckets map
-    const bucketsMap = new Map<string, BucketData>();
+    // Initialize buckets array with all possible ranges
+    const buckets: BucketData[] = [];
+    
+    // Add underflow bucket
+    const minOverflowLabel = displayType === 'rMultiple' ? `< -5` : `< -10`;
+    buckets.push({
+      label: minOverflowLabel,
+      sortOrder: minBucket - 1,
+      rangeStart: -Infinity,
+      rangeEnd: minBucket,
+      tradeCount: 0,
+      winCount: 0,
+      lossCount: 0,
+      breakevenCount: 0,
+      isWinningBucket: false,
+    });
     
     // Generate all possible buckets from min to max
-    for (let start = minBucket; start < maxBucket; start += bucketSize) {
-      const end = start + bucketSize;
-      const label = displayType === 'rMultiple' 
-        ? `${start.toFixed(1)} to ${end.toFixed(1)}`
-        : `${start.toFixed(2)}% to ${end.toFixed(2)}%`;
+    for (let start = minBucket; start < maxBucket; start = Math.round((start + bucketSize) * 100) / 100) {
+      const end = Math.round((start + bucketSize) * 100) / 100;
       
-      bucketsMap.set(label, {
+      // Format label like the reference images
+      let label: string;
+      if (displayType === 'rMultiple') {
+        // Format: "-4.5 to -4", "-0.5 to 0", "0 to 0.5", etc.
+        const startStr = start % 1 === 0 ? start.toString() : start.toFixed(1);
+        const endStr = end % 1 === 0 ? end.toString() : end.toFixed(1);
+        label = `${startStr} to ${endStr}`;
+      } else {
+        // Format: "-0.25 to 0", "0 to 0.25", etc.
+        const startStr = start.toFixed(2);
+        const endStr = end.toFixed(2);
+        label = `${startStr} to ${endStr}`;
+      }
+      
+      buckets.push({
         label,
         sortOrder: start,
         rangeStart: start,
@@ -91,23 +116,9 @@ const RiskDistribution = () => {
       });
     }
     
-    // Add overflow buckets
-    const minOverflowLabel = displayType === 'rMultiple' ? `< ${minBucket.toFixed(1)}` : `< ${minBucket.toFixed(2)}%`;
-    const maxOverflowLabel = displayType === 'rMultiple' ? `> ${maxBucket.toFixed(1)}` : `> ${maxBucket.toFixed(2)}%`;
-    
-    bucketsMap.set(minOverflowLabel, {
-      label: minOverflowLabel,
-      sortOrder: minBucket - 1,
-      rangeStart: -Infinity,
-      rangeEnd: minBucket,
-      tradeCount: 0,
-      winCount: 0,
-      lossCount: 0,
-      breakevenCount: 0,
-      isWinningBucket: false,
-    });
-    
-    bucketsMap.set(maxOverflowLabel, {
+    // Add overflow bucket
+    const maxOverflowLabel = displayType === 'rMultiple' ? `> 10` : `> 10`;
+    buckets.push({
       label: maxOverflowLabel,
       sortOrder: maxBucket + 1,
       rangeStart: maxBucket,
@@ -119,24 +130,26 @@ const RiskDistribution = () => {
       isWinningBucket: true,
     });
     
+    // Create a map for quick lookup
+    const bucketsMap = new Map<number, BucketData>();
+    buckets.forEach(b => bucketsMap.set(b.sortOrder, b));
+    
     // Place trades into buckets
     tradeValues.forEach(({ value, isWin, isLoss, isBreakeven }) => {
-      let bucketLabel: string;
+      let bucketSortOrder: number;
       
       if (value < minBucket) {
-        bucketLabel = minOverflowLabel;
+        bucketSortOrder = minBucket - 1;
       } else if (value >= maxBucket) {
-        bucketLabel = maxOverflowLabel;
+        bucketSortOrder = maxBucket + 1;
       } else {
         // Find the correct bucket
-        const bucketStart = Math.floor(value / bucketSize) * bucketSize;
-        const bucketEnd = bucketStart + bucketSize;
-        bucketLabel = displayType === 'rMultiple'
-          ? `${bucketStart.toFixed(1)} to ${bucketEnd.toFixed(1)}`
-          : `${bucketStart.toFixed(2)}% to ${bucketEnd.toFixed(2)}%`;
+        bucketSortOrder = Math.floor(value / bucketSize) * bucketSize;
+        // Handle floating point precision
+        bucketSortOrder = Math.round(bucketSortOrder * 100) / 100;
       }
       
-      const bucket = bucketsMap.get(bucketLabel);
+      const bucket = bucketsMap.get(bucketSortOrder);
       if (bucket) {
         bucket.tradeCount++;
         if (isWin) bucket.winCount++;
@@ -145,10 +158,8 @@ const RiskDistribution = () => {
       }
     });
     
-    // Convert to array and sort
-    return Array.from(bucketsMap.values())
-      .filter(b => b.tradeCount > 0) // Only show buckets with trades
-      .sort((a, b) => a.sortOrder - b.sortOrder);
+    // Return ALL buckets sorted (including those with 0 trades)
+    return buckets.sort((a, b) => a.sortOrder - b.sortOrder);
   }, [tradeValues, displayType]);
 
   // Calculate metrics
@@ -256,7 +267,7 @@ const RiskDistribution = () => {
       {/* Chart */}
       <Card className="bg-card border-border">
         <CardContent className="pt-6">
-          {bucketData.length > 0 ? (
+          {closedTrades.length > 0 ? (
             <ResponsiveContainer width="100%" height={400}>
               <BarChart data={bucketData} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
                 <CartesianGrid strokeDasharray="3 3" className="stroke-border/50" />
