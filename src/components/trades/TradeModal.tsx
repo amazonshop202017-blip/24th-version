@@ -35,7 +35,7 @@ export const TradeModal = () => {
   const { isOpen, editingTrade, closeModal } = useTradeModal();
   const { addTrade, updateTrade } = useTradesContext();
   const { strategies, getStrategyById } = useStrategiesContext();
-  const { accounts } = useAccountsContext();
+  const { accounts, getAccountWithStats } = useAccountsContext();
   const { currencyConfig, selectedAccounts: globalSelectedAccounts, isAllAccountsSelected } = useGlobalFilters();
   const { 
     options: customStatsOptions,
@@ -347,6 +347,40 @@ export const TradeModal = () => {
   const effectiveGrossPnl = manualGrossPnl !== '' ? parseFloat(manualGrossPnl) || 0 : metrics.grossPnl;
   const effectiveNetPnl = effectiveGrossPnl - (parseFloat(fees) || 0);
 
+  // Calculate Return (%) based on selected account's current balance
+  // For Add Trade: recalculates when account or P/L values change
+  // For Edit Trade: uses saved value unless P/L-affecting fields change
+  const calculatedReturnPercent = useMemo(() => {
+    if (!selectedAccountId) return 0;
+    
+    const accountStats = getAccountWithStats(selectedAccountId);
+    if (!accountStats || accountStats.currentBalance <= 0) return 0;
+    
+    // Return % = Net P/L ÷ Account Balance × 100
+    return (effectiveNetPnl / accountStats.currentBalance) * 100;
+  }, [selectedAccountId, effectiveNetPnl, getAccountWithStats]);
+
+  // For editing: track if P/L-affecting fields have changed from original
+  const pnlFieldsChanged = useMemo(() => {
+    if (!editingTrade) return true; // Always calculate for new trades
+    
+    // Compare current values with original trade values
+    const origMetrics = calculateTradeMetrics(editingTrade);
+    const origNetPnl = editingTrade.manualGrossPnl !== undefined 
+      ? editingTrade.manualGrossPnl - origMetrics.totalCharges 
+      : origMetrics.netPnl;
+    
+    return Math.abs(effectiveNetPnl - origNetPnl) > 0.001;
+  }, [editingTrade, effectiveNetPnl]);
+
+  // Final return percent to display - for edit, use saved unless P/L changed
+  const displayReturnPercent = useMemo(() => {
+    if (editingTrade && !pnlFieldsChanged && editingTrade.savedReturnPercent !== undefined) {
+      return editingTrade.savedReturnPercent;
+    }
+    return calculatedReturnPercent;
+  }, [editingTrade, pnlFieldsChanged, calculatedReturnPercent]);
+
   // Calculate duration
   const durationFormatted = useMemo(() => {
     if (!entryDate || !exitDate) return '—';
@@ -424,6 +458,10 @@ export const TradeModal = () => {
       indicator: indicator || undefined,
       marketGeneral: marketGeneral || undefined,
       bias: bias || undefined,
+      // Save Return (%) - for new trades, always calculate; for edits, update if P/L changed
+      savedReturnPercent: editingTrade && !pnlFieldsChanged 
+        ? editingTrade.savedReturnPercent 
+        : calculatedReturnPercent,
     };
 
     if (editingTrade) {
@@ -529,7 +567,7 @@ export const TradeModal = () => {
     return realizedPnl / risk;
   }, [entryPrice, stopLoss, exitPrice, direction]);
 
-  const returnPercent = metrics.returnPercent.toFixed(2) + '%';
+  const returnPercent = displayReturnPercent.toFixed(2) + '%';
 
   // Checklist dropdown state
   const [checklistOpen, setChecklistOpen] = useState(false);

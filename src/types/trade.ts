@@ -60,6 +60,8 @@ export interface Trade {
   indicator?: string;
   marketGeneral?: string;
   bias?: string;
+  // Saved Return (%) - calculated at trade creation based on account balance
+  savedReturnPercent?: number;
 }
 
 // Calculated values (not stored, computed on-the-fly)
