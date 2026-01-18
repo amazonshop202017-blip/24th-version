@@ -36,7 +36,7 @@ export const TradeModal = () => {
   const { addTrade, updateTrade } = useTradesContext();
   const { strategies, getStrategyById } = useStrategiesContext();
   const { accounts } = useAccountsContext();
-  const { currencyConfig, selectedAccounts: globalSelectedAccounts } = useGlobalFilters();
+  const { currencyConfig, selectedAccounts: globalSelectedAccounts, isAllAccountsSelected } = useGlobalFilters();
   const { 
     options: customStatsOptions,
     addTimeframe,
@@ -169,16 +169,18 @@ export const TradeModal = () => {
     }
   }, [strategyId]);
 
-  // Auto-select account when single account is selected in global filter
+  // Auto-select account when exactly one account is selected in global filter (Add Trade only)
   useEffect(() => {
     if (!editingTrade && isOpen) {
-      if (globalSelectedAccounts.length === 1) {
+      // Only auto-select if exactly ONE account is selected (not "All" and not multiple)
+      if (!isAllAccountsSelected && globalSelectedAccounts.length === 1) {
         setSelectedAccountId(globalSelectedAccounts[0]);
       } else {
+        // "All accounts" or multiple accounts selected - leave empty
         setSelectedAccountId('');
       }
     }
-  }, [globalSelectedAccounts, editingTrade, isOpen]);
+  }, [globalSelectedAccounts, isAllAccountsSelected, editingTrade, isOpen]);
 
   // Clear account error when account is selected
   useEffect(() => {
