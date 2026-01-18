@@ -8,9 +8,11 @@ interface ChartDataPoint {
   tradeIndex: number;
   tradeId: string;
   actualR: number;
-  potentialR: number;
+  setForgetR: number;
+  potentialR: number | null;
   cumulativeActual: number;
-  cumulativePotential: number;
+  cumulativeSetForget: number;
+  cumulativePotential: number | null;
 }
 
 const TradeManagement = () => {
@@ -54,52 +56,80 @@ const TradeManagement = () => {
 
     // Build chart data
     let cumulativeActual = 0;
+    let cumulativeSetForget = 0;
     let cumulativePotential = 0;
+    let hasPotentialData = false;
     
     const data: ChartDataPoint[] = sortedTrades.map((trade, index) => {
       const metrics = calculateTradeMetrics(trade);
+      const entry = metrics.avgEntryPrice;
+      const tp = trade.takeProfit!;
+      const sl = trade.stopLoss!;
       
       // Actual R: Use the stored savedRMultiple
       const actualR = trade.savedRMultiple ?? 0;
       
-      // Potential R: Set and forget logic
-      let potentialR = 0;
+      // Set & Forget R: TP/SL only logic (renamed from "Potential")
+      let setForgetR = 0;
       
       if (trade.priceReachedFirst === 'takeProfit') {
         // Calculate planned RR
-        const entry = metrics.avgEntryPrice;
-        const tp = trade.takeProfit!;
-        const sl = trade.stopLoss!;
-        
         if (trade.side === 'LONG') {
-          // Long: (TP - Entry) / (Entry - SL)
           const risk = entry - sl;
           const reward = tp - entry;
-          potentialR = risk > 0 ? reward / risk : 0;
+          setForgetR = risk > 0 ? reward / risk : 0;
         } else {
-          // Short: (Entry - TP) / (SL - Entry)
           const risk = sl - entry;
           const reward = entry - tp;
-          potentialR = risk > 0 ? reward / risk : 0;
+          setForgetR = risk > 0 ? reward / risk : 0;
         }
       } else if (trade.priceReachedFirst === 'stopLoss') {
+        setForgetR = -1;
+      }
+      
+      // Potential R: Maximum favorable excursion (MFE in R)
+      let potentialR: number | null = null;
+      
+      if (trade.priceReachedFirst === 'stopLoss') {
+        // If SL was hit first, potential is -1R
         potentialR = -1;
+      } else {
+        // Calculate based on highest/lowest price
+        if (trade.side === 'LONG' && trade.highestPrice !== undefined && trade.highestPrice > 0) {
+          const risk = entry - sl;
+          if (risk > 0) {
+            potentialR = Math.max(-1, (trade.highestPrice - entry) / risk);
+          }
+        } else if (trade.side === 'SHORT' && trade.lowestPrice !== undefined && trade.lowestPrice > 0) {
+          const risk = sl - entry;
+          if (risk > 0) {
+            potentialR = Math.max(-1, (entry - trade.lowestPrice) / risk);
+          }
+        }
+      }
+      
+      // Track if we have any potential data
+      if (potentialR !== null) {
+        hasPotentialData = true;
+        cumulativePotential += potentialR;
       }
       
       cumulativeActual += actualR;
-      cumulativePotential += potentialR;
+      cumulativeSetForget += setForgetR;
       
       return {
         tradeIndex: index + 1,
         tradeId: trade.id,
         actualR: parseFloat(actualR.toFixed(2)),
-        potentialR: parseFloat(potentialR.toFixed(2)),
+        setForgetR: parseFloat(setForgetR.toFixed(2)),
+        potentialR: potentialR !== null ? parseFloat(potentialR.toFixed(2)) : null,
         cumulativeActual: parseFloat(cumulativeActual.toFixed(2)),
-        cumulativePotential: parseFloat(cumulativePotential.toFixed(2)),
+        cumulativeSetForget: parseFloat(cumulativeSetForget.toFixed(2)),
+        cumulativePotential: potentialR !== null ? parseFloat(cumulativePotential.toFixed(2)) : null,
       };
     });
     
-    return data;
+    return { data, hasPotentialData };
   }, [filteredTrades]);
 
   const CustomTooltip = ({ active, payload }: any) => {
@@ -116,11 +146,21 @@ const TradeManagement = () => {
               Cumulative Actual: <span className={data.cumulativeActual >= 0 ? 'text-green-500' : 'text-red-500'}>{data.cumulativeActual}</span>
             </p>
             <p className="text-muted-foreground">
-              Potential R: <span className={data.potentialR >= 0 ? 'text-green-500' : 'text-red-500'}>{data.potentialR}</span>
+              Set & Forget R: <span className={data.setForgetR >= 0 ? 'text-green-500' : 'text-red-500'}>{data.setForgetR}</span>
             </p>
             <p className="text-muted-foreground">
-              Cumulative Potential: <span className={data.cumulativePotential >= 0 ? 'text-green-500' : 'text-red-500'}>{data.cumulativePotential}</span>
+              Cumulative Set & Forget: <span className={data.cumulativeSetForget >= 0 ? 'text-green-500' : 'text-red-500'}>{data.cumulativeSetForget}</span>
             </p>
+            {data.potentialR !== null && (
+              <>
+                <p className="text-muted-foreground">
+                  Potential R: <span className={data.potentialR >= 0 ? 'text-green-500' : 'text-red-500'}>{data.potentialR}</span>
+                </p>
+                <p className="text-muted-foreground">
+                  Cumulative Potential: <span className={(data.cumulativePotential ?? 0) >= 0 ? 'text-green-500' : 'text-red-500'}>{data.cumulativePotential}</span>
+                </p>
+              </>
+            )}
           </div>
         </div>
       );
@@ -128,19 +168,21 @@ const TradeManagement = () => {
     return null;
   };
 
+  const { data: chartDataArray, hasPotentialData } = chartData;
+
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold text-foreground">Trade Management</h1>
-        <p className="text-muted-foreground mt-1">Compare your actual performance vs set-and-forget potential</p>
+        <p className="text-muted-foreground mt-1">Compare your actual performance vs set-and-forget and market potential</p>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Actual vs Potential Performance (R-Multiple)</CardTitle>
+          <CardTitle>Performance Comparison (R-Multiple)</CardTitle>
         </CardHeader>
         <CardContent>
-          {chartData.length === 0 ? (
+          {chartDataArray.length === 0 ? (
             <div className="h-96 flex items-center justify-center text-muted-foreground">
               <div className="text-center">
                 <p className="text-lg font-medium mb-2">No eligible trades found</p>
@@ -153,7 +195,7 @@ const TradeManagement = () => {
           ) : (
             <div className="h-96">
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+                <LineChart data={chartDataArray} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                   <XAxis 
                     dataKey="tradeIndex" 
@@ -177,14 +219,27 @@ const TradeManagement = () => {
                   />
                   <Line 
                     type="monotone" 
-                    dataKey="cumulativePotential" 
-                    name="Potential Performance"
+                    dataKey="cumulativeSetForget" 
+                    name="Set & Forget Performance"
                     stroke="hsl(var(--chart-2))" 
                     strokeWidth={2}
                     strokeDasharray="5 5"
                     dot={{ fill: 'hsl(var(--chart-2))', strokeWidth: 0, r: 3 }}
                     activeDot={{ r: 5, fill: 'hsl(var(--chart-2))' }}
                   />
+                  {hasPotentialData && (
+                    <Line 
+                      type="monotone" 
+                      dataKey="cumulativePotential" 
+                      name="Potential Performance"
+                      stroke="hsl(var(--chart-3))" 
+                      strokeWidth={2}
+                      strokeDasharray="2 2"
+                      dot={{ fill: 'hsl(var(--chart-3))', strokeWidth: 0, r: 3 }}
+                      activeDot={{ r: 5, fill: 'hsl(var(--chart-3))' }}
+                      connectNulls
+                    />
+                  )}
                 </LineChart>
               </ResponsiveContainer>
             </div>
@@ -192,12 +247,12 @@ const TradeManagement = () => {
         </CardContent>
       </Card>
 
-      {chartData.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {chartDataArray.length > 0 && (
+        <div className={`grid grid-cols-1 ${hasPotentialData ? 'md:grid-cols-4' : 'md:grid-cols-3'} gap-4`}>
           <Card>
             <CardContent className="pt-6">
               <div className="text-center">
-                <p className="text-2xl font-bold text-foreground">{chartData.length}</p>
+                <p className="text-2xl font-bold text-foreground">{chartDataArray.length}</p>
                 <p className="text-sm text-muted-foreground">Eligible Trades</p>
               </div>
             </CardContent>
@@ -205,8 +260,8 @@ const TradeManagement = () => {
           <Card>
             <CardContent className="pt-6">
               <div className="text-center">
-                <p className={`text-2xl font-bold ${chartData[chartData.length - 1]?.cumulativeActual >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                  {chartData[chartData.length - 1]?.cumulativeActual.toFixed(2) ?? '0.00'}R
+                <p className={`text-2xl font-bold ${chartDataArray[chartDataArray.length - 1]?.cumulativeActual >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                  {chartDataArray[chartDataArray.length - 1]?.cumulativeActual.toFixed(2) ?? '0.00'}R
                 </p>
                 <p className="text-sm text-muted-foreground">Total Actual Performance</p>
               </div>
@@ -215,13 +270,25 @@ const TradeManagement = () => {
           <Card>
             <CardContent className="pt-6">
               <div className="text-center">
-                <p className={`text-2xl font-bold ${chartData[chartData.length - 1]?.cumulativePotential >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                  {chartData[chartData.length - 1]?.cumulativePotential.toFixed(2) ?? '0.00'}R
+                <p className={`text-2xl font-bold ${chartDataArray[chartDataArray.length - 1]?.cumulativeSetForget >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                  {chartDataArray[chartDataArray.length - 1]?.cumulativeSetForget.toFixed(2) ?? '0.00'}R
                 </p>
-                <p className="text-sm text-muted-foreground">Total Potential Performance</p>
+                <p className="text-sm text-muted-foreground">Total Set & Forget</p>
               </div>
             </CardContent>
           </Card>
+          {hasPotentialData && (
+            <Card>
+              <CardContent className="pt-6">
+                <div className="text-center">
+                  <p className={`text-2xl font-bold ${(chartDataArray[chartDataArray.length - 1]?.cumulativePotential ?? 0) >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                    {chartDataArray[chartDataArray.length - 1]?.cumulativePotential?.toFixed(2) ?? '0.00'}R
+                  </p>
+                  <p className="text-sm text-muted-foreground">Total Potential (MFE)</p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
       )}
     </div>
