@@ -133,55 +133,51 @@ const Drawdown = () => {
       ? phaseBottoms.reduce((sum, val) => sum + val, 0) / phaseBottoms.length 
       : 0;
 
-    // 4. Top to Bottom - trades from last peak (0) to the worst drawdown point
-    // 5. Bottom to Top - trades from worst point to recovery (0)
-    // We focus on the most recent complete or ongoing drawdown phase for these metrics
+    // 4. Top to Bottom & 5. Bottom to Top
+    // Find the swing that contains the MAXIMUM drawdown depth
+    // A swing starts when drawdown goes below 0 from a peak (0) and ends when it returns to 0
     
     let topToBottom = 0;
-    let bottomToTop = 0;
+    let bottomToTop: number | null = null;
 
-    // Find the last peak (drawdown = 0) before the most recent/ongoing phase
-    let lastPeakIndex = -1;
-    let worstPointIndex = -1;
-    let worstValue = 0;
-    let recoveryIndex = -1;
-
-    // Find the last drawdown phase
-    for (let i = drawdownData.length - 1; i >= 0; i--) {
-      if (drawdownData[i].drawdown === 0) {
-        if (lastPeakIndex === -1 && worstPointIndex !== -1) {
-          // Found recovery point after we found a bottom
-          recoveryIndex = i;
-        }
-        if (worstPointIndex === -1) {
-          // Haven't found a drawdown yet, keep looking back
-          continue;
-        }
-        // Found the start of the phase we're measuring
-        lastPeakIndex = i;
-        break;
-      } else {
-        // In drawdown
-        if (drawdownData[i].drawdown < worstValue) {
-          worstValue = drawdownData[i].drawdown;
-          worstPointIndex = i;
-        }
+    // First, find the global worst drawdown point
+    let globalWorstIndex = -1;
+    let globalWorstValue = 0;
+    for (let i = 0; i < drawdownData.length; i++) {
+      if (drawdownData[i].drawdown < globalWorstValue) {
+        globalWorstValue = drawdownData[i].drawdown;
+        globalWorstIndex = i;
       }
     }
 
-    // If we found a complete phase pattern
-    if (lastPeakIndex !== -1 && worstPointIndex !== -1) {
-      topToBottom = worstPointIndex - lastPeakIndex;
-    } else if (worstPointIndex !== -1) {
-      // Phase started from the beginning (no previous peak at 0)
-      topToBottom = worstPointIndex + 1;
-    }
+    if (globalWorstIndex !== -1) {
+      // Find the start of the swing containing the worst point
+      // Look backwards from worst point to find the peak (drawdown = 0)
+      let swingStartIndex = 0; // Default to beginning if no peak found
+      for (let i = globalWorstIndex - 1; i >= 0; i--) {
+        if (drawdownData[i].drawdown === 0) {
+          swingStartIndex = i + 1; // Swing starts at the first trade after the peak
+          break;
+        }
+      }
 
-    if (recoveryIndex !== -1 && worstPointIndex !== -1) {
-      bottomToTop = recoveryIndex - worstPointIndex;
-    } else if (worstPointIndex !== -1 && drawdownData[drawdownData.length - 1].drawdown === 0) {
-      // Current position is at 0, so we recovered
-      bottomToTop = (drawdownData.length - 1) - worstPointIndex;
+      // Top to Bottom: count trades from swing start to the worst point (inclusive)
+      topToBottom = globalWorstIndex - swingStartIndex + 1;
+
+      // Find recovery point (where drawdown returns to 0 after the worst point)
+      let recoveryIndex: number | null = null;
+      for (let i = globalWorstIndex + 1; i < drawdownData.length; i++) {
+        if (drawdownData[i].drawdown === 0) {
+          recoveryIndex = i;
+          break;
+        }
+      }
+
+      // Bottom to Top: trades from AFTER the worst point to recovery (inclusive of recovery)
+      if (recoveryIndex !== null) {
+        bottomToTop = recoveryIndex - globalWorstIndex;
+      }
+      // If not recovered yet, bottomToTop stays null
     }
 
     return {
@@ -211,8 +207,8 @@ const Drawdown = () => {
     { label: 'Worst Drawdown', value: formatMetricCurrency(drawdownMetrics.worstDrawdown), hasInfo: false },
     { label: 'Average Drawdown', value: formatMetricCurrency(drawdownMetrics.averageDrawdown), hasInfo: false },
     { label: 'Current Drawdown', value: formatMetricCurrency(drawdownMetrics.currentDrawdown), hasInfo: false },
-    { label: 'Top to Bottom', value: String(drawdownMetrics.topToBottom), hasInfo: true, tooltip: 'Number of trades from the last equity peak to the worst drawdown point' },
-    { label: 'Bottom to Top', value: String(drawdownMetrics.bottomToTop), hasInfo: true, tooltip: 'Number of trades from the worst drawdown point to recovery' },
+    { label: 'Top to Bottom', value: String(drawdownMetrics.topToBottom), hasInfo: true, tooltip: 'Number of trades from equity peak to the deepest drawdown point' },
+    { label: 'Bottom to Top', value: drawdownMetrics.bottomToTop !== null ? String(drawdownMetrics.bottomToTop) : '—', hasInfo: true, tooltip: 'Number of trades from the deepest drawdown point to recovery (equity high)' },
     { label: 'Return to Drawdown', value: 'Releasing soon', hasInfo: false },
   ];
 
