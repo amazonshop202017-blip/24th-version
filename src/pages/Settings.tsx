@@ -1,20 +1,28 @@
 import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Trash2, Edit2, Check, X, Tag, Wallet, TrendingUp, TrendingDown, ArrowLeftRight, BarChart3, MessageSquareText, Settings as SettingsIcon, Download } from 'lucide-react';
+import { Plus, Trash2, Edit2, Check, X, Tag, Wallet, TrendingUp, TrendingDown, ArrowLeftRight, BarChart3, MessageSquareText, Settings as SettingsIcon, Download, DollarSign } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useTagsContext } from '@/contexts/TagsContext';
 import { useAccountsContext } from '@/contexts/AccountsContext';
 import { useCustomStats } from '@/contexts/CustomStatsContext';
 import { useTradesContext } from '@/contexts/TradesContext';
+import { useGlobalFilters, CurrencyCode, CURRENCIES } from '@/contexts/GlobalFiltersContext';
 import { cn } from '@/lib/utils';
 import DepositWithdrawModal from '@/components/settings/DepositWithdrawModal';
 import { importMT5Trades } from '@/lib/mt5Import';
 import { toast } from 'sonner';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 const Settings = () => {
   const { tags, addTag, removeTag, updateTag } = useTagsContext();
   const { accounts, addAccount, removeAccount, updateAccount, getAllAccountsWithStats, addTransaction, getTransactionsForAccount } = useAccountsContext();
   const { bulkAddTrades } = useTradesContext();
+  const { currency, setCurrency, currencyConfig } = useGlobalFilters();
   const {
     options: customStatsOptions,
     addTimeframe, removeTimeframe,
@@ -29,6 +37,10 @@ const Settings = () => {
     addMarketGeneral, removeMarketGeneral,
     addBias, removeBias,
   } = useCustomStats();
+
+  const handleCurrencyChange = (newCurrency: CurrencyCode) => {
+    setCurrency(newCurrency);
+  };
 
   // Settings tab state
   const [activeSettingsTab, setActiveSettingsTab] = useState<'main' | 'tags-comments'>('main');
@@ -296,6 +308,47 @@ const Settings = () => {
       {/* Main Tab Content */}
       {activeSettingsTab === 'main' && (
         <>
+          {/* Currency Section */}
+          <div className="glass-card rounded-2xl p-6">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center">
+                <DollarSign className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <h2 className="text-xl font-semibold">Currency Settings</h2>
+                <p className="text-sm text-muted-foreground">Set your preferred display currency for the journal</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-4">
+              <span className="text-sm text-muted-foreground">Display Currency:</span>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="gap-2 bg-background border-border min-w-[120px]">
+                    <span className="text-lg font-semibold">{currencyConfig.symbol}</span>
+                    <span>{currency}</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="bg-popover border-border z-50">
+                  {Object.entries(CURRENCIES).map(([code, config]) => (
+                    <DropdownMenuItem
+                      key={code}
+                      onClick={() => handleCurrencyChange(code as CurrencyCode)}
+                      className={cn(
+                        "flex items-center gap-2 cursor-pointer",
+                        currency === code && "bg-accent"
+                      )}
+                    >
+                      <span className="w-6 text-center font-semibold">{config.symbol}</span>
+                      <span>{code}</span>
+                      {currency === code && <Check className="w-4 h-4 ml-auto" />}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </div>
+
           {/* Accounts Section */}
           <div className="glass-card rounded-2xl p-6">
             <div className="flex items-center gap-3 mb-6">
