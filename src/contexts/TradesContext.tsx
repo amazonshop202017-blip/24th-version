@@ -1,8 +1,8 @@
 import { createContext, useContext, ReactNode, useMemo, useCallback } from 'react';
 import { useTrades } from '@/hooks/useTrades';
 import { Trade, TradeFormData, calculateTradeMetrics } from '@/types/trade';
-import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
-import { isWithinInterval, parseISO, startOfDay, endOfDay } from 'date-fns';
+import { useGlobalFilters, OutcomeFilter, DayFilter } from '@/contexts/GlobalFiltersContext';
+import { isWithinInterval, parseISO, startOfDay, endOfDay, getDay, getHours } from 'date-fns';
 
 interface TradesContextType {
   trades: Trade[]; // All trades (unfiltered)
@@ -57,10 +57,30 @@ export const useTradesContext = (): TradesContextType => {
   return context;
 };
 
+// Map day index (0-6, Sunday=0) to DayFilter
+const dayIndexToFilter: Record<number, DayFilter> = {
+  0: 'sunday',
+  1: 'monday',
+  2: 'tuesday',
+  3: 'wednesday',
+  4: 'thursday',
+  5: 'friday',
+  6: 'saturday',
+};
+
 // Hook to get filtered trades and stats (must be used inside GlobalFiltersProvider)
 export const useFilteredTradesContext = () => {
   const { trades, addTrade, bulkAddTrades, updateTrade, deleteTrade, getTradeById } = useTradesContext();
-  const { dateRange, selectedAccounts } = useGlobalFilters();
+  const { 
+    dateRange, 
+    selectedAccounts,
+    selectedInstruments,
+    selectedOutcomes,
+    selectedHours,
+    selectedSetups,
+    selectedDays,
+    lastTradesFilter,
+  } = useGlobalFilters();
 
   const filteredTrades = useMemo(() => {
     let filtered = trades;
@@ -86,8 +106,73 @@ export const useFilteredTradesContext = () => {
       );
     }
 
+    // Filter by instrument
+    if (selectedInstruments.length > 0) {
+      filtered = filtered.filter(trade => 
+        selectedInstruments.includes(trade.symbol)
+      );
+    }
+
+    // Filter by outcome
+    if (selectedOutcomes.length > 0) {
+      filtered = filtered.filter(trade => {
+        const metrics = calculateTradeMetrics(trade);
+        const netPnl = metrics.netPnl;
+        
+        if (netPnl > 0 && selectedOutcomes.includes('win')) return true;
+        if (netPnl < 0 && selectedOutcomes.includes('loss')) return true;
+        if (netPnl === 0 && selectedOutcomes.includes('breakeven')) return true;
+        return false;
+      });
+    }
+
+    // Filter by hour (entry hour)
+    if (selectedHours.length > 0) {
+      filtered = filtered.filter(trade => {
+        const metrics = calculateTradeMetrics(trade);
+        if (!metrics.openDate) return false;
+        
+        const entryDate = parseISO(metrics.openDate);
+        const entryHour = getHours(entryDate);
+        return selectedHours.includes(entryHour);
+      });
+    }
+
+    // Filter by setup (strategyId)
+    if (selectedSetups.length > 0) {
+      filtered = filtered.filter(trade => 
+        trade.strategyId && selectedSetups.includes(trade.strategyId)
+      );
+    }
+
+    // Filter by day of week (entry day)
+    if (selectedDays.length > 0) {
+      filtered = filtered.filter(trade => {
+        const metrics = calculateTradeMetrics(trade);
+        if (!metrics.openDate) return false;
+        
+        const entryDate = parseISO(metrics.openDate);
+        const dayIndex = getDay(entryDate);
+        const dayFilter = dayIndexToFilter[dayIndex];
+        return selectedDays.includes(dayFilter);
+      });
+    }
+
+    // Apply "Last Trades" filter LAST - take most recent N trades after all other filters
+    if (lastTradesFilter !== null) {
+      // Sort by entry date descending
+      const sorted = [...filtered].sort((a, b) => {
+        const aMetrics = calculateTradeMetrics(a);
+        const bMetrics = calculateTradeMetrics(b);
+        const aDate = aMetrics.openDate ? parseISO(aMetrics.openDate).getTime() : 0;
+        const bDate = bMetrics.openDate ? parseISO(bMetrics.openDate).getTime() : 0;
+        return bDate - aDate; // Descending
+      });
+      filtered = sorted.slice(0, lastTradesFilter);
+    }
+
     return filtered;
-  }, [trades, dateRange, selectedAccounts]);
+  }, [trades, dateRange, selectedAccounts, selectedInstruments, selectedOutcomes, selectedHours, selectedSetups, selectedDays, lastTradesFilter]);
 
   const stats = useMemo(() => {
     const winningTrades = filteredTrades.filter(t => calculateTradeMetrics(t).netPnl > 0);

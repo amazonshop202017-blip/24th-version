@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { format } from 'date-fns';
 import { CalendarIcon, ChevronDown, Wallet, Settings, Check, X, Filter, SlidersHorizontal, Globe, TrendingUp, Star, BarChart2, Clock, Percent, Hash, ListFilter, Calendar as CalendarIcon2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -17,8 +17,10 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { useGlobalFilters, DatePreset } from '@/contexts/GlobalFiltersContext';
+import { useGlobalFilters, DatePreset, OutcomeFilter, DayFilter, LastTradesFilter } from '@/contexts/GlobalFiltersContext';
 import { useAccountsContext } from '@/contexts/AccountsContext';
+import { useTradesContext } from '@/contexts/TradesContext';
+import { useStrategiesContext } from '@/contexts/StrategiesContext';
 import { cn } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -29,6 +31,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
+import { Checkbox } from '@/components/ui/checkbox';
 
 const DATE_PRESETS: { value: DatePreset; label: string }[] = [
   { value: 'today', label: 'Today' },
@@ -38,6 +41,35 @@ const DATE_PRESETS: { value: DatePreset; label: string }[] = [
   { value: 'last_month', label: 'Last month' },
   { value: 'this_quarter', label: 'This quarter' },
   { value: 'ytd', label: 'YTD (year to date)' },
+];
+
+const HOUR_OPTIONS = Array.from({ length: 24 }, (_, i) => ({
+  value: i,
+  label: `${i.toString().padStart(2, '0')}:00–${i.toString().padStart(2, '0')}:59`,
+}));
+
+const DAY_OPTIONS: { value: DayFilter; label: string }[] = [
+  { value: 'monday', label: 'Monday' },
+  { value: 'tuesday', label: 'Tuesday' },
+  { value: 'wednesday', label: 'Wednesday' },
+  { value: 'thursday', label: 'Thursday' },
+  { value: 'friday', label: 'Friday' },
+  { value: 'saturday', label: 'Saturday' },
+  { value: 'sunday', label: 'Sunday' },
+];
+
+const OUTCOME_OPTIONS: { value: OutcomeFilter; label: string }[] = [
+  { value: 'win', label: 'Win' },
+  { value: 'loss', label: 'Loss' },
+  { value: 'breakeven', label: 'Breakeven' },
+];
+
+const LAST_TRADES_OPTIONS: { value: LastTradesFilter; label: string }[] = [
+  { value: null, label: 'All' },
+  { value: 10, label: 'Last 10' },
+  { value: 25, label: 'Last 25' },
+  { value: 50, label: 'Last 50' },
+  { value: 100, label: 'Last 100' },
 ];
 
 export const GlobalHeader = () => {
@@ -51,12 +83,34 @@ export const GlobalHeader = () => {
     selectedAccounts,
     setSelectedAccounts,
     isAllAccountsSelected,
+    // Basic filters
+    selectedInstruments,
+    setSelectedInstruments,
+    selectedOutcomes,
+    setSelectedOutcomes,
+    selectedHours,
+    setSelectedHours,
+    selectedSetups,
+    setSelectedSetups,
+    selectedDays,
+    setSelectedDays,
+    lastTradesFilter,
+    setLastTradesFilter,
   } = useGlobalFilters();
   
   const { accounts } = useAccountsContext();
+  const { trades } = useTradesContext();
+  const { strategies } = useStrategiesContext();
+  
   const [datePickerOpen, setDatePickerOpen] = useState(false);
   const [basicFiltersOpen, setBasicFiltersOpen] = useState(false);
   const [advancedFiltersOpen, setAdvancedFiltersOpen] = useState(false);
+
+  // Get unique instruments from trades
+  const availableInstruments = useMemo(() => {
+    const instruments = new Set(trades.map(t => t.symbol));
+    return Array.from(instruments).filter(Boolean).sort();
+  }, [trades]);
 
   const handlePresetClick = (preset: DatePreset) => {
     applyDatePreset(preset);
@@ -79,6 +133,51 @@ export const GlobalHeader = () => {
 
   const handleAllAccountsToggle = () => {
     setSelectedAccounts([]);
+  };
+
+  // Instrument filter handlers
+  const handleInstrumentToggle = (instrument: string) => {
+    if (selectedInstruments.includes(instrument)) {
+      setSelectedInstruments(selectedInstruments.filter(i => i !== instrument));
+    } else {
+      setSelectedInstruments([...selectedInstruments, instrument]);
+    }
+  };
+
+  // Outcome filter handlers
+  const handleOutcomeToggle = (outcome: OutcomeFilter) => {
+    if (selectedOutcomes.includes(outcome)) {
+      setSelectedOutcomes(selectedOutcomes.filter(o => o !== outcome));
+    } else {
+      setSelectedOutcomes([...selectedOutcomes, outcome]);
+    }
+  };
+
+  // Hour filter handlers
+  const handleHourToggle = (hour: number) => {
+    if (selectedHours.includes(hour)) {
+      setSelectedHours(selectedHours.filter(h => h !== hour));
+    } else {
+      setSelectedHours([...selectedHours, hour]);
+    }
+  };
+
+  // Setup filter handlers
+  const handleSetupToggle = (setupId: string) => {
+    if (selectedSetups.includes(setupId)) {
+      setSelectedSetups(selectedSetups.filter(s => s !== setupId));
+    } else {
+      setSelectedSetups([...selectedSetups, setupId]);
+    }
+  };
+
+  // Day filter handlers
+  const handleDayToggle = (day: DayFilter) => {
+    if (selectedDays.includes(day)) {
+      setSelectedDays(selectedDays.filter(d => d !== day));
+    } else {
+      setSelectedDays([...selectedDays, day]);
+    }
   };
 
   const getDateRangeLabel = () => {
@@ -107,6 +206,18 @@ export const GlobalHeader = () => {
     return `${selectedAccounts.length} accounts`;
   };
 
+  // Count active basic filters
+  const activeBasicFiltersCount = useMemo(() => {
+    let count = 0;
+    if (selectedInstruments.length > 0) count++;
+    if (selectedOutcomes.length > 0) count++;
+    if (selectedHours.length > 0) count++;
+    if (selectedSetups.length > 0) count++;
+    if (selectedDays.length > 0) count++;
+    if (lastTradesFilter !== null) count++;
+    return count;
+  }, [selectedInstruments, selectedOutcomes, selectedHours, selectedSetups, selectedDays, lastTradesFilter]);
+
   return (
     <div className="flex items-center gap-3 px-8 py-4 border-b border-border bg-card/50 backdrop-blur-sm">
       {/* Basic Filters Dropdown */}
@@ -115,52 +226,108 @@ export const GlobalHeader = () => {
           <Button variant="outline" className="gap-2 bg-background border-border">
             <Filter className="w-4 h-4 text-muted-foreground" />
             <span>Basic Filters</span>
+            {activeBasicFiltersCount > 0 && (
+              <span className="ml-1 px-1.5 py-0.5 text-xs rounded-full bg-primary text-primary-foreground">
+                {activeBasicFiltersCount}
+              </span>
+            )}
             <ChevronDown className="w-4 h-4 text-muted-foreground" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start" className="w-[900px] p-4 bg-popover border-border z-50">
           <div className="grid grid-cols-6 gap-3">
             {/* Row 1: Instrument, Outcome, Month, Hour, Trade Type, Checklist Type */}
-            {/* Instrument */}
+            {/* Instrument - Multi-select from trades */}
             <div className="space-y-1.5">
               <label className="text-xs text-muted-foreground flex items-center gap-1.5">
                 <Globe className="w-3 h-3" />
                 Instrument
               </label>
-              <Select>
-                <SelectTrigger className="h-9 bg-background border-border">
-                  <SelectValue placeholder="All" />
-                </SelectTrigger>
-                <SelectContent className="bg-popover border-border z-[60]">
-                  <SelectItem value="all">All</SelectItem>
-                  <SelectItem value="eurusd">EUR/USD</SelectItem>
-                  <SelectItem value="gbpusd">GBP/USD</SelectItem>
-                  <SelectItem value="usdjpy">USD/JPY</SelectItem>
-                  <SelectItem value="btcusd">BTC/USD</SelectItem>
-                </SelectContent>
-              </Select>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className="w-full h-9 justify-between text-sm font-normal bg-background border-border">
+                    {selectedInstruments.length === 0 ? 'All' : `${selectedInstruments.length} selected`}
+                    <ChevronDown className="w-3 h-3 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-48 p-2 bg-popover border-border z-[70]" align="start">
+                  <div className="space-y-1 max-h-48 overflow-auto">
+                    {availableInstruments.length === 0 ? (
+                      <div className="text-xs text-muted-foreground py-2 text-center">No instruments found</div>
+                    ) : (
+                      availableInstruments.map((instrument) => (
+                        <div 
+                          key={instrument} 
+                          className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-accent cursor-pointer"
+                          onClick={() => handleInstrumentToggle(instrument)}
+                        >
+                          <Checkbox checked={selectedInstruments.includes(instrument)} />
+                          <span className="text-sm">{instrument}</span>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                  {selectedInstruments.length > 0 && (
+                    <>
+                      <DropdownMenuSeparator className="my-2" />
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="w-full text-xs"
+                        onClick={() => setSelectedInstruments([])}
+                      >
+                        Clear selection
+                      </Button>
+                    </>
+                  )}
+                </PopoverContent>
+              </Popover>
             </div>
 
-            {/* Outcome */}
+            {/* Outcome - Multi-select */}
             <div className="space-y-1.5">
               <label className="text-xs text-muted-foreground flex items-center gap-1.5">
                 <TrendingUp className="w-3 h-3" />
                 Outcome
               </label>
-              <Select>
-                <SelectTrigger className="h-9 bg-background border-border">
-                  <SelectValue placeholder="All" />
-                </SelectTrigger>
-                <SelectContent className="bg-popover border-border z-[60]">
-                  <SelectItem value="all">All</SelectItem>
-                  <SelectItem value="win">Win</SelectItem>
-                  <SelectItem value="loss">Loss</SelectItem>
-                  <SelectItem value="breakeven">Breakeven</SelectItem>
-                </SelectContent>
-              </Select>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className="w-full h-9 justify-between text-sm font-normal bg-background border-border">
+                    {selectedOutcomes.length === 0 ? 'All' : `${selectedOutcomes.length} selected`}
+                    <ChevronDown className="w-3 h-3 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-40 p-2 bg-popover border-border z-[70]" align="start">
+                  <div className="space-y-1">
+                    {OUTCOME_OPTIONS.map((option) => (
+                      <div 
+                        key={option.value} 
+                        className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-accent cursor-pointer"
+                        onClick={() => handleOutcomeToggle(option.value)}
+                      >
+                        <Checkbox checked={selectedOutcomes.includes(option.value)} />
+                        <span className="text-sm">{option.label}</span>
+                      </div>
+                    ))}
+                  </div>
+                  {selectedOutcomes.length > 0 && (
+                    <>
+                      <DropdownMenuSeparator className="my-2" />
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="w-full text-xs"
+                        onClick={() => setSelectedOutcomes([])}
+                      >
+                        Clear selection
+                      </Button>
+                    </>
+                  )}
+                </PopoverContent>
+              </Popover>
             </div>
 
-            {/* Month */}
+            {/* Month - UI only (not wired) */}
             <div className="space-y-1.5">
               <label className="text-xs text-muted-foreground flex items-center gap-1.5">
                 <CalendarIcon2 className="w-3 h-3" />
@@ -188,27 +355,50 @@ export const GlobalHeader = () => {
               </Select>
             </div>
 
-            {/* Hour */}
+            {/* Hour - Multi-select */}
             <div className="space-y-1.5">
               <label className="text-xs text-muted-foreground flex items-center gap-1.5">
                 <Clock className="w-3 h-3" />
                 Hour
               </label>
-              <Select>
-                <SelectTrigger className="h-9 bg-background border-border">
-                  <SelectValue placeholder="All" />
-                </SelectTrigger>
-                <SelectContent className="bg-popover border-border z-[60]">
-                  <SelectItem value="all">All</SelectItem>
-                  <SelectItem value="morning">Morning (6-12)</SelectItem>
-                  <SelectItem value="afternoon">Afternoon (12-18)</SelectItem>
-                  <SelectItem value="evening">Evening (18-24)</SelectItem>
-                  <SelectItem value="night">Night (0-6)</SelectItem>
-                </SelectContent>
-              </Select>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className="w-full h-9 justify-between text-sm font-normal bg-background border-border">
+                    {selectedHours.length === 0 ? 'All' : `${selectedHours.length} selected`}
+                    <ChevronDown className="w-3 h-3 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-44 p-2 bg-popover border-border z-[70]" align="start">
+                  <div className="space-y-1 max-h-48 overflow-auto">
+                    {HOUR_OPTIONS.map((option) => (
+                      <div 
+                        key={option.value} 
+                        className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-accent cursor-pointer"
+                        onClick={() => handleHourToggle(option.value)}
+                      >
+                        <Checkbox checked={selectedHours.includes(option.value)} />
+                        <span className="text-sm">{option.label}</span>
+                      </div>
+                    ))}
+                  </div>
+                  {selectedHours.length > 0 && (
+                    <>
+                      <DropdownMenuSeparator className="my-2" />
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="w-full text-xs"
+                        onClick={() => setSelectedHours([])}
+                      >
+                        Clear selection
+                      </Button>
+                    </>
+                  )}
+                </PopoverContent>
+              </Popover>
             </div>
 
-            {/* Trade Type */}
+            {/* Trade Type - UI only (not wired) */}
             <div className="space-y-1.5">
               <label className="text-xs text-muted-foreground flex items-center gap-1.5">
                 <ListFilter className="w-3 h-3" />
@@ -227,7 +417,7 @@ export const GlobalHeader = () => {
               </Select>
             </div>
 
-            {/* Checklist Type */}
+            {/* Checklist Type - UI only (not wired) */}
             <div className="space-y-1.5">
               <label className="text-xs text-muted-foreground flex items-center gap-1.5">
                 <ListFilter className="w-3 h-3" />
@@ -247,26 +437,54 @@ export const GlobalHeader = () => {
             </div>
 
             {/* Row 2: Setup, Direction, Day, Return %, Starred, empty */}
-            {/* Setup */}
+            {/* Setup - Multi-select from strategies */}
             <div className="space-y-1.5">
               <label className="text-xs text-muted-foreground flex items-center gap-1.5">
                 <BarChart2 className="w-3 h-3" />
                 Setup
               </label>
-              <Select>
-                <SelectTrigger className="h-9 bg-background border-border">
-                  <SelectValue placeholder="All" />
-                </SelectTrigger>
-                <SelectContent className="bg-popover border-border z-[60]">
-                  <SelectItem value="all">All</SelectItem>
-                  <SelectItem value="breakout">Breakout</SelectItem>
-                  <SelectItem value="pullback">Pullback</SelectItem>
-                  <SelectItem value="reversal">Reversal</SelectItem>
-                </SelectContent>
-              </Select>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className="w-full h-9 justify-between text-sm font-normal bg-background border-border">
+                    {selectedSetups.length === 0 ? 'All' : `${selectedSetups.length} selected`}
+                    <ChevronDown className="w-3 h-3 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-48 p-2 bg-popover border-border z-[70]" align="start">
+                  <div className="space-y-1 max-h-48 overflow-auto">
+                    {strategies.length === 0 ? (
+                      <div className="text-xs text-muted-foreground py-2 text-center">No setups found</div>
+                    ) : (
+                      strategies.map((strategy) => (
+                        <div 
+                          key={strategy.id} 
+                          className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-accent cursor-pointer"
+                          onClick={() => handleSetupToggle(strategy.id)}
+                        >
+                          <Checkbox checked={selectedSetups.includes(strategy.id)} />
+                          <span className="text-sm truncate">{strategy.name}</span>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                  {selectedSetups.length > 0 && (
+                    <>
+                      <DropdownMenuSeparator className="my-2" />
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="w-full text-xs"
+                        onClick={() => setSelectedSetups([])}
+                      >
+                        Clear selection
+                      </Button>
+                    </>
+                  )}
+                </PopoverContent>
+              </Popover>
             </div>
 
-            {/* Direction */}
+            {/* Direction - UI only (not wired) */}
             <div className="space-y-1.5">
               <label className="text-xs text-muted-foreground flex items-center gap-1.5">
                 <TrendingUp className="w-3 h-3" />
@@ -284,30 +502,50 @@ export const GlobalHeader = () => {
               </Select>
             </div>
 
-            {/* Day */}
+            {/* Day - Multi-select */}
             <div className="space-y-1.5">
               <label className="text-xs text-muted-foreground flex items-center gap-1.5">
                 <CalendarIcon2 className="w-3 h-3" />
                 Day
               </label>
-              <Select>
-                <SelectTrigger className="h-9 bg-background border-border">
-                  <SelectValue placeholder="All" />
-                </SelectTrigger>
-                <SelectContent className="bg-popover border-border z-[60]">
-                  <SelectItem value="all">All</SelectItem>
-                  <SelectItem value="monday">Monday</SelectItem>
-                  <SelectItem value="tuesday">Tuesday</SelectItem>
-                  <SelectItem value="wednesday">Wednesday</SelectItem>
-                  <SelectItem value="thursday">Thursday</SelectItem>
-                  <SelectItem value="friday">Friday</SelectItem>
-                  <SelectItem value="saturday">Saturday</SelectItem>
-                  <SelectItem value="sunday">Sunday</SelectItem>
-                </SelectContent>
-              </Select>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className="w-full h-9 justify-between text-sm font-normal bg-background border-border">
+                    {selectedDays.length === 0 ? 'All' : `${selectedDays.length} selected`}
+                    <ChevronDown className="w-3 h-3 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-40 p-2 bg-popover border-border z-[70]" align="start">
+                  <div className="space-y-1">
+                    {DAY_OPTIONS.map((option) => (
+                      <div 
+                        key={option.value} 
+                        className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-accent cursor-pointer"
+                        onClick={() => handleDayToggle(option.value)}
+                      >
+                        <Checkbox checked={selectedDays.includes(option.value)} />
+                        <span className="text-sm">{option.label}</span>
+                      </div>
+                    ))}
+                  </div>
+                  {selectedDays.length > 0 && (
+                    <>
+                      <DropdownMenuSeparator className="my-2" />
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="w-full text-xs"
+                        onClick={() => setSelectedDays([])}
+                      >
+                        Clear selection
+                      </Button>
+                    </>
+                  )}
+                </PopoverContent>
+              </Popover>
             </div>
 
-            {/* Return % */}
+            {/* Return % - UI only (not wired) */}
             <div className="space-y-1.5">
               <label className="text-xs text-muted-foreground flex items-center gap-1.5">
                 <Percent className="w-3 h-3" />
@@ -327,7 +565,7 @@ export const GlobalHeader = () => {
               </Select>
             </div>
 
-            {/* Starred */}
+            {/* Starred - UI only (not wired) */}
             <div className="space-y-1.5">
               <label className="text-xs text-muted-foreground flex items-center gap-1.5">
                 <Star className="w-3 h-3" />
@@ -349,7 +587,7 @@ export const GlobalHeader = () => {
             <div />
 
             {/* Row 3: RRR, Last Trades, Year, R-Multiple Gain, empty, empty */}
-            {/* RRR */}
+            {/* RRR - UI only (not wired) */}
             <div className="space-y-1.5">
               <label className="text-xs text-muted-foreground flex items-center gap-1.5">
                 <Percent className="w-3 h-3" />
@@ -368,27 +606,30 @@ export const GlobalHeader = () => {
               </Select>
             </div>
 
-            {/* Last Trades */}
+            {/* Last Trades - Single select */}
             <div className="space-y-1.5">
               <label className="text-xs text-muted-foreground flex items-center gap-1.5">
                 <Hash className="w-3 h-3" />
                 Last Trades
               </label>
-              <Select>
+              <Select 
+                value={lastTradesFilter === null ? 'all' : lastTradesFilter.toString()} 
+                onValueChange={(value) => setLastTradesFilter(value === 'all' ? null : parseInt(value) as LastTradesFilter)}
+              >
                 <SelectTrigger className="h-9 bg-background border-border">
                   <SelectValue placeholder="All" />
                 </SelectTrigger>
                 <SelectContent className="bg-popover border-border z-[60]">
-                  <SelectItem value="all">All</SelectItem>
-                  <SelectItem value="10">Last 10</SelectItem>
-                  <SelectItem value="25">Last 25</SelectItem>
-                  <SelectItem value="50">Last 50</SelectItem>
-                  <SelectItem value="100">Last 100</SelectItem>
+                  {LAST_TRADES_OPTIONS.map((option) => (
+                    <SelectItem key={option.label} value={option.value === null ? 'all' : option.value.toString()}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
 
-            {/* Year */}
+            {/* Year - UI only (not wired) */}
             <div className="space-y-1.5">
               <label className="text-xs text-muted-foreground flex items-center gap-1.5">
                 <CalendarIcon2 className="w-3 h-3" />
@@ -407,7 +648,7 @@ export const GlobalHeader = () => {
               </Select>
             </div>
 
-            {/* R-Multiple Gain */}
+            {/* R-Multiple Gain - UI only (not wired) */}
             <div className="space-y-1.5">
               <label className="text-xs text-muted-foreground flex items-center gap-1.5">
                 <Hash className="w-3 h-3" />

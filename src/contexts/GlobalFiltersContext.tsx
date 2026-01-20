@@ -22,6 +22,10 @@ export interface DateRange {
   to: Date | undefined;
 }
 
+export type OutcomeFilter = 'win' | 'loss' | 'breakeven';
+export type DayFilter = 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday' | 'sunday';
+export type LastTradesFilter = 10 | 25 | 50 | 100 | null;
+
 interface GlobalFiltersContextType {
   // Currency
   currency: CurrencyCode;
@@ -40,6 +44,20 @@ interface GlobalFiltersContextType {
   selectedAccounts: string[];
   setSelectedAccounts: (accounts: string[]) => void;
   isAllAccountsSelected: boolean;
+  
+  // Basic Filters
+  selectedInstruments: string[];
+  setSelectedInstruments: (instruments: string[]) => void;
+  selectedOutcomes: OutcomeFilter[];
+  setSelectedOutcomes: (outcomes: OutcomeFilter[]) => void;
+  selectedHours: number[];
+  setSelectedHours: (hours: number[]) => void;
+  selectedSetups: string[];
+  setSelectedSetups: (setups: string[]) => void;
+  selectedDays: DayFilter[];
+  setSelectedDays: (days: DayFilter[]) => void;
+  lastTradesFilter: LastTradesFilter;
+  setLastTradesFilter: (count: LastTradesFilter) => void;
 }
 
 const GlobalFiltersContext = createContext<GlobalFiltersContextType | undefined>(undefined);
@@ -54,6 +72,14 @@ export const GlobalFiltersProvider = ({ children }: { children: ReactNode }) => 
   
   // Account filter state - empty array means "all accounts"
   const [selectedAccounts, setSelectedAccounts] = useState<string[]>([]);
+  
+  // Basic filters state
+  const [selectedInstruments, setSelectedInstruments] = useState<string[]>([]);
+  const [selectedOutcomes, setSelectedOutcomes] = useState<OutcomeFilter[]>([]);
+  const [selectedHours, setSelectedHours] = useState<number[]>([]);
+  const [selectedSetups, setSelectedSetups] = useState<string[]>([]);
+  const [selectedDays, setSelectedDays] = useState<DayFilter[]>([]);
+  const [lastTradesFilter, setLastTradesFilter] = useState<LastTradesFilter>(null);
 
   const currencyConfig = CURRENCIES[currency];
 
@@ -130,7 +156,32 @@ export const GlobalFiltersProvider = ({ children }: { children: ReactNode }) => 
     selectedAccounts,
     setSelectedAccounts,
     isAllAccountsSelected,
-  }), [currency, currencyConfig, dateRange, datePreset, selectedAccounts]);
+    // Basic Filters
+    selectedInstruments,
+    setSelectedInstruments,
+    selectedOutcomes,
+    setSelectedOutcomes,
+    selectedHours,
+    setSelectedHours,
+    selectedSetups,
+    setSelectedSetups,
+    selectedDays,
+    setSelectedDays,
+    lastTradesFilter,
+    setLastTradesFilter,
+  }), [
+    currency, 
+    currencyConfig, 
+    dateRange, 
+    datePreset, 
+    selectedAccounts,
+    selectedInstruments,
+    selectedOutcomes,
+    selectedHours,
+    selectedSetups,
+    selectedDays,
+    lastTradesFilter,
+  ]);
 
   return (
     <GlobalFiltersContext.Provider value={value}>
