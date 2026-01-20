@@ -118,8 +118,9 @@ export const GlobalHeader = () => {
             <ChevronDown className="w-4 h-4 text-muted-foreground" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" className="w-[600px] p-4 bg-popover border-border z-50">
-          <div className="grid grid-cols-3 gap-3">
+        <DropdownMenuContent align="start" className="w-[900px] p-4 bg-popover border-border z-50">
+          <div className="grid grid-cols-6 gap-3">
+            {/* Row 1: Instrument, Outcome, Month, Hour, Trade Type, Checklist Type */}
             {/* Instrument */}
             <div className="space-y-1.5">
               <label className="text-xs text-muted-foreground flex items-center gap-1.5">
@@ -159,133 +160,6 @@ export const GlobalHeader = () => {
               </Select>
             </div>
 
-            {/* Setup */}
-            <div className="space-y-1.5">
-              <label className="text-xs text-muted-foreground flex items-center gap-1.5">
-                <BarChart2 className="w-3 h-3" />
-                Setup
-              </label>
-              <Select>
-                <SelectTrigger className="h-9 bg-background border-border">
-                  <SelectValue placeholder="All" />
-                </SelectTrigger>
-                <SelectContent className="bg-popover border-border z-[60]">
-                  <SelectItem value="all">All</SelectItem>
-                  <SelectItem value="breakout">Breakout</SelectItem>
-                  <SelectItem value="pullback">Pullback</SelectItem>
-                  <SelectItem value="reversal">Reversal</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Direction */}
-            <div className="space-y-1.5">
-              <label className="text-xs text-muted-foreground flex items-center gap-1.5">
-                <TrendingUp className="w-3 h-3" />
-                Direction
-              </label>
-              <Select>
-                <SelectTrigger className="h-9 bg-background border-border">
-                  <SelectValue placeholder="All" />
-                </SelectTrigger>
-                <SelectContent className="bg-popover border-border z-[60]">
-                  <SelectItem value="all">All</SelectItem>
-                  <SelectItem value="long">Long</SelectItem>
-                  <SelectItem value="short">Short</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* RRR */}
-            <div className="space-y-1.5">
-              <label className="text-xs text-muted-foreground flex items-center gap-1.5">
-                <Percent className="w-3 h-3" />
-                RRR
-              </label>
-              <Select>
-                <SelectTrigger className="h-9 bg-background border-border">
-                  <SelectValue placeholder="All" />
-                </SelectTrigger>
-                <SelectContent className="bg-popover border-border z-[60]">
-                  <SelectItem value="all">All</SelectItem>
-                  <SelectItem value="1">1:1</SelectItem>
-                  <SelectItem value="2">1:2</SelectItem>
-                  <SelectItem value="3">1:3+</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Starred */}
-            <div className="space-y-1.5">
-              <label className="text-xs text-muted-foreground flex items-center gap-1.5">
-                <Star className="w-3 h-3" />
-                Starred
-              </label>
-              <Select>
-                <SelectTrigger className="h-9 bg-background border-border">
-                  <SelectValue placeholder="All" />
-                </SelectTrigger>
-                <SelectContent className="bg-popover border-border z-[60]">
-                  <SelectItem value="all">All</SelectItem>
-                  <SelectItem value="starred">Starred Only</SelectItem>
-                  <SelectItem value="unstarred">Unstarred Only</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        </DropdownMenuContent>
-      </DropdownMenu>
-
-      {/* Advanced Filters Dropdown */}
-      <DropdownMenu open={advancedFiltersOpen} onOpenChange={setAdvancedFiltersOpen}>
-        <DropdownMenuTrigger asChild>
-          <Button variant="outline" className="gap-2 bg-background border-border">
-            <SlidersHorizontal className="w-4 h-4 text-muted-foreground" />
-            <span>Advanced Filters</span>
-            <ChevronDown className="w-4 h-4 text-muted-foreground" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" className="w-[700px] p-4 bg-popover border-border z-50">
-          <div className="grid grid-cols-4 gap-3">
-            {/* Date Range */}
-            <div className="space-y-1.5">
-              <label className="text-xs text-muted-foreground flex items-center gap-1.5">
-                <CalendarIcon2 className="w-3 h-3" />
-                Date Range
-              </label>
-              <Select>
-                <SelectTrigger className="h-9 bg-background border-border">
-                  <SelectValue placeholder="All" />
-                </SelectTrigger>
-                <SelectContent className="bg-popover border-border z-[60]">
-                  <SelectItem value="all">All Time</SelectItem>
-                  <SelectItem value="today">Today</SelectItem>
-                  <SelectItem value="week">This Week</SelectItem>
-                  <SelectItem value="month">This Month</SelectItem>
-                  <SelectItem value="custom">Custom</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Year */}
-            <div className="space-y-1.5">
-              <label className="text-xs text-muted-foreground flex items-center gap-1.5">
-                <CalendarIcon2 className="w-3 h-3" />
-                Year
-              </label>
-              <Select>
-                <SelectTrigger className="h-9 bg-background border-border">
-                  <SelectValue placeholder="All" />
-                </SelectTrigger>
-                <SelectContent className="bg-popover border-border z-[60]">
-                  <SelectItem value="all">All</SelectItem>
-                  <SelectItem value="2026">2026</SelectItem>
-                  <SelectItem value="2025">2025</SelectItem>
-                  <SelectItem value="2024">2024</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
             {/* Month */}
             <div className="space-y-1.5">
               <label className="text-xs text-muted-foreground flex items-center gap-1.5">
@@ -310,29 +184,6 @@ export const GlobalHeader = () => {
                   <SelectItem value="10">October</SelectItem>
                   <SelectItem value="11">November</SelectItem>
                   <SelectItem value="12">December</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Day */}
-            <div className="space-y-1.5">
-              <label className="text-xs text-muted-foreground flex items-center gap-1.5">
-                <CalendarIcon2 className="w-3 h-3" />
-                Day
-              </label>
-              <Select>
-                <SelectTrigger className="h-9 bg-background border-border">
-                  <SelectValue placeholder="All" />
-                </SelectTrigger>
-                <SelectContent className="bg-popover border-border z-[60]">
-                  <SelectItem value="all">All</SelectItem>
-                  <SelectItem value="monday">Monday</SelectItem>
-                  <SelectItem value="tuesday">Tuesday</SelectItem>
-                  <SelectItem value="wednesday">Wednesday</SelectItem>
-                  <SelectItem value="thursday">Thursday</SelectItem>
-                  <SelectItem value="friday">Friday</SelectItem>
-                  <SelectItem value="saturday">Saturday</SelectItem>
-                  <SelectItem value="sunday">Sunday</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -376,6 +227,86 @@ export const GlobalHeader = () => {
               </Select>
             </div>
 
+            {/* Checklist Type */}
+            <div className="space-y-1.5">
+              <label className="text-xs text-muted-foreground flex items-center gap-1.5">
+                <ListFilter className="w-3 h-3" />
+                Checklist Type
+              </label>
+              <Select>
+                <SelectTrigger className="h-9 bg-background border-border">
+                  <SelectValue placeholder="All" />
+                </SelectTrigger>
+                <SelectContent className="bg-popover border-border z-[60]">
+                  <SelectItem value="all">All</SelectItem>
+                  <SelectItem value="entry">Entry</SelectItem>
+                  <SelectItem value="exit">Exit</SelectItem>
+                  <SelectItem value="risk">Risk</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Row 2: Setup, Direction, Day, Return %, Starred, empty */}
+            {/* Setup */}
+            <div className="space-y-1.5">
+              <label className="text-xs text-muted-foreground flex items-center gap-1.5">
+                <BarChart2 className="w-3 h-3" />
+                Setup
+              </label>
+              <Select>
+                <SelectTrigger className="h-9 bg-background border-border">
+                  <SelectValue placeholder="All" />
+                </SelectTrigger>
+                <SelectContent className="bg-popover border-border z-[60]">
+                  <SelectItem value="all">All</SelectItem>
+                  <SelectItem value="breakout">Breakout</SelectItem>
+                  <SelectItem value="pullback">Pullback</SelectItem>
+                  <SelectItem value="reversal">Reversal</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Direction */}
+            <div className="space-y-1.5">
+              <label className="text-xs text-muted-foreground flex items-center gap-1.5">
+                <TrendingUp className="w-3 h-3" />
+                Direction
+              </label>
+              <Select>
+                <SelectTrigger className="h-9 bg-background border-border">
+                  <SelectValue placeholder="All" />
+                </SelectTrigger>
+                <SelectContent className="bg-popover border-border z-[60]">
+                  <SelectItem value="all">All</SelectItem>
+                  <SelectItem value="long">Long</SelectItem>
+                  <SelectItem value="short">Short</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Day */}
+            <div className="space-y-1.5">
+              <label className="text-xs text-muted-foreground flex items-center gap-1.5">
+                <CalendarIcon2 className="w-3 h-3" />
+                Day
+              </label>
+              <Select>
+                <SelectTrigger className="h-9 bg-background border-border">
+                  <SelectValue placeholder="All" />
+                </SelectTrigger>
+                <SelectContent className="bg-popover border-border z-[60]">
+                  <SelectItem value="all">All</SelectItem>
+                  <SelectItem value="monday">Monday</SelectItem>
+                  <SelectItem value="tuesday">Tuesday</SelectItem>
+                  <SelectItem value="wednesday">Wednesday</SelectItem>
+                  <SelectItem value="thursday">Thursday</SelectItem>
+                  <SelectItem value="friday">Friday</SelectItem>
+                  <SelectItem value="saturday">Saturday</SelectItem>
+                  <SelectItem value="sunday">Sunday</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
             {/* Return % */}
             <div className="space-y-1.5">
               <label className="text-xs text-muted-foreground flex items-center gap-1.5">
@@ -392,6 +323,86 @@ export const GlobalHeader = () => {
                   <SelectItem value="negative">&lt; 0%</SelectItem>
                   <SelectItem value="high">&gt; 2%</SelectItem>
                   <SelectItem value="vhigh">&gt; 5%</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Starred */}
+            <div className="space-y-1.5">
+              <label className="text-xs text-muted-foreground flex items-center gap-1.5">
+                <Star className="w-3 h-3" />
+                Starred
+              </label>
+              <Select>
+                <SelectTrigger className="h-9 bg-background border-border">
+                  <SelectValue placeholder="All" />
+                </SelectTrigger>
+                <SelectContent className="bg-popover border-border z-[60]">
+                  <SelectItem value="all">All</SelectItem>
+                  <SelectItem value="starred">Starred Only</SelectItem>
+                  <SelectItem value="unstarred">Unstarred Only</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Empty cell for row alignment */}
+            <div />
+
+            {/* Row 3: RRR, Last Trades, Year, R-Multiple Gain, empty, empty */}
+            {/* RRR */}
+            <div className="space-y-1.5">
+              <label className="text-xs text-muted-foreground flex items-center gap-1.5">
+                <Percent className="w-3 h-3" />
+                RRR
+              </label>
+              <Select>
+                <SelectTrigger className="h-9 bg-background border-border">
+                  <SelectValue placeholder="All" />
+                </SelectTrigger>
+                <SelectContent className="bg-popover border-border z-[60]">
+                  <SelectItem value="all">All</SelectItem>
+                  <SelectItem value="1">1:1</SelectItem>
+                  <SelectItem value="2">1:2</SelectItem>
+                  <SelectItem value="3">1:3+</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Last Trades */}
+            <div className="space-y-1.5">
+              <label className="text-xs text-muted-foreground flex items-center gap-1.5">
+                <Hash className="w-3 h-3" />
+                Last Trades
+              </label>
+              <Select>
+                <SelectTrigger className="h-9 bg-background border-border">
+                  <SelectValue placeholder="All" />
+                </SelectTrigger>
+                <SelectContent className="bg-popover border-border z-[60]">
+                  <SelectItem value="all">All</SelectItem>
+                  <SelectItem value="10">Last 10</SelectItem>
+                  <SelectItem value="25">Last 25</SelectItem>
+                  <SelectItem value="50">Last 50</SelectItem>
+                  <SelectItem value="100">Last 100</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Year */}
+            <div className="space-y-1.5">
+              <label className="text-xs text-muted-foreground flex items-center gap-1.5">
+                <CalendarIcon2 className="w-3 h-3" />
+                Year
+              </label>
+              <Select>
+                <SelectTrigger className="h-9 bg-background border-border">
+                  <SelectValue placeholder="All" />
+                </SelectTrigger>
+                <SelectContent className="bg-popover border-border z-[60]">
+                  <SelectItem value="all">All</SelectItem>
+                  <SelectItem value="2026">2026</SelectItem>
+                  <SelectItem value="2025">2025</SelectItem>
+                  <SelectItem value="2024">2024</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -415,45 +426,37 @@ export const GlobalHeader = () => {
                 </SelectContent>
               </Select>
             </div>
+          </div>
+        </DropdownMenuContent>
+      </DropdownMenu>
 
-            {/* Last Trades */}
-            <div className="space-y-1.5">
-              <label className="text-xs text-muted-foreground flex items-center gap-1.5">
-                <ListFilter className="w-3 h-3" />
-                Last Trades
-              </label>
-              <Select>
-                <SelectTrigger className="h-9 bg-background border-border">
-                  <SelectValue placeholder="All" />
-                </SelectTrigger>
-                <SelectContent className="bg-popover border-border z-[60]">
-                  <SelectItem value="all">All</SelectItem>
-                  <SelectItem value="10">Last 10</SelectItem>
-                  <SelectItem value="25">Last 25</SelectItem>
-                  <SelectItem value="50">Last 50</SelectItem>
-                  <SelectItem value="100">Last 100</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Checklist Type */}
-            <div className="space-y-1.5 col-span-2">
-              <label className="text-xs text-muted-foreground flex items-center gap-1.5">
-                <ListFilter className="w-3 h-3" />
-                Checklist Type
-              </label>
-              <Select>
-                <SelectTrigger className="h-9 bg-background border-border">
-                  <SelectValue placeholder="All" />
-                </SelectTrigger>
-                <SelectContent className="bg-popover border-border z-[60]">
-                  <SelectItem value="all">All</SelectItem>
-                  <SelectItem value="entry">Entry Checklist</SelectItem>
-                  <SelectItem value="exit">Exit Checklist</SelectItem>
-                  <SelectItem value="risk">Risk Checklist</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+      {/* Advanced Filters Dropdown */}
+      <DropdownMenu open={advancedFiltersOpen} onOpenChange={setAdvancedFiltersOpen}>
+        <DropdownMenuTrigger asChild>
+          <Button variant="outline" className="gap-2 bg-background border-border">
+            <SlidersHorizontal className="w-4 h-4 text-muted-foreground" />
+            <span>Advanced Filters</span>
+            <ChevronDown className="w-4 h-4 text-muted-foreground" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="start" className="w-[250px] p-4 bg-popover border-border z-50">
+          <div className="space-y-1.5">
+            <label className="text-xs text-muted-foreground flex items-center gap-1.5">
+              <CalendarIcon2 className="w-3 h-3" />
+              Date Range
+            </label>
+            <Select>
+              <SelectTrigger className="h-9 bg-background border-border">
+                <SelectValue placeholder="All" />
+              </SelectTrigger>
+              <SelectContent className="bg-popover border-border z-[60]">
+                <SelectItem value="all">All Time</SelectItem>
+                <SelectItem value="today">Today</SelectItem>
+                <SelectItem value="week">This Week</SelectItem>
+                <SelectItem value="month">This Month</SelectItem>
+                <SelectItem value="custom">Custom</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </DropdownMenuContent>
       </DropdownMenu>
