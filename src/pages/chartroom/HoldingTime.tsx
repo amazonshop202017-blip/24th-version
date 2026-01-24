@@ -341,14 +341,6 @@ const HoldingTime = () => {
         </CardContent>
       </Card>
 
-      {/* Trade Duration Charts Section */}
-      <PerformanceByDurationChart />
-      
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <TradeCountByDurationChart />
-        <WinRateByDurationChart />
-      </div>
-
       {/* Metrics Cards */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
         {metricsCards.map((metric) => (
@@ -363,6 +355,14 @@ const HoldingTime = () => {
             </CardContent>
           </Card>
         ))}
+      </div>
+
+      {/* Trade Duration Charts Section */}
+      <PerformanceByDurationChart />
+      
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <TradeCountByDurationChart />
+        <WinRateByDurationChart />
       </div>
     </div>
   );

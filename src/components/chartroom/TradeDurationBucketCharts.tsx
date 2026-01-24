@@ -3,6 +3,7 @@ import { useFilteredTradesContext } from '@/contexts/TradesContext';
 import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
 import { calculateTradeMetrics } from '@/types/trade';
 import { Card, CardContent } from '@/components/ui/card';
+import { BarChart2, Clock, Percent } from 'lucide-react';
 import {
   BarChart,
   Bar,
@@ -11,7 +12,6 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  Cell,
   ReferenceLine,
 } from 'recharts';
 
@@ -21,19 +21,19 @@ interface DurationBucket {
   maxMinutes: number;
 }
 
-// Duration buckets matching typical trading patterns
+// Duration buckets matching the reference design
 const DURATION_BUCKETS: DurationBucket[] = [
-  { label: '0-15s', minMinutes: 0, maxMinutes: 0.25 },
-  { label: '15-45s', minMinutes: 0.25, maxMinutes: 0.75 },
+  { label: '0s-15s', minMinutes: 0, maxMinutes: 0.25 },
+  { label: '15s-45s', minMinutes: 0.25, maxMinutes: 0.75 },
   { label: '45s-1m', minMinutes: 0.75, maxMinutes: 1 },
-  { label: '1-2m', minMinutes: 1, maxMinutes: 2 },
-  { label: '2-5m', minMinutes: 2, maxMinutes: 5 },
-  { label: '5-15m', minMinutes: 5, maxMinutes: 15 },
-  { label: '15-30m', minMinutes: 15, maxMinutes: 30 },
+  { label: '1m-2m', minMinutes: 1, maxMinutes: 2 },
+  { label: '2m-5m', minMinutes: 2, maxMinutes: 5 },
+  { label: '5m-10m', minMinutes: 5, maxMinutes: 10 },
+  { label: '10m-30m', minMinutes: 10, maxMinutes: 30 },
   { label: '30m-1h', minMinutes: 30, maxMinutes: 60 },
-  { label: '1-2h', minMinutes: 60, maxMinutes: 120 },
-  { label: '2-4h', minMinutes: 120, maxMinutes: 240 },
-  { label: '4h+', minMinutes: 240, maxMinutes: Infinity },
+  { label: '1h-2h', minMinutes: 60, maxMinutes: 120 },
+  { label: '2h-4h', minMinutes: 120, maxMinutes: 240 },
+  { label: '4h-24h', minMinutes: 240, maxMinutes: 1440 },
 ];
 
 interface BucketData {
@@ -86,71 +86,80 @@ export const useTradeDurationBuckets = () => {
       }
     });
 
-    // Calculate win rates and filter out empty buckets
+    // Calculate win rates - keep all buckets for consistent layout
     const result: BucketData[] = [];
     DURATION_BUCKETS.forEach((bucket) => {
       const data = bucketMap.get(bucket.label)!;
       if (data.tradeCount > 0) {
         data.winRate = (data.winCount / data.tradeCount) * 100;
-        result.push(data);
       }
+      result.push(data);
     });
 
     return result;
   }, [filteredTrades]);
 };
 
-// Performance by Trade Duration Chart
+// Performance by Trade Duration Chart - Horizontal bars
 export const PerformanceByDurationChart = () => {
   const bucketData = useTradeDurationBuckets();
   const { currencyConfig } = useGlobalFilters();
 
   const formatCurrency = (value: number) => {
-    const prefix = value >= 0 ? currencyConfig.symbol : `-${currencyConfig.symbol}`;
+    if (value === 0) return '$0';
+    const prefix = value >= 0 ? '+$' : '-$';
     return `${prefix}${Math.abs(value).toFixed(0)}`;
   };
 
-  if (bucketData.length === 0) {
-    return (
-      <Card className="bg-card border-border">
-        <CardContent className="p-6">
-          <h3 className="text-lg font-semibold mb-4">Performance by Trade Duration</h3>
-          <div className="h-[300px] flex items-center justify-center text-muted-foreground">
-            No trade data available
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
+  // Calculate domain for x-axis
+  const xDomain = useMemo(() => {
+    const values = bucketData.map(d => d.totalPnl);
+    const min = Math.min(...values, 0);
+    const max = Math.max(...values, 0);
+    const padding = Math.max(Math.abs(max - min) * 0.1, 50);
+    return [min - padding, max + padding];
+  }, [bucketData]);
 
   return (
     <Card className="bg-card border-border">
       <CardContent className="p-6">
-        <h3 className="text-lg font-semibold mb-4">Performance by Trade Duration</h3>
-        <div className="h-[300px]">
+        <div className="flex items-center gap-2 mb-6">
+          <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
+            <BarChart2 className="w-4 h-4 text-primary" />
+          </div>
+          <h3 className="text-base font-semibold">Performance By Trade Duration</h3>
+        </div>
+        <div className="h-[350px]">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={bucketData} margin={{ top: 20, right: 20, left: 10, bottom: 30 }}>
+            <BarChart
+              data={bucketData}
+              layout="vertical"
+              margin={{ top: 10, right: 80, left: 10, bottom: 10 }}
+            >
               <CartesianGrid
                 strokeDasharray="3 3"
                 stroke="hsl(var(--border))"
-                opacity={0.3}
+                opacity={0.2}
+                horizontal={false}
               />
               <XAxis
-                dataKey="bucket"
+                type="number"
+                domain={xDomain}
+                orientation="top"
                 axisLine={{ stroke: 'hsl(var(--border))' }}
                 tickLine={false}
                 tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 11 }}
-                angle={-45}
-                textAnchor="end"
-                height={60}
+                tickFormatter={(value) => `${currencyConfig.symbol}${value}`}
               />
               <YAxis
-                axisLine={{ stroke: 'hsl(var(--border))' }}
+                type="category"
+                dataKey="bucket"
+                axisLine={false}
                 tickLine={false}
                 tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 11 }}
-                tickFormatter={formatCurrency}
+                width={70}
               />
-              <ReferenceLine y={0} stroke="hsl(var(--border))" strokeWidth={1} />
+              <ReferenceLine x={0} stroke="hsl(var(--border))" strokeWidth={1} />
               <Tooltip
                 content={({ active, payload }) => {
                   if (!active || !payload || payload.length === 0) return null;
@@ -170,14 +179,17 @@ export const PerformanceByDurationChart = () => {
                   );
                 }}
               />
-              <Bar dataKey="totalPnl" radius={[4, 4, 0, 0]}>
-                {bucketData.map((entry, index) => (
-                  <Cell
-                    key={`cell-${index}`}
-                    fill={entry.totalPnl >= 0 ? 'hsl(142, 71%, 45%)' : 'hsl(0, 84%, 60%)'}
-                  />
-                ))}
-              </Bar>
+              <Bar
+                dataKey="totalPnl"
+                fill="hsl(217, 91%, 60%)"
+                radius={[0, 4, 4, 0]}
+                label={{
+                  position: 'right',
+                  fill: 'hsl(var(--muted-foreground))',
+                  fontSize: 11,
+                  formatter: (value: number) => value !== 0 ? formatCurrency(value) : '',
+                }}
+              />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -186,48 +198,53 @@ export const PerformanceByDurationChart = () => {
   );
 };
 
-// Trade Count by Trade Duration Chart
+// Trade Count by Trade Duration Chart - Horizontal bars
 export const TradeCountByDurationChart = () => {
   const bucketData = useTradeDurationBuckets();
 
-  if (bucketData.length === 0) {
-    return (
-      <Card className="bg-card border-border">
-        <CardContent className="p-6">
-          <h3 className="text-lg font-semibold mb-4">Trade Count by Duration</h3>
-          <div className="h-[250px] flex items-center justify-center text-muted-foreground">
-            No trade data available
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
+  // Calculate max for domain
+  const xMax = useMemo(() => {
+    const max = Math.max(...bucketData.map(d => d.tradeCount), 1);
+    return Math.ceil(max * 1.2);
+  }, [bucketData]);
 
   return (
     <Card className="bg-card border-border">
       <CardContent className="p-6">
-        <h3 className="text-lg font-semibold mb-4">Trade Count by Duration</h3>
-        <div className="h-[250px]">
+        <div className="flex items-center gap-2 mb-6">
+          <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
+            <Clock className="w-4 h-4 text-primary" />
+          </div>
+          <h3 className="text-base font-semibold">Trade Count By Trade Duration</h3>
+        </div>
+        <div className="h-[350px]">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={bucketData} margin={{ top: 20, right: 20, left: 10, bottom: 30 }}>
+            <BarChart
+              data={bucketData}
+              layout="vertical"
+              margin={{ top: 10, right: 50, left: 10, bottom: 10 }}
+            >
               <CartesianGrid
                 strokeDasharray="3 3"
                 stroke="hsl(var(--border))"
-                opacity={0.3}
+                opacity={0.2}
+                horizontal={false}
               />
               <XAxis
-                dataKey="bucket"
+                type="number"
+                domain={[0, xMax]}
+                orientation="top"
                 axisLine={{ stroke: 'hsl(var(--border))' }}
                 tickLine={false}
                 tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 11 }}
-                angle={-45}
-                textAnchor="end"
-                height={60}
               />
               <YAxis
-                axisLine={{ stroke: 'hsl(var(--border))' }}
+                type="category"
+                dataKey="bucket"
+                axisLine={false}
                 tickLine={false}
                 tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 11 }}
+                width={70}
               />
               <Tooltip
                 content={({ active, payload }) => {
@@ -247,7 +264,17 @@ export const TradeCountByDurationChart = () => {
                   );
                 }}
               />
-              <Bar dataKey="tradeCount" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+              <Bar
+                dataKey="tradeCount"
+                fill="hsl(217, 91%, 60%)"
+                radius={[0, 4, 4, 0]}
+                label={{
+                  position: 'right',
+                  fill: 'hsl(var(--muted-foreground))',
+                  fontSize: 11,
+                  formatter: (value: number) => value > 0 ? value : '',
+                }}
+              />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -256,52 +283,63 @@ export const TradeCountByDurationChart = () => {
   );
 };
 
-// Win Rate by Trade Duration Chart
+// Win Rate by Trade Duration Chart - Horizontal bars
 export const WinRateByDurationChart = () => {
   const bucketData = useTradeDurationBuckets();
 
-  if (bucketData.length === 0) {
-    return (
-      <Card className="bg-card border-border">
-        <CardContent className="p-6">
-          <h3 className="text-lg font-semibold mb-4">Win Rate by Duration</h3>
-          <div className="h-[250px] flex items-center justify-center text-muted-foreground">
-            No trade data available
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
+  // Calculate overall win rate
+  const overallWinRate = useMemo(() => {
+    const totalTrades = bucketData.reduce((sum, d) => sum + d.tradeCount, 0);
+    const totalWins = bucketData.reduce((sum, d) => sum + d.winCount, 0);
+    return totalTrades > 0 ? (totalWins / totalTrades) * 100 : 0;
+  }, [bucketData]);
 
   return (
     <Card className="bg-card border-border">
       <CardContent className="p-6">
-        <h3 className="text-lg font-semibold mb-4">Win Rate by Duration</h3>
-        <div className="h-[250px]">
+        <div className="flex items-center gap-2 mb-6">
+          <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
+            <Percent className="w-4 h-4 text-primary" />
+          </div>
+          <h3 className="text-base font-semibold">Win Rate By Trade Duration</h3>
+        </div>
+        <div className="h-[350px] relative">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={bucketData} margin={{ top: 20, right: 20, left: 10, bottom: 30 }}>
+            <BarChart
+              data={bucketData}
+              layout="vertical"
+              margin={{ top: 10, right: 50, left: 10, bottom: 10 }}
+            >
               <CartesianGrid
                 strokeDasharray="3 3"
                 stroke="hsl(var(--border))"
-                opacity={0.3}
+                opacity={0.2}
+                horizontal={false}
               />
               <XAxis
-                dataKey="bucket"
-                axisLine={{ stroke: 'hsl(var(--border))' }}
-                tickLine={false}
-                tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 11 }}
-                angle={-45}
-                textAnchor="end"
-                height={60}
-              />
-              <YAxis
+                type="number"
                 domain={[0, 100]}
+                orientation="top"
                 axisLine={{ stroke: 'hsl(var(--border))' }}
                 tickLine={false}
                 tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 11 }}
                 tickFormatter={(value) => `${value}%`}
+                ticks={[0, 25, 50, 75, 100]}
               />
-              <ReferenceLine y={50} stroke="hsl(var(--border))" strokeDasharray="3 3" />
+              <YAxis
+                type="category"
+                dataKey="bucket"
+                axisLine={false}
+                tickLine={false}
+                tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 11 }}
+                width={70}
+              />
+              <ReferenceLine 
+                x={overallWinRate} 
+                stroke="hsl(45, 93%, 47%)" 
+                strokeWidth={2}
+                strokeDasharray="3 3"
+              />
               <Tooltip
                 content={({ active, payload }) => {
                   if (!active || !payload || payload.length === 0) return null;
@@ -314,23 +352,31 @@ export const WinRateByDurationChart = () => {
                           Win Rate: {data.winRate.toFixed(1)}%
                         </p>
                         <p className="text-muted-foreground">
-                          {data.winCount}W / {data.lossCount}L
+                          {data.winCount}W / {data.lossCount}L ({data.tradeCount} trades)
                         </p>
                       </div>
                     </div>
                   );
                 }}
               />
-              <Bar dataKey="winRate" radius={[4, 4, 0, 0]}>
-                {bucketData.map((entry, index) => (
-                  <Cell
-                    key={`cell-${index}`}
-                    fill={entry.winRate >= 50 ? 'hsl(142, 71%, 45%)' : 'hsl(0, 84%, 60%)'}
-                  />
-                ))}
-              </Bar>
+              <Bar
+                dataKey="winRate"
+                fill="hsl(217, 91%, 60%)"
+                radius={[0, 4, 4, 0]}
+                label={{
+                  position: 'right',
+                  fill: 'hsl(var(--muted-foreground))',
+                  fontSize: 11,
+                  formatter: (value: number) => value > 0 ? `${value.toFixed(0)}%` : '',
+                }}
+              />
             </BarChart>
           </ResponsiveContainer>
+          
+          {/* Overall Win Rate Badge */}
+          <div className="absolute bottom-0 right-0 px-2 py-1 bg-amber-500/20 border border-amber-500/50 rounded text-xs text-amber-400 font-medium">
+            {overallWinRate.toFixed(1)}% Overall
+          </div>
         </div>
       </CardContent>
     </Card>
