@@ -29,6 +29,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { InstrumentPerformanceChart } from '@/components/chartroom/InstrumentPerformanceChart';
 
 type DisplayType = 'dollar' | 'percent' | 'winrate' | 'tradecount';
 
@@ -232,7 +233,19 @@ const PerformanceByInstrument = () => {
         <p className="text-muted-foreground mt-1">Analyze your trading performance across different instruments.</p>
       </div>
 
-      {/* Chart Container */}
+      {/* Side-by-side Comparison Charts */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <InstrumentPerformanceChart 
+          defaultDisplayType="dollar" 
+          title="Instrument Performance (Return $)" 
+        />
+        <InstrumentPerformanceChart 
+          defaultDisplayType="winrate" 
+          title="Instrument Performance (Winrate %)" 
+        />
+      </div>
+
+      {/* Original Detailed Chart Container */}
       <Card className="bg-card border-border">
         <CardContent className="p-6">
           {/* Header with Dropdowns */}

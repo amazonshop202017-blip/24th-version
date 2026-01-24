@@ -30,6 +30,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { SetupPerformanceChart } from '@/components/chartroom/SetupPerformanceChart';
 
 type DisplayType = 'dollar' | 'percent' | 'winrate' | 'tradecount';
 
@@ -257,7 +258,19 @@ const PerformanceBySetup = () => {
         <p className="text-muted-foreground mt-1">Analyze your trading performance across different setups and patterns.</p>
       </div>
 
-      {/* Chart Container */}
+      {/* Side-by-side Comparison Charts */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <SetupPerformanceChart 
+          defaultDisplayType="dollar" 
+          title="Setup Performance (Return $)" 
+        />
+        <SetupPerformanceChart 
+          defaultDisplayType="winrate" 
+          title="Setup Performance (Winrate %)" 
+        />
+      </div>
+
+      {/* Original Detailed Chart Container */}
       <Card className="bg-card border-border">
         <CardContent className="p-6">
           {/* Header with Dropdowns */}
