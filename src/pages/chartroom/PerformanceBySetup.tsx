@@ -262,11 +262,11 @@ const PerformanceBySetup = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <SetupPerformanceChart 
           defaultDisplayType="dollar" 
-          title="Setup Performance (Return $)" 
+          title="Setup Performance 1" 
         />
         <SetupPerformanceChart 
           defaultDisplayType="winrate" 
-          title="Setup Performance (Winrate %)" 
+          title="Setup Performance 2" 
         />
       </div>
 
