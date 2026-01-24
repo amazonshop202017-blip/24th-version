@@ -14,6 +14,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { TradeModal } from "@/components/trades/TradeModal";
 import Dashboard from "./pages/Dashboard";
 import Trades from "./pages/Trades";
+import DaysView from "./pages/DaysView";
 import Strategies from "./pages/Strategies";
 import StrategyDetail from "./pages/StrategyDetail";
 import Reports from "./pages/Reports";
@@ -49,6 +50,7 @@ const App = () => (
                         <Routes>
                           <Route path="/" element={<Dashboard />} />
                           <Route path="/trades" element={<Trades />} />
+                          <Route path="/trades/days-view" element={<DaysView />} />
                           <Route path="/strategies" element={<Strategies />} />
                           <Route path="/strategies/:id" element={<StrategyDetail />} />
                           <Route path="/reports/*" element={<Reports />} />

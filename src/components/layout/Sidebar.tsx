@@ -9,9 +9,13 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 
 const navItems = [
   { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
-  { icon: ListOrdered, label: 'Trades', path: '/trades' },
   { icon: Target, label: 'Setups', path: '/strategies' },
   { icon: FileText, label: 'Reports', path: '/reports' },
+];
+
+const tradesItems = [
+  { label: 'All Trades', path: '/trades' },
+  { label: 'Days View', path: '/trades/days-view' },
 ];
 
 const chartRoomItems = [
@@ -33,8 +37,12 @@ export const Sidebar = () => {
   const [chartRoomOpen, setChartRoomOpen] = useState(
     location.pathname.startsWith('/chart-room')
   );
+  const [tradesOpen, setTradesOpen] = useState(
+    location.pathname.startsWith('/trades')
+  );
   
   const isChartRoomActive = location.pathname.startsWith('/chart-room');
+  const isTradesActive = location.pathname.startsWith('/trades');
 
   return (
     <aside 
@@ -103,6 +111,116 @@ export const Sidebar = () => {
 
       {/* Navigation */}
       <nav className="flex-1 px-3 space-y-1">
+        {/* Dashboard */}
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <NavLink to="/" className="block">
+              <motion.div
+                className={cn(
+                  "flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200",
+                  isCollapsed ? "justify-center" : "",
+                  location.pathname === '/'
+                    ? "bg-primary text-primary-foreground shadow-lg"
+                    : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                )}
+                whileHover={{ x: location.pathname === '/' || isCollapsed ? 0 : 4 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <LayoutDashboard className="w-5 h-5 flex-shrink-0" />
+                <AnimatePresence>
+                  {!isCollapsed && (
+                    <motion.span
+                      initial={{ opacity: 0, width: 0 }}
+                      animate={{ opacity: 1, width: 'auto' }}
+                      exit={{ opacity: 0, width: 0 }}
+                      className="font-medium overflow-hidden whitespace-nowrap"
+                    >
+                      Dashboard
+                    </motion.span>
+                  )}
+                </AnimatePresence>
+              </motion.div>
+            </NavLink>
+          </TooltipTrigger>
+          {isCollapsed && (
+            <TooltipContent side="right">
+              <p>Dashboard</p>
+            </TooltipContent>
+          )}
+        </Tooltip>
+
+        {/* Trades Dropdown */}
+        {isCollapsed ? (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <NavLink to="/trades" className="block">
+                <motion.div
+                  className={cn(
+                    "flex items-center justify-center px-3 py-3 rounded-xl transition-all duration-200",
+                    isTradesActive
+                      ? "bg-primary text-primary-foreground shadow-lg"
+                      : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                  )}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <ListOrdered className="w-5 h-5 flex-shrink-0" />
+                </motion.div>
+              </NavLink>
+            </TooltipTrigger>
+            <TooltipContent side="right">
+              <p>Trades</p>
+            </TooltipContent>
+          </Tooltip>
+        ) : (
+          <Collapsible open={tradesOpen} onOpenChange={setTradesOpen}>
+            <CollapsibleTrigger asChild>
+              <motion.button
+                className={cn(
+                  "w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200",
+                  isTradesActive
+                    ? "bg-primary text-primary-foreground shadow-lg"
+                    : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                )}
+                whileHover={{ x: isTradesActive ? 0 : 4 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <ListOrdered className="w-5 h-5 flex-shrink-0" />
+                <span className="font-medium flex-1 text-left">Trades</span>
+                <ChevronDown 
+                  className={cn(
+                    "w-4 h-4 transition-transform duration-200",
+                    tradesOpen ? "rotate-180" : ""
+                  )} 
+                />
+              </motion.button>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <div className="ml-4 mt-1 space-y-1 border-l border-sidebar-border pl-4">
+                {tradesItems.map((item) => {
+                  const isSubActive = location.pathname === item.path;
+                  return (
+                    <NavLink key={item.path} to={item.path} className="block">
+                      <motion.div
+                        className={cn(
+                          "flex items-center px-3 py-2 rounded-lg text-sm transition-all duration-200",
+                          isSubActive
+                            ? "bg-primary/10 text-primary font-medium"
+                            : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                        )}
+                        whileHover={{ x: isSubActive ? 0 : 4 }}
+                        whileTap={{ scale: 0.98 }}
+                      >
+                        {item.label}
+                      </motion.div>
+                    </NavLink>
+                  );
+                })}
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
+        )}
+
+        {/* Other Nav Items */}
         {navItems.map((item) => {
           const isActive = location.pathname === item.path || 
             (item.path === '/reports' && location.pathname.startsWith('/reports'));
