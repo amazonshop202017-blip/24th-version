@@ -30,6 +30,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { PerformanceByTimeChart } from '@/components/chartroom/PerformanceByTimeChart';
 
 type DisplayType = 'dollar' | 'percent' | 'winrate' | 'tradecount';
 type DateSettingType = 'entry' | 'exit';
@@ -451,7 +452,13 @@ const PerformanceByTime = () => {
         <p className="text-muted-foreground mt-1">Analyze your trading performance across different time periods.</p>
       </div>
 
-      {/* Chart Container */}
+      {/* Side-by-Side Charts */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <PerformanceByTimeChart defaultDisplayType="dollar" />
+        <PerformanceByTimeChart defaultDisplayType="winrate" />
+      </div>
+
+      {/* Original Detailed Chart Container */}
       <Card className="bg-card border-border">
         <CardContent className="p-6">
           {/* Header with Dropdowns */}
