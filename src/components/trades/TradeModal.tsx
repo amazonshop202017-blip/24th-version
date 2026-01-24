@@ -1143,101 +1143,18 @@ export const TradeModal = () => {
                 </div>
               </div>
 
-              {/* Custom Stats Section */}
+              {/* Assign Tags Section */}
               <div className="space-y-4">
-                <h4 className="text-sm font-medium text-foreground">Custom Stats</h4>
-                
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-1.5">
-                    <Label className="text-xs text-muted-foreground">Timeframe</Label>
-                    <TypeableCombobox
-                      value={timeframe}
-                      onChange={setTimeframe}
-                      options={customStatsOptions.timeframes}
-                      onAddNew={addTimeframe}
-                      placeholder="Select..."
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label className="text-xs text-muted-foreground">Confluence</Label>
-                    <TypeableCombobox
-                      value={confluence}
-                      onChange={setConfluence}
-                      options={customStatsOptions.confluences}
-                      onAddNew={addConfluence}
-                      placeholder="Select..."
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-1.5">
-                    <Label className="text-xs text-muted-foreground">Pattern</Label>
-                    <TypeableCombobox
-                      value={pattern}
-                      onChange={setPattern}
-                      options={customStatsOptions.patterns}
-                      onAddNew={addPattern}
-                      placeholder="Select..."
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label className="text-xs text-muted-foreground">Preparation</Label>
-                    <TypeableCombobox
-                      value={preparation}
-                      onChange={setPreparation}
-                      options={customStatsOptions.preparations}
-                      onAddNew={addPreparation}
-                      placeholder="Select..."
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-1.5">
-                    <Label className="text-xs text-muted-foreground">Mental</Label>
-                    <TypeableCombobox
-                      value={mental}
-                      onChange={setMental}
-                      options={customStatsOptions.mentals}
-                      onAddNew={addMental}
-                      placeholder="Select..."
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label className="text-xs text-muted-foreground">Indicator</Label>
-                    <TypeableCombobox
-                      value={indicator}
-                      onChange={setIndicator}
-                      options={customStatsOptions.indicators}
-                      onAddNew={addIndicator}
-                      placeholder="Select..."
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-1.5">
-                    <Label className="text-xs text-muted-foreground">Market General</Label>
-                    <TypeableCombobox
-                      value={marketGeneral}
-                      onChange={setMarketGeneral}
-                      options={customStatsOptions.marketGenerals}
-                      onAddNew={addMarketGeneral}
-                      placeholder="Select..."
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label className="text-xs text-muted-foreground">Bias</Label>
-                    <TypeableCombobox
-                      value={bias}
-                      onChange={setBias}
-                      options={customStatsOptions.biases}
-                      onAddNew={addBias}
-                      placeholder="Select..."
-                    />
-                  </div>
-                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full h-10"
+                  onClick={() => {
+                    // Placeholder - functionality to be added later
+                  }}
+                >
+                  Assign Tags
+                </Button>
               </div>
             </div>
           )}
