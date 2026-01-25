@@ -1,5 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useFilteredTradesContext } from '@/contexts/TradesContext';
+import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
+import { useAccountsContext } from '@/contexts/AccountsContext';
 import { calculateTradeMetrics } from '@/types/trade';
 import { parseISO } from 'date-fns';
 import {
@@ -29,7 +31,23 @@ import {
 
 const Drawdown = () => {
   const { filteredTrades } = useFilteredTradesContext();
+  const { selectedAccounts, isAllAccountsSelected, currencyConfig } = useGlobalFilters();
+  const { accounts, getAccountBalanceBeforeTrades } = useAccountsContext();
   const [displayType, setDisplayType] = useState('return');
+
+  // Calculate total starting balance for Return (%) denominator
+  const totalStartingBalance = useMemo(() => {
+    const activeAccounts = accounts.filter(a => !a.isArchived);
+    
+    if (isAllAccountsSelected) {
+      return activeAccounts.reduce((sum, acc) => sum + getAccountBalanceBeforeTrades(acc.id), 0);
+    } else if (selectedAccounts.length > 0) {
+      return activeAccounts
+        .filter(acc => selectedAccounts.includes(acc.name))
+        .reduce((sum, acc) => sum + getAccountBalanceBeforeTrades(acc.id), 0);
+    }
+    return 0;
+  }, [accounts, selectedAccounts, isAllAccountsSelected, getAccountBalanceBeforeTrades]);
 
   // Calculate drawdown data trade by trade
   const drawdownData = useMemo(() => {
@@ -62,21 +80,28 @@ const Drawdown = () => {
       // Drawdown is the difference from peak (always 0 or negative)
       const drawdown = cumulativePnl - peak;
       
+      // Calculate Return (%) correctly: Drawdown ÷ Account Starting Balance × 100
+      const drawdownPercent = totalStartingBalance > 0 
+        ? (drawdown / totalStartingBalance) * 100 
+        : 0;
+      
       return {
         trade: index + 1,
         drawdown: drawdown,
+        drawdownPercent: drawdownPercent,
         cumulativePnl,
         peak,
       };
     });
-  }, [filteredTrades]);
+  }, [filteredTrades, totalStartingBalance]);
 
-  // Calculate min drawdown for Y-axis domain
+  // Calculate min drawdown for Y-axis domain based on display type
   const minDrawdown = useMemo(() => {
-    if (drawdownData.length === 0) return -1000;
-    const min = Math.min(...drawdownData.map(d => d.drawdown));
-    return min < 0 ? min * 1.1 : -100; // Add 10% padding below
-  }, [drawdownData]);
+    if (drawdownData.length === 0) return displayType === 'percent' ? -10 : -1000;
+    const values = drawdownData.map(d => displayType === 'percent' ? d.drawdownPercent : d.drawdown);
+    const min = Math.min(...values);
+    return min < 0 ? min * 1.1 : (displayType === 'percent' ? -1 : -100); // Add 10% padding below
+  }, [drawdownData, displayType]);
 
   // Calculate drawdown metrics
   const drawdownMetrics = useMemo(() => {
@@ -193,13 +218,26 @@ const Drawdown = () => {
   const formatCurrency = (value: number) => {
     const absValue = Math.abs(value);
     if (absValue >= 1000) {
-      return `${value < 0 ? '-' : ''}$${(absValue / 1000).toFixed(1)}K`;
+      return `${value < 0 ? '-' : ''}${currencyConfig.symbol}${(absValue / 1000).toFixed(1)}K`;
     }
-    return `${value < 0 ? '-' : ''}$${absValue.toFixed(0)}`;
+    return `${value < 0 ? '-' : ''}${currencyConfig.symbol}${absValue.toFixed(0)}`;
+  };
+
+  // Format percentage for display
+  const formatPercent = (value: number) => {
+    return `${value.toFixed(2)}%`;
+  };
+
+  // Format value based on display type
+  const formatValue = (value: number) => {
+    if (displayType === 'percent') {
+      return formatPercent(value);
+    }
+    return formatCurrency(value);
   };
 
   const formatMetricCurrency = (value: number) => {
-    return `$${value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    return `${currencyConfig.symbol}${value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   };
 
   // Calculated metric values
@@ -270,9 +308,9 @@ const Drawdown = () => {
                     axisLine={{ stroke: 'hsl(var(--border))' }}
                     tickLine={false}
                     tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
-                    tickFormatter={(value) => formatCurrency(value)}
+                    tickFormatter={formatValue}
                     label={{
-                      value: 'Drawdown ($)',
+                      value: displayType === 'percent' ? 'Drawdown (%)' : 'Drawdown ($)',
                       angle: -90,
                       position: 'insideLeft',
                       offset: 10,
@@ -294,12 +332,17 @@ const Drawdown = () => {
                       padding: '8px 12px',
                     }}
                     labelStyle={{ color: 'hsl(var(--foreground))' }}
-                    formatter={(value: number) => [`$${value.toFixed(2)}`, 'Drawdown']}
+                    formatter={(value: number, name: string) => {
+                      if (displayType === 'percent') {
+                        return [`${value.toFixed(2)}%`, 'Drawdown'];
+                      }
+                      return [`${currencyConfig.symbol}${value.toFixed(2)}`, 'Drawdown'];
+                    }}
                     labelFormatter={(label) => `Trade #${label}`}
                   />
                   <Area
                     type="monotone"
-                    dataKey="drawdown"
+                    dataKey={displayType === 'percent' ? 'drawdownPercent' : 'drawdown'}
                     stroke="hsl(0, 84%, 60%)"
                     strokeWidth={2}
                     fill="url(#drawdownGradient)"
