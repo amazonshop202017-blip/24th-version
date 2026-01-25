@@ -42,6 +42,10 @@ export interface BreakevenTolerance {
 // Tag filter: Map of categoryId -> array of selected tagIds
 export type TagFilters = Record<string, string[]>;
 
+// Trade Comments filter types
+export type TradeCommentCategory = 'entryComments' | 'tradeManagements' | 'exitComments';
+export type TradeCommentFilters = Record<TradeCommentCategory, string[]>;
+
 // Trade outcome classification result
 export type TradeOutcome = 'win' | 'loss' | 'breakeven';
 
@@ -97,6 +101,15 @@ interface GlobalFiltersContextType {
   selectAllTagsInCategory: (categoryId: string, tagIds: string[]) => void;
   clearCategoryTags: (categoryId: string) => void;
   hasActiveTagFilters: boolean;
+  
+  // Advanced Filters - Trade Comments
+  selectedTradeComments: TradeCommentFilters;
+  setSelectedTradeComments: (comments: TradeCommentFilters) => void;
+  toggleTradeCommentCategory: (category: TradeCommentCategory) => void;
+  toggleTradeComment: (category: TradeCommentCategory, comment: string) => void;
+  selectAllCommentsInCategory: (category: TradeCommentCategory, comments: string[]) => void;
+  clearTradeCommentCategory: (category: TradeCommentCategory) => void;
+  hasActiveTradeCommentFilters: boolean;
 }
 
 const GlobalFiltersContext = createContext<GlobalFiltersContextType | undefined>(undefined);
@@ -173,6 +186,13 @@ export const GlobalFiltersProvider = ({ children }: { children: ReactNode }) => 
   
   // Advanced Filters - Tags
   const [selectedTagsByCategory, setSelectedTagsByCategory] = useState<TagFilters>({});
+  
+  // Advanced Filters - Trade Comments
+  const [selectedTradeComments, setSelectedTradeComments] = useState<TradeCommentFilters>({
+    entryComments: [],
+    tradeManagements: [],
+    exitComments: [],
+  });
 
   // Persist currency to localStorage
   const setCurrency = useCallback((newCurrency: CurrencyCode) => {
@@ -263,6 +283,41 @@ export const GlobalFiltersProvider = ({ children }: { children: ReactNode }) => 
   const hasActiveTagFilters = Object.keys(selectedTagsByCategory).some(
     categoryId => selectedTagsByCategory[categoryId]?.length > 0
   );
+  
+  // Trade Comments filter functions
+  const toggleTradeCommentCategory = (category: TradeCommentCategory) => {
+    setSelectedTradeComments(prev => {
+      if (prev[category].length > 0) {
+        return { ...prev, [category]: [] };
+      }
+      return prev;
+    });
+  };
+  
+  const toggleTradeComment = (category: TradeCommentCategory, comment: string) => {
+    setSelectedTradeComments(prev => {
+      const categoryComments = prev[category] || [];
+      if (categoryComments.includes(comment)) {
+        return { ...prev, [category]: categoryComments.filter(c => c !== comment) };
+      } else {
+        return { ...prev, [category]: [...categoryComments, comment] };
+      }
+    });
+  };
+  
+  const selectAllCommentsInCategory = (category: TradeCommentCategory, comments: string[]) => {
+    setSelectedTradeComments(prev => ({ ...prev, [category]: comments }));
+  };
+  
+  const clearTradeCommentCategory = (category: TradeCommentCategory) => {
+    setSelectedTradeComments(prev => ({ ...prev, [category]: [] }));
+  };
+  
+  // Check if any trade comment filters are active
+  const hasActiveTradeCommentFilters = 
+    selectedTradeComments.entryComments.length > 0 ||
+    selectedTradeComments.tradeManagements.length > 0 ||
+    selectedTradeComments.exitComments.length > 0;
 
   const currencyConfig = CURRENCIES[currency];
 
@@ -368,6 +423,14 @@ export const GlobalFiltersProvider = ({ children }: { children: ReactNode }) => 
     selectAllTagsInCategory,
     clearCategoryTags,
     hasActiveTagFilters,
+    // Advanced Filters - Trade Comments
+    selectedTradeComments,
+    setSelectedTradeComments,
+    toggleTradeCommentCategory,
+    toggleTradeComment,
+    selectAllCommentsInCategory,
+    clearTradeCommentCategory,
+    hasActiveTradeCommentFilters,
   }), [
     currency, 
     setCurrency,
@@ -389,6 +452,8 @@ export const GlobalFiltersProvider = ({ children }: { children: ReactNode }) => 
     selectedRMultipleRanges,
     selectedTagsByCategory,
     hasActiveTagFilters,
+    selectedTradeComments,
+    hasActiveTradeCommentFilters,
   ]);
 
   return (

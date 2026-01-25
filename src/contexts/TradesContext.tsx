@@ -1,7 +1,7 @@
 import { createContext, useContext, ReactNode, useMemo, useCallback } from 'react';
 import { useTrades } from '@/hooks/useTrades';
 import { Trade, TradeFormData, calculateTradeMetrics } from '@/types/trade';
-import { useGlobalFilters, OutcomeFilter, DayFilter, DirectionFilter, ReturnPercentRange, RMultipleRange, TagFilters } from '@/contexts/GlobalFiltersContext';
+import { useGlobalFilters, OutcomeFilter, DayFilter, DirectionFilter, ReturnPercentRange, RMultipleRange, TagFilters, TradeCommentFilters, TradeCommentCategory } from '@/contexts/GlobalFiltersContext';
 import { useAccountsContext } from '@/contexts/AccountsContext';
 import { isWithinInterval, parseISO, startOfDay, endOfDay, getDay, getHours } from 'date-fns';
 
@@ -121,6 +121,7 @@ export const useFilteredTradesContext = () => {
     selectedReturnRanges,
     selectedRMultipleRanges,
     selectedTagsByCategory,
+    selectedTradeComments,
     classifyTradeOutcome,
   } = useGlobalFilters();
 
@@ -247,6 +248,28 @@ export const useFilteredTradesContext = () => {
       });
     }
 
+    // Filter by Trade Comments (AND across categories)
+    // Entry Comments filter
+    if (selectedTradeComments.entryComments.length > 0) {
+      filtered = filtered.filter(trade => 
+        trade.entryComment && selectedTradeComments.entryComments.includes(trade.entryComment)
+      );
+    }
+    
+    // Trade Management Comments filter
+    if (selectedTradeComments.tradeManagements.length > 0) {
+      filtered = filtered.filter(trade => 
+        trade.tradeManagement && selectedTradeComments.tradeManagements.includes(trade.tradeManagement)
+      );
+    }
+    
+    // Exit Comments filter
+    if (selectedTradeComments.exitComments.length > 0) {
+      filtered = filtered.filter(trade => 
+        trade.exitComment && selectedTradeComments.exitComments.includes(trade.exitComment)
+      );
+    }
+
     // Apply "Last Trades" filter LAST - take most recent N trades after all other filters
     if (lastTradesFilter !== null) {
       // Sort by entry date descending
@@ -261,7 +284,7 @@ export const useFilteredTradesContext = () => {
     }
 
     return filtered;
-  }, [trades, dateRange, selectedAccounts, activeAccountNames, selectedInstruments, selectedOutcomes, selectedHours, selectedSetups, selectedDays, lastTradesFilter, selectedDirections, selectedReturnRanges, selectedRMultipleRanges, selectedTagsByCategory, classifyTradeOutcome]);
+  }, [trades, dateRange, selectedAccounts, activeAccountNames, selectedInstruments, selectedOutcomes, selectedHours, selectedSetups, selectedDays, lastTradesFilter, selectedDirections, selectedReturnRanges, selectedRMultipleRanges, selectedTagsByCategory, selectedTradeComments, classifyTradeOutcome]);
 
   const stats = useMemo(() => {
     // Classify trades using breakeven tolerance (pass trade-level isBreakeven flag)
