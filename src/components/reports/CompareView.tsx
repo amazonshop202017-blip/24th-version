@@ -1,26 +1,35 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { CompareGroupCard, CompareGroupFilters, getDefaultCompareGroupFilters } from './CompareGroupCard';
+import { CompareResults } from './CompareResults';
 
 interface CompareViewProps {
   onGenerateReport?: (group1: CompareGroupFilters, group2: CompareGroupFilters) => void;
 }
 
 export const CompareView = ({ onGenerateReport }: CompareViewProps) => {
+  const [showResults, setShowResults] = useState(false);
+  const [reportFilters, setReportFilters] = useState<{
+    group1: CompareGroupFilters;
+    group2: CompareGroupFilters;
+  } | null>(null);
   const [group1Filters, setGroup1Filters] = useState<CompareGroupFilters>(getDefaultCompareGroupFilters());
   const [group2Filters, setGroup2Filters] = useState<CompareGroupFilters>(getDefaultCompareGroupFilters());
 
   const handleReset = () => {
     setGroup1Filters(getDefaultCompareGroupFilters());
     setGroup2Filters(getDefaultCompareGroupFilters());
+    setShowResults(false);
+    setReportFilters(null);
   };
 
   const handleGenerateReport = () => {
-    // Placeholder - just stores current selections
-    // Actual comparison logic will be implemented later
-    console.log('Generate Report clicked');
-    console.log('Group 1 Filters:', group1Filters);
-    console.log('Group 2 Filters:', group2Filters);
+    // Store current filter state for the report
+    setReportFilters({
+      group1: { ...group1Filters },
+      group2: { ...group2Filters },
+    });
+    setShowResults(true);
     
     if (onGenerateReport) {
       onGenerateReport(group1Filters, group2Filters);
@@ -60,6 +69,14 @@ export const CompareView = ({ onGenerateReport }: CompareViewProps) => {
           GENERATE REPORT
         </Button>
       </div>
+
+      {/* Comparison Results */}
+      {showResults && reportFilters && (
+        <CompareResults
+          group1Filters={reportFilters.group1}
+          group2Filters={reportFilters.group2}
+        />
+      )}
     </div>
   );
 };

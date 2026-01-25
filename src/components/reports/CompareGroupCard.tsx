@@ -1,10 +1,9 @@
 import { useState, useMemo } from 'react';
 import { format } from 'date-fns';
-import { CalendarIcon, ChevronDown, Check, Tag } from 'lucide-react';
+import { CalendarIcon, ChevronDown, Check, Tag, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
-import { Input } from '@/components/ui/input';
 import {
   Popover,
   PopoverContent,
@@ -27,6 +26,7 @@ import {
 } from '@/components/ui/command';
 import { useFilteredTradesContext } from '@/contexts/TradesContext';
 import { CompareGroupFiltersPanel } from './CompareGroupFiltersPanel';
+import { getMatchedTradesCount } from '@/lib/compareUtils';
 
 export interface CompareGroupFilters {
   symbol: string;
@@ -98,9 +98,17 @@ export const CompareGroupCard = ({ groupNumber, filters, onFiltersChange }: Comp
     return tagCount + commentCount;
   }, [filters.tagsByCategory, filters.tradeComments]);
 
+  // Get matched trades count
+  const matchedCount = useMemo(() => 
+    getMatchedTradesCount(trades, filters), 
+    [trades, filters]
+  );
+
   return (
     <div className="bg-card border border-border rounded-xl p-6 flex-1">
-      <h3 className="text-lg font-semibold mb-6">Group #{groupNumber}</h3>
+      <h3 className="text-lg font-semibold mb-6">
+        Group #{groupNumber} ({matchedCount} Trades Matched)
+      </h3>
       
       <div className="grid grid-cols-2 gap-x-8 gap-y-4">
         {/* Left Column */}
@@ -108,44 +116,58 @@ export const CompareGroupCard = ({ groupNumber, filters, onFiltersChange }: Comp
           {/* Symbol */}
           <div className="flex items-center gap-4">
             <label className="text-sm text-muted-foreground w-20 shrink-0">Symbol</label>
-            <Popover open={symbolOpen} onOpenChange={setSymbolOpen}>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  role="combobox"
-                  aria-expanded={symbolOpen}
-                  className="flex-1 justify-between h-10 bg-background border-border"
-                >
-                  {filters.symbol || <span className="text-muted-foreground">Select...</span>}
-                  <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-[200px] p-0 bg-popover border-border z-[100]" align="start">
-                <Command>
-                  <CommandInput placeholder="Search symbol..." className="h-9" />
-                  <CommandList>
-                    <CommandEmpty>No symbols found.</CommandEmpty>
-                    <CommandGroup>
-                      {availableSymbols.map((symbol) => (
-                        <CommandItem
-                          key={symbol}
-                          onSelect={() => handleSymbolChange(symbol)}
-                          className="cursor-pointer"
-                        >
-                          <Check
-                            className={cn(
-                              "mr-2 h-4 w-4",
-                              filters.symbol === symbol ? "opacity-100" : "opacity-0"
-                            )}
-                          />
-                          {symbol}
-                        </CommandItem>
-                      ))}
-                    </CommandGroup>
-                  </CommandList>
-                </Command>
-              </PopoverContent>
-            </Popover>
+            {filters.symbol ? (
+              <div className="flex-1 flex items-center gap-2">
+                <span className="inline-flex items-center gap-1 bg-primary text-primary-foreground rounded-full px-3 py-1 text-sm">
+                  {filters.symbol}
+                  <button
+                    onClick={() => onFiltersChange({ ...filters, symbol: '' })}
+                    className="ml-1 hover:opacity-70"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              </div>
+            ) : (
+              <Popover open={symbolOpen} onOpenChange={setSymbolOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={symbolOpen}
+                    className="flex-1 justify-between h-10 bg-background border-border"
+                  >
+                    <span className="text-muted-foreground">Select...</span>
+                    <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-[200px] p-0 bg-popover border-border z-[100]" align="start">
+                  <Command>
+                    <CommandInput placeholder="Search symbol..." className="h-9" />
+                    <CommandList>
+                      <CommandEmpty>No symbols found.</CommandEmpty>
+                      <CommandGroup>
+                        {availableSymbols.map((symbol) => (
+                          <CommandItem
+                            key={symbol}
+                            onSelect={() => handleSymbolChange(symbol)}
+                            className="cursor-pointer"
+                          >
+                            <Check
+                              className={cn(
+                                "mr-2 h-4 w-4",
+                                filters.symbol === symbol ? "opacity-100" : "opacity-0"
+                              )}
+                            />
+                            {symbol}
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
+            )}
           </div>
 
           {/* Side */}
