@@ -1,7 +1,8 @@
 import { useState, useMemo } from 'react';
 import { Calendar } from 'lucide-react';
-import { useFilteredTradesContext } from '@/contexts/TradesContext';
+import { useFilteredTradesContext, useTradesContext } from '@/contexts/TradesContext';
 import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
+import { useAccountsContext } from '@/contexts/AccountsContext';
 import { DayCard } from '@/components/dayview/DayCard';
 import { DaySidebarCalendar } from '@/components/dayview/DaySidebarCalendar';
 import { calculateTradeMetrics, Trade } from '@/types/trade';
@@ -14,12 +15,29 @@ interface DayGroup {
 }
 
 const DayView = () => {
-  const { filteredTrades, trades } = useFilteredTradesContext();
-  const { setDateRange, setDatePreset } = useGlobalFilters();
+  const { filteredTrades } = useFilteredTradesContext();
+  const { trades: allTrades } = useTradesContext();
+  const { selectedAccounts, setDateRange, setDatePreset } = useGlobalFilters();
+  const { getActiveAccountNames } = useAccountsContext();
   
   // Calendar month state
   const [currentMonth, setCurrentMonth] = useState(() => new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+
+  // Get active account names for filtering
+  const activeAccountNames = useMemo(() => getActiveAccountNames(), [getActiveAccountNames]);
+
+  // Filter trades by account (but NOT by date) for the calendar
+  // This ensures calendar highlights update when account filter changes
+  const accountFilteredTrades = useMemo(() => {
+    if (selectedAccounts.length === 0) {
+      // "All Accounts" selected - filter to only active accounts
+      return allTrades.filter(trade => activeAccountNames.includes(trade.accountName));
+    } else {
+      // Specific accounts selected
+      return allTrades.filter(trade => selectedAccounts.includes(trade.accountName));
+    }
+  }, [allTrades, selectedAccounts, activeAccountNames]);
 
   // Group filtered trades by date
   const dayGroups = useMemo(() => {
@@ -89,7 +107,7 @@ const DayView = () => {
         {/* Sticky Calendar Sidebar */}
         <div className="w-[280px] flex-shrink-0">
           <DaySidebarCalendar
-            trades={trades} // Use all trades for calendar coloring
+            trades={accountFilteredTrades}
             currentMonth={currentMonth}
             onMonthChange={setCurrentMonth}
             selectedDate={selectedDate}

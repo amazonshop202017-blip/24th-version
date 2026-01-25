@@ -5,6 +5,7 @@ import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
 import { useStrategiesContext } from '@/contexts/StrategiesContext';
 import { useTagsContext } from '@/contexts/TagsContext';
 import { useTradesContext } from '@/contexts/TradesContext';
+import { useTradeModal } from '@/contexts/TradeModalContext';
 import { AssignTagsModal } from '@/components/trades/AssignTagsModal';
 import { parseISO, format } from 'date-fns';
 import {
@@ -27,6 +28,7 @@ export const DayTradesTable = ({ trades }: DayTradesTableProps) => {
   const { strategies } = useStrategiesContext();
   const { tags } = useTagsContext();
   const { updateTrade } = useTradesContext();
+  const { openModal } = useTradeModal();
 
   // Tag assignment modal state
   const [tagModalOpen, setTagModalOpen] = useState(false);
@@ -41,9 +43,14 @@ export const DayTradesTable = ({ trades }: DayTradesTableProps) => {
     return bTime - aTime; // Most recent first
   });
 
-  const handleOpenTagModal = (trade: Trade) => {
+  const handleOpenTagModal = (e: React.MouseEvent, trade: Trade) => {
+    e.stopPropagation(); // Prevent row click from triggering
     setSelectedTradeForTags(trade);
     setTagModalOpen(true);
+  };
+
+  const handleRowClick = (trade: Trade) => {
+    openModal(trade);
   };
 
   const handleTagsChange = (tagIds: string[]) => {
@@ -75,7 +82,6 @@ export const DayTradesTable = ({ trades }: DayTradesTableProps) => {
               <TableHead className="text-muted-foreground font-medium">Open Time</TableHead>
               <TableHead className="text-muted-foreground font-medium">Ticker</TableHead>
               <TableHead className="text-muted-foreground font-medium">Side</TableHead>
-              <TableHead className="text-muted-foreground font-medium">Instrument</TableHead>
               <TableHead className="text-muted-foreground font-medium">Net P&L</TableHead>
               <TableHead className="text-muted-foreground font-medium">Net ROI</TableHead>
               <TableHead className="text-muted-foreground font-medium">Realized R-Multiple</TableHead>
@@ -93,7 +99,11 @@ export const DayTradesTable = ({ trades }: DayTradesTableProps) => {
               const tradeTags = getTradeTags(trade);
 
               return (
-                <TableRow key={trade.id} className="border-border hover:bg-muted/30">
+                <TableRow 
+                  key={trade.id} 
+                  className="border-border hover:bg-muted/30 cursor-pointer"
+                  onClick={() => handleRowClick(trade)}
+                >
                   <TableCell className="text-foreground">{openTime}</TableCell>
                   <TableCell>
                     <Badge variant="outline" className="font-mono text-xs">
@@ -101,7 +111,6 @@ export const DayTradesTable = ({ trades }: DayTradesTableProps) => {
                     </Badge>
                   </TableCell>
                   <TableCell className="text-foreground">{trade.side}</TableCell>
-                  <TableCell className="text-foreground">{trade.instrument}</TableCell>
                   <TableCell className={cn(isProfit ? 'text-profit' : 'text-loss')}>
                     {formatCurrency(metrics.netPnl)}
                   </TableCell>
@@ -141,7 +150,7 @@ export const DayTradesTable = ({ trades }: DayTradesTableProps) => {
                         </span>
                       )}
                       <button
-                        onClick={() => handleOpenTagModal(trade)}
+                        onClick={(e) => handleOpenTagModal(e, trade)}
                         className="p-1 rounded hover:bg-muted/50 transition-colors"
                         aria-label="Manage tags"
                       >
