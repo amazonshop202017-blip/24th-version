@@ -6,6 +6,7 @@ export interface Tag {
   name: string;
   categoryId: string;
   description: string;
+  archived?: boolean;
 }
 
 interface TagsContextType {
@@ -15,6 +16,11 @@ interface TagsContextType {
   updateTag: (id: string, name: string, categoryId: string, description: string) => void;
   removeTagsByCategory: (categoryId: string) => void;
   getTagUsageCount: (tagId: string, trades: { tags: string[] }[]) => number;
+  archiveTag: (id: string) => void;
+  unarchiveTag: (id: string) => void;
+  deleteTagPermanently: (id: string) => void;
+  getActiveTags: () => Tag[];
+  getArchivedTags: () => Tag[];
 }
 
 const TagsContext = createContext<TagsContextType | undefined>(undefined);
@@ -63,6 +69,7 @@ export const TagsProvider = ({ children }: { children: ReactNode }) => {
         name: trimmed,
         categoryId,
         description: description.trim(),
+        archived: false,
       };
       saveTags([...tags, newTag]);
       return newTag;
@@ -83,6 +90,30 @@ export const TagsProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [tags, saveTags]);
 
+  const archiveTag = useCallback((id: string) => {
+    saveTags(tags.map(t => 
+      t.id === id ? { ...t, archived: true } : t
+    ));
+  }, [tags, saveTags]);
+
+  const unarchiveTag = useCallback((id: string) => {
+    saveTags(tags.map(t => 
+      t.id === id ? { ...t, archived: false } : t
+    ));
+  }, [tags, saveTags]);
+
+  const deleteTagPermanently = useCallback((id: string) => {
+    saveTags(tags.filter(t => t.id !== id));
+  }, [tags, saveTags]);
+
+  const getActiveTags = useCallback(() => {
+    return tags.filter(t => !t.archived);
+  }, [tags]);
+
+  const getArchivedTags = useCallback(() => {
+    return tags.filter(t => t.archived);
+  }, [tags]);
+
   const getTagUsageCount = useCallback((tagId: string, trades: { tags: string[] }[]) => {
     return trades.filter(trade => trade.tags?.includes(tagId)).length;
   }, []);
@@ -94,7 +125,12 @@ export const TagsProvider = ({ children }: { children: ReactNode }) => {
       removeTag, 
       updateTag, 
       removeTagsByCategory,
-      getTagUsageCount 
+      getTagUsageCount,
+      archiveTag,
+      unarchiveTag,
+      deleteTagPermanently,
+      getActiveTags,
+      getArchivedTags,
     }}>
       {children}
     </TagsContext.Provider>

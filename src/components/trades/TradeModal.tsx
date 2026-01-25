@@ -52,6 +52,9 @@ export const TradeModal = () => {
     addIndicator,
     addMarketGeneral,
     addBias,
+    getActiveEntryComments,
+    getActiveTradeManagements,
+    getActiveExitComments,
   } = useCustomStats();
 
   // Refs
@@ -1002,7 +1005,7 @@ export const TradeModal = () => {
                     <TypeableCombobox
                       value={entryComment}
                       onChange={setEntryComment}
-                      options={customStatsOptions.entryComments}
+                      options={getActiveEntryComments()}
                       onAddNew={addEntryComment}
                       placeholder="Select..."
                     />
@@ -1013,7 +1016,7 @@ export const TradeModal = () => {
                     <TypeableCombobox
                       value={tradeManagement}
                       onChange={setTradeManagement}
-                      options={customStatsOptions.tradeManagements}
+                      options={getActiveTradeManagements()}
                       onAddNew={addTradeManagement}
                       placeholder="Select..."
                     />
@@ -1024,7 +1027,7 @@ export const TradeModal = () => {
                     <TypeableCombobox
                       value={exitComment}
                       onChange={setExitComment}
-                      options={customStatsOptions.exitComments}
+                      options={getActiveExitComments()}
                       onAddNew={addExitComment}
                       placeholder="Select..."
                     />

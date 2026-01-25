@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Trash2, Edit2, Check, X, Tag, Wallet, TrendingUp, TrendingDown, Settings as SettingsIcon, Download, DollarSign, FolderOpen, Archive, ArchiveRestore, ChevronDown, ChevronUp, Target } from 'lucide-react';
+import { Plus, Trash2, Edit2, Check, X, Tag, Wallet, TrendingUp, TrendingDown, Settings as SettingsIcon, Download, DollarSign, FolderOpen, Archive, ArchiveRestore, ChevronDown, ChevronUp, Target, MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAccountsContext } from '@/contexts/AccountsContext';
@@ -10,6 +10,7 @@ import { cn } from '@/lib/utils';
 import DepositWithdrawModal from '@/components/settings/DepositWithdrawModal';
 import { CategoriesManagement } from '@/components/settings/CategoriesManagement';
 import { TagsManagement } from '@/components/settings/TagsManagement';
+import { TradeCommentsManagement } from '@/components/settings/TradeCommentsManagement';
 import { importMT5Trades } from '@/lib/mt5Import';
 import { toast } from 'sonner';
 import {
@@ -61,10 +62,10 @@ const Settings = () => {
     });
   };
 
-  // Settings tab state
-  const [activeSettingsTab, setActiveSettingsTab] = useState<'main' | 'tags-comments'>('main');
+  // Settings tab state - now with 3 tabs
+  const [activeSettingsTab, setActiveSettingsTab] = useState<'main' | 'custom-tags' | 'trade-comments'>('main');
   
-  // Tags/Comments sub-tab state
+  // Custom Tags sub-tab state
   const [activeTagsSubTab, setActiveTagsSubTab] = useState<'categories' | 'tags'>('categories');
 
   // Account state
@@ -191,16 +192,28 @@ const Settings = () => {
           Main
         </button>
         <button
-          onClick={() => setActiveSettingsTab('tags-comments')}
+          onClick={() => setActiveSettingsTab('custom-tags')}
           className={cn(
             "flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors",
-            activeSettingsTab === 'tags-comments'
+            activeSettingsTab === 'custom-tags'
               ? "bg-background text-foreground shadow-sm"
               : "text-muted-foreground hover:text-foreground hover:bg-background/50"
           )}
         >
           <Tag className="w-4 h-4" />
-          Tags / Comments
+          Custom Tags
+        </button>
+        <button
+          onClick={() => setActiveSettingsTab('trade-comments')}
+          className={cn(
+            "flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors",
+            activeSettingsTab === 'trade-comments'
+              ? "bg-background text-foreground shadow-sm"
+              : "text-muted-foreground hover:text-foreground hover:bg-background/50"
+          )}
+        >
+          <MessageSquare className="w-4 h-4" />
+          Trade Comments
         </button>
       </div>
 
@@ -605,8 +618,8 @@ const Settings = () => {
         </>
       )}
 
-      {/* Tags / Comments Tab Content */}
-      {activeSettingsTab === 'tags-comments' && (
+      {/* Custom Tags Tab Content */}
+      {activeSettingsTab === 'custom-tags' && (
         <div className="space-y-6">
           {/* Sub-tab Navigation */}
           <div className="flex gap-2 p-1 bg-muted/30 rounded-lg w-fit">
@@ -650,6 +663,11 @@ const Settings = () => {
             </div>
           )}
         </div>
+      )}
+
+      {/* Trade Comments Tab Content */}
+      {activeSettingsTab === 'trade-comments' && (
+        <TradeCommentsManagement />
       )}
 
       {/* Deposit/Withdraw Modal */}

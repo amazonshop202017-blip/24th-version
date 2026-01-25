@@ -185,8 +185,11 @@ export const AssignTagsModal = ({
   entryDate,
 }: AssignTagsModalProps) => {
   const { categories } = useCategoriesContext();
-  const { tags, addTag } = useTagsContext();
+  const { tags, addTag, getActiveTags } = useTagsContext();
   const [localSelectedIds, setLocalSelectedIds] = useState<string[]>(selectedTagIds);
+  
+  // Only show active (non-archived) tags in the selection UI
+  const activeTags = getActiveTags();
 
   // Sync local state when modal opens or selectedTagIds changes
   useEffect(() => {
@@ -267,7 +270,7 @@ export const AssignTagsModal = ({
               <div className="text-center py-8">
                 <p className="text-muted-foreground text-sm">No categories found.</p>
                 <p className="text-muted-foreground text-xs mt-1">
-                  Create categories in Settings → Tags / Comments
+                  Create categories in Settings → Custom Tags
                 </p>
               </div>
             ) : (
@@ -275,7 +278,7 @@ export const AssignTagsModal = ({
                 <CategoryBlock
                   key={category.id}
                   category={category}
-                  tags={tags}
+                  tags={activeTags}
                   selectedTagIds={localSelectedIds}
                   onToggleTag={handleToggleTag}
                   onCreateTag={handleCreateTag}

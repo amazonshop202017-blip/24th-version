@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Plus, Search, MoreHorizontal, Edit2, Trash2 } from 'lucide-react';
+import { Plus, Search, MoreHorizontal, Edit2, Trash2, Archive, ArchiveRestore, ChevronDown, ChevronUp, Tag as TagIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -28,9 +28,10 @@ import { useTagsContext, Tag } from '@/contexts/TagsContext';
 import { useCategoriesContext } from '@/contexts/CategoriesContext';
 import { useTradesContext } from '@/contexts/TradesContext';
 import { TagModal } from './TagModal';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export const TagsManagement = () => {
-  const { tags, addTag, removeTag, updateTag, getTagUsageCount } = useTagsContext();
+  const { tags, addTag, removeTag, updateTag, getTagUsageCount, archiveTag, unarchiveTag, deleteTagPermanently, getActiveTags, getArchivedTags } = useTagsContext();
   const { categories } = useCategoriesContext();
   const { trades } = useTradesContext();
 
@@ -39,16 +40,30 @@ export const TagsManagement = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTag, setEditingTag] = useState<Tag | null>(null);
   const [selectedTags, setSelectedTags] = useState<Set<string>>(new Set());
+  const [showArchived, setShowArchived] = useState(false);
 
-  // Filter tags based on search and category
-  const filteredTags = useMemo(() => {
-    return tags.filter((tag) => {
+  const activeTags = getActiveTags();
+  const archivedTags = getArchivedTags();
+
+  // Filter active tags based on search and category
+  const filteredActiveTags = useMemo(() => {
+    return activeTags.filter((tag) => {
       const matchesSearch = tag.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         tag.description.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesCategory = categoryFilter === 'all' || tag.categoryId === categoryFilter;
       return matchesSearch && matchesCategory;
     });
-  }, [tags, searchQuery, categoryFilter]);
+  }, [activeTags, searchQuery, categoryFilter]);
+
+  // Filter archived tags based on search and category
+  const filteredArchivedTags = useMemo(() => {
+    return archivedTags.filter((tag) => {
+      const matchesSearch = tag.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        tag.description.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesCategory = categoryFilter === 'all' || tag.categoryId === categoryFilter;
+      return matchesSearch && matchesCategory;
+    });
+  }, [archivedTags, searchQuery, categoryFilter]);
 
   // Get category by ID
   const getCategoryById = (categoryId: string) => {
@@ -75,13 +90,23 @@ export const TagsManagement = () => {
     setEditingTag(null);
   };
 
-  const handleDeleteTag = (tagId: string) => {
-    removeTag(tagId);
+  const handleArchiveTag = (tagId: string) => {
+    archiveTag(tagId);
     setSelectedTags((prev) => {
       const next = new Set(prev);
       next.delete(tagId);
       return next;
     });
+  };
+
+  const handleUnarchiveTag = (tagId: string) => {
+    unarchiveTag(tagId);
+  };
+
+  const handleDeleteTag = (tagId: string) => {
+    if (window.confirm('Are you sure you want to permanently delete this tag? This action cannot be undone.')) {
+      deleteTagPermanently(tagId);
+    }
   };
 
   const toggleTagSelection = (tagId: string) => {
@@ -97,10 +122,10 @@ export const TagsManagement = () => {
   };
 
   const toggleAllSelection = () => {
-    if (selectedTags.size === filteredTags.length) {
+    if (selectedTags.size === filteredActiveTags.length) {
       setSelectedTags(new Set());
     } else {
-      setSelectedTags(new Set(filteredTags.map((t) => t.id)));
+      setSelectedTags(new Set(filteredActiveTags.map((t) => t.id)));
     }
   };
 
@@ -110,7 +135,7 @@ export const TagsManagement = () => {
       <div className="space-y-2">
         <h3 className="text-lg font-semibold">Tags management</h3>
         <p className="text-sm text-muted-foreground">
-          You can customize your tags by clicking on the inputs from setups, mistakes, and custom tabs here.
+          Manage your custom tags. Archived tags remain attached to historical trades but won't appear in new selections.
         </p>
       </div>
 
@@ -152,11 +177,12 @@ export const TagsManagement = () => {
         </Button>
       </div>
 
-      {/* Tags Table */}
-      {filteredTags.length === 0 ? (
+      {/* Active Tags Table */}
+      {filteredActiveTags.length === 0 ? (
         <div className="text-center py-12 text-muted-foreground">
-          <p>No tags found</p>
-          {tags.length === 0 ? (
+          <TagIcon className="w-10 h-10 mx-auto mb-3 opacity-30" />
+          <p>No active tags found</p>
+          {activeTags.length === 0 ? (
             <p className="text-sm mt-1">Create your first tag to get started</p>
           ) : (
             <p className="text-sm mt-1">Try adjusting your search or filter</p>
@@ -169,7 +195,7 @@ export const TagsManagement = () => {
               <TableRow className="bg-muted/30">
                 <TableHead className="w-[50px]">
                   <Checkbox
-                    checked={selectedTags.size === filteredTags.length && filteredTags.length > 0}
+                    checked={selectedTags.size === filteredActiveTags.length && filteredActiveTags.length > 0}
                     onCheckedChange={toggleAllSelection}
                   />
                 </TableHead>
@@ -181,7 +207,7 @@ export const TagsManagement = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredTags.map((tag) => {
+              {filteredActiveTags.map((tag) => {
                 const category = getCategoryById(tag.categoryId);
                 const usageCount = getTagUsageCount(tag.id, trades);
 
@@ -227,12 +253,9 @@ export const TagsManagement = () => {
                             <Edit2 className="w-4 h-4 mr-2" />
                             Edit
                           </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => handleDeleteTag(tag.id)}
-                            className="text-destructive focus:text-destructive"
-                          >
-                            <Trash2 className="w-4 h-4 mr-2" />
-                            Delete
+                          <DropdownMenuItem onClick={() => handleArchiveTag(tag.id)}>
+                            <Archive className="w-4 h-4 mr-2" />
+                            Archive
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -242,6 +265,84 @@ export const TagsManagement = () => {
               })}
             </TableBody>
           </Table>
+        </div>
+      )}
+
+      {/* Archived Tags Section */}
+      {filteredArchivedTags.length > 0 && (
+        <div className="mt-6">
+          <Button
+            variant="outline"
+            onClick={() => setShowArchived(!showArchived)}
+            className="w-full justify-between h-10 mb-2"
+          >
+            <div className="flex items-center gap-2">
+              <Archive className="w-4 h-4" />
+              <span>Archived Tags ({filteredArchivedTags.length})</span>
+            </div>
+            {showArchived ? (
+              <ChevronUp className="w-4 h-4" />
+            ) : (
+              <ChevronDown className="w-4 h-4" />
+            )}
+          </Button>
+          
+          {showArchived && (
+            <div className="space-y-2 mt-2">
+              <AnimatePresence>
+                {filteredArchivedTags.map((tag) => {
+                  const category = getCategoryById(tag.categoryId);
+                  const usageCount = getTagUsageCount(tag.id, trades);
+                  
+                  return (
+                    <motion.div
+                      key={tag.id}
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="flex items-center justify-between p-4 bg-muted/30 rounded-lg border border-border/50"
+                    >
+                      <div className="flex items-center gap-4 flex-1">
+                        <span className="font-medium text-muted-foreground">{tag.name}</span>
+                        {category && (
+                          <div className="flex items-center gap-2">
+                            <div
+                              className="w-3 h-3 rounded-full"
+                              style={{ backgroundColor: category.color }}
+                            />
+                            <span className="text-sm text-muted-foreground">{category.name}</span>
+                          </div>
+                        )}
+                        <span className="text-sm text-muted-foreground">Used: {usageCount}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleUnarchiveTag(tag.id)}
+                          className="h-7 text-xs gap-1"
+                          title="Unarchive tag"
+                        >
+                          <ArchiveRestore className="w-3 h-3" />
+                          Unarchive
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => handleDeleteTag(tag.id)}
+                          className="text-destructive hover:text-destructive h-7 text-xs gap-1"
+                          title="Permanently delete"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                          Delete
+                        </Button>
+                      </div>
+                    </motion.div>
+                  );
+                })}
+              </AnimatePresence>
+            </div>
+          )}
         </div>
       )}
 
