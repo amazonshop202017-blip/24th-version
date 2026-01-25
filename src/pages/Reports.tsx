@@ -3,7 +3,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Clock, BarChart2, AlertTriangle, Target, Tags, Calendar, TrendingUp, ChevronDown, Zap, LayoutGrid, GitCompare } from 'lucide-react';
 import OverviewStats from '@/components/reports/OverviewStats';
 import YearlyCalendar from '@/components/reports/YearlyCalendar';
+import { CompareView } from '@/components/reports/CompareView';
 import { cn } from '@/lib/utils';
+
 const mainTabs = [
   { id: 'performance', label: 'Performance', icon: Zap, isNew: true },
   { id: 'overview', label: 'Overview', icon: LayoutGrid },
@@ -144,6 +146,8 @@ const Reports = () => {
           <OverviewStats />
         ) : activeMainTab === 'calendar' ? (
           <YearlyCalendar />
+        ) : activeMainTab === 'compare' ? (
+          <CompareView />
         ) : (
           <div className="glass-card rounded-2xl p-12 flex flex-col items-center justify-center min-h-[400px]">
             {contentInfo && (
