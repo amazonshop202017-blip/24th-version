@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useFilteredTradesContext } from '@/contexts/TradesContext';
 import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
+import { useAccountsContext } from '@/contexts/AccountsContext';
 import { calculateTradeMetrics, Trade } from '@/types/trade';
 import { useStrategiesContext } from '@/contexts/StrategiesContext';
 import {
@@ -49,12 +50,24 @@ interface SetupData {
 
 const PerformanceBySetup = () => {
   const { filteredTrades } = useFilteredTradesContext();
-  const { currencyConfig } = useGlobalFilters();
+  const { currencyConfig, selectedAccounts, isAllAccountsSelected } = useGlobalFilters();
+  const { accounts, getAccountBalanceBeforeTrades } = useAccountsContext();
   const { strategies } = useStrategiesContext();
   const [displayType, setDisplayType] = useState<DisplayType>('dollar');
 
-  // NOTE: Return (%) is now stored on each trade as savedReturnPercent
-  // We use the stored value directly - never recalculate it
+  // Calculate total starting balance for Return (%) denominator
+  const totalStartingBalance = useMemo(() => {
+    const activeAccounts = accounts.filter(a => !a.isArchived);
+    
+    if (isAllAccountsSelected) {
+      return activeAccounts.reduce((sum, acc) => sum + getAccountBalanceBeforeTrades(acc.id), 0);
+    } else if (selectedAccounts.length > 0) {
+      return activeAccounts
+        .filter(acc => selectedAccounts.includes(acc.name))
+        .reduce((sum, acc) => sum + getAccountBalanceBeforeTrades(acc.id), 0);
+    }
+    return 0;
+  }, [accounts, selectedAccounts, isAllAccountsSelected, getAccountBalanceBeforeTrades]);
 
   // Calculate setup data - SETUP-CENTRIC approach
   const setupData = useMemo(() => {
@@ -74,15 +87,11 @@ const PerformanceBySetup = () => {
     // SETUP-CENTRIC: First, iterate over all setups and collect their trades
     const setupMap = new Map<string, {
       totalPnl: number;
-      totalPercent: number;
       tradeCount: number;
       winCount: number;
       lossCount: number;
       beCount: number;
     }>();
-
-    // Initialize all setups with zero values (so setups with no trades still appear)
-    // Actually, per requirements, we only show setups that have trades
     
     // Group trades by their strategyId (setup)
     closedTrades.forEach(trade => {
@@ -91,26 +100,15 @@ const PerformanceBySetup = () => {
       // Determine setup name from strategyId
       let setupName: string;
       if (trade.strategyId && setupIdToName.has(trade.strategyId)) {
-        // Trade has a valid strategyId that matches an existing setup
         setupName = setupIdToName.get(trade.strategyId)!;
       } else if (!trade.strategyId || trade.strategyId.trim() === '') {
-        // Trade has no strategyId - goes to Unassigned
         setupName = 'Unassigned';
       } else {
-        // Trade has a strategyId but it doesn't match any existing setup
-        // This could happen if the setup was deleted - treat as Unassigned
         setupName = 'Unassigned';
-      }
-
-      // Use stored Return % - skip trades without stored value for percent mode
-      const returnPercent = trade.savedReturnPercent;
-      if (displayType === 'percent' && (returnPercent === undefined || returnPercent === null || !isFinite(returnPercent))) {
-        return; // Skip this trade for percent mode
       }
       
       const existing = setupMap.get(setupName) || { 
         totalPnl: 0, 
-        totalPercent: 0,
         tradeCount: 0, 
         winCount: 0,
         lossCount: 0,
@@ -124,7 +122,6 @@ const PerformanceBySetup = () => {
       
       setupMap.set(setupName, {
         totalPnl: existing.totalPnl + metrics.netPnl,
-        totalPercent: existing.totalPercent + (returnPercent ?? 0),
         tradeCount: existing.tradeCount + 1,
         winCount: existing.winCount + (isWin ? 1 : 0),
         lossCount: existing.lossCount + (isLoss ? 1 : 0),
@@ -136,6 +133,11 @@ const PerformanceBySetup = () => {
     const data: SetupData[] = Array.from(setupMap.entries())
       .map(([setup, data]) => {
         const winrate = data.tradeCount > 0 ? (data.winCount / data.tradeCount) * 100 : 0;
+        // Calculate Return (%) correctly: Total P/L ÷ Account Starting Balance × 100
+        const returnPercent = totalStartingBalance > 0 
+          ? (data.totalPnl / totalStartingBalance) * 100 
+          : 0;
+        
         let displayValue: number;
         
         switch (displayType) {
@@ -143,7 +145,7 @@ const PerformanceBySetup = () => {
             displayValue = data.totalPnl;
             break;
           case 'percent':
-            displayValue = data.totalPercent;
+            displayValue = returnPercent;
             break;
           case 'winrate':
             displayValue = winrate;
@@ -158,7 +160,7 @@ const PerformanceBySetup = () => {
         return {
           setup,
           totalPnl: data.totalPnl,
-          totalPercent: data.totalPercent,
+          totalPercent: returnPercent,
           tradeCount: data.tradeCount,
           winCount: data.winCount,
           lossCount: data.lossCount,
@@ -172,7 +174,7 @@ const PerformanceBySetup = () => {
       .sort((a, b) => b.displayValue - a.displayValue);
 
     return data;
-  }, [filteredTrades, displayType, strategies]);
+  }, [filteredTrades, displayType, strategies, totalStartingBalance]);
 
   // Calculate metrics
   const metrics = useMemo(() => {

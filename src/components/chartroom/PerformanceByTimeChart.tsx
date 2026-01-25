@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useFilteredTradesContext } from '@/contexts/TradesContext';
 import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
+import { useAccountsContext } from '@/contexts/AccountsContext';
 import { calculateTradeMetrics, Trade } from '@/types/trade';
 import { parseISO, getDay, getMonth, getWeek, getHours, getMinutes } from 'date-fns';
 import {
@@ -52,11 +53,29 @@ export const PerformanceByTimeChart = ({
   title = 'Performance by Time'
 }: PerformanceByTimeChartProps) => {
   const { filteredTrades } = useFilteredTradesContext();
-  const { currencyConfig } = useGlobalFilters();
+  const { currencyConfig, selectedAccounts, isAllAccountsSelected } = useGlobalFilters();
+  const { accounts, getAccountBalanceBeforeTrades } = useAccountsContext();
   
   const [displayType, setDisplayType] = useState<DisplayType>(defaultDisplayType);
   const [dateSetting, setDateSetting] = useState<DateSettingType>('entry');
   const [period, setPeriod] = useState<PeriodType>('weekday');
+
+  // Calculate total starting balance for Return (%) denominator
+  const totalStartingBalance = useMemo(() => {
+    // Get active accounts
+    const activeAccounts = accounts.filter(a => !a.isArchived);
+    
+    if (isAllAccountsSelected) {
+      // Sum starting balances of all active accounts
+      return activeAccounts.reduce((sum, acc) => sum + getAccountBalanceBeforeTrades(acc.id), 0);
+    } else if (selectedAccounts.length > 0) {
+      // Sum starting balances of selected accounts
+      return activeAccounts
+        .filter(acc => selectedAccounts.includes(acc.name))
+        .reduce((sum, acc) => sum + getAccountBalanceBeforeTrades(acc.id), 0);
+    }
+    return 0;
+  }, [accounts, selectedAccounts, isAllAccountsSelected, getAccountBalanceBeforeTrades]);
 
   // Get bucket for a trade based on period
   const getBucket = (date: Date, periodType: PeriodType): { label: string; sortOrder: number } => {
@@ -148,7 +167,6 @@ export const PerformanceByTimeChart = ({
     const timeMap = new Map<string, {
       sortOrder: number;
       totalPnl: number;
-      totalPercent: number;
       tradeCount: number;
       winCount: number;
       lossCount: number;
@@ -163,11 +181,6 @@ export const PerformanceByTimeChart = ({
       
       const date = parseISO(dateStr);
       const bucket = getBucket(date, period);
-      
-      const returnPercent = trade.savedReturnPercent;
-      if (displayType === 'percent' && (returnPercent === undefined || returnPercent === null || !isFinite(returnPercent))) {
-        return;
-      }
 
       const isWin = metrics.netPnl > 0;
       const isLoss = metrics.netPnl < 0;
@@ -176,7 +189,6 @@ export const PerformanceByTimeChart = ({
       const existing = timeMap.get(bucket.label) || { 
         sortOrder: bucket.sortOrder,
         totalPnl: 0, 
-        totalPercent: 0,
         tradeCount: 0, 
         winCount: 0,
         lossCount: 0,
@@ -186,7 +198,6 @@ export const PerformanceByTimeChart = ({
       timeMap.set(bucket.label, {
         sortOrder: bucket.sortOrder,
         totalPnl: existing.totalPnl + metrics.netPnl,
-        totalPercent: existing.totalPercent + (returnPercent ?? 0),
         tradeCount: existing.tradeCount + 1,
         winCount: existing.winCount + (isWin ? 1 : 0),
         lossCount: existing.lossCount + (isLoss ? 1 : 0),
@@ -197,11 +208,16 @@ export const PerformanceByTimeChart = ({
     const data: TimeData[] = Array.from(timeMap.entries())
       .map(([label, data]) => {
         const winrate = data.tradeCount > 0 ? (data.winCount / data.tradeCount) * 100 : 0;
+        // Calculate Return (%) correctly: Total P/L ÷ Account Starting Balance × 100
+        const returnPercent = totalStartingBalance > 0 
+          ? (data.totalPnl / totalStartingBalance) * 100 
+          : 0;
+        
         let displayValue: number;
         
         switch (displayType) {
           case 'percent':
-            displayValue = data.totalPercent;
+            displayValue = returnPercent;
             break;
           case 'winrate':
             displayValue = winrate;
@@ -219,7 +235,7 @@ export const PerformanceByTimeChart = ({
           label,
           sortOrder: data.sortOrder,
           totalPnl: data.totalPnl,
-          totalPercent: data.totalPercent,
+          totalPercent: returnPercent,
           tradeCount: data.tradeCount,
           winCount: data.winCount,
           lossCount: data.lossCount,
@@ -230,7 +246,7 @@ export const PerformanceByTimeChart = ({
       .sort((a, b) => a.sortOrder - b.sortOrder);
 
     return data;
-  }, [filteredTrades, displayType, dateSetting, period]);
+  }, [filteredTrades, displayType, dateSetting, period, totalStartingBalance]);
 
   const formatValue = (value: number, type: DisplayType = displayType): string => {
     if (type === 'percent') {

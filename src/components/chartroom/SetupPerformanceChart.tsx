@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useFilteredTradesContext } from '@/contexts/TradesContext';
 import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
+import { useAccountsContext } from '@/contexts/AccountsContext';
 import { calculateTradeMetrics, Trade } from '@/types/trade';
 import { useStrategiesContext } from '@/contexts/StrategiesContext';
 import {
@@ -48,9 +49,24 @@ export const SetupPerformanceChart = ({
   title = 'Performance by Setup'
 }: SetupPerformanceChartProps) => {
   const { filteredTrades } = useFilteredTradesContext();
-  const { currencyConfig } = useGlobalFilters();
+  const { currencyConfig, selectedAccounts, isAllAccountsSelected } = useGlobalFilters();
+  const { accounts, getAccountBalanceBeforeTrades } = useAccountsContext();
   const { strategies } = useStrategiesContext();
   const [displayType, setDisplayType] = useState<DisplayType>(defaultDisplayType);
+
+  // Calculate total starting balance for Return (%) denominator
+  const totalStartingBalance = useMemo(() => {
+    const activeAccounts = accounts.filter(a => !a.isArchived);
+    
+    if (isAllAccountsSelected) {
+      return activeAccounts.reduce((sum, acc) => sum + getAccountBalanceBeforeTrades(acc.id), 0);
+    } else if (selectedAccounts.length > 0) {
+      return activeAccounts
+        .filter(acc => selectedAccounts.includes(acc.name))
+        .reduce((sum, acc) => sum + getAccountBalanceBeforeTrades(acc.id), 0);
+    }
+    return 0;
+  }, [accounts, selectedAccounts, isAllAccountsSelected, getAccountBalanceBeforeTrades]);
 
   // Calculate setup data - SETUP-CENTRIC approach
   const setupData = useMemo(() => {
@@ -69,7 +85,6 @@ export const SetupPerformanceChart = ({
 
     const setupMap = new Map<string, {
       totalPnl: number;
-      totalPercent: number;
       tradeCount: number;
       winCount: number;
       lossCount: number;
@@ -89,16 +104,9 @@ export const SetupPerformanceChart = ({
       } else {
         setupName = 'Unassigned';
       }
-
-      // Use stored Return % - skip trades without stored value for percent mode
-      const returnPercent = trade.savedReturnPercent;
-      if (displayType === 'percent' && (returnPercent === undefined || returnPercent === null || !isFinite(returnPercent))) {
-        return;
-      }
       
       const existing = setupMap.get(setupName) || { 
         totalPnl: 0, 
-        totalPercent: 0,
         tradeCount: 0, 
         winCount: 0,
         lossCount: 0,
@@ -112,7 +120,6 @@ export const SetupPerformanceChart = ({
       
       setupMap.set(setupName, {
         totalPnl: existing.totalPnl + metrics.netPnl,
-        totalPercent: existing.totalPercent + (returnPercent ?? 0),
         tradeCount: existing.tradeCount + 1,
         winCount: existing.winCount + (isWin ? 1 : 0),
         lossCount: existing.lossCount + (isLoss ? 1 : 0),
@@ -124,6 +131,11 @@ export const SetupPerformanceChart = ({
     const data: SetupData[] = Array.from(setupMap.entries())
       .map(([setup, data]) => {
         const winrate = data.tradeCount > 0 ? (data.winCount / data.tradeCount) * 100 : 0;
+        // Calculate Return (%) correctly: Total P/L ÷ Account Starting Balance × 100
+        const returnPercent = totalStartingBalance > 0 
+          ? (data.totalPnl / totalStartingBalance) * 100 
+          : 0;
+        
         let displayValue: number;
         
         switch (displayType) {
@@ -131,7 +143,7 @@ export const SetupPerformanceChart = ({
             displayValue = data.totalPnl;
             break;
           case 'percent':
-            displayValue = data.totalPercent;
+            displayValue = returnPercent;
             break;
           case 'winrate':
             displayValue = winrate;
@@ -146,7 +158,7 @@ export const SetupPerformanceChart = ({
         return {
           setup,
           totalPnl: data.totalPnl,
-          totalPercent: data.totalPercent,
+          totalPercent: returnPercent,
           tradeCount: data.tradeCount,
           winCount: data.winCount,
           lossCount: data.lossCount,
@@ -160,7 +172,7 @@ export const SetupPerformanceChart = ({
       .sort((a, b) => b.displayValue - a.displayValue);
 
     return data;
-  }, [filteredTrades, displayType, strategies]);
+  }, [filteredTrades, displayType, strategies, totalStartingBalance]);
 
   // Format currency
   const formatValue = (value: number, forceType?: DisplayType): string => {

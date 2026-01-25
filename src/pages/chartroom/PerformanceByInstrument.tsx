@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useFilteredTradesContext } from '@/contexts/TradesContext';
 import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
+import { useAccountsContext } from '@/contexts/AccountsContext';
 import { calculateTradeMetrics, Trade } from '@/types/trade';
 import {
   BarChart,
@@ -48,11 +49,23 @@ interface InstrumentData {
 
 const PerformanceByInstrument = () => {
   const { filteredTrades } = useFilteredTradesContext();
-  const { currencyConfig } = useGlobalFilters();
+  const { currencyConfig, selectedAccounts, isAllAccountsSelected } = useGlobalFilters();
+  const { accounts, getAccountBalanceBeforeTrades } = useAccountsContext();
   const [displayType, setDisplayType] = useState<DisplayType>('dollar');
 
-  // NOTE: Return (%) is now stored on each trade as savedReturnPercent
-  // We use the stored value directly - never recalculate it
+  // Calculate total starting balance for Return (%) denominator
+  const totalStartingBalance = useMemo(() => {
+    const activeAccounts = accounts.filter(a => !a.isArchived);
+    
+    if (isAllAccountsSelected) {
+      return activeAccounts.reduce((sum, acc) => sum + getAccountBalanceBeforeTrades(acc.id), 0);
+    } else if (selectedAccounts.length > 0) {
+      return activeAccounts
+        .filter(acc => selectedAccounts.includes(acc.name))
+        .reduce((sum, acc) => sum + getAccountBalanceBeforeTrades(acc.id), 0);
+    }
+    return 0;
+  }, [accounts, selectedAccounts, isAllAccountsSelected, getAccountBalanceBeforeTrades]);
 
   // Calculate instrument data
   const instrumentData = useMemo(() => {
@@ -66,7 +79,6 @@ const PerformanceByInstrument = () => {
     // Group trades by instrument symbol
     const instrumentMap = new Map<string, {
       totalPnl: number;
-      totalPercent: number;
       tradeCount: number;
       winCount: number;
       lossCount: number;
@@ -77,15 +89,8 @@ const PerformanceByInstrument = () => {
       const metrics = calculateTradeMetrics(trade);
       const normalizedSymbol = trade.symbol.toUpperCase();
       
-      // Use stored Return % - skip trades without stored value
-      const returnPercent = trade.savedReturnPercent;
-      if (displayType === 'percent' && (returnPercent === undefined || returnPercent === null || !isFinite(returnPercent))) {
-        return; // Skip this trade for percent mode
-      }
-      
       const existing = instrumentMap.get(normalizedSymbol) || { 
         totalPnl: 0, 
-        totalPercent: 0,
         tradeCount: 0, 
         winCount: 0,
         lossCount: 0,
@@ -99,7 +104,6 @@ const PerformanceByInstrument = () => {
       
       instrumentMap.set(normalizedSymbol, {
         totalPnl: existing.totalPnl + metrics.netPnl,
-        totalPercent: existing.totalPercent + (returnPercent ?? 0),
         tradeCount: existing.tradeCount + 1,
         winCount: existing.winCount + (isWin ? 1 : 0),
         lossCount: existing.lossCount + (isLoss ? 1 : 0),
@@ -111,6 +115,11 @@ const PerformanceByInstrument = () => {
     const data: InstrumentData[] = Array.from(instrumentMap.entries())
       .map(([symbol, data]) => {
         const winrate = data.tradeCount > 0 ? (data.winCount / data.tradeCount) * 100 : 0;
+        // Calculate Return (%) correctly: Total P/L ÷ Account Starting Balance × 100
+        const returnPercent = totalStartingBalance > 0 
+          ? (data.totalPnl / totalStartingBalance) * 100 
+          : 0;
+        
         let displayValue: number;
         
         switch (displayType) {
@@ -118,7 +127,7 @@ const PerformanceByInstrument = () => {
             displayValue = data.totalPnl;
             break;
           case 'percent':
-            displayValue = data.totalPercent;
+            displayValue = returnPercent;
             break;
           case 'winrate':
             displayValue = winrate;
@@ -133,7 +142,7 @@ const PerformanceByInstrument = () => {
         return {
           symbol,
           totalPnl: data.totalPnl,
-          totalPercent: data.totalPercent,
+          totalPercent: returnPercent,
           tradeCount: data.tradeCount,
           winCount: data.winCount,
           lossCount: data.lossCount,
@@ -147,7 +156,7 @@ const PerformanceByInstrument = () => {
       .sort((a, b) => b.displayValue - a.displayValue);
 
     return data;
-  }, [filteredTrades, displayType]);
+  }, [filteredTrades, displayType, totalStartingBalance]);
 
   // Calculate metrics
   const metrics = useMemo(() => {
