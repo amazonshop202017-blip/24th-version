@@ -168,7 +168,7 @@ export const useFilteredTradesContext = () => {
     if (selectedOutcomes.length > 0) {
       filtered = filtered.filter(trade => {
         const metrics = calculateTradeMetrics(trade);
-        const outcome = classifyTradeOutcome(metrics.netPnl, trade.savedReturnPercent);
+        const outcome = classifyTradeOutcome(metrics.netPnl, trade.savedReturnPercent, trade.breakEven);
         return selectedOutcomes.includes(outcome);
       });
     }
