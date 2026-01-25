@@ -32,9 +32,9 @@ export function filterTradesForGroup(
 ): Trade[] {
   let filtered = [...trades];
 
-  // Filter by symbol
-  if (filters.symbol) {
-    filtered = filtered.filter(t => t.symbol === filters.symbol);
+  // Filter by symbols (OR logic - match ANY selected symbol)
+  if (filters.symbols && filters.symbols.length > 0) {
+    filtered = filtered.filter(t => filters.symbols.includes(t.symbol));
   }
 
   // Filter by side

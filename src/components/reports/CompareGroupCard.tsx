@@ -29,7 +29,7 @@ import { CompareGroupFiltersPanel } from './CompareGroupFiltersPanel';
 import { getMatchedTradesCount } from '@/lib/compareUtils';
 
 export interface CompareGroupFilters {
-  symbol: string;
+  symbols: string[];
   side: 'all' | 'long' | 'short';
   tradePnL: 'all' | 'win' | 'loss';
   tagsByCategory: Record<string, string[]>;
@@ -59,9 +59,15 @@ export const CompareGroupCard = ({ groupNumber, filters, onFiltersChange }: Comp
     return Array.from(symbols).filter(Boolean).sort();
   }, [trades]);
 
-  const handleSymbolChange = (symbol: string) => {
-    onFiltersChange({ ...filters, symbol });
-    setSymbolOpen(false);
+  const handleSymbolToggle = (symbol: string) => {
+    const newSymbols = filters.symbols.includes(symbol)
+      ? filters.symbols.filter(s => s !== symbol)
+      : [...filters.symbols, symbol];
+    onFiltersChange({ ...filters, symbols: newSymbols });
+  };
+
+  const handleSymbolRemove = (symbol: string) => {
+    onFiltersChange({ ...filters, symbols: filters.symbols.filter(s => s !== symbol) });
   };
 
   const handleSideChange = (side: 'all' | 'long' | 'short') => {
@@ -116,58 +122,66 @@ export const CompareGroupCard = ({ groupNumber, filters, onFiltersChange }: Comp
           {/* Symbol */}
           <div className="flex items-center gap-4">
             <label className="text-sm text-muted-foreground w-20 shrink-0">Symbol</label>
-            {filters.symbol ? (
-              <div className="flex-1 flex items-center gap-2">
-                <span className="inline-flex items-center gap-1 bg-primary text-primary-foreground rounded-full px-3 py-1 text-sm">
-                  {filters.symbol}
-                  <button
-                    onClick={() => onFiltersChange({ ...filters, symbol: '' })}
-                    className="ml-1 hover:opacity-70"
-                  >
-                    <X className="w-3 h-3" />
-                  </button>
-                </span>
-              </div>
-            ) : (
-              <Popover open={symbolOpen} onOpenChange={setSymbolOpen}>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    role="combobox"
-                    aria-expanded={symbolOpen}
-                    className="flex-1 justify-between h-10 bg-background border-border"
-                  >
-                    <span className="text-muted-foreground">Select...</span>
-                    <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-[200px] p-0 bg-popover border-border z-[100]" align="start">
-                  <Command>
-                    <CommandInput placeholder="Search symbol..." className="h-9" />
-                    <CommandList>
-                      <CommandEmpty>No symbols found.</CommandEmpty>
-                      <CommandGroup>
-                        {availableSymbols.map((symbol) => (
-                          <CommandItem
-                            key={symbol}
-                            onSelect={() => handleSymbolChange(symbol)}
-                            className="cursor-pointer"
+            <Popover open={symbolOpen} onOpenChange={setSymbolOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  role="combobox"
+                  aria-expanded={symbolOpen}
+                  className="flex-1 justify-start h-auto min-h-10 bg-background border-border py-2"
+                >
+                  {filters.symbols.length > 0 ? (
+                    <div className="flex flex-wrap gap-1">
+                      {filters.symbols.map((symbol) => (
+                        <span
+                          key={symbol}
+                          className="inline-flex items-center gap-1 bg-primary text-primary-foreground rounded-full px-2 py-0.5 text-xs"
+                        >
+                          {symbol}
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleSymbolRemove(symbol);
+                            }}
+                            className="hover:opacity-70"
                           >
-                            <Check
-                              className={cn(
-                                "mr-2 h-4 w-4",
-                                filters.symbol === symbol ? "opacity-100" : "opacity-0"
-                              )}
-                            />
-                            {symbol}
-                          </CommandItem>
-                        ))}
-                      </CommandGroup>
-                    </CommandList>
-                  </Command>
-                </PopoverContent>
-              </Popover>
-            )}
+                            <X className="w-3 h-3" />
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                  ) : (
+                    <span className="text-muted-foreground">Select...</span>
+                  )}
+                  <ChevronDown className="ml-auto h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-[200px] p-0 bg-popover border-border z-[100]" align="start">
+                <Command>
+                  <CommandInput placeholder="Search symbol..." className="h-9" />
+                  <CommandList>
+                    <CommandEmpty>No symbols found.</CommandEmpty>
+                    <CommandGroup>
+                      {availableSymbols.map((symbol) => (
+                        <CommandItem
+                          key={symbol}
+                          onSelect={() => handleSymbolToggle(symbol)}
+                          className="cursor-pointer"
+                        >
+                          <Check
+                            className={cn(
+                              "mr-2 h-4 w-4",
+                              filters.symbols.includes(symbol) ? "opacity-100" : "opacity-0"
+                            )}
+                          />
+                          {symbol}
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
           </div>
 
           {/* Side */}
@@ -296,7 +310,7 @@ export const CompareGroupCard = ({ groupNumber, filters, onFiltersChange }: Comp
 };
 
 export const getDefaultCompareGroupFilters = (): CompareGroupFilters => ({
-  symbol: '',
+  symbols: [],
   side: 'all',
   tradePnL: 'all',
   tagsByCategory: {},
