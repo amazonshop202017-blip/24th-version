@@ -308,11 +308,11 @@ export const PerformanceByTimeChart = ({
           {/* Legend */}
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-1.5">
-              <div className="w-2.5 h-2.5 rounded-sm bg-green-500" />
+              <div className="w-2.5 h-2.5 rounded-sm bg-profit" />
               <span className="text-xs text-muted-foreground">Profit</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <div className="w-2.5 h-2.5 rounded-sm bg-red-500" />
+              <div className="w-2.5 h-2.5 rounded-sm bg-loss" />
               <span className="text-xs text-muted-foreground">Loss</span>
             </div>
           </div>
@@ -371,24 +371,57 @@ export const PerformanceByTimeChart = ({
                   content={({ active, payload }) => {
                     if (!active || !payload || payload.length === 0) return null;
                     const data = payload[0].payload as TimeData;
+                    const winrate = data.tradeCount > 0 ? (data.winCount / data.tradeCount) * 100 : 0;
+                    
+                    if (displayType === 'tradecount') {
+                      return (
+                        <div className="bg-card border border-border rounded-lg p-3 shadow-lg z-50">
+                          <p className="text-foreground font-medium mb-2">{data.label}</p>
+                          <p className="text-sm text-foreground">
+                            Trade Count: {data.tradeCount}
+                          </p>
+                        </div>
+                      );
+                    }
+                    
+                    if (displayType === 'winrate') {
+                      return (
+                        <div className="bg-card border border-border rounded-lg p-3 shadow-lg z-50">
+                          <p className="text-foreground font-medium mb-2">{data.label}</p>
+                          <div className="space-y-1 text-sm">
+                            <p className="text-foreground">
+                              Winrate: {winrate.toFixed(1)}%
+                            </p>
+                            <p className="text-muted-foreground">
+                              Wins: {data.winCount}
+                            </p>
+                            <p className="text-muted-foreground">
+                              Losses: {data.lossCount}
+                            </p>
+                            <p className="text-muted-foreground">
+                              Breakeven: {data.breakevenCount}
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    }
+                    
+                    // dollar and percent modes - show full metrics
                     return (
                       <div className="bg-card border border-border rounded-lg p-3 shadow-lg z-50">
                         <p className="text-foreground font-medium mb-2">{data.label}</p>
                         <div className="space-y-1 text-sm">
-                          {displayType === 'tradecount' ? (
-                            <p className="text-foreground font-semibold">
-                              Trade Count: {data.tradeCount}
-                            </p>
-                          ) : (
-                            <p className={data.totalPnl >= 0 ? 'text-green-500' : 'text-red-500'}>
-                              {formatValue(data.totalPnl, 'dollar')}
-                            </p>
-                          )}
+                          <p className={data.totalPnl >= 0 ? 'text-profit' : 'text-loss'}>
+                            Total P&L: {formatValue(data.totalPnl, 'dollar')}
+                          </p>
+                          <p className={data.totalPercent >= 0 ? 'text-profit' : 'text-loss'}>
+                            Total Return: {formatValue(data.totalPercent, 'percent')}
+                          </p>
                           <p className="text-muted-foreground">
                             Trades: {data.tradeCount}
                           </p>
                           <p className="text-muted-foreground">
-                            Win: {data.winCount} | Loss: {data.lossCount} | BE: {data.breakevenCount}
+                            Win Rate: {winrate.toFixed(1)}%
                           </p>
                         </div>
                       </div>
