@@ -643,9 +643,20 @@ const PerformanceRatio = () => {
           </h3>
           {groupedData.length > 0 ? (
             <ResponsiveContainer width="100%" height={350}>
-              <BarChart data={groupedData} layout="vertical" margin={{ left: 120, right: 40, top: 10, bottom: 10 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" horizontal={false} />
+              <BarChart data={groupedData} margin={{ left: 20, right: 20, top: 20, bottom: 60 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
                 <XAxis 
+                  type="category" 
+                  dataKey="name" 
+                  axisLine={false} 
+                  tickLine={false}
+                  tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 11 }}
+                  angle={-45}
+                  textAnchor="end"
+                  height={60}
+                  interval={0}
+                />
+                <YAxis 
                   type="number" 
                   axisLine={false} 
                   tickLine={false}
@@ -656,17 +667,9 @@ const PerformanceRatio = () => {
                     return `${currencyConfig.symbol}${Math.abs(value) >= 1000 ? `${(value / 1000).toFixed(0)}k` : value.toFixed(0)}`;
                   }}
                 />
-                <YAxis 
-                  type="category" 
-                  dataKey="name" 
-                  axisLine={false} 
-                  tickLine={false}
-                  tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 11 }}
-                  width={110}
-                />
                 <Tooltip content={<CustomTooltip />} cursor={{ fill: 'hsl(var(--muted)/0.1)' }} />
-                <ReferenceLine x={0} stroke="hsl(var(--border))" />
-                <Bar dataKey="displayValue" radius={[0, 4, 4, 0]} maxBarSize={32}>
+                <ReferenceLine y={0} stroke="hsl(var(--border))" />
+                <Bar dataKey="displayValue" radius={[4, 4, 0, 0]} maxBarSize={48}>
                   {groupedData.map((entry, index) => (
                     <Cell 
                       key={`cell-${index}`}
