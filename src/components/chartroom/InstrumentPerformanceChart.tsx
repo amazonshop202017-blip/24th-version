@@ -48,7 +48,7 @@ export const InstrumentPerformanceChart = ({
   title = 'Performance by Instrument'
 }: InstrumentPerformanceChartProps) => {
   const { filteredTrades } = useFilteredTradesContext();
-  const { currencyConfig, selectedAccounts, isAllAccountsSelected } = useGlobalFilters();
+  const { currencyConfig, selectedAccounts, isAllAccountsSelected, classifyTradeOutcome } = useGlobalFilters();
   const { accounts, getAccountBalanceBeforeTrades } = useAccountsContext();
   const [displayType, setDisplayType] = useState<DisplayType>(defaultDisplayType);
 
@@ -96,24 +96,24 @@ export const InstrumentPerformanceChart = ({
         beCount: 0
       };
       
-      // Determine win/loss/breakeven
-      const isWin = metrics.netPnl > 0;
-      const isLoss = metrics.netPnl < 0;
-      const isBe = metrics.netPnl === 0;
+      // Use global classifyTradeOutcome for consistent classification
+      const outcome = classifyTradeOutcome(metrics.netPnl, trade.savedReturnPercent, trade.breakEven);
       
       instrumentMap.set(normalizedSymbol, {
         totalPnl: existing.totalPnl + metrics.netPnl,
         tradeCount: existing.tradeCount + 1,
-        winCount: existing.winCount + (isWin ? 1 : 0),
-        lossCount: existing.lossCount + (isLoss ? 1 : 0),
-        beCount: existing.beCount + (isBe ? 1 : 0),
+        winCount: existing.winCount + (outcome === 'win' ? 1 : 0),
+        lossCount: existing.lossCount + (outcome === 'loss' ? 1 : 0),
+        beCount: existing.beCount + (outcome === 'breakeven' ? 1 : 0),
       });
     });
 
     // Convert to array and calculate averages
     const data: InstrumentData[] = Array.from(instrumentMap.entries())
       .map(([symbol, data]) => {
-        const winrate = data.tradeCount > 0 ? (data.winCount / data.tradeCount) * 100 : 0;
+        // Win Rate = Wins / (Wins + Losses) - excludes breakeven
+        const winsAndLosses = data.winCount + data.lossCount;
+        const winrate = winsAndLosses > 0 ? (data.winCount / winsAndLosses) * 100 : 0;
         // Calculate Return (%) correctly: Total P/L ÷ Account Starting Balance × 100
         const returnPercent = totalStartingBalance > 0 
           ? (data.totalPnl / totalStartingBalance) * 100 
@@ -155,7 +155,7 @@ export const InstrumentPerformanceChart = ({
       .sort((a, b) => b.displayValue - a.displayValue);
 
     return data;
-  }, [filteredTrades, displayType, totalStartingBalance]);
+  }, [filteredTrades, displayType, totalStartingBalance, classifyTradeOutcome]);
 
   // Format currency
   const formatValue = (value: number, forceType?: DisplayType): string => {

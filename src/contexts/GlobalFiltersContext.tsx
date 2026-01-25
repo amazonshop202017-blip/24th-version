@@ -31,10 +31,12 @@ export type RMultipleRange = '<-2' | '-2-0' | '0-1' | '1-2' | '2-4' | '>4';
 
 // Breakeven Tolerance types
 export type BreakevenToleranceType = 'amount' | 'percentage';
+export type BreakevenModeType = 'automatic' | 'manual';
 
 export interface BreakevenTolerance {
   type: BreakevenToleranceType;
   value: number; // Amount in currency OR percentage value
+  mode: BreakevenModeType; // 'automatic' uses tolerance, 'manual' uses trade-level flag
 }
 
 // Tag filter: Map of categoryId -> array of selected tagIds
@@ -53,7 +55,8 @@ interface GlobalFiltersContextType {
   // Breakeven Tolerance
   breakevenTolerance: BreakevenTolerance;
   setBreakevenTolerance: (tolerance: BreakevenTolerance) => void;
-  classifyTradeOutcome: (netPnl: number, returnPercent?: number) => TradeOutcome;
+  // classifyTradeOutcome now accepts optional isBreakeven flag for manual mode
+  classifyTradeOutcome: (netPnl: number, returnPercent?: number, isBreakeven?: boolean) => TradeOutcome;
   
   // Date Range
   dateRange: DateRange;
@@ -106,6 +109,7 @@ const BREAKEVEN_TOLERANCE_STORAGE_KEY = 'trading-journal-breakeven-tolerance';
 const DEFAULT_BREAKEVEN_TOLERANCE: BreakevenTolerance = {
   type: 'amount',
   value: 0,
+  mode: 'automatic', // Default to automatic (tolerance-based)
 };
 
 // Load persisted currency from localStorage
@@ -128,7 +132,12 @@ const loadPersistedBreakevenTolerance = (): BreakevenTolerance => {
     if (stored) {
       const parsed = JSON.parse(stored);
       if (parsed.type && typeof parsed.value === 'number') {
-        return parsed as BreakevenTolerance;
+        // Ensure mode is set (backwards compatibility)
+        return {
+          type: parsed.type,
+          value: parsed.value,
+          mode: parsed.mode || 'automatic',
+        };
       }
     }
   } catch (e) {
@@ -185,10 +194,23 @@ export const GlobalFiltersProvider = ({ children }: { children: ReactNode }) => 
     }
   }, []);
 
-  // Classify trade outcome based on tolerance
-  const classifyTradeOutcome = useCallback((netPnl: number, returnPercent?: number): TradeOutcome => {
-    const { type, value } = breakevenTolerance;
+  // Classify trade outcome based on mode and tolerance
+  // isBreakeven is the trade-level flag from the Add/Edit Trade popup
+  const classifyTradeOutcome = useCallback((netPnl: number, returnPercent?: number, isBreakeven?: boolean): TradeOutcome => {
+    const { type, value, mode } = breakevenTolerance;
     
+    // Manual mode: Use trade-level breakeven flag
+    if (mode === 'manual') {
+      if (isBreakeven === true) {
+        return 'breakeven';
+      }
+      // If not marked as breakeven, classify by P/L
+      if (netPnl > 0) return 'win';
+      if (netPnl < 0) return 'loss';
+      return 'breakeven'; // Exactly zero is always breakeven
+    }
+    
+    // Automatic mode: Use tolerance-based logic
     if (type === 'amount') {
       // Amount-based tolerance: P/L between -value and +value is breakeven
       if (netPnl >= -value && netPnl <= value) {

@@ -40,8 +40,8 @@ const Settings = () => {
   
   const handleToleranceTypeChange = (type: BreakevenToleranceType) => {
     setBreakevenTolerance({
+      ...breakevenTolerance,
       type,
-      value: breakevenTolerance.value,
     });
   };
   
@@ -49,8 +49,15 @@ const Settings = () => {
     setToleranceValue(value);
     const numValue = parseFloat(value) || 0;
     setBreakevenTolerance({
-      type: breakevenTolerance.type,
+      ...breakevenTolerance,
       value: Math.max(0, numValue), // Ensure non-negative
+    });
+  };
+  
+  const handleBreakevenModeChange = (mode: 'automatic' | 'manual') => {
+    setBreakevenTolerance({
+      ...breakevenTolerance,
+      mode,
     });
   };
 
@@ -249,51 +256,77 @@ const Settings = () => {
               </div>
               <div>
                 <h2 className="text-xl font-semibold">Breakeven Tolerance</h2>
-                <p className="text-sm text-muted-foreground">Define how close to zero a trade can be and still count as breakeven</p>
+                <p className="text-sm text-muted-foreground">Define how breakeven trades are classified</p>
               </div>
             </div>
 
             <div className="flex flex-col gap-4">
+              {/* Classification Mode */}
               <div className="flex items-center gap-4">
-                <span className="text-sm text-muted-foreground min-w-[100px]">Tolerance Type:</span>
+                <span className="text-sm text-muted-foreground min-w-[120px]">Classification Mode:</span>
                 <Select
-                  value={breakevenTolerance.type}
-                  onValueChange={(value) => handleToleranceTypeChange(value as BreakevenToleranceType)}
+                  value={breakevenTolerance.mode}
+                  onValueChange={(value) => handleBreakevenModeChange(value as 'automatic' | 'manual')}
                 >
-                  <SelectTrigger className="w-[180px] bg-background">
+                  <SelectTrigger className="w-[200px] bg-background">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="amount">Amount ({currencyConfig.symbol})</SelectItem>
-                    <SelectItem value="percentage">Percentage (%)</SelectItem>
+                    <SelectItem value="automatic">Automatic (Tolerance)</SelectItem>
+                    <SelectItem value="manual">Manual (Trade-Level)</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               
-              <div className="flex items-center gap-4">
-                <span className="text-sm text-muted-foreground min-w-[100px]">Tolerance Value:</span>
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
-                    {breakevenTolerance.type === 'amount' ? `±${currencyConfig.symbol}` : '±'}
-                  </span>
-                  <Input
-                    type="number"
-                    min="0"
-                    step={breakevenTolerance.type === 'amount' ? '1' : '0.01'}
-                    placeholder="0"
-                    value={toleranceValue}
-                    onChange={(e) => handleToleranceValueChange(e.target.value)}
-                    className="bg-input border-border w-40 pl-10"
-                  />
-                  {breakevenTolerance.type === 'percentage' && (
-                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">%</span>
-                  )}
-                </div>
-              </div>
+              {/* Only show tolerance settings in Automatic mode */}
+              {breakevenTolerance.mode === 'automatic' && (
+                <>
+                  <div className="flex items-center gap-4">
+                    <span className="text-sm text-muted-foreground min-w-[120px]">Tolerance Type:</span>
+                    <Select
+                      value={breakevenTolerance.type}
+                      onValueChange={(value) => handleToleranceTypeChange(value as BreakevenToleranceType)}
+                    >
+                      <SelectTrigger className="w-[180px] bg-background">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="amount">Amount ({currencyConfig.symbol})</SelectItem>
+                        <SelectItem value="percentage">Percentage (%)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div className="flex items-center gap-4">
+                    <span className="text-sm text-muted-foreground min-w-[120px]">Tolerance Value:</span>
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+                        {breakevenTolerance.type === 'amount' ? `±${currencyConfig.symbol}` : '±'}
+                      </span>
+                      <Input
+                        type="number"
+                        min="0"
+                        step={breakevenTolerance.type === 'amount' ? '1' : '0.01'}
+                        placeholder="0"
+                        value={toleranceValue}
+                        onChange={(e) => handleToleranceValueChange(e.target.value)}
+                        className="bg-input border-border w-40 pl-10"
+                      />
+                      {breakevenTolerance.type === 'percentage' && (
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">%</span>
+                      )}
+                    </div>
+                  </div>
+                </>
+              )}
               
               <div className="mt-2 p-3 bg-muted/30 rounded-lg">
                 <p className="text-xs text-muted-foreground">
-                  {breakevenTolerance.type === 'amount' ? (
+                  {breakevenTolerance.mode === 'manual' ? (
+                    <>
+                      Trades are classified as <span className="text-primary font-medium">breakeven</span> based on the "Breakeven" toggle in the Add/Edit Trade popup. Tolerance settings are ignored.
+                    </>
+                  ) : breakevenTolerance.type === 'amount' ? (
                     <>
                       Trades with P/L between <span className="font-mono text-foreground">-{currencyConfig.symbol}{breakevenTolerance.value}</span> and <span className="font-mono text-foreground">+{currencyConfig.symbol}{breakevenTolerance.value}</span> will be classified as <span className="text-primary font-medium">breakeven</span>.
                     </>
@@ -302,6 +335,12 @@ const Settings = () => {
                       Trades with Return between <span className="font-mono text-foreground">-{breakevenTolerance.value}%</span> and <span className="font-mono text-foreground">+{breakevenTolerance.value}%</span> will be classified as <span className="text-primary font-medium">breakeven</span>.
                     </>
                   )}
+                </p>
+              </div>
+              
+              <div className="p-3 bg-muted/30 rounded-lg border-l-2 border-primary">
+                <p className="text-xs text-muted-foreground">
+                  <span className="font-medium text-foreground">Win Rate Formula:</span> Wins ÷ (Wins + Losses) × 100%. Breakeven trades are excluded from win rate calculations.
                 </p>
               </div>
             </div>

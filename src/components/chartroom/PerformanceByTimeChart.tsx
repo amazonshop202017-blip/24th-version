@@ -37,6 +37,7 @@ interface TimeData {
   winCount: number;
   lossCount: number;
   breakevenCount: number;
+  winrate: number;
   displayValue: number;
 }
 
@@ -53,7 +54,7 @@ export const PerformanceByTimeChart = ({
   title = 'Performance by Time'
 }: PerformanceByTimeChartProps) => {
   const { filteredTrades } = useFilteredTradesContext();
-  const { currencyConfig, selectedAccounts, isAllAccountsSelected } = useGlobalFilters();
+  const { currencyConfig, selectedAccounts, isAllAccountsSelected, classifyTradeOutcome } = useGlobalFilters();
   const { accounts, getAccountBalanceBeforeTrades } = useAccountsContext();
   
   const [displayType, setDisplayType] = useState<DisplayType>(defaultDisplayType);
@@ -182,9 +183,8 @@ export const PerformanceByTimeChart = ({
       const date = parseISO(dateStr);
       const bucket = getBucket(date, period);
 
-      const isWin = metrics.netPnl > 0;
-      const isLoss = metrics.netPnl < 0;
-      const isBreakeven = metrics.netPnl === 0;
+      // Use global classifyTradeOutcome for consistent classification
+      const outcome = classifyTradeOutcome(metrics.netPnl, trade.savedReturnPercent, trade.breakEven);
       
       const existing = timeMap.get(bucket.label) || { 
         sortOrder: bucket.sortOrder,
@@ -199,15 +199,17 @@ export const PerformanceByTimeChart = ({
         sortOrder: bucket.sortOrder,
         totalPnl: existing.totalPnl + metrics.netPnl,
         tradeCount: existing.tradeCount + 1,
-        winCount: existing.winCount + (isWin ? 1 : 0),
-        lossCount: existing.lossCount + (isLoss ? 1 : 0),
-        breakevenCount: existing.breakevenCount + (isBreakeven ? 1 : 0),
+        winCount: existing.winCount + (outcome === 'win' ? 1 : 0),
+        lossCount: existing.lossCount + (outcome === 'loss' ? 1 : 0),
+        breakevenCount: existing.breakevenCount + (outcome === 'breakeven' ? 1 : 0),
       });
     });
 
     const data: TimeData[] = Array.from(timeMap.entries())
       .map(([label, data]) => {
-        const winrate = data.tradeCount > 0 ? (data.winCount / data.tradeCount) * 100 : 0;
+        // Win Rate = Wins / (Wins + Losses) - excludes breakeven
+        const winsAndLosses = data.winCount + data.lossCount;
+        const winrate = winsAndLosses > 0 ? (data.winCount / winsAndLosses) * 100 : 0;
         // Calculate Return (%) correctly: Total P/L ÷ Account Starting Balance × 100
         const returnPercent = totalStartingBalance > 0 
           ? (data.totalPnl / totalStartingBalance) * 100 
@@ -240,13 +242,14 @@ export const PerformanceByTimeChart = ({
           winCount: data.winCount,
           lossCount: data.lossCount,
           breakevenCount: data.breakevenCount,
+          winrate,
           displayValue,
         };
       })
       .sort((a, b) => a.sortOrder - b.sortOrder);
 
     return data;
-  }, [filteredTrades, displayType, dateSetting, period, totalStartingBalance]);
+  }, [filteredTrades, displayType, dateSetting, period, totalStartingBalance, classifyTradeOutcome]);
 
   const formatValue = (value: number, type: DisplayType = displayType): string => {
     if (type === 'percent') {
@@ -387,7 +390,6 @@ export const PerformanceByTimeChart = ({
                   content={({ active, payload }) => {
                     if (!active || !payload || payload.length === 0) return null;
                     const data = payload[0].payload as TimeData;
-                    const winrate = data.tradeCount > 0 ? (data.winCount / data.tradeCount) * 100 : 0;
                     
                     if (displayType === 'tradecount') {
                       return (
@@ -406,7 +408,7 @@ export const PerformanceByTimeChart = ({
                           <p className="text-foreground font-medium mb-2">{data.label}</p>
                           <div className="space-y-1 text-sm">
                             <p className="text-foreground">
-                              Winrate: {winrate.toFixed(1)}%
+                              Winrate: {data.winrate.toFixed(1)}%
                             </p>
                             <p className="text-muted-foreground">
                               Wins: {data.winCount}
@@ -437,7 +439,7 @@ export const PerformanceByTimeChart = ({
                             Trades: {data.tradeCount}
                           </p>
                           <p className="text-muted-foreground">
-                            Win Rate: {winrate.toFixed(1)}%
+                            Win Rate: {data.winrate.toFixed(1)}%
                           </p>
                         </div>
                       </div>

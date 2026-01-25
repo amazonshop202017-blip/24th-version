@@ -264,10 +264,10 @@ export const useFilteredTradesContext = () => {
   }, [trades, dateRange, selectedAccounts, activeAccountNames, selectedInstruments, selectedOutcomes, selectedHours, selectedSetups, selectedDays, lastTradesFilter, selectedDirections, selectedReturnRanges, selectedRMultipleRanges, selectedTagsByCategory, classifyTradeOutcome]);
 
   const stats = useMemo(() => {
-    // Classify trades using breakeven tolerance
+    // Classify trades using breakeven tolerance (pass trade-level isBreakeven flag)
     const classifiedTrades = filteredTrades.map(t => {
       const metrics = calculateTradeMetrics(t);
-      const outcome = classifyTradeOutcome(metrics.netPnl, t.savedReturnPercent);
+      const outcome = classifyTradeOutcome(metrics.netPnl, t.savedReturnPercent, t.breakEven);
       return { trade: t, metrics, outcome };
     });
     
@@ -295,18 +295,26 @@ export const useFilteredTradesContext = () => {
     const losingDaysCount = dayOutcomes.filter(o => o === 'loss').length;
     const breakevenDaysCount = dayOutcomes.filter(o => o === 'breakeven').length;
     
+    // Win Rate = Wins / (Wins + Losses) - excludes breakeven trades
+    const winsAndLosses = winningTrades.length + losingTrades.length;
+    const tradeWinRate = winsAndLosses > 0 
+      ? (winningTrades.length / winsAndLosses) * 100 
+      : 0;
+    
+    // Day Win Rate = Winning Days / (Winning + Losing Days) - excludes breakeven days
+    const winAndLoseDays = winningDaysCount + losingDaysCount;
+    const dayWinRate = winAndLoseDays > 0 
+      ? (winningDaysCount / winAndLoseDays) * 100 
+      : 0;
+    
     return {
       netPnl: filteredTrades.reduce((sum, t) => sum + calculateTradeMetrics(t).netPnl, 0),
       totalTrades: filteredTrades.length,
       winningTrades: winningTrades.length,
       losingTrades: losingTrades.length,
       breakevenTrades: breakevenTrades.length,
-      tradeWinRate: filteredTrades.length > 0 
-        ? (winningTrades.length / filteredTrades.length) * 100 
-        : 0,
-      dayWinRate: dayOutcomes.length > 0 
-        ? (winningDaysCount / dayOutcomes.length) * 100 
-        : 0,
+      tradeWinRate,
+      dayWinRate,
       winningDays: winningDaysCount,
       losingDays: losingDaysCount,
       breakevenDays: breakevenDaysCount,
