@@ -17,7 +17,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { useGlobalFilters, DatePreset, OutcomeFilter, DayFilter, LastTradesFilter, DirectionFilter, ReturnPercentRange, RMultipleRange } from '@/contexts/GlobalFiltersContext';
+import { useGlobalFilters, DatePreset, OutcomeFilter, DayFilter, LastTradesFilter, DirectionFilter, ReturnPercentRange, RMultipleRange, YearFilter } from '@/contexts/GlobalFiltersContext';
 import { useAccountsContext } from '@/contexts/AccountsContext';
 import { useTradesContext } from '@/contexts/TradesContext';
 import { useStrategiesContext } from '@/contexts/StrategiesContext';
@@ -126,6 +126,11 @@ export const GlobalHeader = () => {
     setSelectedReturnRanges,
     selectedRMultipleRanges,
     setSelectedRMultipleRanges,
+    selectedYear,
+    setSelectedYear,
+    selectedChecklistItems,
+    setSelectedChecklistItems,
+    hasActiveChecklistFilter,
     hasActiveTagFilters,
   } = useGlobalFilters();
   
@@ -136,6 +141,8 @@ export const GlobalHeader = () => {
   const [datePickerOpen, setDatePickerOpen] = useState(false);
   const [basicFiltersOpen, setBasicFiltersOpen] = useState(false);
   const [advancedFiltersOpen, setAdvancedFiltersOpen] = useState(false);
+  const [yearPickerOpen, setYearPickerOpen] = useState(false);
+  const [checklistOpen, setChecklistOpen] = useState(false);
 
   // Get active accounts (excluding archived)
   const activeAccounts = useMemo(() => getActiveAccountsWithStats(), [getActiveAccountsWithStats]);
@@ -145,6 +152,35 @@ export const GlobalHeader = () => {
     const instruments = new Set(trades.map(t => t.symbol));
     return Array.from(instruments).filter(Boolean).sort();
   }, [trades]);
+
+  // Get available years from trades
+  const availableYears = useMemo(() => {
+    const years = new Set<number>();
+    trades.forEach(trade => {
+      if (trade.entries && trade.entries.length > 0) {
+        const firstEntry = trade.entries.sort((a, b) => 
+          new Date(a.datetime).getTime() - new Date(b.datetime).getTime()
+        )[0];
+        if (firstEntry?.datetime) {
+          years.add(new Date(firstEntry.datetime).getFullYear());
+        }
+      }
+    });
+    return Array.from(years).sort((a, b) => b - a); // Descending
+  }, [trades]);
+
+  // Get checklist items for selected setups
+  const availableChecklistItems = useMemo(() => {
+    if (selectedSetups.length === 0) return [];
+    // Get all checklist items from selected strategies
+    const items = new Set<string>();
+    strategies
+      .filter(s => selectedSetups.includes(s.id))
+      .forEach(s => {
+        s.checklistItems?.forEach(item => items.add(item));
+      });
+    return Array.from(items);
+  }, [strategies, selectedSetups]);
 
   const handlePresetClick = (preset: DatePreset) => {
     applyDatePreset(preset);
@@ -241,6 +277,21 @@ export const GlobalHeader = () => {
     }
   };
 
+  // Year filter handler
+  const handleYearSelect = (year: number | null) => {
+    setSelectedYear(year);
+    setYearPickerOpen(false);
+  };
+
+  // Checklist filter handlers
+  const handleChecklistItemToggle = (item: string) => {
+    if (selectedChecklistItems.includes(item)) {
+      setSelectedChecklistItems(selectedChecklistItems.filter(i => i !== item));
+    } else {
+      setSelectedChecklistItems([...selectedChecklistItems, item]);
+    }
+  };
+
   const getDateRangeLabel = () => {
     if (datePreset === 'all' || (!dateRange.from && !dateRange.to)) {
       return 'All time';
@@ -274,13 +325,15 @@ export const GlobalHeader = () => {
     if (selectedOutcomes.length > 0) count++;
     if (selectedHours.length > 0) count++;
     if (selectedSetups.length > 0) count++;
+    if (selectedChecklistItems.length > 0) count++;
     if (selectedDays.length > 0) count++;
     if (lastTradesFilter !== null) count++;
     if (selectedDirections.length > 0) count++;
     if (selectedReturnRanges.length > 0) count++;
     if (selectedRMultipleRanges.length > 0) count++;
+    if (selectedYear !== null) count++;
     return count;
-  }, [selectedInstruments, selectedOutcomes, selectedHours, selectedSetups, selectedDays, lastTradesFilter, selectedDirections, selectedReturnRanges, selectedRMultipleRanges]);
+  }, [selectedInstruments, selectedOutcomes, selectedHours, selectedSetups, selectedChecklistItems, selectedDays, lastTradesFilter, selectedDirections, selectedReturnRanges, selectedRMultipleRanges, selectedYear]);
 
   return (
     <div className="flex items-center gap-3 px-8 py-4 border-b border-border bg-card/50 backdrop-blur-sm">
@@ -462,43 +515,11 @@ export const GlobalHeader = () => {
               </Popover>
             </div>
 
-            {/* Trade Type - UI only (not wired) */}
-            <div className="space-y-1.5">
-              <label className="text-xs text-muted-foreground flex items-center gap-1.5">
-                <ListFilter className="w-3 h-3" />
-                Trade Type
-              </label>
-              <Select>
-                <SelectTrigger className="h-9 bg-background border-border">
-                  <SelectValue placeholder="All" />
-                </SelectTrigger>
-                <SelectContent className="bg-popover border-border z-[60]">
-                  <SelectItem value="all">All</SelectItem>
-                  <SelectItem value="scalp">Scalp</SelectItem>
-                  <SelectItem value="day">Day Trade</SelectItem>
-                  <SelectItem value="swing">Swing</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+            {/* Empty cell - Trade Type removed */}
+            <div />
 
-            {/* Checklist Type - UI only (not wired) */}
-            <div className="space-y-1.5">
-              <label className="text-xs text-muted-foreground flex items-center gap-1.5">
-                <ListFilter className="w-3 h-3" />
-                Checklist Type
-              </label>
-              <Select>
-                <SelectTrigger className="h-9 bg-background border-border">
-                  <SelectValue placeholder="All" />
-                </SelectTrigger>
-                <SelectContent className="bg-popover border-border z-[60]">
-                  <SelectItem value="all">All</SelectItem>
-                  <SelectItem value="entry">Entry</SelectItem>
-                  <SelectItem value="exit">Exit</SelectItem>
-                  <SelectItem value="risk">Risk</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+            {/* Empty cell - Checklist moved to after Setup */}
+            <div />
 
             {/* Row 2: Setup, Direction, Day, Return %, Starred, empty */}
             {/* Setup - Multi-select from strategies */}
@@ -542,6 +563,69 @@ export const GlobalHeader = () => {
                       >
                         Clear selection
                       </Button>
+                    </>
+                  )}
+                </PopoverContent>
+              </Popover>
+            </div>
+
+            {/* Checklist of Setup - Depends on Setup selection */}
+            <div className="space-y-1.5">
+              <label className="text-xs text-muted-foreground flex items-center gap-1.5">
+                <ListFilter className="w-3 h-3" />
+                Checklist of Setup
+              </label>
+              <Popover open={checklistOpen} onOpenChange={setChecklistOpen}>
+                <PopoverTrigger asChild>
+                  <Button 
+                    variant="outline" 
+                    className="w-full h-9 justify-between text-sm font-normal bg-background border-border"
+                    disabled={selectedSetups.length === 0}
+                  >
+                    {selectedSetups.length === 0 
+                      ? 'Select setup first' 
+                      : selectedChecklistItems.length === 0 
+                        ? 'All' 
+                        : `${selectedChecklistItems.length} selected`}
+                    <ChevronDown className="w-3 h-3 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-56 p-2 bg-popover border-border z-[70]" align="start">
+                  {selectedSetups.length === 0 ? (
+                    <div className="text-xs text-muted-foreground py-3 text-center">
+                      Please select a setup to choose checklist items.
+                    </div>
+                  ) : availableChecklistItems.length === 0 ? (
+                    <div className="text-xs text-muted-foreground py-3 text-center">
+                      No checklist items for selected setups.
+                    </div>
+                  ) : (
+                    <>
+                      <div className="space-y-1 max-h-48 overflow-auto">
+                        {availableChecklistItems.map((item) => (
+                          <div 
+                            key={item} 
+                            className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-accent cursor-pointer"
+                            onClick={() => handleChecklistItemToggle(item)}
+                          >
+                            <Checkbox checked={selectedChecklistItems.includes(item)} />
+                            <span className="text-sm truncate">{item}</span>
+                          </div>
+                        ))}
+                      </div>
+                      {selectedChecklistItems.length > 0 && (
+                        <>
+                          <DropdownMenuSeparator className="my-2" />
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="w-full text-xs"
+                            onClick={() => setSelectedChecklistItems([])}
+                          >
+                            Clear selection
+                          </Button>
+                        </>
+                      )}
                     </>
                   )}
                 </PopoverContent>
@@ -741,23 +825,81 @@ export const GlobalHeader = () => {
               </Select>
             </div>
 
-            {/* Year - UI only (not wired) */}
+            {/* Year - Calendar-style year picker */}
             <div className="space-y-1.5">
               <label className="text-xs text-muted-foreground flex items-center gap-1.5">
                 <CalendarIcon2 className="w-3 h-3" />
                 Year
               </label>
-              <Select>
-                <SelectTrigger className="h-9 bg-background border-border">
-                  <SelectValue placeholder="All" />
-                </SelectTrigger>
-                <SelectContent className="bg-popover border-border z-[60]">
-                  <SelectItem value="all">All</SelectItem>
-                  <SelectItem value="2026">2026</SelectItem>
-                  <SelectItem value="2025">2025</SelectItem>
-                  <SelectItem value="2024">2024</SelectItem>
-                </SelectContent>
-              </Select>
+              <Popover open={yearPickerOpen} onOpenChange={setYearPickerOpen}>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className="w-full h-9 justify-between text-sm font-normal bg-background border-border">
+                    {selectedYear === null ? 'All' : selectedYear.toString()}
+                    <ChevronDown className="w-3 h-3 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-[200px] p-3 bg-popover border-border z-[70]" align="start">
+                  <div className="space-y-2">
+                    <div className="text-xs font-medium text-muted-foreground text-center mb-2">Select Year</div>
+                    <div 
+                      className={cn(
+                        "px-3 py-2 rounded-md text-center text-sm cursor-pointer transition-colors",
+                        selectedYear === null ? "bg-primary text-primary-foreground" : "hover:bg-accent"
+                      )}
+                      onClick={() => handleYearSelect(null)}
+                    >
+                      All Years
+                    </div>
+                    <DropdownMenuSeparator />
+                    <div className="grid grid-cols-2 gap-1.5">
+                      {availableYears.length === 0 ? (
+                        // Generate last 5 years if no trades
+                        [0, 1, 2, 3, 4].map(offset => {
+                          const year = new Date().getFullYear() - offset;
+                          return (
+                            <div
+                              key={year}
+                              className={cn(
+                                "px-3 py-2 rounded-md text-center text-sm cursor-pointer transition-colors",
+                                selectedYear === year ? "bg-primary text-primary-foreground" : "hover:bg-accent"
+                              )}
+                              onClick={() => handleYearSelect(year)}
+                            >
+                              {year}
+                            </div>
+                          );
+                        })
+                      ) : (
+                        availableYears.map(year => (
+                          <div
+                            key={year}
+                            className={cn(
+                              "px-3 py-2 rounded-md text-center text-sm cursor-pointer transition-colors",
+                              selectedYear === year ? "bg-primary text-primary-foreground" : "hover:bg-accent"
+                            )}
+                            onClick={() => handleYearSelect(year)}
+                          >
+                            {year}
+                          </div>
+                        ))
+                      )}
+                    </div>
+                    {selectedYear !== null && (
+                      <>
+                        <DropdownMenuSeparator />
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="w-full text-xs"
+                          onClick={() => handleYearSelect(null)}
+                        >
+                          Clear selection
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                </PopoverContent>
+              </Popover>
             </div>
 
             {/* R-Multiple Gain - Multi-select */}

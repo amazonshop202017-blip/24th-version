@@ -28,6 +28,7 @@ export type LastTradesFilter = 10 | 25 | 50 | 100 | null;
 export type DirectionFilter = 'long' | 'short';
 export type ReturnPercentRange = '<0' | '0-1' | '1-2' | '3-5' | '5-10' | '>10';
 export type RMultipleRange = '<-2' | '-2-0' | '0-1' | '1-2' | '2-4' | '>4';
+export type YearFilter = number | null; // null means "all years"
 
 // Breakeven Tolerance types
 export type BreakevenToleranceType = 'amount' | 'percentage';
@@ -94,6 +95,14 @@ interface GlobalFiltersContextType {
   selectedRMultipleRanges: RMultipleRange[];
   setSelectedRMultipleRanges: (ranges: RMultipleRange[]) => void;
   
+  // Year Filter
+  selectedYear: YearFilter;
+  setSelectedYear: (year: YearFilter) => void;
+  
+  // Checklist of Setup Filter
+  selectedChecklistItems: string[];
+  setSelectedChecklistItems: (items: string[]) => void;
+  hasActiveChecklistFilter: boolean;
   // Advanced Filters - Tags
   selectedTagsByCategory: TagFilters;
   setSelectedTagsByCategory: (tags: TagFilters) => void;
@@ -183,6 +192,12 @@ export const GlobalFiltersProvider = ({ children }: { children: ReactNode }) => 
   const [selectedDirections, setSelectedDirections] = useState<DirectionFilter[]>([]);
   const [selectedReturnRanges, setSelectedReturnRanges] = useState<ReturnPercentRange[]>([]);
   const [selectedRMultipleRanges, setSelectedRMultipleRanges] = useState<RMultipleRange[]>([]);
+  
+  // Year Filter
+  const [selectedYear, setSelectedYear] = useState<YearFilter>(null);
+  
+  // Checklist of Setup Filter
+  const [selectedChecklistItems, setSelectedChecklistItems] = useState<string[]>([]);
   
   // Advanced Filters - Tags
   const [selectedTagsByCategory, setSelectedTagsByCategory] = useState<TagFilters>({});
@@ -380,6 +395,9 @@ export const GlobalFiltersProvider = ({ children }: { children: ReactNode }) => 
   };
 
   const isAllAccountsSelected = selectedAccounts.length === 0;
+  
+  // Check if checklist filter is active
+  const hasActiveChecklistFilter = selectedChecklistItems.length > 0;
 
   const value = useMemo(() => ({
     currency,
@@ -416,6 +434,13 @@ export const GlobalFiltersProvider = ({ children }: { children: ReactNode }) => 
     setSelectedReturnRanges,
     selectedRMultipleRanges,
     setSelectedRMultipleRanges,
+    // Year Filter
+    selectedYear,
+    setSelectedYear,
+    // Checklist of Setup Filter
+    selectedChecklistItems,
+    setSelectedChecklistItems,
+    hasActiveChecklistFilter,
     // Advanced Filters - Tags
     selectedTagsByCategory,
     setSelectedTagsByCategory,
@@ -450,6 +475,9 @@ export const GlobalFiltersProvider = ({ children }: { children: ReactNode }) => 
     selectedDirections,
     selectedReturnRanges,
     selectedRMultipleRanges,
+    selectedYear,
+    selectedChecklistItems,
+    hasActiveChecklistFilter,
     selectedTagsByCategory,
     hasActiveTagFilters,
     selectedTradeComments,
