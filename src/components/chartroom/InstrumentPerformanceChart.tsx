@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { useFilteredTradesContext } from '@/contexts/TradesContext';
+import { useFilteredTrades } from '@/hooks/useFilteredTrades';
 import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
 import { useAccountsContext } from '@/contexts/AccountsContext';
 import { calculateTradeMetrics, Trade } from '@/types/trade';

@@ -9,12 +9,12 @@ import { TradeDurationPerformanceChart } from '@/components/dashboard/TradeDurat
 import { MonthlyPerformanceCalendar } from '@/components/dashboard/MonthlyPerformanceCalendar';
 import { InstrumentAnalysisChart } from '@/components/dashboard/InstrumentAnalysisChart';
 import { LongShortAnalysisChart } from '@/components/dashboard/LongShortAnalysisChart';
-import { useFilteredTradesContext } from '@/contexts/TradesContext';
+import { useFilteredTrades } from '@/hooks/useFilteredTrades';
 import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
 import { motion } from 'framer-motion';
 
 const Dashboard = () => {
-  const { stats } = useFilteredTradesContext();
+  const { stats } = useFilteredTrades();
   const { formatCurrency } = useGlobalFilters();
 
   return (

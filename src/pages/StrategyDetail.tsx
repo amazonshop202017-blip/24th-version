@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useStrategiesContext } from '@/contexts/StrategiesContext';
-import { useFilteredTradesContext } from '@/contexts/TradesContext';
+import { useFilteredTrades } from '@/hooks/useFilteredTrades';
 import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
 import { calculateTradeMetrics } from '@/types/trade';
 import { format } from 'date-fns';
@@ -19,7 +19,7 @@ const StrategyDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { getStrategyById } = useStrategiesContext();
-  const { filteredTrades } = useFilteredTradesContext();
+  const { filteredTrades } = useFilteredTrades();
   const { formatCurrency, currencyConfig } = useGlobalFilters();
 
   const strategy = id ? getStrategyById(id) : undefined;

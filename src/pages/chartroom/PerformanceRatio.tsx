@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { useFilteredTradesContext } from '@/contexts/TradesContext';
+import { useFilteredTrades } from '@/hooks/useFilteredTrades';
 import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
 import { useAccountsContext } from '@/contexts/AccountsContext';
 import { useTagsContext } from '@/contexts/TagsContext';
@@ -70,7 +70,7 @@ interface GroupedData {
 }
 
 const PerformanceRatio = () => {
-  const { filteredTrades } = useFilteredTradesContext();
+  const { filteredTrades } = useFilteredTrades();
   const { currencyConfig, selectedAccounts, isAllAccountsSelected, classifyTradeOutcome } = useGlobalFilters();
   const { accounts, getAccountBalanceBeforeTrades } = useAccountsContext();
   const { tags, getActiveTags } = useTagsContext();

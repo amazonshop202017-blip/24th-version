@@ -1,4 +1,4 @@
-import { useFilteredTradesContext } from '@/contexts/TradesContext';
+import { useFilteredTrades } from '@/hooks/useFilteredTrades';
 import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
 import { calculateTradeMetrics, Trade } from '@/types/trade';
 import { Button } from '@/components/ui/button';

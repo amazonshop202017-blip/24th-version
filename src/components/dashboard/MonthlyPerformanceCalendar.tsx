@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { useFilteredTradesContext } from '@/contexts/TradesContext';
+import { useFilteredTrades } from '@/hooks/useFilteredTrades';
 import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
 import { calculateTradeMetrics } from '@/types/trade';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, addMonths, subMonths, isSameMonth, getDay, startOfWeek, endOfWeek } from 'date-fns';
@@ -36,7 +36,7 @@ interface DisplaySettings {
 }
 
 export const MonthlyPerformanceCalendar = () => {
-  const { filteredTrades: trades } = useFilteredTradesContext();
+  const { filteredTrades: trades } = useFilteredTrades();
   const { currencyConfig } = useGlobalFilters();
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [displaySettings, setDisplaySettings] = useState<DisplaySettings>({

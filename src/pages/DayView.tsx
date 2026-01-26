@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { Calendar } from 'lucide-react';
-import { useFilteredTradesContext, useTradesContext } from '@/contexts/TradesContext';
+import { useFilteredTrades } from '@/hooks/useFilteredTrades';
+import { useTradesContext } from '@/contexts/TradesContext';
 import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
 import { useAccountsContext } from '@/contexts/AccountsContext';
 import { DayCard } from '@/components/dayview/DayCard';
@@ -15,7 +16,7 @@ interface DayGroup {
 }
 
 const DayView = () => {
-  const { filteredTrades } = useFilteredTradesContext();
+  const { filteredTrades } = useFilteredTrades();
   const { trades: allTrades } = useTradesContext();
   const { selectedAccounts, setDateRange, setDatePreset } = useGlobalFilters();
   const { getActiveAccountNames } = useAccountsContext();

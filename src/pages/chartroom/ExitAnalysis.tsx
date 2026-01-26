@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { useFilteredTradesContext } from '@/contexts/TradesContext';
+import { useFilteredTrades } from '@/hooks/useFilteredTrades';
 import { calculateTradeMetrics, Trade } from '@/types/trade';
 import { parseISO } from 'date-fns';
 import {
@@ -40,7 +40,7 @@ interface ExitAnalysisData {
 }
 
 const ExitAnalysis = () => {
-  const { filteredTrades } = useFilteredTradesContext();
+  const { filteredTrades } = useFilteredTrades();
   const [displayType, setDisplayType] = useState('percentage');
 
   // Calculate exit analysis data for each trade

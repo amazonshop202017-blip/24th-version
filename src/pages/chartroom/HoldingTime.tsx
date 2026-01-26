@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { useFilteredTradesContext } from '@/contexts/TradesContext';
+import { useFilteredTrades } from '@/hooks/useFilteredTrades';
 import { calculateTradeMetrics, Trade } from '@/types/trade';
 import {
   ScatterChart,
@@ -39,7 +39,7 @@ interface HoldingTimeData {
 }
 
 const HoldingTime = () => {
-  const { filteredTrades } = useFilteredTradesContext();
+  const { filteredTrades } = useFilteredTrades();
   const [timeUnit, setTimeUnit] = useState<TimeUnit>('hours');
   const [displayType, setDisplayType] = useState<DisplayType>('dollar');
 

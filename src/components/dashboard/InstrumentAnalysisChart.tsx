@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, Cell } from 'recharts';
 import { motion } from 'framer-motion';
-import { useFilteredTradesContext } from '@/contexts/TradesContext';
+import { useFilteredTrades } from '@/hooks/useFilteredTrades';
 import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
 import { calculateTradeMetrics } from '@/types/trade';
 import { Info } from 'lucide-react';
@@ -14,7 +14,7 @@ interface InstrumentData {
 }
 
 export const InstrumentAnalysisChart = () => {
-  const { filteredTrades: trades } = useFilteredTradesContext();
+  const { filteredTrades: trades } = useFilteredTrades();
   const { currencyConfig } = useGlobalFilters();
 
   const chartData = useMemo(() => {

@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
 import { format, parseISO } from 'date-fns';
 import { motion } from 'framer-motion';
-import { useFilteredTradesContext } from '@/contexts/TradesContext';
+import { useFilteredTrades } from '@/hooks/useFilteredTrades';
 import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
 import { calculateTradeMetrics } from '@/types/trade';
 import { Info } from 'lucide-react';
@@ -16,7 +16,7 @@ interface DailyData {
 }
 
 export const DailyCumulativePnLChart = () => {
-  const { filteredTrades: trades } = useFilteredTradesContext();
+  const { filteredTrades: trades } = useFilteredTrades();
   const { formatCurrency: globalFormatCurrency, currencyConfig } = useGlobalFilters();
 
   const chartData = useMemo(() => {

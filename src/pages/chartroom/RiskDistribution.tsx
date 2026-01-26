@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { useFilteredTradesContext } from '@/contexts/TradesContext';
+import { useFilteredTrades } from '@/hooks/useFilteredTrades';
 import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
 import { calculateTradeMetrics } from '@/types/trade';
 import {
@@ -37,7 +37,7 @@ interface BucketData {
 }
 
 const RiskDistribution = () => {
-  const { filteredTrades } = useFilteredTradesContext();
+  const { filteredTrades } = useFilteredTrades();
   const { currencyConfig } = useGlobalFilters();
   
   const [displayType, setDisplayType] = useState<DisplayType>('returnPercent');

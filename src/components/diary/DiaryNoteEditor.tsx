@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useDiaryContext } from '@/contexts/DiaryContext';
-import { useFilteredTradesContext } from '@/contexts/TradesContext';
+import { useFilteredTrades } from '@/hooks/useFilteredTrades';
 import { calculateTradeMetrics } from '@/types/trade';
 import { RichTextEditor } from './RichTextEditor';
 import { DiaryTradeSummary } from './DiaryTradeSummary';

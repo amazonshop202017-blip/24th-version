@@ -2,7 +2,7 @@ import { motion } from 'framer-motion';
 import { Pencil, Trash2, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
-import { useFilteredTradesContext } from '@/contexts/TradesContext';
+import { useFilteredTrades } from '@/hooks/useFilteredTrades';
 import { useTradeModal } from '@/contexts/TradeModalContext';
 import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
 import { calculateTradeMetrics } from '@/types/trade';
@@ -29,7 +29,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 
 const Trades = () => {
-  const { filteredTrades, deleteTrade } = useFilteredTradesContext();
+  const { filteredTrades, deleteTrade } = useFilteredTrades();
   const { openModal } = useTradeModal();
   const { formatCurrency, currencyConfig } = useGlobalFilters();
 

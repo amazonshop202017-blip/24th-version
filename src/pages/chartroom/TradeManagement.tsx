@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { useFilteredTradesContext } from '@/contexts/TradesContext';
+import { useFilteredTrades } from '@/hooks/useFilteredTrades';
 import { calculateTradeMetrics, Trade } from '@/types/trade';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
@@ -16,7 +16,7 @@ interface ChartDataPoint {
 }
 
 const TradeManagement = () => {
-  const { filteredTrades } = useFilteredTradesContext();
+  const { filteredTrades } = useFilteredTrades();
 
   const chartData = useMemo(() => {
     // Filter eligible trades: must have entry price, stop loss, take profit, direction, and priceReachedFirst

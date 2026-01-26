@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { useFilteredTradesContext } from '@/contexts/TradesContext';
+import { useFilteredTrades } from '@/hooks/useFilteredTrades';
 import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
 import { calculateTradeMetrics } from '@/types/trade';
 import { motion } from 'framer-motion';
@@ -40,7 +40,7 @@ interface ChartDataPoint {
 }
 
 export const TradeTimePerformanceChart = () => {
-  const { filteredTrades: trades } = useFilteredTradesContext();
+  const { filteredTrades: trades } = useFilteredTrades();
   const { currencyConfig } = useGlobalFilters();
   const [timeMode, setTimeMode] = useState<TimeMode>('entry');
 

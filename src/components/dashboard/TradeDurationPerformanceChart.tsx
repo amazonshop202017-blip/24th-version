@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { useFilteredTradesContext } from '@/contexts/TradesContext';
+import { useFilteredTrades } from '@/hooks/useFilteredTrades';
 import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
 import { calculateTradeMetrics } from '@/types/trade';
 import { motion } from 'framer-motion';
@@ -72,7 +72,7 @@ const formatDurationAxis = (minutes: number): string => {
 };
 
 export const TradeDurationPerformanceChart = () => {
-  const { filteredTrades: trades } = useFilteredTradesContext();
+  const { filteredTrades: trades } = useFilteredTrades();
   const { currencyConfig } = useGlobalFilters();
 
   const chartData = useMemo(() => {

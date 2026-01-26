@@ -2,7 +2,8 @@ import { createContext, useContext, ReactNode, useMemo, useCallback } from 'reac
 import { useTrades } from '@/hooks/useTrades';
 import { Trade, TradeFormData, calculateTradeMetrics } from '@/types/trade';
 import { useGlobalFilters, OutcomeFilter, DayFilter, DirectionFilter, ReturnPercentRange, RMultipleRange, TagFilters, TradeCommentFilters, TradeCommentCategory } from '@/contexts/GlobalFiltersContext';
-import { useAccountsContext } from '@/contexts/AccountsContext';
+// NOTE: useAccountsContext is imported dynamically to avoid circular dependency
+// AccountsContext imports TradesContext, so we can't import AccountsContext here at module level
 import { isWithinInterval, parseISO, startOfDay, endOfDay, getDay, getHours, getYear } from 'date-fns';
 
 // Helper function to check if return % falls within a range
@@ -105,9 +106,9 @@ const dayIndexToFilter: Record<number, DayFilter> = {
 };
 
 // Hook to get filtered trades and stats (must be used inside GlobalFiltersProvider)
-export const useFilteredTradesContext = () => {
+// NOTE: activeAccountNames is passed as a parameter to avoid circular dependency with AccountsContext
+export const useFilteredTradesContext = (activeAccountNames?: string[]) => {
   const { trades, addTrade, bulkAddTrades, updateTrade, deleteTrade, deleteTradesByAccountId, deleteTradesByAccountName, getTradeById } = useTradesContext();
-  const { getActiveAccountNames } = useAccountsContext();
   const { 
     dateRange, 
     selectedAccounts,
@@ -127,18 +128,22 @@ export const useFilteredTradesContext = () => {
     classifyTradeOutcome,
   } = useGlobalFilters();
 
-  // Get active account names (excluding archived)
-  const activeAccountNames = useMemo(() => getActiveAccountNames(), [getActiveAccountNames]);
+  // Use provided activeAccountNames or default to empty (show all if not provided)
+  const accountNames = activeAccountNames || [];
 
   const filteredTrades = useMemo(() => {
     let filtered = trades;
 
     // When "All Accounts" is selected (selectedAccounts is empty), 
     // filter to only include trades from ACTIVE (non-archived) accounts
+    // If accountNames is empty, show all trades (for backward compatibility)
     if (selectedAccounts.length === 0) {
-      filtered = filtered.filter(trade => 
-        activeAccountNames.includes(trade.accountName)
-      );
+      if (accountNames.length > 0) {
+        filtered = filtered.filter(trade => 
+          accountNames.includes(trade.accountName)
+        );
+      }
+      // If accountNames is empty, show all trades
     } else {
       // Filter by specifically selected accounts
       filtered = filtered.filter(trade => 
@@ -305,7 +310,7 @@ export const useFilteredTradesContext = () => {
     }
 
     return filtered;
-  }, [trades, dateRange, selectedAccounts, activeAccountNames, selectedInstruments, selectedOutcomes, selectedHours, selectedSetups, selectedDays, lastTradesFilter, selectedDirections, selectedReturnRanges, selectedRMultipleRanges, selectedYear, selectedChecklistItems, selectedTagsByCategory, selectedTradeComments, classifyTradeOutcome]);
+  }, [trades, dateRange, selectedAccounts, accountNames, selectedInstruments, selectedOutcomes, selectedHours, selectedSetups, selectedDays, lastTradesFilter, selectedDirections, selectedReturnRanges, selectedRMultipleRanges, selectedYear, selectedChecklistItems, selectedTagsByCategory, selectedTradeComments, classifyTradeOutcome]);
 
   const stats = useMemo(() => {
     // Classify trades using breakeven tolerance (pass trade-level isBreakeven flag)

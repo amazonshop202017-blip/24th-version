@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { useFilteredTradesContext } from '@/contexts/TradesContext';
+import { useFilteredTrades } from '@/hooks/useFilteredTrades';
 import { CompareGroupFilters } from './CompareGroupCard';
 import { CompareStatisticsTable } from './CompareStatisticsTable';
 import { CompareOverallEvaluation } from './CompareOverallEvaluation';

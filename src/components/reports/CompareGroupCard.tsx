@@ -24,7 +24,7 @@ import {
   CommandItem,
   CommandList,
 } from '@/components/ui/command';
-import { useFilteredTradesContext } from '@/contexts/TradesContext';
+import { useFilteredTrades } from '@/hooks/useFilteredTrades';
 import { CompareGroupFiltersPanel } from './CompareGroupFiltersPanel';
 import { getMatchedTradesCount } from '@/lib/compareUtils';
 

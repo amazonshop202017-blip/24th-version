@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useStrategiesContext } from '@/contexts/StrategiesContext';
-import { useFilteredTradesContext } from '@/contexts/TradesContext';
+import { useFilteredTrades } from '@/hooks/useFilteredTrades';
 import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
 import { useNavigate } from 'react-router-dom';
 import { calculateStrategyStats } from '@/lib/strategyStats';
@@ -19,7 +19,7 @@ import {
 
 const Strategies = () => {
   const { strategies, addStrategy, removeStrategy, updateStrategy, updateStrategyChecklist } = useStrategiesContext();
-  const { filteredTrades } = useFilteredTradesContext();
+  const { filteredTrades } = useFilteredTrades();
   const { formatCurrency } = useGlobalFilters();
   const navigate = useNavigate();
   const [newName, setNewName] = useState('');

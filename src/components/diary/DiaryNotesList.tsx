@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Plus, Filter } from 'lucide-react';
 import { useDiaryContext } from '@/contexts/DiaryContext';
-import { useFilteredTradesContext } from '@/contexts/TradesContext';
+import { useFilteredTrades } from '@/hooks/useFilteredTrades';
 import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
 import { calculateTradeMetrics, Trade } from '@/types/trade';
 import { Button } from '@/components/ui/button';
