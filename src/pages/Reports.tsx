@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils';
 
 const mainTabs = [
   { id: 'overview', label: 'Overview', icon: LayoutGrid },
-  { id: 'reports', label: 'Reports', icon: TrendingUp },
+  { id: 'reports', label: 'Wins vs Losses', icon: TrendingUp },
   { id: 'compare', label: 'Compare', icon: GitCompare },
   { id: 'calendar', label: 'Calendar', icon: Calendar },
 ];
