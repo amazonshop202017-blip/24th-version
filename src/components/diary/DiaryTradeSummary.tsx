@@ -19,11 +19,15 @@ export const DiaryTradeSummary = ({ trade }: DiaryTradeSummaryProps) => {
   const volume = metrics.totalQuantity;
   const commissions = metrics.totalCharges;
   
-  // Calculate Net ROI (Return on Investment)
-  const investedAmount = trade.side === 'LONG' 
-    ? trade.entries.filter(e => e.type === 'BUY').reduce((sum, e) => sum + (e.quantity * e.price), 0)
-    : trade.entries.filter(e => e.type === 'SELL').reduce((sum, e) => sum + (e.quantity * e.price), 0);
-  const netRoi = investedAmount > 0 ? ((netPnl / investedAmount) * 100).toFixed(2) : '0';
+  // Use saved return percent if available, otherwise calculate
+  // This ensures accuracy by using the value stored at trade creation
+  let netRoi: string;
+  if (trade.savedReturnPercent !== undefined) {
+    netRoi = trade.savedReturnPercent.toFixed(2);
+  } else {
+    // Fallback to calculated value
+    netRoi = metrics.returnPercent.toFixed(2);
+  }
 
   // Count CFDs traded (number of entry trades)
   const cfdsTraded = trade.scaleEntries?.length || 

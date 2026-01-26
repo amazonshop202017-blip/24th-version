@@ -1,7 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useDiaryContext } from '@/contexts/DiaryContext';
 import { useFilteredTradesContext } from '@/contexts/TradesContext';
-import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
 import { calculateTradeMetrics } from '@/types/trade';
 import { RichTextEditor } from './RichTextEditor';
 import { DiaryTradeSummary } from './DiaryTradeSummary';
@@ -25,6 +24,8 @@ export const DiaryNoteEditor = () => {
     deleteNote,
     linkNoteToTrade,
     unlinkNoteFromTrade,
+    selectedFolderId,
+    folders,
   } = useDiaryContext();
   const { trades } = useFilteredTradesContext();
   
@@ -33,6 +34,9 @@ export const DiaryNoteEditor = () => {
   const [localContent, setLocalContent] = useState('');
 
   const selectedNote = getSelectedNote();
+  const currentFolder = folders.find(f => f.id === selectedFolderId);
+  const isDayNote = selectedNote?.linkedDate !== null;
+  const isTradeNote = selectedNote?.linkedTradeId !== null;
 
   // Get linked trade if any
   const linkedTrade = useMemo(() => {
@@ -112,7 +116,7 @@ export const DiaryNoteEditor = () => {
               value={localTitle}
               onChange={(e) => setLocalTitle(e.target.value)}
               className="text-xl font-semibold border-0 p-0 h-auto focus-visible:ring-0 bg-transparent"
-              placeholder="Untitled Note"
+              placeholder="Note Title"
             />
           </div>
           <div className="text-xs text-muted-foreground mt-1 ml-7">
@@ -135,18 +139,23 @@ export const DiaryNoteEditor = () => {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="bg-popover z-50">
-              {linkedTrade ? (
-                <DropdownMenuItem onClick={handleUnlinkTrade}>
-                  <Unlink className="h-4 w-4 mr-2" />
-                  Unlink from trade
-                </DropdownMenuItem>
-              ) : (
-                <DropdownMenuItem onClick={() => setIsLinkModalOpen(true)}>
-                  <LinkIcon className="h-4 w-4 mr-2" />
-                  Link to trade
-                </DropdownMenuItem>
+              {/* Show Link/Unlink options only for non-Day notes */}
+              {!isDayNote && (
+                <>
+                  {isTradeNote ? (
+                    <DropdownMenuItem onClick={handleUnlinkTrade}>
+                      <Unlink className="h-4 w-4 mr-2" />
+                      Unlink from trade
+                    </DropdownMenuItem>
+                  ) : (
+                    <DropdownMenuItem onClick={() => setIsLinkModalOpen(true)}>
+                      <LinkIcon className="h-4 w-4 mr-2" />
+                      Link to trade
+                    </DropdownMenuItem>
+                  )}
+                  <DropdownMenuSeparator />
+                </>
               )}
-              <DropdownMenuSeparator />
               <DropdownMenuItem 
                 onClick={handleDeleteNote}
                 className="text-destructive focus:text-destructive"

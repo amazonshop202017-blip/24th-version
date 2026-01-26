@@ -120,9 +120,28 @@ export const DiaryProvider = ({ children }: { children: ReactNode }) => {
   // Create a new note
   const createNote = useCallback((data?: Partial<DiaryNoteFormData>): DiaryNote => {
     const now = new Date().toISOString();
+    
+    // Determine default title based on linked data
+    let defaultTitle = data?.title || 'New Note';
+    
+    // If linking to a trade, use "SYMBOL : DATE" format
+    if (data?.linkedTradeId) {
+      const trade = trades.find(t => t.id === data.linkedTradeId);
+      if (trade) {
+        const openDate = trade.entries[0]?.datetime 
+          ? new Date(trade.entries[0].datetime).toLocaleDateString('en-US', { 
+              month: 'short', 
+              day: '2-digit', 
+              year: 'numeric' 
+            })
+          : '';
+        defaultTitle = `${trade.symbol} : ${openDate}`;
+      }
+    }
+    
     const newNote: DiaryNote = {
       id: crypto.randomUUID(),
-      title: data?.title || 'Untitled Note',
+      title: defaultTitle,
       content: data?.content || '',
       folderId: data?.folderId || null,
       linkedTradeId: data?.linkedTradeId || null,
@@ -134,7 +153,7 @@ export const DiaryProvider = ({ children }: { children: ReactNode }) => {
     setNotes(prev => [newNote, ...prev]);
     setSelectedNoteId(newNote.id);
     return newNote;
-  }, []);
+  }, [trades]);
 
   // Update a note
   const updateNote = useCallback((id: string, data: Partial<DiaryNoteFormData>) => {
