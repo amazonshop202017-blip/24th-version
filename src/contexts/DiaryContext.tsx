@@ -122,7 +122,7 @@ export const DiaryProvider = ({ children }: { children: ReactNode }) => {
     const now = new Date().toISOString();
     
     // Determine default title based on linked data
-    let defaultTitle = data?.title || 'New Note';
+    let defaultTitle = 'Untitled';
     
     // If linking to a trade, use "SYMBOL : DATE" format
     if (data?.linkedTradeId) {
@@ -137,6 +137,9 @@ export const DiaryProvider = ({ children }: { children: ReactNode }) => {
           : '';
         defaultTitle = `${trade.symbol} : ${openDate}`;
       }
+    } else if (data?.title) {
+      // Use provided title (for Day Notes)
+      defaultTitle = data.title;
     }
     
     const newNote: DiaryNote = {

@@ -40,8 +40,9 @@ export const DiaryNotesList = () => {
       setIsSelectDayModalOpen(true);
     } else if (isTradeNotes) {
       // Create a trade note (will need to be linked)
+      // Use empty title - will be auto-named when linked to a trade
       createNote({
-        title: 'New Trade Note',
+        title: '',
         content: '',
       });
     }
