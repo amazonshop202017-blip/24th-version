@@ -3,7 +3,7 @@ import { useTrades } from '@/hooks/useTrades';
 import { Trade, TradeFormData, calculateTradeMetrics } from '@/types/trade';
 import { useGlobalFilters, OutcomeFilter, DayFilter, DirectionFilter, ReturnPercentRange, RMultipleRange, TagFilters, TradeCommentFilters, TradeCommentCategory } from '@/contexts/GlobalFiltersContext';
 import { useAccountsContext } from '@/contexts/AccountsContext';
-import { isWithinInterval, parseISO, startOfDay, endOfDay, getDay, getHours } from 'date-fns';
+import { isWithinInterval, parseISO, startOfDay, endOfDay, getDay, getHours, getYear } from 'date-fns';
 
 // Helper function to check if return % falls within a range
 const matchesReturnRange = (returnPercent: number | undefined, range: ReturnPercentRange): boolean => {
@@ -120,6 +120,8 @@ export const useFilteredTradesContext = () => {
     selectedDirections,
     selectedReturnRanges,
     selectedRMultipleRanges,
+    selectedYear,
+    selectedChecklistItems,
     selectedTagsByCategory,
     selectedTradeComments,
     classifyTradeOutcome,
@@ -232,6 +234,25 @@ export const useFilteredTradesContext = () => {
       });
     }
 
+    // Filter by Year
+    if (selectedYear !== null) {
+      filtered = filtered.filter(trade => {
+        const metrics = calculateTradeMetrics(trade);
+        if (!metrics.openDate) return false;
+        const tradeYear = getYear(parseISO(metrics.openDate));
+        return tradeYear === selectedYear;
+      });
+    }
+
+    // Filter by Checklist Items (AND logic - trade must have ALL selected checklist items)
+    if (selectedChecklistItems.length > 0) {
+      filtered = filtered.filter(trade => {
+        // Trade must have the selected checklist items ticked
+        const tradeChecklist = trade.selectedChecklistItems || [];
+        return selectedChecklistItems.every(item => tradeChecklist.includes(item));
+      });
+    }
+
     // Filter by Tags (AND across categories, OR within category)
     const activeCategoryIds = Object.keys(selectedTagsByCategory).filter(
       categoryId => selectedTagsByCategory[categoryId]?.length > 0
@@ -284,7 +305,7 @@ export const useFilteredTradesContext = () => {
     }
 
     return filtered;
-  }, [trades, dateRange, selectedAccounts, activeAccountNames, selectedInstruments, selectedOutcomes, selectedHours, selectedSetups, selectedDays, lastTradesFilter, selectedDirections, selectedReturnRanges, selectedRMultipleRanges, selectedTagsByCategory, selectedTradeComments, classifyTradeOutcome]);
+  }, [trades, dateRange, selectedAccounts, activeAccountNames, selectedInstruments, selectedOutcomes, selectedHours, selectedSetups, selectedDays, lastTradesFilter, selectedDirections, selectedReturnRanges, selectedRMultipleRanges, selectedYear, selectedChecklistItems, selectedTagsByCategory, selectedTradeComments, classifyTradeOutcome]);
 
   const stats = useMemo(() => {
     // Classify trades using breakeven tolerance (pass trade-level isBreakeven flag)
