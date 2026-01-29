@@ -12,6 +12,7 @@ import { AccountsProvider } from "@/contexts/AccountsContext";
 import { GlobalFiltersProvider } from "@/contexts/GlobalFiltersContext";
 import { CustomStatsProvider } from "@/contexts/CustomStatsContext";
 import { DiaryProvider } from "@/contexts/DiaryContext";
+import { SymbolTickSizeProvider } from "@/contexts/SymbolTickSizeContext";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { TradeModal } from "@/components/trades/TradeModal";
 import Dashboard from "./pages/Dashboard";
@@ -46,8 +47,9 @@ const App = () => (
               <AccountsProvider>
                 <GlobalFiltersProvider>
                   <CustomStatsProvider>
-                    <DiaryProvider>
-                      <TradeModalProvider>
+                    <SymbolTickSizeProvider>
+                      <DiaryProvider>
+                        <TradeModalProvider>
                         <BrowserRouter>
                           <Toaster />
                           <Sonner />
@@ -77,7 +79,8 @@ const App = () => (
                         </BrowserRouter>
                       </TradeModalProvider>
                     </DiaryProvider>
-                  </CustomStatsProvider>
+                  </SymbolTickSizeProvider>
+                </CustomStatsProvider>
                 </GlobalFiltersProvider>
               </AccountsProvider>
             </TradesProvider>

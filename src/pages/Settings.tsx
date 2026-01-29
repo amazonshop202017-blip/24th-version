@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Trash2, Edit2, Check, X, Tag, Wallet, TrendingUp, TrendingDown, Settings as SettingsIcon, Download, DollarSign, FolderOpen, Archive, ArchiveRestore, ChevronDown, ChevronUp, Target, MessageSquare } from 'lucide-react';
+import { Plus, Trash2, Edit2, Check, X, Tag, Wallet, TrendingUp, TrendingDown, Settings as SettingsIcon, Download, DollarSign, FolderOpen, Archive, ArchiveRestore, ChevronDown, ChevronUp, Target, MessageSquare, Ruler } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAccountsContext } from '@/contexts/AccountsContext';
@@ -12,6 +12,7 @@ import { CategoriesManagement } from '@/components/settings/CategoriesManagement
 import { TagsManagement } from '@/components/settings/TagsManagement';
 import { TradeCommentsManagement } from '@/components/settings/TradeCommentsManagement';
 import { AccountImportModal } from '@/components/settings/AccountImportModal';
+import { SymbolTickSizeManagement } from '@/components/settings/SymbolTickSizeManagement';
 import { toast } from 'sonner';
 import {
   DropdownMenu,
@@ -62,8 +63,8 @@ const Settings = () => {
     });
   };
 
-  // Settings tab state - now with 3 tabs
-  const [activeSettingsTab, setActiveSettingsTab] = useState<'main' | 'custom-tags' | 'trade-comments'>('main');
+  // Settings tab state - now with 4 tabs
+  const [activeSettingsTab, setActiveSettingsTab] = useState<'main' | 'custom-tags' | 'trade-comments' | 'symbol-tick'>('main');
   
   // Custom Tags sub-tab state
   const [activeTagsSubTab, setActiveTagsSubTab] = useState<'categories' | 'tags'>('categories');
@@ -171,6 +172,18 @@ const Settings = () => {
         >
           <MessageSquare className="w-4 h-4" />
           Trade Comments
+        </button>
+        <button
+          onClick={() => setActiveSettingsTab('symbol-tick')}
+          className={cn(
+            "flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors",
+            activeSettingsTab === 'symbol-tick'
+              ? "bg-background text-foreground shadow-sm"
+              : "text-muted-foreground hover:text-foreground hover:bg-background/50"
+          )}
+        >
+          <Ruler className="w-4 h-4" />
+          Symbol Tick / Pip
         </button>
       </div>
 
@@ -625,6 +638,22 @@ const Settings = () => {
       {/* Trade Comments Tab Content */}
       {activeSettingsTab === 'trade-comments' && (
         <TradeCommentsManagement />
+      )}
+
+      {/* Symbol Tick / Pip Tab Content */}
+      {activeSettingsTab === 'symbol-tick' && (
+        <div className="glass-card rounded-2xl p-6">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center">
+              <Ruler className="w-5 h-5 text-primary" />
+            </div>
+            <div>
+              <h2 className="text-xl font-semibold">Symbol Tick / Pip Size</h2>
+              <p className="text-sm text-muted-foreground">Define custom tick/pip sizes per traded symbol</p>
+            </div>
+          </div>
+          <SymbolTickSizeManagement />
+        </div>
       )}
 
       {/* Deposit/Withdraw Modal */}
