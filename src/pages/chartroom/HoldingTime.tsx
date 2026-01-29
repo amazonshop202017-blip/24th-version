@@ -1,4 +1,5 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect, useRef } from 'react';
+import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
 import { useFilteredTrades } from '@/hooks/useFilteredTrades';
 import { calculateTradeMetrics, Trade } from '@/types/trade';
 import {
@@ -40,8 +41,30 @@ interface HoldingTimeData {
 
 const HoldingTime = () => {
   const { filteredTrades } = useFilteredTrades();
+  const { displayMode } = useGlobalFilters();
   const [timeUnit, setTimeUnit] = useState<TimeUnit>('hours');
-  const [displayType, setDisplayType] = useState<DisplayType>('dollar');
+
+  // Map global display mode to chart display type for initialization
+  const getInitialDisplayType = (): DisplayType => {
+    switch (displayMode) {
+      case 'dollar': return 'dollar';
+      case 'percentage': return 'percent';
+      case 'privacy': return 'privacy';
+      case 'tickpip': return 'tickpip';
+      default: return 'dollar';
+    }
+  };
+
+  const [displayType, setDisplayType] = useState<DisplayType>(getInitialDisplayType);
+  const hasInitialized = useRef(false);
+
+  // Initialize from global filter only once on mount
+  useEffect(() => {
+    if (!hasInitialized.current) {
+      hasInitialized.current = true;
+      setDisplayType(getInitialDisplayType());
+    }
+  }, []);
 
   // Helper to convert minutes to selected time unit
   const convertTime = (minutes: number, unit: TimeUnit): number => {
