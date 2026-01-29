@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { useFilteredTrades } from '@/hooks/useFilteredTrades';
 import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
 import { useAccountsContext } from '@/contexts/AccountsContext';
@@ -71,13 +71,34 @@ interface GroupedData {
 
 const PerformanceRatio = () => {
   const { filteredTrades } = useFilteredTrades();
-  const { currencyConfig, selectedAccounts, isAllAccountsSelected, classifyTradeOutcome } = useGlobalFilters();
+  const { currencyConfig, selectedAccounts, isAllAccountsSelected, classifyTradeOutcome, displayMode } = useGlobalFilters();
   const { accounts, getAccountBalanceBeforeTrades } = useAccountsContext();
   const { tags, getActiveTags } = useTagsContext();
   const { categories } = useCategoriesContext();
   const { options } = useCustomStats();
 
-  const [displayType, setDisplayType] = useState<DisplayType>('dollar');
+  // Map global display mode to chart display type for initialization
+  const getInitialDisplayType = (): DisplayType => {
+    switch (displayMode) {
+      case 'dollar': return 'dollar';
+      case 'percentage': return 'percent';
+      case 'privacy': return 'privacy';
+      case 'tickpip': return 'tickpip';
+      default: return 'dollar';
+    }
+  };
+
+  const [displayType, setDisplayType] = useState<DisplayType>(getInitialDisplayType);
+  const hasInitialized = useRef(false);
+
+  // Initialize from global filter only once on mount
+  useEffect(() => {
+    if (!hasInitialized.current) {
+      hasInitialized.current = true;
+      setDisplayType(getInitialDisplayType());
+    }
+  }, []);
+
   const [selectionType, setSelectionType] = useState<SelectionType>('tradeComments');
   const [selectedCommentCategory, setSelectedCommentCategory] = useState<CommentCategory>('entryComments');
   const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
