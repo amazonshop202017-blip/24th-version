@@ -1,6 +1,6 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { useFilteredTrades } from '@/hooks/useFilteredTrades';
-import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
+import { useGlobalFilters, DisplayMode } from '@/contexts/GlobalFiltersContext';
 import { useAccountsContext } from '@/contexts/AccountsContext';
 import { calculateTradeMetrics } from '@/types/trade';
 import { parseISO } from 'date-fns';
@@ -29,11 +29,24 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 
+type DrawdownDisplayType = 'return' | 'percent' | 'tickpip' | 'privacy';
+
 const Drawdown = () => {
   const { filteredTrades } = useFilteredTrades();
-  const { selectedAccounts, isAllAccountsSelected, currencyConfig } = useGlobalFilters();
+  const { selectedAccounts, isAllAccountsSelected, currencyConfig, displayMode } = useGlobalFilters();
   const { accounts, getAccountBalanceBeforeTrades } = useAccountsContext();
-  const [displayType, setDisplayType] = useState('return');
+  const [displayType, setDisplayType] = useState<DrawdownDisplayType>('return');
+
+  // Sync with global display mode
+  useEffect(() => {
+    const modeMap: Record<DisplayMode, DrawdownDisplayType> = {
+      'dollar': 'return',
+      'percentage': 'percent',
+      'privacy': 'privacy',
+      'tickpip': 'tickpip',
+    };
+    setDisplayType(modeMap[displayMode] || 'return');
+  }, [displayMode]);
 
   // Calculate total starting balance for Return (%) denominator
   const totalStartingBalance = useMemo(() => {
@@ -262,7 +275,7 @@ const Drawdown = () => {
         <CardContent className="p-6">
           {/* Display Dropdown */}
           <div className="mb-4">
-            <Select value={displayType} onValueChange={setDisplayType}>
+            <Select value={displayType} onValueChange={(v) => setDisplayType(v as DrawdownDisplayType)}>
               <SelectTrigger className="w-[160px] bg-background border-border">
                 <div className="flex flex-col items-start">
                   <span className="text-xs text-muted-foreground">Display</span>
@@ -272,6 +285,8 @@ const Drawdown = () => {
               <SelectContent>
                 <SelectItem value="return">Return ($)</SelectItem>
                 <SelectItem value="percent">Return (%)</SelectItem>
+                <SelectItem value="tickpip">Tick / Pip</SelectItem>
+                <SelectItem value="privacy">Privacy</SelectItem>
               </SelectContent>
             </Select>
           </div>

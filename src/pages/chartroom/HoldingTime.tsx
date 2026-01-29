@@ -26,7 +26,7 @@ import {
 } from '@/components/chartroom/TradeDurationBucketCharts';
 
 type TimeUnit = 'days' | 'hours' | 'minutes';
-type DisplayType = 'dollar' | 'percent';
+type DisplayType = 'tickpip';
 
 interface HoldingTimeData {
   holdingTime: number;
@@ -41,7 +41,7 @@ interface HoldingTimeData {
 const HoldingTime = () => {
   const { filteredTrades } = useFilteredTrades();
   const [timeUnit, setTimeUnit] = useState<TimeUnit>('hours');
-  const [displayType, setDisplayType] = useState<DisplayType>('dollar');
+  const [displayType, setDisplayType] = useState<DisplayType>('tickpip');
 
   // Helper to convert minutes to selected time unit
   const convertTime = (minutes: number, unit: TimeUnit): number => {
@@ -68,16 +68,6 @@ const HoldingTime = () => {
     });
 
     return closedTrades
-      .filter((trade) => {
-        // For percent mode, skip trades without stored return %
-        if (displayType === 'percent') {
-          const returnPercent = trade.savedReturnPercent;
-          if (returnPercent === undefined || returnPercent === null || !isFinite(returnPercent)) {
-            return false;
-          }
-        }
-        return true;
-      })
       .map((trade) => {
         const metrics = calculateTradeMetrics(trade);
         const holdingTimeInUnit = convertTime(metrics.durationMinutes, timeUnit);
@@ -86,7 +76,8 @@ const HoldingTime = () => {
 
         return {
           holdingTime: Math.round(holdingTimeInUnit * 100) / 100,
-          returnValue: displayType === 'dollar' ? metrics.netPnl : returnPercent,
+          // For tickpip mode, we show netPnl for now (actual tick/pip conversion will come later)
+          returnValue: metrics.netPnl,
           isWinner: metrics.netPnl > 0,
           symbol: trade.symbol,
           side: trade.side,
@@ -94,7 +85,7 @@ const HoldingTime = () => {
           returnPercent,
         };
       });
-  }, [filteredTrades, timeUnit, displayType]);
+  }, [filteredTrades, timeUnit]);
 
   // Split data for coloring
   const winnerData = holdingTimeData.filter(d => d.isWinner);
@@ -204,8 +195,7 @@ const HoldingTime = () => {
                   </div>
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="dollar">Return ($)</SelectItem>
-                  <SelectItem value="percent">Return (%)</SelectItem>
+                  <SelectItem value="tickpip">Tick / Pip</SelectItem>
                 </SelectContent>
               </Select>
 
@@ -269,13 +259,9 @@ const HoldingTime = () => {
                     axisLine={{ stroke: 'hsl(var(--border))' }}
                     tickLine={false}
                     tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
-                    tickFormatter={(value) => 
-                      displayType === 'dollar' 
-                        ? `$${value.toFixed(0)}` 
-                        : `${value.toFixed(1)}%`
-                    }
+                    tickFormatter={(value) => `${value.toFixed(0)} ticks`}
                     label={{
-                      value: displayType === 'dollar' ? 'Return ($)' : 'Return (%)',
+                      value: 'Tick / Pip',
                       angle: -90,
                       position: 'insideLeft',
                       offset: 10,

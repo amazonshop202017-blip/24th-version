@@ -265,10 +265,14 @@ const PerformanceBySetup = () => {
         <SetupPerformanceChart 
           defaultDisplayType="dollar" 
           title="Setup Performance 1" 
+          syncWithGlobalDisplay={true}
+          isLeftChart={true}
         />
         <SetupPerformanceChart 
           defaultDisplayType="winrate" 
           title="Setup Performance 2" 
+          syncWithGlobalDisplay={true}
+          isLeftChart={false}
         />
       </div>
 

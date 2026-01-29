@@ -1,6 +1,6 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { useFilteredTrades } from '@/hooks/useFilteredTrades';
-import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
+import { useGlobalFilters, DisplayMode } from '@/contexts/GlobalFiltersContext';
 import { useAccountsContext } from '@/contexts/AccountsContext';
 import { calculateTradeMetrics, Trade } from '@/types/trade';
 import {
@@ -23,7 +23,7 @@ import {
 } from '@/components/ui/select';
 import { Card, CardContent } from '@/components/ui/card';
 
-type DisplayType = 'dollar' | 'percent' | 'winrate' | 'tradecount';
+type DisplayType = 'dollar' | 'percent' | 'winrate' | 'tradecount' | 'tickpip' | 'privacy';
 
 interface InstrumentData {
   symbol: string;
@@ -41,16 +41,33 @@ interface InstrumentData {
 interface InstrumentPerformanceChartProps {
   defaultDisplayType?: DisplayType;
   title?: string;
+  syncWithGlobalDisplay?: boolean;
+  isLeftChart?: boolean;
 }
 
 export const InstrumentPerformanceChart = ({ 
   defaultDisplayType = 'dollar',
-  title = 'Performance by Instrument'
+  title = 'Performance by Instrument',
+  syncWithGlobalDisplay = false,
+  isLeftChart = false,
 }: InstrumentPerformanceChartProps) => {
   const { filteredTrades } = useFilteredTrades();
-  const { currencyConfig, selectedAccounts, isAllAccountsSelected, classifyTradeOutcome } = useGlobalFilters();
+  const { currencyConfig, selectedAccounts, isAllAccountsSelected, classifyTradeOutcome, displayMode } = useGlobalFilters();
   const { accounts, getAccountBalanceBeforeTrades } = useAccountsContext();
   const [displayType, setDisplayType] = useState<DisplayType>(defaultDisplayType);
+
+  // Sync with global display mode if enabled and this is the left chart
+  useEffect(() => {
+    if (syncWithGlobalDisplay && isLeftChart) {
+      const modeMap: Record<DisplayMode, DisplayType> = {
+        'dollar': 'dollar',
+        'percentage': 'percent',
+        'privacy': 'privacy',
+        'tickpip': 'tickpip',
+      };
+      setDisplayType(modeMap[displayMode] || 'dollar');
+    }
+  }, [displayMode, syncWithGlobalDisplay, isLeftChart]);
 
   // Calculate total starting balance for Return (%) denominator
   const totalStartingBalance = useMemo(() => {
@@ -186,6 +203,8 @@ export const InstrumentPerformanceChart = ({
                 <SelectItem value="percent">Return (%)</SelectItem>
                 <SelectItem value="winrate">Winrate (%)</SelectItem>
                 <SelectItem value="tradecount">Trade Count</SelectItem>
+                <SelectItem value="tickpip">Tick / Pip</SelectItem>
+                <SelectItem value="privacy">Privacy</SelectItem>
               </SelectContent>
             </Select>
           </div>

@@ -247,10 +247,14 @@ const PerformanceByInstrument = () => {
         <InstrumentPerformanceChart 
           defaultDisplayType="dollar" 
           title="Instrument Performance 1" 
+          syncWithGlobalDisplay={true}
+          isLeftChart={true}
         />
         <InstrumentPerformanceChart 
           defaultDisplayType="winrate" 
           title="Instrument Performance 2" 
+          syncWithGlobalDisplay={true}
+          isLeftChart={false}
         />
       </div>
 
