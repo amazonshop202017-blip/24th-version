@@ -4,6 +4,7 @@ import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
 import { useAccountsContext } from '@/contexts/AccountsContext';
 import { useTagsContext } from '@/contexts/TagsContext';
 import { useCategoriesContext } from '@/contexts/CategoriesContext';
+import { usePrivacyMode } from '@/hooks/usePrivacyMode';
 import { calculateTradeMetrics, Trade } from '@/types/trade';
 import { Card, CardContent } from '@/components/ui/card';
 import {
@@ -55,6 +56,7 @@ const PerformanceRatio = () => {
   const { accounts, getAccountBalanceBeforeTrades } = useAccountsContext();
   const { tags, getActiveTags } = useTagsContext();
   const { categories } = useCategoriesContext();
+  const { isPrivacyMode } = usePrivacyMode();
 
   // Selection state (shared across both charts)
   const [selectionType, setSelectionType] = useState<SelectionType>('tradeComments');
@@ -241,6 +243,10 @@ const PerformanceRatio = () => {
 
   // Format value for display
   const formatValue = (value: number): string => {
+    // Mask $ values in privacy mode
+    if (isPrivacyMode) {
+      return '**';
+    }
     const absValue = Math.abs(value);
     if (absValue >= 1000) {
       return `${value >= 0 ? '+' : '-'}${currencyConfig.symbol}${(absValue / 1000).toFixed(1)}k`;

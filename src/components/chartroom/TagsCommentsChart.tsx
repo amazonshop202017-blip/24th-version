@@ -3,6 +3,7 @@ import { useFilteredTrades } from '@/hooks/useFilteredTrades';
 import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
 import { useAccountsContext } from '@/contexts/AccountsContext';
 import { useTagsContext } from '@/contexts/TagsContext';
+import { usePrivacyMode } from '@/hooks/usePrivacyMode';
 import { calculateTradeMetrics, Trade } from '@/types/trade';
 import { ChartDisplayType, mapGlobalToChartDisplay } from '@/hooks/useChartDisplayMode';
 import {
@@ -60,6 +61,7 @@ export const TagsCommentsChart = ({
   const { currencyConfig, selectedAccounts, isAllAccountsSelected, classifyTradeOutcome, displayMode } = useGlobalFilters();
   const { accounts, getAccountBalanceBeforeTrades } = useAccountsContext();
   const { tags } = useTagsContext();
+  const { isPrivacyMode } = usePrivacyMode();
 
   // Calculate initial display type from global filter or prop
   const getInitialDisplayType = (): ChartDisplayType => {
@@ -254,12 +256,12 @@ export const TagsCommentsChart = ({
     }
 
     if (displayType === 'dollar') {
-      const pnlValue = `${data.totalPnl >= 0 ? '+' : ''}${currencyConfig.symbol}${Math.abs(data.totalPnl).toFixed(2)}`;
+      const pnlValue = isPrivacyMode ? '**' : `${data.totalPnl >= 0 ? '+' : ''}${currencyConfig.symbol}${Math.abs(data.totalPnl).toFixed(2)}`;
       return (
         <div className="bg-popover border border-border rounded-lg p-3 shadow-xl text-sm">
           <p className="font-medium text-foreground mb-2">{label}</p>
           <div className="space-y-1 text-muted-foreground">
-            <p>Net PNL: <span className={data.totalPnl >= 0 ? 'text-profit' : 'text-loss'}>{pnlValue}</span></p>
+            <p>Net PNL: <span className={isPrivacyMode ? 'text-foreground' : data.totalPnl >= 0 ? 'text-profit' : 'text-loss'}>{pnlValue}</span></p>
             <p>Total Trades: {data.tradeCount}</p>
             <p>Winners: {data.winCount}</p>
             <p>Losers: {data.lossCount}</p>
@@ -270,12 +272,12 @@ export const TagsCommentsChart = ({
     }
 
     if (displayType === 'percent') {
-      const returnValue = `${data.totalPercent >= 0 ? '+' : ''}${data.totalPercent.toFixed(2)}%`;
+      const returnValue = isPrivacyMode ? '**' : `${data.totalPercent >= 0 ? '+' : ''}${data.totalPercent.toFixed(2)}%`;
       return (
         <div className="bg-popover border border-border rounded-lg p-3 shadow-xl text-sm">
           <p className="font-medium text-foreground mb-2">{label}</p>
           <div className="space-y-1 text-muted-foreground">
-            <p>Return %: <span className={data.totalPercent >= 0 ? 'text-profit' : 'text-loss'}>{returnValue}</span></p>
+            <p>Return %: <span className={isPrivacyMode ? 'text-foreground' : data.totalPercent >= 0 ? 'text-profit' : 'text-loss'}>{returnValue}</span></p>
             <p>Total Trades: {data.tradeCount}</p>
             <p>Winners: {data.winCount}</p>
             <p>Losers: {data.lossCount}</p>
@@ -359,6 +361,10 @@ export const TagsCommentsChart = ({
                   tickLine={false}
                   tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 11 }}
                   tickFormatter={(value) => {
+                    // Mask $ and % values in privacy mode
+                    if (isPrivacyMode && (displayType === 'dollar' || displayType === 'percent')) {
+                      return '**';
+                    }
                     if (displayType === 'percent' || displayType === 'winrate') return `${value.toFixed(0)}%`;
                     if (displayType === 'tradecount') return value.toString();
                     if (displayType === 'privacy') return '•••';

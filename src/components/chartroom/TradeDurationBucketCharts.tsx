@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { useFilteredTrades } from '@/hooks/useFilteredTrades';
 import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
+import { usePrivacyMode } from '@/hooks/usePrivacyMode';
 import { calculateTradeMetrics } from '@/types/trade';
 import { Card, CardContent } from '@/components/ui/card';
 import { BarChart2, Clock, Percent } from 'lucide-react';
@@ -104,8 +105,10 @@ export const useTradeDurationBuckets = () => {
 export const PerformanceByDurationChart = () => {
   const bucketData = useTradeDurationBuckets();
   const { currencyConfig } = useGlobalFilters();
+  const { isPrivacyMode } = usePrivacyMode();
 
   const formatCurrency = (value: number) => {
+    if (isPrivacyMode) return '**';
     if (value === 0) return '$0';
     const prefix = value >= 0 ? '+$' : '-$';
     return `${prefix}${Math.abs(value).toFixed(0)}`;
@@ -168,8 +171,8 @@ export const PerformanceByDurationChart = () => {
                     <div className="bg-card border border-border rounded-lg p-3 shadow-lg">
                       <p className="text-foreground font-medium mb-2">{data.bucket}</p>
                       <div className="space-y-1 text-sm">
-                        <p className={data.totalPnl >= 0 ? 'text-green-500' : 'text-red-500'}>
-                          P&L: {formatCurrency(data.totalPnl)}
+                        <p className={isPrivacyMode ? 'text-foreground' : data.totalPnl >= 0 ? 'text-green-500' : 'text-red-500'}>
+                          P&L: {isPrivacyMode ? '**' : formatCurrency(data.totalPnl)}
                         </p>
                         <p className="text-muted-foreground">
                           Trades: {data.tradeCount}

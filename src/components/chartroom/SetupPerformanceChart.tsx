@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { useFilteredTrades } from '@/hooks/useFilteredTrades';
 import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
 import { useAccountsContext } from '@/contexts/AccountsContext';
+import { usePrivacyMode } from '@/hooks/usePrivacyMode';
 import { calculateTradeMetrics, Trade } from '@/types/trade';
 import { useStrategiesContext } from '@/contexts/StrategiesContext';
 import { ChartDisplayType, mapGlobalToChartDisplay } from '@/hooks/useChartDisplayMode';
@@ -53,6 +54,7 @@ export const SetupPerformanceChart = ({
   const { currencyConfig, selectedAccounts, isAllAccountsSelected, classifyTradeOutcome, displayMode } = useGlobalFilters();
   const { accounts, getAccountBalanceBeforeTrades } = useAccountsContext();
   const { strategies } = useStrategiesContext();
+  const { isPrivacyMode } = usePrivacyMode();
   
   // Calculate initial display type from global filter or prop
   const getInitialDisplayType = (): ChartDisplayType => {
@@ -252,6 +254,10 @@ export const SetupPerformanceChart = ({
                   tickLine={false}
                   tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 10 }}
                   tickFormatter={(value) => {
+                    // Mask $ and % values in privacy mode
+                    if (isPrivacyMode && (displayType === 'dollar' || displayType === 'percent')) {
+                      return '**';
+                    }
                     switch (displayType) {
                       case 'dollar':
                         return `${currencyConfig.symbol}${value.toFixed(0)}`;
@@ -322,8 +328,8 @@ export const SetupPerformanceChart = ({
                         <div className="bg-card border border-border rounded-lg p-3 shadow-lg">
                           <p className="text-foreground font-medium mb-2">{data.setup}</p>
                           <div className="space-y-1 text-sm">
-                            <p className={data.totalPnl >= 0 ? 'text-profit' : 'text-loss'}>
-                              Net PNL: {formatValue(data.totalPnl, 'dollar')}
+                            <p className={isPrivacyMode ? 'text-foreground' : data.totalPnl >= 0 ? 'text-profit' : 'text-loss'}>
+                              Net PNL: {isPrivacyMode ? '**' : formatValue(data.totalPnl, 'dollar')}
                             </p>
                             <p className="text-muted-foreground">
                               Total Trades: {data.tradeCount}
@@ -348,8 +354,8 @@ export const SetupPerformanceChart = ({
                         <div className="bg-card border border-border rounded-lg p-3 shadow-lg">
                           <p className="text-foreground font-medium mb-2">{data.setup}</p>
                           <div className="space-y-1 text-sm">
-                            <p className={data.totalPercent >= 0 ? 'text-profit' : 'text-loss'}>
-                              Return %: {formatValue(data.totalPercent, 'percent')}
+                            <p className={isPrivacyMode ? 'text-foreground' : data.totalPercent >= 0 ? 'text-profit' : 'text-loss'}>
+                              Return %: {isPrivacyMode ? '**' : formatValue(data.totalPercent, 'percent')}
                             </p>
                             <p className="text-muted-foreground">
                               Total Trades: {data.tradeCount}

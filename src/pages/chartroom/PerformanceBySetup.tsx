@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { useFilteredTrades } from '@/hooks/useFilteredTrades';
 import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
 import { useAccountsContext } from '@/contexts/AccountsContext';
+import { usePrivacyMode } from '@/hooks/usePrivacyMode';
 import { calculateTradeMetrics, Trade } from '@/types/trade';
 import { useStrategiesContext } from '@/contexts/StrategiesContext';
 import {
@@ -53,6 +54,7 @@ const PerformanceBySetup = () => {
   const { currencyConfig, selectedAccounts, isAllAccountsSelected } = useGlobalFilters();
   const { accounts, getAccountBalanceBeforeTrades } = useAccountsContext();
   const { strategies } = useStrategiesContext();
+  const { isPrivacyMode } = usePrivacyMode();
   const [displayType, setDisplayType] = useState<DisplayType>('dollar');
 
   // Calculate total starting balance for Return (%) denominator
@@ -217,6 +219,10 @@ const PerformanceBySetup = () => {
   // Format currency
   const formatValue = (value: number, forceType?: DisplayType): string => {
     const type = forceType || displayType;
+    // Mask $ and % values in privacy mode
+    if (isPrivacyMode && (type === 'percent' || type === 'dollar')) {
+      return '**';
+    }
     if (type === 'percent') {
       return `${value >= 0 ? '+' : ''}${value.toFixed(2)}%`;
     }

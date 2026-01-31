@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { useFilteredTrades } from '@/hooks/useFilteredTrades';
 import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
+import { usePrivacyMode } from '@/hooks/usePrivacyMode';
 import { calculateTradeMetrics } from '@/types/trade';
 import { motion } from 'framer-motion';
 import { Info } from 'lucide-react';
@@ -74,6 +75,7 @@ const formatDurationAxis = (minutes: number): string => {
 export const TradeDurationPerformanceChart = () => {
   const { filteredTrades: trades } = useFilteredTrades();
   const { currencyConfig } = useGlobalFilters();
+  const { isPrivacyMode } = usePrivacyMode();
 
   const chartData = useMemo(() => {
     const data: ChartDataPoint[] = [];
@@ -112,6 +114,7 @@ export const TradeDurationPerformanceChart = () => {
   }, [trades]);
 
   const formatCurrency = (value: number) => {
+    if (isPrivacyMode) return '**';
     const prefix = value >= 0 ? currencyConfig.symbol : `-${currencyConfig.symbol}`;
     return `${prefix}${Math.abs(value).toFixed(0)}`;
   };
@@ -148,8 +151,8 @@ export const TradeDurationPerformanceChart = () => {
           <p className="text-xs text-muted-foreground">
             Duration: {data.durationDisplay}
           </p>
-          <p className={`text-sm font-bold font-mono ${data.isProfit ? 'profit-text' : 'loss-text'}`}>
-            {data.pnl >= 0 ? '+' : ''}{formatCurrency(data.pnl)}
+          <p className={`text-sm font-bold font-mono ${isPrivacyMode ? 'text-foreground' : data.isProfit ? 'profit-text' : 'loss-text'}`}>
+            {isPrivacyMode ? '**' : `${data.pnl >= 0 ? '+' : ''}${formatCurrency(data.pnl)}`}
           </p>
         </div>
       );
