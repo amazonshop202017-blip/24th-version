@@ -358,26 +358,84 @@ const PerformanceRatio = () => {
     }
   };
 
-  // Custom tooltip
+  // Custom tooltip - content varies based on display type
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (!active || !payload || !payload.length) return null;
     
     const data = payload[0].payload as GroupedData;
-    const returnLabel = displayType === 'percent' ? 'Return (%)' : 'Total P/L';
-    const returnValue = displayType === 'percent' 
-      ? `${data.totalPercent >= 0 ? '+' : ''}${data.totalPercent.toFixed(2)}%`
-      : `${data.totalPnl >= 0 ? '+' : ''}${currencyConfig.symbol}${Math.abs(data.totalPnl).toFixed(2)}`;
 
+    // Trades Count mode: show only Total Trades
+    if (displayType === 'tradecount') {
+      return (
+        <div className="bg-popover border border-border rounded-lg p-3 shadow-xl text-sm">
+          <p className="font-medium text-foreground mb-2">{label}</p>
+          <div className="space-y-1 text-muted-foreground">
+            <p>Total Trades: {data.tradeCount}</p>
+          </div>
+        </div>
+      );
+    }
+
+    // Winrate mode: show Winrate first, then trade counts
+    if (displayType === 'winrate') {
+      return (
+        <div className="bg-popover border border-border rounded-lg p-3 shadow-xl text-sm">
+          <p className="font-medium text-foreground mb-2">{label}</p>
+          <div className="space-y-1 text-muted-foreground">
+            <p>Winrate: <span className="text-foreground">{data.winrate.toFixed(1)}%</span></p>
+            <p>Total Trades: {data.tradeCount}</p>
+            <p>Winners: {data.winCount}</p>
+            <p>Losers: {data.lossCount}</p>
+            <p>BE: {data.beCount}</p>
+          </div>
+        </div>
+      );
+    }
+
+    // Dollar mode: show Net PNL + trade counts
+    if (displayType === 'dollar') {
+      const pnlValue = `${data.totalPnl >= 0 ? '+' : ''}${currencyConfig.symbol}${Math.abs(data.totalPnl).toFixed(2)}`;
+      return (
+        <div className="bg-popover border border-border rounded-lg p-3 shadow-xl text-sm">
+          <p className="font-medium text-foreground mb-2">{label}</p>
+          <div className="space-y-1 text-muted-foreground">
+            <p>Net PNL: <span className={data.totalPnl >= 0 ? 'text-profit' : 'text-loss'}>{pnlValue}</span></p>
+            <p>Total Trades: {data.tradeCount}</p>
+            <p>Winners: {data.winCount}</p>
+            <p>Losers: {data.lossCount}</p>
+            <p>BE: {data.beCount}</p>
+          </div>
+        </div>
+      );
+    }
+
+    // Percent mode: show Return % + trade counts
+    if (displayType === 'percent') {
+      const returnValue = `${data.totalPercent >= 0 ? '+' : ''}${data.totalPercent.toFixed(2)}%`;
+      return (
+        <div className="bg-popover border border-border rounded-lg p-3 shadow-xl text-sm">
+          <p className="font-medium text-foreground mb-2">{label}</p>
+          <div className="space-y-1 text-muted-foreground">
+            <p>Return %: <span className={data.totalPercent >= 0 ? 'text-profit' : 'text-loss'}>{returnValue}</span></p>
+            <p>Total Trades: {data.tradeCount}</p>
+            <p>Winners: {data.winCount}</p>
+            <p>Losers: {data.lossCount}</p>
+            <p>BE: {data.beCount}</p>
+          </div>
+        </div>
+      );
+    }
+
+    // Tick/Pip and Privacy modes: show placeholder + trade counts
     return (
       <div className="bg-popover border border-border rounded-lg p-3 shadow-xl text-sm">
         <p className="font-medium text-foreground mb-2">{label}</p>
         <div className="space-y-1 text-muted-foreground">
-          <p>{returnLabel}: <span className={data.totalPnl >= 0 ? 'text-green-500' : 'text-red-500'}>{returnValue}</span></p>
-          <p>Trades: {data.tradeCount}</p>
-          <p>Wins: {data.winCount}</p>
-          <p>Losses: {data.lossCount}</p>
-          <p>Breakeven: {data.beCount}</p>
-          <p>Win Rate: {data.winrate.toFixed(1)}%</p>
+          <p>{displayType === 'privacy' ? '•••••' : '--'}</p>
+          <p>Total Trades: {data.tradeCount}</p>
+          <p>Winners: {data.winCount}</p>
+          <p>Losers: {data.lossCount}</p>
+          <p>BE: {data.beCount}</p>
         </div>
       </div>
     );
