@@ -296,14 +296,14 @@ const PerformanceBySetup = () => {
       </div>
 
       {/* Metrics Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
         {metricsCards.map((metric) => (
           <Card key={metric.label} className="bg-card border-border">
             <CardContent className="p-4">
               <p className="text-xs text-muted-foreground mb-1">{metric.label}</p>
-              <p className="text-sm text-foreground mb-1">{metric.setup}</p>
+              <p className="text-sm text-foreground mb-1 truncate" title={metric.setup}>{metric.setup}</p>
               <p className={`text-lg font-semibold ${
-                metric.isPositive ? 'text-green-500' : 'text-red-500'
+                metric.isPositive ? 'text-profit' : 'text-loss'
               }`}>
                 {metric.value}
               </p>
