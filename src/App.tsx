@@ -30,7 +30,7 @@ import HoldingTime from "./pages/chartroom/HoldingTime";
 import PerformanceByInstrument from "./pages/chartroom/PerformanceByInstrument";
 import PerformanceBySetup from "./pages/chartroom/PerformanceBySetup";
 import PerformanceByTime from "./pages/chartroom/PerformanceByTime";
-import PerformanceRatio from "./pages/chartroom/PerformanceRatio";
+import TagsAnalytics from "./pages/chartroom/TagsAnalytics";
 import RiskDistribution from "./pages/chartroom/RiskDistribution";
 import TradeManagement from "./pages/chartroom/TradeManagement";
 
@@ -68,7 +68,7 @@ const App = () => (
                               <Route path="/chart-room/performance-by-instrument" element={<PerformanceByInstrument />} />
                               <Route path="/chart-room/performance-by-setup" element={<PerformanceBySetup />} />
                               <Route path="/chart-room/performance-by-time" element={<PerformanceByTime />} />
-                              <Route path="/chart-room/performance-ratio" element={<PerformanceRatio />} />
+                              <Route path="/chart-room/tags-analytics" element={<TagsAnalytics />} />
                               <Route path="/chart-room/risk-distribution" element={<RiskDistribution />} />
                               <Route path="/chart-room/trade-management" element={<TradeManagement />} />
                               <Route path="/settings" element={<Settings />} />
