@@ -4,7 +4,7 @@ import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
 import { useAccountsContext } from '@/contexts/AccountsContext';
 import { useTagsContext } from '@/contexts/TagsContext';
 import { useCategoriesContext } from '@/contexts/CategoriesContext';
-import { usePrivacyMode } from '@/hooks/usePrivacyMode';
+import { usePrivacyMode, PRIVACY_MASK } from '@/hooks/usePrivacyMode';
 import { calculateTradeMetrics, Trade } from '@/types/trade';
 import { Card, CardContent } from '@/components/ui/card';
 import {
@@ -598,10 +598,10 @@ const PerformanceRatio = () => {
                       <TableCell className="text-muted-foreground text-right">{row.beCount}</TableCell>
                       <TableCell className="text-foreground text-right">{row.winrate.toFixed(1)}%</TableCell>
                       <TableCell className={`text-right ${row.avgPnl >= 0 ? 'text-profit' : 'text-loss'}`}>
-                        {row.avgPnl >= 0 ? '+' : '-'}{currencyConfig.symbol}{Math.abs(row.avgPnl).toFixed(2)}
+                        {isPrivacyMode ? PRIVACY_MASK : `${row.avgPnl >= 0 ? '+' : '-'}${currencyConfig.symbol}${Math.abs(row.avgPnl).toFixed(2)}`}
                       </TableCell>
                       <TableCell className={`text-right ${row.totalPnl >= 0 ? 'text-profit' : 'text-loss'}`}>
-                        {row.totalPnl >= 0 ? '+' : '-'}{currencyConfig.symbol}{Math.abs(row.totalPnl).toFixed(2)}
+                        {isPrivacyMode ? PRIVACY_MASK : `${row.totalPnl >= 0 ? '+' : '-'}${currencyConfig.symbol}${Math.abs(row.totalPnl).toFixed(2)}`}
                       </TableCell>
                     </TableRow>
                   ))}

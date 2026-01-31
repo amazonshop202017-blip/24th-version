@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { useFilteredTrades } from '@/hooks/useFilteredTrades';
 import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
 import { useAccountsContext } from '@/contexts/AccountsContext';
-import { usePrivacyMode } from '@/hooks/usePrivacyMode';
+import { usePrivacyMode, PRIVACY_MASK } from '@/hooks/usePrivacyMode';
 import { calculateTradeMetrics, Trade } from '@/types/trade';
 import {
   BarChart,
@@ -217,6 +217,10 @@ const PerformanceBySymbol = () => {
 
   // Format for table (without +/- prefix handled separately)
   const formatTableValue = (value: number, type: DisplayType): string => {
+    // Mask $ and % values in privacy mode
+    if (isPrivacyMode && (type === 'percent' || type === 'dollar')) {
+      return PRIVACY_MASK;
+    }
     if (type === 'percent') {
       return `${value.toFixed(2)}%`;
     }
@@ -332,10 +336,10 @@ const PerformanceBySymbol = () => {
                         <TableCell className="text-foreground text-right">{row.tradeCount}</TableCell>
                         <TableCell className="text-foreground text-right">{winrate.toFixed(1)}%</TableCell>
                         <TableCell className={`text-right ${avgValue >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                          {avgValue >= 0 ? '+' : '-'}{formatTableValue(avgValue, displayType)}
+                          {isPrivacyMode && displayType === 'dollar' ? PRIVACY_MASK : `${avgValue >= 0 ? '+' : '-'}${formatTableValue(avgValue, displayType)}`}
                         </TableCell>
                         <TableCell className={`text-right ${totalValue >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                          {totalValue >= 0 ? '+' : '-'}{formatTableValue(totalValue, displayType)}
+                          {isPrivacyMode && displayType === 'dollar' ? PRIVACY_MASK : `${totalValue >= 0 ? '+' : '-'}${formatTableValue(totalValue, displayType)}`}
                         </TableCell>
                       </TableRow>
                     );

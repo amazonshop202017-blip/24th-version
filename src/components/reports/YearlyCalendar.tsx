@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useFilteredTrades } from '@/hooks/useFilteredTrades';
 import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
+import { usePrivacyMode, PRIVACY_MASK } from '@/hooks/usePrivacyMode';
 import { calculateTradeMetrics } from '@/types/trade';
 import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, addDays, isSameMonth, isToday } from 'date-fns';
 import {
@@ -27,6 +28,7 @@ const YearlyCalendar = () => {
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const { filteredTrades } = useFilteredTrades();
   const { formatCurrency } = useGlobalFilters();
+  const { isPrivacyMode } = usePrivacyMode();
 
   // Group trades by date and calculate daily P&L
   const dailyData = useMemo(() => {
@@ -169,7 +171,7 @@ const YearlyCalendar = () => {
                                     "text-sm font-semibold",
                                     dayData.netPnl > 0 ? "text-emerald-400" : dayData.netPnl < 0 ? "text-red-400" : "text-muted-foreground"
                                   )}>
-                                    Net P&L: {formatCurrency(dayData.netPnl)}
+                                    Net P&L: {isPrivacyMode ? PRIVACY_MASK : formatCurrency(dayData.netPnl)}
                                   </div>
                                   <div className="text-xs text-muted-foreground">
                                     {dayData.tradeCount} trade{dayData.tradeCount !== 1 ? 's' : ''}

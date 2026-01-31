@@ -359,6 +359,7 @@ const Drawdown = () => {
                     }}
                     labelStyle={{ color: 'hsl(var(--foreground))' }}
                     formatter={(value: number, name: string) => {
+                      if (isPrivacyMode) return [PRIVACY_MASK, 'Drawdown'];
                       if (displayType === 'percent') {
                         return [`${value.toFixed(2)}%`, 'Drawdown'];
                       }

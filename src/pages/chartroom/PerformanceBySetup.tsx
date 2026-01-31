@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { useFilteredTrades } from '@/hooks/useFilteredTrades';
 import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
 import { useAccountsContext } from '@/contexts/AccountsContext';
-import { usePrivacyMode } from '@/hooks/usePrivacyMode';
+import { usePrivacyMode, PRIVACY_MASK } from '@/hooks/usePrivacyMode';
 import { calculateTradeMetrics, Trade } from '@/types/trade';
 import { useStrategiesContext } from '@/contexts/StrategiesContext';
 import {
@@ -235,6 +235,10 @@ const PerformanceBySetup = () => {
 
   // Format for table (without +/- prefix handled separately)
   const formatTableValue = (value: number, type: DisplayType): string => {
+    // Mask $ and % values in privacy mode
+    if (isPrivacyMode && (type === 'percent' || type === 'dollar')) {
+      return PRIVACY_MASK;
+    }
     if (type === 'percent') {
       return `${value.toFixed(2)}%`;
     }
@@ -344,10 +348,10 @@ const PerformanceBySetup = () => {
                         <TableCell className="text-foreground text-right">{row.tradeCount}</TableCell>
                         <TableCell className="text-foreground text-right">{winrate.toFixed(1)}%</TableCell>
                         <TableCell className={`text-right ${row.avgPnl >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                          {row.avgPnl >= 0 ? '+' : '-'}{currencyConfig.symbol}{Math.abs(row.avgPnl).toFixed(2)}
+                          {isPrivacyMode ? PRIVACY_MASK : `${row.avgPnl >= 0 ? '+' : '-'}${currencyConfig.symbol}${Math.abs(row.avgPnl).toFixed(2)}`}
                         </TableCell>
                         <TableCell className={`text-right ${row.totalPnl >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                          {row.totalPnl >= 0 ? '+' : '-'}{currencyConfig.symbol}{Math.abs(row.totalPnl).toFixed(2)}
+                          {isPrivacyMode ? PRIVACY_MASK : `${row.totalPnl >= 0 ? '+' : '-'}${currencyConfig.symbol}${Math.abs(row.totalPnl).toFixed(2)}`}
                         </TableCell>
                       </TableRow>
                     );

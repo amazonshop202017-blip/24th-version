@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { format, parseISO } from 'date-fns';
 import { Info } from 'lucide-react';
+import { usePrivacyMode, PRIVACY_MASK } from '@/hooks/usePrivacyMode';
 import {
   AreaChart,
   Area,
@@ -30,6 +31,8 @@ export const CompareCumulativePnLChart = ({
   data, 
   dateRangeLabel 
 }: CompareCumulativePnLChartProps) => {
+  const { isPrivacyMode } = usePrivacyMode();
+  
   // Split data into positive and negative segments for coloring
   const chartData = useMemo(() => {
     return data.map(d => ({
@@ -41,6 +44,7 @@ export const CompareCumulativePnLChart = ({
   }, [data]);
 
   const formatYAxis = (value: number) => {
+    if (isPrivacyMode) return PRIVACY_MASK;
     return `$${value.toLocaleString()}`;
   };
 
@@ -51,7 +55,7 @@ export const CompareCumulativePnLChart = ({
         <div className="bg-popover border border-border rounded-lg p-3 shadow-lg">
           <p className="text-sm text-muted-foreground mb-1">{label}</p>
           <p className={`text-sm font-semibold ${value >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>
-            Cumulative P&L: ${value.toFixed(2)}
+            Cumulative P&L: {isPrivacyMode ? PRIVACY_MASK : `$${value.toFixed(2)}`}
           </p>
         </div>
       );

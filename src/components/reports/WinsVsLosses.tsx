@@ -3,6 +3,7 @@ import { format } from 'date-fns';
 import { ChevronDown, Info } from 'lucide-react';
 import { useFilteredTrades } from '@/hooks/useFilteredTrades';
 import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
+import { usePrivacyMode, PRIVACY_MASK } from '@/hooks/usePrivacyMode';
 import { calculateTradeMetrics, Trade } from '@/types/trade';
 import {
   DropdownMenu,
@@ -43,6 +44,7 @@ const WinsVsLosses = () => {
   const [pnlType, setPnlType] = useState<PnLType>('net');
   const { filteredTrades } = useFilteredTrades();
   const { formatCurrency, dateRange } = useGlobalFilters();
+  const { isPrivacyMode } = usePrivacyMode();
 
   // Classify trades based on selected P&L type
   const { winningTrades, losingTrades } = useMemo(() => {
@@ -258,6 +260,7 @@ const WinsVsLosses = () => {
 
   const formatValue = (value: number | null): string => {
     if (value === null) return 'N/A';
+    if (isPrivacyMode) return PRIVACY_MASK;
     return formatCurrency(value, false);
   };
 

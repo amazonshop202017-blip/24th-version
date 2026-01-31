@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { useFilteredTrades } from '@/hooks/useFilteredTrades';
 import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
 import { useAccountsContext } from '@/contexts/AccountsContext';
-import { usePrivacyMode } from '@/hooks/usePrivacyMode';
+import { usePrivacyMode, PRIVACY_MASK } from '@/hooks/usePrivacyMode';
 import { calculateTradeMetrics, Trade } from '@/types/trade';
 import { parseISO, getDay, getMonth, getWeek, getHours, getMinutes, format } from 'date-fns';
 import {
@@ -521,10 +521,10 @@ const PerformanceByTime = () => {
                         <TableCell className="text-foreground text-right">{row.tradeCount}</TableCell>
                         <TableCell className="text-foreground text-right">{winrate.toFixed(2)}</TableCell>
                         <TableCell className={`text-right ${avgPnl >= 0 ? 'text-profit' : 'text-loss'}`}>
-                          {avgPnl >= 0 ? '' : '-'}{currencyConfig.symbol}{Math.abs(avgPnl).toFixed(2)}
+                          {isPrivacyMode ? PRIVACY_MASK : `${avgPnl >= 0 ? '' : '-'}${currencyConfig.symbol}${Math.abs(avgPnl).toFixed(2)}`}
                         </TableCell>
                         <TableCell className={`text-right ${row.totalPnl >= 0 ? 'text-profit' : 'text-loss'}`}>
-                          {row.totalPnl >= 0 ? '' : '-'}{currencyConfig.symbol}{Math.abs(row.totalPnl).toFixed(2)}
+                          {isPrivacyMode ? PRIVACY_MASK : `${row.totalPnl >= 0 ? '' : '-'}${currencyConfig.symbol}${Math.abs(row.totalPnl).toFixed(2)}`}
                         </TableCell>
                       </TableRow>
                     );

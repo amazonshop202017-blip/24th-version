@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { format, parseISO } from 'date-fns';
 import { Info } from 'lucide-react';
+import { usePrivacyMode, PRIVACY_MASK } from '@/hooks/usePrivacyMode';
 import {
   AreaChart,
   Area,
@@ -38,6 +39,7 @@ export const WinsVsLossesChart = ({
   variant,
   formatCurrency,
 }: WinsVsLossesChartProps) => {
+  const { isPrivacyMode } = usePrivacyMode();
   const chartColor = variant === 'wins' ? '#10b981' : '#ef4444';
   const gradientId = variant === 'wins' ? 'winsGradient' : 'lossesGradient';
 
@@ -110,7 +112,7 @@ export const WinsVsLossesChart = ({
               tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 11 }}
               tickLine={false}
               axisLine={false}
-              tickFormatter={(value) => `$${Math.abs(value).toLocaleString()}`}
+              tickFormatter={(value) => isPrivacyMode ? PRIVACY_MASK : `$${Math.abs(value).toLocaleString()}`}
               tickMargin={10}
               width={70}
             />
@@ -125,13 +127,13 @@ export const WinsVsLossesChart = ({
                       <div className="flex items-center justify-between gap-4">
                         <span className="text-xs text-muted-foreground">Daily P&L:</span>
                         <span className={`text-xs font-medium ${data.netPnl >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>
-                          {formatCurrency(data.netPnl, true)}
+                          {isPrivacyMode ? PRIVACY_MASK : formatCurrency(data.netPnl, true)}
                         </span>
                       </div>
                       <div className="flex items-center justify-between gap-4">
                         <span className="text-xs text-muted-foreground">Cumulative:</span>
                         <span className={`text-xs font-medium ${data.cumulativePnl >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>
-                          {formatCurrency(data.cumulativePnl, true)}
+                          {isPrivacyMode ? PRIVACY_MASK : formatCurrency(data.cumulativePnl, true)}
                         </span>
                       </div>
                     </div>
