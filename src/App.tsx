@@ -27,7 +27,7 @@ import NotFound from "./pages/NotFound";
 import Drawdown from "./pages/chartroom/Drawdown";
 import ExitAnalysis from "./pages/chartroom/ExitAnalysis";
 import HoldingTime from "./pages/chartroom/HoldingTime";
-import PerformanceByInstrument from "./pages/chartroom/PerformanceByInstrument";
+import PerformanceBySymbol from "./pages/chartroom/PerformanceBySymbol";
 import PerformanceBySetup from "./pages/chartroom/PerformanceBySetup";
 import PerformanceByTime from "./pages/chartroom/PerformanceByTime";
 import TagsAnalytics from "./pages/chartroom/TagsAnalytics";
@@ -65,7 +65,7 @@ const App = () => (
                               <Route path="/chart-room/drawdown" element={<Drawdown />} />
                               <Route path="/chart-room/exit-analysis" element={<ExitAnalysis />} />
                               <Route path="/chart-room/holding-time" element={<HoldingTime />} />
-                              <Route path="/chart-room/performance-by-instrument" element={<PerformanceByInstrument />} />
+                              <Route path="/chart-room/performance-by-symbol" element={<PerformanceBySymbol />} />
                               <Route path="/chart-room/performance-by-setup" element={<PerformanceBySetup />} />
                               <Route path="/chart-room/performance-by-time" element={<PerformanceByTime />} />
                               <Route path="/chart-room/tags-analytics" element={<TagsAnalytics />} />
