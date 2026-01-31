@@ -468,74 +468,71 @@ const PerformanceByTime = () => {
       </div>
 
 
-      {/* Performance Table and Metrics side by side */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Table */}
-        <Card className="bg-card border-border lg:col-span-2">
-          <CardContent className="p-6">
-            {timeData.length > 0 ? (
-              <div className="overflow-x-auto max-h-[400px] overflow-y-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow className="border-border">
-                      <TableHead className="text-muted-foreground sticky top-0 bg-card">{periodLabel}</TableHead>
-                      <TableHead className="text-muted-foreground text-right sticky top-0 bg-card">Trades</TableHead>
-                      <TableHead className="text-muted-foreground text-right sticky top-0 bg-card">Winrate (%)</TableHead>
-                      <TableHead className="text-muted-foreground text-right sticky top-0 bg-card">Avg P/L ($)</TableHead>
-                      <TableHead className="text-muted-foreground text-right sticky top-0 bg-card">Total Gain ($)</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {timeData.map((row) => {
-                      const winrate = row.tradeCount > 0 ? (row.winCount / row.tradeCount) * 100 : 0;
-                      const avgPnl = row.tradeCount > 0 ? row.totalPnl / row.tradeCount : 0;
-                      
-                      return (
-                        <TableRow key={row.label} className="border-border">
-                          <TableCell className="text-foreground font-medium">{row.label}</TableCell>
-                          <TableCell className="text-foreground text-right">{row.tradeCount}</TableCell>
-                          <TableCell className="text-foreground text-right">{winrate.toFixed(2)}</TableCell>
-                          <TableCell className={`text-right ${avgPnl >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                            {avgPnl >= 0 ? '' : '-'}{currencyConfig.symbol}{Math.abs(avgPnl).toFixed(2)}
-                          </TableCell>
-                          <TableCell className={`text-right ${row.totalPnl >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                            {row.totalPnl >= 0 ? '' : '-'}{currencyConfig.symbol}{Math.abs(row.totalPnl).toFixed(2)}
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
-                  </TableBody>
-                </Table>
-              </div>
-            ) : (
-              <div className="flex items-center justify-center h-32 border border-dashed border-border rounded-xl bg-muted/20">
-                <p className="text-muted-foreground">No trades data available.</p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Metrics Cards */}
-        <div className="grid grid-cols-2 gap-4 h-fit">
-          {metricsCards.map((metric) => (
-            <Card key={metric.label} className="bg-card border-border">
-              <CardContent className="p-4">
-                <p className="text-xs text-muted-foreground mb-1">{metric.label}</p>
-                {metric.period && (
-                  <p className="text-sm text-foreground mb-1">{metric.period}</p>
-                )}
-                <p className={`text-lg font-semibold ${
-                  metric.isNeutral 
-                    ? 'text-foreground' 
-                    : metric.isPositive ? 'text-green-500' : 'text-red-500'
-                }`}>
-                  {metric.value}
-                </p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+      {/* Metrics Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {metricsCards.map((metric) => (
+          <Card key={metric.label} className="bg-card border-border">
+            <CardContent className="p-4">
+              <p className="text-xs text-muted-foreground mb-1">{metric.label}</p>
+              {metric.period && (
+                <p className="text-sm text-foreground mb-1 truncate" title={metric.period}>{metric.period}</p>
+              )}
+              <p className={`text-lg font-semibold ${
+                metric.isNeutral 
+                  ? 'text-foreground' 
+                  : metric.isPositive ? 'text-profit' : 'text-loss'
+              }`}>
+                {metric.value}
+              </p>
+            </CardContent>
+          </Card>
+        ))}
       </div>
+
+      {/* Performance Table */}
+      <Card className="bg-card border-border">
+        <CardContent className="p-6">
+          {timeData.length > 0 ? (
+            <div className="overflow-x-auto max-h-[400px] overflow-y-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow className="border-border">
+                    <TableHead className="text-muted-foreground sticky top-0 bg-card">{periodLabel}</TableHead>
+                    <TableHead className="text-muted-foreground text-right sticky top-0 bg-card">Trades</TableHead>
+                    <TableHead className="text-muted-foreground text-right sticky top-0 bg-card">Winrate (%)</TableHead>
+                    <TableHead className="text-muted-foreground text-right sticky top-0 bg-card">Avg P/L ($)</TableHead>
+                    <TableHead className="text-muted-foreground text-right sticky top-0 bg-card">Total Gain ($)</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {timeData.map((row) => {
+                    const winrate = row.tradeCount > 0 ? (row.winCount / row.tradeCount) * 100 : 0;
+                    const avgPnl = row.tradeCount > 0 ? row.totalPnl / row.tradeCount : 0;
+                    
+                    return (
+                      <TableRow key={row.label} className="border-border">
+                        <TableCell className="text-foreground font-medium">{row.label}</TableCell>
+                        <TableCell className="text-foreground text-right">{row.tradeCount}</TableCell>
+                        <TableCell className="text-foreground text-right">{winrate.toFixed(2)}</TableCell>
+                        <TableCell className={`text-right ${avgPnl >= 0 ? 'text-profit' : 'text-loss'}`}>
+                          {avgPnl >= 0 ? '' : '-'}{currencyConfig.symbol}{Math.abs(avgPnl).toFixed(2)}
+                        </TableCell>
+                        <TableCell className={`text-right ${row.totalPnl >= 0 ? 'text-profit' : 'text-loss'}`}>
+                          {row.totalPnl >= 0 ? '' : '-'}{currencyConfig.symbol}{Math.abs(row.totalPnl).toFixed(2)}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </div>
+          ) : (
+            <div className="flex items-center justify-center h-32 border border-dashed border-border rounded-xl bg-muted/20">
+              <p className="text-muted-foreground">No trades data available.</p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 };
