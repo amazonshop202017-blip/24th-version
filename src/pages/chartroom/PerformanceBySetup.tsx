@@ -184,6 +184,8 @@ const PerformanceBySetup = () => {
         worstSum: { setup: '-', value: 0 },
         bestAvg: { setup: '-', value: 0 },
         worstAvg: { setup: '-', value: 0 },
+        bestWinRate: { setup: '-', value: 0 },
+        worstWinRate: { setup: '-', value: 0 },
       };
     }
 
@@ -197,11 +199,18 @@ const PerformanceBySetup = () => {
     const bestAvg = sortedByAvg[0];
     const worstAvg = sortedByAvg[sortedByAvg.length - 1];
 
+    // Best/Worst by winrate
+    const sortedByWinRate = [...setupData].sort((a, b) => b.winrate - a.winrate);
+    const bestWinRate = sortedByWinRate[0];
+    const worstWinRate = sortedByWinRate[sortedByWinRate.length - 1];
+
     return {
       bestSum: { setup: bestSum.setup, value: displayType === 'dollar' ? bestSum.totalPnl : bestSum.totalPercent },
       worstSum: { setup: worstSum.setup, value: displayType === 'dollar' ? worstSum.totalPnl : worstSum.totalPercent },
       bestAvg: { setup: bestAvg.setup, value: displayType === 'dollar' ? bestAvg.avgPnl : bestAvg.totalPercent / bestAvg.tradeCount },
       worstAvg: { setup: worstAvg.setup, value: displayType === 'dollar' ? worstAvg.avgPnl : worstAvg.totalPercent / worstAvg.tradeCount },
+      bestWinRate: { setup: bestWinRate.setup, value: bestWinRate.winrate },
+      worstWinRate: { setup: worstWinRate.setup, value: worstWinRate.winrate },
     };
   }, [setupData, displayType]);
 
@@ -250,6 +259,18 @@ const PerformanceBySetup = () => {
       setup: metrics.worstAvg.setup,
       value: formatValue(metrics.worstAvg.value), 
       isPositive: metrics.worstAvg.value >= 0 
+    },
+    { 
+      label: 'Best Winrate Setup', 
+      setup: metrics.bestWinRate.setup,
+      value: `${metrics.bestWinRate.value.toFixed(1)}%`, 
+      isPositive: true 
+    },
+    { 
+      label: 'Worst Winrate Setup', 
+      setup: metrics.worstWinRate.setup,
+      value: `${metrics.worstWinRate.value.toFixed(1)}%`, 
+      isPositive: false 
     },
   ];
 

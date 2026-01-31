@@ -166,6 +166,8 @@ const PerformanceByInstrument = () => {
         worstSum: { symbol: '-', value: 0 },
         bestAvg: { symbol: '-', value: 0 },
         worstAvg: { symbol: '-', value: 0 },
+        bestWinRate: { symbol: '-', value: 0 },
+        worstWinRate: { symbol: '-', value: 0 },
       };
     }
 
@@ -179,11 +181,18 @@ const PerformanceByInstrument = () => {
     const bestAvg = sortedByAvg[0];
     const worstAvg = sortedByAvg[sortedByAvg.length - 1];
 
+    // Best/Worst by winrate
+    const sortedByWinRate = [...instrumentData].sort((a, b) => b.winrate - a.winrate);
+    const bestWinRate = sortedByWinRate[0];
+    const worstWinRate = sortedByWinRate[sortedByWinRate.length - 1];
+
     return {
       bestSum: { symbol: bestSum.symbol, value: displayType === 'dollar' ? bestSum.totalPnl : bestSum.totalPercent },
       worstSum: { symbol: worstSum.symbol, value: displayType === 'dollar' ? worstSum.totalPnl : worstSum.totalPercent },
       bestAvg: { symbol: bestAvg.symbol, value: displayType === 'dollar' ? bestAvg.avgPnl : bestAvg.totalPercent / bestAvg.tradeCount },
       worstAvg: { symbol: worstAvg.symbol, value: displayType === 'dollar' ? worstAvg.avgPnl : worstAvg.totalPercent / worstAvg.tradeCount },
+      bestWinRate: { symbol: bestWinRate.symbol, value: bestWinRate.winrate },
+      worstWinRate: { symbol: worstWinRate.symbol, value: worstWinRate.winrate },
     };
   }, [instrumentData, displayType]);
 
@@ -210,48 +219,60 @@ const PerformanceByInstrument = () => {
 
   const metricsCards = [
     { 
-      label: 'Best Instrument Sum', 
+      label: 'Best Symbol Sum', 
       symbol: metrics.bestSum.symbol,
       value: formatValue(metrics.bestSum.value), 
       isPositive: metrics.bestSum.value >= 0 
     },
     { 
-      label: 'Worst Instrument Sum', 
+      label: 'Worst Symbol Sum', 
       symbol: metrics.worstSum.symbol,
       value: formatValue(metrics.worstSum.value), 
       isPositive: metrics.worstSum.value >= 0 
     },
     { 
-      label: 'Best Instrument Avg', 
+      label: 'Best Symbol Avg', 
       symbol: metrics.bestAvg.symbol,
       value: formatValue(metrics.bestAvg.value), 
       isPositive: metrics.bestAvg.value >= 0 
     },
     { 
-      label: 'Worst Instrument Avg', 
+      label: 'Worst Symbol Avg', 
       symbol: metrics.worstAvg.symbol,
       value: formatValue(metrics.worstAvg.value), 
       isPositive: metrics.worstAvg.value >= 0 
+    },
+    { 
+      label: 'Best Winrate Symbol', 
+      symbol: metrics.bestWinRate.symbol,
+      value: `${metrics.bestWinRate.value.toFixed(1)}%`, 
+      isPositive: true 
+    },
+    { 
+      label: 'Worst Winrate Symbol', 
+      symbol: metrics.worstWinRate.symbol,
+      value: `${metrics.worstWinRate.value.toFixed(1)}%`, 
+      isPositive: false 
     },
   ];
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-foreground">Performance by Instrument</h1>
-        <p className="text-muted-foreground mt-1">Analyze your trading performance across different instruments.</p>
+        <h1 className="text-3xl font-bold text-foreground">Performance by Symbol</h1>
+        <p className="text-muted-foreground mt-1">Analyze your trading performance across different symbols.</p>
       </div>
 
       {/* Side-by-side Comparison Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <InstrumentPerformanceChart 
           defaultDisplayType="dollar" 
-          title="Instrument Performance 1"
+          title="Symbol Performance 1"
           useGlobalDefault={true}
         />
         <InstrumentPerformanceChart 
           defaultDisplayType="winrate" 
-          title="Instrument Performance 2"
+          title="Symbol Performance 2"
           useGlobalDefault={false}
         />
       </div>
@@ -273,16 +294,16 @@ const PerformanceByInstrument = () => {
         ))}
       </div>
 
-      {/* Instrument Performance Table */}
+      {/* Symbol Performance Table */}
       <Card className="bg-card border-border">
         <CardContent className="p-6">
-          <h3 className="text-lg font-semibold text-foreground mb-4">Instrument Performance</h3>
+          <h3 className="text-lg font-semibold text-foreground mb-4">Symbol Performance</h3>
           {instrumentData.length > 0 ? (
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow className="border-border">
-                    <TableHead className="text-muted-foreground">Instrument</TableHead>
+                    <TableHead className="text-muted-foreground">Symbol</TableHead>
                     <TableHead className="text-muted-foreground text-right">Trades</TableHead>
                     <TableHead className="text-muted-foreground text-right">Winrate (%)</TableHead>
                     <TableHead className="text-muted-foreground text-right">Avg P/L</TableHead>
@@ -318,7 +339,7 @@ const PerformanceByInstrument = () => {
             </div>
           ) : (
             <div className="flex items-center justify-center h-32 border border-dashed border-border rounded-xl bg-muted/20">
-              <p className="text-muted-foreground">No instrument data available.</p>
+              <p className="text-muted-foreground">No symbol data available.</p>
             </div>
           )}
         </CardContent>
