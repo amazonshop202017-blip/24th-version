@@ -221,7 +221,6 @@ export const SetupPerformanceChart = ({
                 <SelectItem value="winrate">Winrate (%)</SelectItem>
                 <SelectItem value="tradecount">Trade Count</SelectItem>
                 <SelectItem value="tickpip">Tick / Pip</SelectItem>
-                <SelectItem value="privacy">Privacy</SelectItem>
               </SelectContent>
             </Select>
           </div>

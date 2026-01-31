@@ -295,7 +295,6 @@ const Drawdown = () => {
                 <SelectItem value="return">Return ($)</SelectItem>
                 <SelectItem value="percent">Return (%)</SelectItem>
                 <SelectItem value="tickpip">Tick / Pip</SelectItem>
-                <SelectItem value="privacy">Privacy</SelectItem>
               </SelectContent>
             </Select>
           </div>
