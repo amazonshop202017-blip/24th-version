@@ -23,7 +23,8 @@ export const mapGlobalToChartDisplay = (globalMode: DisplayMode): ChartDisplayTy
     case 'tickpip':
       return 'tickpip';
     case 'privacy':
-      return 'privacy';
+      // Privacy removed from chart dropdowns - fall back to dollar
+      return 'dollar';
     default:
       return 'dollar';
   }
