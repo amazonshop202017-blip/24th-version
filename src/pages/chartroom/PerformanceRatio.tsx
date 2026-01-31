@@ -4,27 +4,7 @@ import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
 import { useAccountsContext } from '@/contexts/AccountsContext';
 import { useTagsContext } from '@/contexts/TagsContext';
 import { useCategoriesContext } from '@/contexts/CategoriesContext';
-import { useCustomStats } from '@/contexts/CustomStatsContext';
 import { calculateTradeMetrics, Trade } from '@/types/trade';
-import { useChartDisplayMode, ChartDisplayType, getDisplayLabel } from '@/hooks/useChartDisplayMode';
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  ResponsiveContainer,
-  Tooltip,
-  ReferenceLine,
-  CartesianGrid,
-  Cell,
-} from 'recharts';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Card, CardContent } from '@/components/ui/card';
 import {
   Table,
@@ -52,8 +32,8 @@ import {
   CommandList,
   CommandSeparator,
 } from '@/components/ui/command';
+import { TagsCommentsChart } from '@/components/chartroom/TagsCommentsChart';
 
-type DisplayType = ChartDisplayType;
 type SelectionType = 'tradeComments' | 'tags';
 type CommentCategory = 'entryComments' | 'tradeManagement' | 'exitComments';
 
@@ -67,7 +47,6 @@ interface GroupedData {
   beCount: number;
   avgPnl: number;
   winrate: number;
-  displayValue: number;
 }
 
 const PerformanceRatio = () => {
@@ -76,9 +55,8 @@ const PerformanceRatio = () => {
   const { accounts, getAccountBalanceBeforeTrades } = useAccountsContext();
   const { tags, getActiveTags } = useTagsContext();
   const { categories } = useCategoriesContext();
-  const { options } = useCustomStats();
 
-  const { displayType, setDisplayType } = useChartDisplayMode('dollar', true);
+  // Selection state (shared across both charts)
   const [selectionType, setSelectionType] = useState<SelectionType>('tradeComments');
   const [selectedCommentCategory, setSelectedCommentCategory] = useState<CommentCategory>('entryComments');
   const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
@@ -108,21 +86,7 @@ const PerformanceRatio = () => {
     return grouped;
   }, [categories, getActiveTags, tags]);
 
-  // Get comment values based on selected category
-  const commentValues = useMemo(() => {
-    switch (selectedCommentCategory) {
-      case 'entryComments':
-        return options.entryComments.filter(c => !c.archived).map(c => c.value);
-      case 'tradeManagement':
-        return options.tradeManagements.filter(c => !c.archived).map(c => c.value);
-      case 'exitComments':
-        return options.exitComments.filter(c => !c.archived).map(c => c.value);
-      default:
-        return [];
-    }
-  }, [selectedCommentCategory, options]);
-
-  // Calculate grouped data based on selection
+  // Calculate grouped data for table and metrics cards
   const groupedData = useMemo(() => {
     const closedTrades = filteredTrades.filter((trade: Trade) => {
       const metrics = calculateTradeMetrics(trade);
@@ -140,7 +104,6 @@ const PerformanceRatio = () => {
     }>();
 
     if (selectionType === 'tradeComments') {
-      // Group by comment values
       const fieldKey = selectedCommentCategory === 'entryComments' ? 'entryComment' :
                        selectedCommentCategory === 'tradeManagement' ? 'tradeManagement' :
                        'exitComment';
@@ -167,25 +130,19 @@ const PerformanceRatio = () => {
         });
       });
     } else {
-      // Group by tags
       const tagIdToName = new Map<string, string>();
       tags.forEach(tag => tagIdToName.set(tag.id, tag.name));
 
-      // If specific tags are selected, group by those tags only
       const targetTagIds = selectedTagIds.length > 0 ? selectedTagIds : tags.map(t => t.id);
 
       closedTrades.forEach(trade => {
         const metrics = calculateTradeMetrics(trade);
         const outcome = classifyTradeOutcome(metrics.netPnl, trade.savedReturnPercent, trade.breakEven);
 
-        // A trade can have multiple tags, so it may appear in multiple groups
         const tradeTagIds = trade.tags || [];
-        
-        // Find which target tags this trade has
         const matchedTagIds = tradeTagIds.filter(tagId => targetTagIds.includes(tagId));
         
         if (matchedTagIds.length === 0 && selectedTagIds.length === 0) {
-          // No tags and showing all - categorize as "Untagged"
           const existing = dataMap.get('Untagged') || {
             totalPnl: 0,
             tradeCount: 0,
@@ -222,7 +179,6 @@ const PerformanceRatio = () => {
       });
     }
 
-    // Convert to array with calculated values
     const data: GroupedData[] = Array.from(dataMap.entries())
       .map(([name, data]) => {
         const winsAndLosses = data.winCount + data.lossCount;
@@ -230,24 +186,6 @@ const PerformanceRatio = () => {
         const returnPercent = totalStartingBalance > 0
           ? (data.totalPnl / totalStartingBalance) * 100
           : 0;
-
-        let displayValue: number;
-        switch (displayType) {
-          case 'dollar':
-            displayValue = data.totalPnl;
-            break;
-          case 'percent':
-            displayValue = returnPercent;
-            break;
-          case 'winrate':
-            displayValue = winrate;
-            break;
-          case 'tradecount':
-            displayValue = data.tradeCount;
-            break;
-          default:
-            displayValue = data.totalPnl;
-        }
 
         return {
           name,
@@ -259,13 +197,12 @@ const PerformanceRatio = () => {
           beCount: data.beCount,
           avgPnl: data.totalPnl / data.tradeCount,
           winrate,
-          displayValue,
         };
       })
-      .sort((a, b) => b.displayValue - a.displayValue);
+      .sort((a, b) => b.totalPnl - a.totalPnl);
 
     return data;
-  }, [filteredTrades, selectionType, selectedCommentCategory, selectedTagIds, displayType, totalStartingBalance, tags, classifyTradeOutcome]);
+  }, [filteredTrades, selectionType, selectedCommentCategory, selectedTagIds, totalStartingBalance, tags, classifyTradeOutcome]);
 
   // Calculate metrics for cards
   const metrics = useMemo(() => {
@@ -293,24 +230,17 @@ const PerformanceRatio = () => {
     const worstWinRate = sortedByWinRate[sortedByWinRate.length - 1];
 
     return {
-      bestSum: { name: bestSum.name, value: displayType === 'dollar' ? bestSum.totalPnl : bestSum.totalPercent },
-      worstSum: { name: worstSum.name, value: displayType === 'dollar' ? worstSum.totalPnl : worstSum.totalPercent },
-      bestAvg: { name: bestAvg.name, value: displayType === 'dollar' ? bestAvg.avgPnl : bestAvg.totalPercent / bestAvg.tradeCount },
-      worstAvg: { name: worstAvg.name, value: displayType === 'dollar' ? worstAvg.avgPnl : worstAvg.totalPercent / worstAvg.tradeCount },
+      bestSum: { name: bestSum.name, value: bestSum.totalPnl },
+      worstSum: { name: worstSum.name, value: worstSum.totalPnl },
+      bestAvg: { name: bestAvg.name, value: bestAvg.avgPnl },
+      worstAvg: { name: worstAvg.name, value: worstAvg.avgPnl },
       bestWinRate: { name: bestWinRate.name, value: bestWinRate.winrate },
       worstWinRate: { name: worstWinRate.name, value: worstWinRate.winrate },
     };
-  }, [groupedData, displayType]);
+  }, [groupedData]);
 
   // Format value for display
-  const formatValue = (value: number, forceType?: DisplayType): string => {
-    const type = forceType || displayType;
-    if (type === 'percent' || type === 'winrate') {
-      return `${value >= 0 ? '+' : ''}${value.toFixed(2)}%`;
-    }
-    if (type === 'tradecount') {
-      return value.toString();
-    }
+  const formatValue = (value: number): string => {
     const absValue = Math.abs(value);
     if (absValue >= 1000) {
       return `${value >= 0 ? '+' : '-'}${currencyConfig.symbol}${(absValue / 1000).toFixed(1)}k`;
@@ -356,89 +286,6 @@ const PerformanceRatio = () => {
       }
       return `${selectedTagIds.length} Tags`;
     }
-  };
-
-  // Custom tooltip - content varies based on display type
-  const CustomTooltip = ({ active, payload, label }: any) => {
-    if (!active || !payload || !payload.length) return null;
-    
-    const data = payload[0].payload as GroupedData;
-
-    // Trades Count mode: show only Total Trades
-    if (displayType === 'tradecount') {
-      return (
-        <div className="bg-popover border border-border rounded-lg p-3 shadow-xl text-sm">
-          <p className="font-medium text-foreground mb-2">{label}</p>
-          <div className="space-y-1 text-muted-foreground">
-            <p>Total Trades: {data.tradeCount}</p>
-          </div>
-        </div>
-      );
-    }
-
-    // Winrate mode: show Winrate first, then trade counts
-    if (displayType === 'winrate') {
-      return (
-        <div className="bg-popover border border-border rounded-lg p-3 shadow-xl text-sm">
-          <p className="font-medium text-foreground mb-2">{label}</p>
-          <div className="space-y-1 text-muted-foreground">
-            <p>Winrate: <span className="text-foreground">{data.winrate.toFixed(1)}%</span></p>
-            <p>Total Trades: {data.tradeCount}</p>
-            <p>Winners: {data.winCount}</p>
-            <p>Losers: {data.lossCount}</p>
-            <p>BE: {data.beCount}</p>
-          </div>
-        </div>
-      );
-    }
-
-    // Dollar mode: show Net PNL + trade counts
-    if (displayType === 'dollar') {
-      const pnlValue = `${data.totalPnl >= 0 ? '+' : ''}${currencyConfig.symbol}${Math.abs(data.totalPnl).toFixed(2)}`;
-      return (
-        <div className="bg-popover border border-border rounded-lg p-3 shadow-xl text-sm">
-          <p className="font-medium text-foreground mb-2">{label}</p>
-          <div className="space-y-1 text-muted-foreground">
-            <p>Net PNL: <span className={data.totalPnl >= 0 ? 'text-profit' : 'text-loss'}>{pnlValue}</span></p>
-            <p>Total Trades: {data.tradeCount}</p>
-            <p>Winners: {data.winCount}</p>
-            <p>Losers: {data.lossCount}</p>
-            <p>BE: {data.beCount}</p>
-          </div>
-        </div>
-      );
-    }
-
-    // Percent mode: show Return % + trade counts
-    if (displayType === 'percent') {
-      const returnValue = `${data.totalPercent >= 0 ? '+' : ''}${data.totalPercent.toFixed(2)}%`;
-      return (
-        <div className="bg-popover border border-border rounded-lg p-3 shadow-xl text-sm">
-          <p className="font-medium text-foreground mb-2">{label}</p>
-          <div className="space-y-1 text-muted-foreground">
-            <p>Return %: <span className={data.totalPercent >= 0 ? 'text-profit' : 'text-loss'}>{returnValue}</span></p>
-            <p>Total Trades: {data.tradeCount}</p>
-            <p>Winners: {data.winCount}</p>
-            <p>Losers: {data.lossCount}</p>
-            <p>BE: {data.beCount}</p>
-          </div>
-        </div>
-      );
-    }
-
-    // Tick/Pip and Privacy modes: show placeholder + trade counts
-    return (
-      <div className="bg-popover border border-border rounded-lg p-3 shadow-xl text-sm">
-        <p className="font-medium text-foreground mb-2">{label}</p>
-        <div className="space-y-1 text-muted-foreground">
-          <p>{displayType === 'privacy' ? '•••••' : '--'}</p>
-          <p>Total Trades: {data.tradeCount}</p>
-          <p>Winners: {data.winCount}</p>
-          <p>Losers: {data.lossCount}</p>
-          <p>BE: {data.beCount}</p>
-        </div>
-      </div>
-    );
   };
 
   const metricsCards = [
@@ -487,27 +334,8 @@ const PerformanceRatio = () => {
         <p className="text-muted-foreground mt-1">Analyze your trading performance grouped by tags or trade comments.</p>
       </div>
 
-      {/* Controls Row */}
+      {/* Selection Panel (shared across both charts) */}
       <div className="flex flex-wrap items-center gap-4">
-        {/* Display Dropdown */}
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-muted-foreground">Display:</span>
-          <Select value={displayType} onValueChange={(v) => setDisplayType(v as DisplayType)}>
-            <SelectTrigger className="w-[140px] bg-background border-border">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent className="bg-popover border-border z-50">
-              <SelectItem value="dollar">{getDisplayLabel('dollar')}</SelectItem>
-              <SelectItem value="percent">{getDisplayLabel('percent')}</SelectItem>
-              <SelectItem value="winrate">{getDisplayLabel('winrate')}</SelectItem>
-              <SelectItem value="tradecount">{getDisplayLabel('tradecount')}</SelectItem>
-              <SelectItem value="tickpip">{getDisplayLabel('tickpip')}</SelectItem>
-              <SelectItem value="privacy">{getDisplayLabel('privacy')}</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* Selection Panel */}
         <div className="flex items-center gap-2">
           <span className="text-sm text-muted-foreground">Selection:</span>
           <Popover open={selectionOpen} onOpenChange={setSelectionOpen}>
@@ -696,67 +524,23 @@ const PerformanceRatio = () => {
         </div>
       </div>
 
-      {/* Chart */}
-      <Card className="bg-card border-border">
-        <CardContent className="p-6">
-          <h3 className="text-lg font-semibold text-foreground mb-4">
-            Performance by {selectionType === 'tags' ? 'Tag' : 'Comment'}
-          </h3>
-          {groupedData.length > 0 ? (
-            <ResponsiveContainer width="100%" height={350}>
-              <BarChart data={groupedData} margin={{ left: 20, right: 20, top: 20, bottom: 60 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
-                <XAxis 
-                  type="category" 
-                  dataKey="name" 
-                  axisLine={false} 
-                  tickLine={false}
-                  tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 11 }}
-                  angle={-45}
-                  textAnchor="end"
-                  height={60}
-                  interval={0}
-                />
-                <YAxis 
-                  type="number" 
-                  axisLine={false} 
-                  tickLine={false}
-                  tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 11 }}
-                  tickFormatter={(value) => {
-                    if (displayType === 'percent' || displayType === 'winrate') return `${value.toFixed(0)}%`;
-                    if (displayType === 'tradecount') return value.toString();
-                    return `${currencyConfig.symbol}${Math.abs(value) >= 1000 ? `${(value / 1000).toFixed(0)}k` : value.toFixed(0)}`;
-                  }}
-                />
-                <Tooltip content={<CustomTooltip />} cursor={{ fill: 'hsl(var(--muted)/0.1)' }} />
-                <ReferenceLine y={0} stroke="hsl(var(--border))" />
-                <Bar dataKey="displayValue" radius={[4, 4, 0, 0]} maxBarSize={48}>
-                  {groupedData.map((entry, index) => (
-                    <Cell 
-                      key={`cell-${index}`}
-                      fill={
-                        displayType === 'winrate' || displayType === 'tradecount'
-                          ? 'hsl(var(--primary))'
-                          : entry.displayValue >= 0
-                            ? 'hsl(142.1 76.2% 36.3%)'  // green
-                            : 'hsl(0 84.2% 60.2%)'     // red
-                      }
-                    />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          ) : (
-            <div className="flex items-center justify-center h-64 border border-dashed border-border rounded-xl bg-muted/20">
-              <p className="text-muted-foreground">
-                {selectionType === 'tags' 
-                  ? 'No trades with tags found. Assign tags to trades to see analysis.'
-                  : 'No trades with comments found. Add comments to trades to see analysis.'}
-              </p>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+      {/* Side-by-Side Charts */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <TagsCommentsChart 
+          selectionType={selectionType}
+          selectedCommentCategory={selectedCommentCategory}
+          selectedTagIds={selectedTagIds}
+          defaultDisplayType="dollar"
+          useGlobalDefault={true}
+        />
+        <TagsCommentsChart 
+          selectionType={selectionType}
+          selectedCommentCategory={selectedCommentCategory}
+          selectedTagIds={selectedTagIds}
+          defaultDisplayType="winrate"
+          useGlobalDefault={false}
+        />
+      </div>
 
       {/* Metrics Cards */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
@@ -766,7 +550,7 @@ const PerformanceRatio = () => {
               <p className="text-xs text-muted-foreground mb-1">{metric.label}</p>
               <p className="text-sm text-foreground mb-1 truncate" title={metric.name}>{metric.name}</p>
               <p className={`text-lg font-semibold ${
-                metric.isPositive ? 'text-green-500' : 'text-red-500'
+                metric.isPositive ? 'text-profit' : 'text-loss'
               }`}>
                 {metric.value}
               </p>
@@ -803,14 +587,14 @@ const PerformanceRatio = () => {
                     <TableRow key={row.name} className="border-border">
                       <TableCell className="text-foreground font-medium">{row.name}</TableCell>
                       <TableCell className="text-foreground text-right">{row.tradeCount}</TableCell>
-                      <TableCell className="text-green-500 text-right">{row.winCount}</TableCell>
-                      <TableCell className="text-red-500 text-right">{row.lossCount}</TableCell>
+                      <TableCell className="text-profit text-right">{row.winCount}</TableCell>
+                      <TableCell className="text-loss text-right">{row.lossCount}</TableCell>
                       <TableCell className="text-muted-foreground text-right">{row.beCount}</TableCell>
                       <TableCell className="text-foreground text-right">{row.winrate.toFixed(1)}%</TableCell>
-                      <TableCell className={`text-right ${row.avgPnl >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                      <TableCell className={`text-right ${row.avgPnl >= 0 ? 'text-profit' : 'text-loss'}`}>
                         {row.avgPnl >= 0 ? '+' : '-'}{currencyConfig.symbol}{Math.abs(row.avgPnl).toFixed(2)}
                       </TableCell>
-                      <TableCell className={`text-right ${row.totalPnl >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                      <TableCell className={`text-right ${row.totalPnl >= 0 ? 'text-profit' : 'text-loss'}`}>
                         {row.totalPnl >= 0 ? '+' : '-'}{currencyConfig.symbol}{Math.abs(row.totalPnl).toFixed(2)}
                       </TableCell>
                     </TableRow>
