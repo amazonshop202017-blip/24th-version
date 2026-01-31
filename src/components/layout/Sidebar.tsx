@@ -30,7 +30,7 @@ const chartRoomItems = [
   { label: 'Drawdown', path: '/chart-room/drawdown' },
   { label: 'Exit Analysis', path: '/chart-room/exit-analysis' },
   { label: 'Holding Time', path: '/chart-room/holding-time' },
-  { label: 'Performance by Instrument', path: '/chart-room/performance-by-instrument' },
+  { label: 'Performance by Symbol', path: '/chart-room/performance-by-symbol' },
   { label: 'Performance by Setup', path: '/chart-room/performance-by-setup' },
   { label: 'Performance by Time', path: '/chart-room/performance-by-time' },
   { label: 'Tags/Comments Analysis', path: '/chart-room/tags-analytics' },

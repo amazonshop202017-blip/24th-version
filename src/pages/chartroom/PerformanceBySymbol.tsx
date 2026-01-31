@@ -47,7 +47,7 @@ interface InstrumentData {
   displayValue: number;
 }
 
-const PerformanceByInstrument = () => {
+const PerformanceBySymbol = () => {
   const { filteredTrades } = useFilteredTrades();
   const { currencyConfig, selectedAccounts, isAllAccountsSelected } = useGlobalFilters();
   const { accounts, getAccountBalanceBeforeTrades } = useAccountsContext();
@@ -348,4 +348,4 @@ const PerformanceByInstrument = () => {
   );
 };
 
-export default PerformanceByInstrument;
+export default PerformanceBySymbol;
