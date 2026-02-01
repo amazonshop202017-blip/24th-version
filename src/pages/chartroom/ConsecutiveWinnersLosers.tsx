@@ -53,6 +53,9 @@ interface ChartDataPoint {
   lossAmountPercent: number;
   winFrequency: number;
   lossFrequency: number;
+  // For single-bar rendering: [bottom (negative), top (positive)]
+  barRange: [number, number];
+  barRangePercent: [number, number];
 }
 
 const ConsecutiveWinnersLosers = () => {
@@ -180,14 +183,22 @@ const ConsecutiveWinnersLosers = () => {
       const winData = winDataByStreak[i];
       const lossData = lossDataByStreak[i];
       
+      const winAvg = winData ? winData.total / winData.count : 0;
+      const lossAvg = lossData ? lossData.total / lossData.count : 0;
+      const winAvgPercent = winData ? winData.totalPercent / winData.count : 0;
+      const lossAvgPercent = lossData ? lossData.totalPercent / lossData.count : 0;
+      
       chartData.push({
         streak: i,
-        winAmount: winData ? winData.total / winData.count : 0,
-        lossAmount: lossData ? lossData.total / lossData.count : 0,
-        winAmountPercent: winData ? winData.totalPercent / winData.count : 0,
-        lossAmountPercent: lossData ? lossData.totalPercent / lossData.count : 0,
+        winAmount: winAvg,
+        lossAmount: lossAvg,
+        winAmountPercent: winAvgPercent,
+        lossAmountPercent: lossAvgPercent,
         winFrequency: winData ? winData.count : 0,
         lossFrequency: lossData ? lossData.count : 0,
+        // barRange: [bottom (loss, negative), top (win, positive)]
+        barRange: [lossAvg, winAvg],
+        barRangePercent: [lossAvgPercent, winAvgPercent],
       });
     }
 
@@ -201,14 +212,21 @@ const ConsecutiveWinnersLosers = () => {
       const lossTotal = lossOver10.reduce((sum, s) => sum + s.totalPnl, 0);
       const lossTotalPercent = lossOver10.reduce((sum, s) => sum + s.totalReturnPercent, 0);
       
+      const winAvgOver10 = winOver10.length > 0 ? winTotal / winOver10.length : 0;
+      const lossAvgOver10 = lossOver10.length > 0 ? lossTotal / lossOver10.length : 0;
+      const winAvgPercentOver10 = winOver10.length > 0 ? winTotalPercent / winOver10.length : 0;
+      const lossAvgPercentOver10 = lossOver10.length > 0 ? lossTotalPercent / lossOver10.length : 0;
+      
       chartData.push({
         streak: 11, // Represents ">10"
-        winAmount: winOver10.length > 0 ? winTotal / winOver10.length : 0,
-        lossAmount: lossOver10.length > 0 ? lossTotal / lossOver10.length : 0,
-        winAmountPercent: winOver10.length > 0 ? winTotalPercent / winOver10.length : 0,
-        lossAmountPercent: lossOver10.length > 0 ? lossTotalPercent / lossOver10.length : 0,
+        winAmount: winAvgOver10,
+        lossAmount: lossAvgOver10,
+        winAmountPercent: winAvgPercentOver10,
+        lossAmountPercent: lossAvgPercentOver10,
         winFrequency: winOver10.length,
         lossFrequency: lossOver10.length,
+        barRange: [lossAvgOver10, winAvgOver10],
+        barRangePercent: [lossAvgPercentOver10, winAvgPercentOver10],
       });
     }
 
@@ -472,22 +490,60 @@ const ConsecutiveWinnersLosers = () => {
 
                   <Tooltip content={<CustomTooltip />} />
 
-                  {/* Win bars (positive - green) */}
+                  {/* Single range bar per streak value */}
                   <Bar 
-                    dataKey={chartDisplayType === 'dollar' ? 'winAmount' : 'winAmountPercent'}
-                    name="Winners"
-                    fill="hsl(var(--profit))"
-                    radius={[4, 4, 0, 0]}
+                    dataKey={chartDisplayType === 'dollar' ? 'barRange' : 'barRangePercent'}
+                    name="Streak"
                     maxBarSize={60}
-                  />
-                  
-                  {/* Loss bars (negative - red) */}
-                  <Bar 
-                    dataKey={chartDisplayType === 'dollar' ? 'lossAmount' : 'lossAmountPercent'}
-                    name="Losers"
-                    fill="hsl(var(--loss))"
-                    radius={[0, 0, 4, 4]}
-                    maxBarSize={60}
+                    shape={(props: any) => {
+                      const { x, y, width, height, payload } = props;
+                      if (!payload) return null;
+                      
+                      const isDollar = chartDisplayType === 'dollar';
+                      const winValue = isDollar ? payload.winAmount : payload.winAmountPercent;
+                      const lossValue = isDollar ? payload.lossAmount : payload.lossAmountPercent;
+                      
+                      // barRange = [lossValue (negative), winValue (positive)]
+                      // y is the top of the bar, height is the full height from loss to win
+                      const barTop = y;
+                      const barBottom = y + height;
+                      
+                      // Calculate where 0 falls within this range
+                      const totalRange = winValue - lossValue;
+                      if (totalRange === 0) return null;
+                      
+                      const zeroRatio = winValue / totalRange;
+                      const zeroY = barTop + (height * zeroRatio);
+                      
+                      return (
+                        <g>
+                          {/* Green portion: from zeroY to barTop (positive values) */}
+                          {winValue > 0 && (
+                            <rect
+                              x={x}
+                              y={barTop}
+                              width={width}
+                              height={Math.max(0, zeroY - barTop)}
+                              fill="hsl(var(--profit))"
+                              rx={4}
+                              ry={4}
+                            />
+                          )}
+                          {/* Red portion: from zeroY to barBottom (negative values) */}
+                          {lossValue < 0 && (
+                            <rect
+                              x={x}
+                              y={zeroY}
+                              width={width}
+                              height={Math.max(0, barBottom - zeroY)}
+                              fill="hsl(var(--loss))"
+                              rx={4}
+                              ry={4}
+                            />
+                          )}
+                        </g>
+                      );
+                    }}
                   />
                 </ComposedChart>
               </ResponsiveContainer>
