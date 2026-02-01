@@ -25,6 +25,7 @@ import Reports from "./pages/Reports";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 import Drawdown from "./pages/chartroom/Drawdown";
+import ConsecutiveWinnersLosers from "./pages/chartroom/ConsecutiveWinnersLosers";
 import ExitAnalysis from "./pages/chartroom/ExitAnalysis";
 import HoldingTime from "./pages/chartroom/HoldingTime";
 import PerformanceBySymbol from "./pages/chartroom/PerformanceBySymbol";
@@ -63,6 +64,7 @@ const App = () => (
                               <Route path="/strategies/:id" element={<StrategyDetail />} />
                               <Route path="/reports/*" element={<Reports />} />
                               <Route path="/chart-room/drawdown" element={<Drawdown />} />
+                              <Route path="/chart-room/consecutive" element={<ConsecutiveWinnersLosers />} />
                               <Route path="/chart-room/exit-analysis" element={<ExitAnalysis />} />
                               <Route path="/chart-room/holding-time" element={<HoldingTime />} />
                               <Route path="/chart-room/performance-by-symbol" element={<PerformanceBySymbol />} />

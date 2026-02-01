@@ -28,6 +28,7 @@ const analysisItems = [
 
 const chartRoomItems = [
   { label: 'Drawdown', path: '/chart-room/drawdown' },
+  { label: 'Consecutive Winners/Losers', path: '/chart-room/consecutive' },
   { label: 'Exit Analysis', path: '/chart-room/exit-analysis' },
   { label: 'Holding Time', path: '/chart-room/holding-time' },
   { label: 'Performance by Symbol', path: '/chart-room/performance-by-symbol' },
