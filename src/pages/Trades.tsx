@@ -375,14 +375,14 @@ const Trades = () => {
         </div>
 
         {/* Scrollable Table Container */}
-        <div className="flex-1 overflow-auto min-h-0">
+        <div className="flex-1 overflow-auto min-h-0 scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent">
           {paginatedTrades.length === 0 ? (
             <div className="text-center py-16 text-muted-foreground">
               <p className="text-lg">No trades recorded yet</p>
               <p className="text-sm mt-1">Click "Enter Trade" or the + button to add your first trade</p>
             </div>
           ) : (
-            <Table>
+            <Table className="min-w-max">
               <TableHeader className="sticky top-0 bg-card z-10">
                 <TableRow className="border-border hover:bg-transparent">
                   <TableHead className="w-8 px-2">
