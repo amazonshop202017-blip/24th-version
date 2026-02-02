@@ -477,11 +477,15 @@ const Trades = () => {
                       {isColumnVisible('realizedRMultiple') && (
                         <TableCell className={cn(
                           "font-mono px-2 py-1",
-                          trade.savedRMultiple !== undefined && trade.savedRMultiple !== null
-                            ? trade.savedRMultiple >= 0 ? "profit-text" : "loss-text"
+                          typeof trade.savedRMultiple === 'number'
+                            ? trade.savedRMultiple > 0 
+                              ? "profit-text" 
+                              : trade.savedRMultiple < 0 
+                                ? "loss-text" 
+                                : ""
                             : ""
                         )}>
-                          {trade.savedRMultiple !== undefined && trade.savedRMultiple !== null 
+                          {typeof trade.savedRMultiple === 'number'
                             ? trade.savedRMultiple.toFixed(2) 
                             : '—'}
                         </TableCell>
