@@ -46,7 +46,7 @@ import {
 } from '@/components/ui/alert-dialog';
 
 const Trades = () => {
-  const { filteredTrades, deleteTrade, stats } = useFilteredTrades();
+  const { filteredTrades, deleteTrades, stats } = useFilteredTrades();
   const { openModal } = useTradeModal();
   const { formatCurrency } = useGlobalFilters();
   const { isPrivacyMode, maskCurrency } = usePrivacyMode();
@@ -96,17 +96,15 @@ const Trades = () => {
   };
 
   const handleDeleteSelected = () => {
-    // Create a snapshot of all selected trade IDs to ensure all are deleted
+    // Snapshot selection first
     const idsToDelete = Array.from(selectedTrades);
-    
-    // Delete each selected trade explicitly
-    idsToDelete.forEach(id => {
-      deleteTrade(id);
-    });
-    
-    // Clear selection and close dialog after all deletions
+
+    // Clear selection immediately (do not read selection state again during deletion)
     setSelectedTrades(new Set());
     setDeleteDialogOpen(false);
+
+    // Perform atomic bulk delete using the snapshot only
+    deleteTrades(idsToDelete);
   };
 
   const formatDuration = (duration: string) => {

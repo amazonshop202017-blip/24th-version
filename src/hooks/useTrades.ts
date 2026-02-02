@@ -118,6 +118,13 @@ export const useTrades = () => {
     saveTrades(trades.filter(trade => trade.id !== id));
   }, [trades, saveTrades]);
 
+  // Atomic bulk delete to avoid stale-closure issues when deleting multiple trades
+  const deleteTrades = useCallback((ids: string[]) => {
+    if (!ids || ids.length === 0) return;
+    const idSet = new Set(ids);
+    saveTrades(trades.filter(trade => !idSet.has(trade.id)));
+  }, [trades, saveTrades]);
+
   const deleteTradesByAccountId = useCallback((accountId: string) => {
     saveTrades(trades.filter(trade => trade.accountId !== accountId));
   }, [trades, saveTrades]);
@@ -184,6 +191,7 @@ export const useTrades = () => {
     bulkAddTrades,
     updateTrade,
     deleteTrade,
+    deleteTrades,
     deleteTradesByAccountId,
     deleteTradesByAccountName,
     getTradeById,
