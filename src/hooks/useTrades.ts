@@ -25,39 +25,46 @@ export const useTrades = () => {
             };
           }
           
-          // Migration 2: Backfill savedRMultiple for trades that don't have it
-          // Only calculate if trade has tradeRisk > 0 and we can compute netPnl
-          if (updated.savedRMultiple === undefined || updated.savedRMultiple === null) {
-            const metrics = calculateTradeMetrics(updated);
-            if (updated.tradeRisk > 0 && metrics.positionStatus === 'CLOSED') {
+          // Calculate metrics once for all derived field reconciliation
+          const metrics = calculateTradeMetrics(updated);
+          
+          // Migration 2: Reconcile savedRMultiple
+          // Handles: undefined, null, AND stale zero values (stored 0 when should be non-zero)
+          // This ensures backward compatibility when new derived fields are added
+          if (updated.tradeRisk > 0 && metrics.positionStatus === 'CLOSED') {
+            const calculatedRMultiple = metrics.netPnl / updated.tradeRisk;
+            const isMissing = updated.savedRMultiple === undefined || updated.savedRMultiple === null;
+            const isStaleZero = updated.savedRMultiple === 0 && Math.abs(calculatedRMultiple) > 0.0001;
+            
+            if (isMissing || isStaleZero) {
               updated = {
                 ...updated,
-                savedRMultiple: metrics.netPnl / updated.tradeRisk,
+                savedRMultiple: calculatedRMultiple,
               };
             }
           }
           
-          // Migration 3: Backfill savedReturnPercent for trades that don't have it
+          // Migration 3: Reconcile savedReturnPercent
           // AUTHORITATIVE DEFINITION: Return % = (Net P&L / Account Balance at Trade Time) × 100
-          // This applies to ALL trades (manual and imported) - NO conditional logic
-          if (updated.savedReturnPercent === undefined || updated.savedReturnPercent === null) {
-            // Calculate Net P&L
-            const metrics = calculateTradeMetrics(updated);
+          // Handles: undefined, null, AND stale zero values
+          if (updated.accountBalanceSnapshot && updated.accountBalanceSnapshot > 0) {
             const netPnl = updated.manualGrossPnl !== undefined 
               ? updated.manualGrossPnl - metrics.totalCharges 
               : metrics.netPnl;
+            const calculatedReturnPercent = (netPnl / updated.accountBalanceSnapshot) * 100;
             
-            // Use accountBalanceSnapshot if available
-            if (updated.accountBalanceSnapshot && updated.accountBalanceSnapshot > 0) {
+            const isMissing = updated.savedReturnPercent === undefined || updated.savedReturnPercent === null;
+            const isStaleZero = updated.savedReturnPercent === 0 && Math.abs(calculatedReturnPercent) > 0.0001;
+            
+            if (isMissing || isStaleZero) {
               updated = {
                 ...updated,
-                savedReturnPercent: (netPnl / updated.accountBalanceSnapshot) * 100,
+                savedReturnPercent: calculatedReturnPercent,
               };
-            } else if (metrics.positionStatus === 'CLOSED') {
-              // Legacy trade without account balance - log warning
-              // Cannot calculate Return % accurately without account balance
-              console.warn(`Trade ${updated.id || 'unknown'} missing accountBalanceSnapshot - Return % cannot be calculated accurately`);
-              // Set to 0 to indicate missing data rather than using incorrect formula
+            }
+          } else if (metrics.positionStatus === 'CLOSED') {
+            // Legacy trade without account balance - only set to 0 if truly missing
+            if (updated.savedReturnPercent === undefined || updated.savedReturnPercent === null) {
               updated = {
                 ...updated,
                 savedReturnPercent: 0,
