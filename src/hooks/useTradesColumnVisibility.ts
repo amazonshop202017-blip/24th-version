@@ -23,7 +23,7 @@ export const COLUMN_GROUPS: ColumnGroup[] = [
   {
     id: 'timing',
     label: 'Timing',
-    columns: ['openDate', 'closeDate', 'closeTime', 'duration'],
+    columns: ['openDateTime', 'closeDateTime', 'duration'],
   },
   {
     id: 'execution',
@@ -46,10 +46,9 @@ export const ALL_COLUMNS: ColumnConfig[] = [
   { id: 'instrument', label: 'Instrument', group: 'identification', visible: true },
   { id: 'accountName', label: 'Account Name', group: 'identification', visible: false },
   
-  // Timing
-  { id: 'openDate', label: 'Open Date', group: 'timing', visible: true },
-  { id: 'closeDate', label: 'Close Date', group: 'timing', visible: true },
-  { id: 'closeTime', label: 'Close Time', group: 'timing', visible: false },
+  // Timing - consolidated columns
+  { id: 'openDateTime', label: 'Open Date / Time', group: 'timing', visible: true },
+  { id: 'closeDateTime', label: 'Close Date / Time', group: 'timing', visible: true },
   { id: 'duration', label: 'Duration', group: 'timing', visible: false },
   
   // Execution & Plan
