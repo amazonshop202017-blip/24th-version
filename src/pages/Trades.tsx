@@ -1,7 +1,6 @@
 import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { 
-  Pencil, 
   Trash2, 
   ArrowUpRight, 
   ArrowDownRight,
@@ -26,6 +25,7 @@ import { AvgWinLossRatio } from '@/components/dashboard/AvgWinLossRatio';
 import { TradesColumnSettings } from '@/components/trades/TradesColumnSettings';
 import { useTradesColumnVisibility } from '@/hooks/useTradesColumnVisibility';
 import { Checkbox } from '@/components/ui/checkbox';
+import { AccountImportModal } from '@/components/settings/AccountImportModal';
 import {
   Table,
   TableBody,
@@ -43,7 +43,6 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 
 const Trades = () => {
@@ -54,6 +53,8 @@ const Trades = () => {
   const { columns, toggleColumn, isColumnVisible, columnGroups } = useTradesColumnVisibility();
   
   const [selectedTrades, setSelectedTrades] = useState<Set<string>>(new Set());
+  const [importModalOpen, setImportModalOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   const sortedTrades = useMemo(() => {
     return [...filteredTrades].sort((a, b) => {
@@ -74,7 +75,8 @@ const Trades = () => {
     }
   };
 
-  const handleSelectTrade = (tradeId: string) => {
+  const handleSelectTrade = (tradeId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
     setSelectedTrades(prev => {
       const next = new Set(prev);
       if (next.has(tradeId)) {
@@ -84,6 +86,19 @@ const Trades = () => {
       }
       return next;
     });
+  };
+
+  const handleRowClick = (tradeId: string) => {
+    const trade = sortedTrades.find(t => t.id === tradeId);
+    if (trade) {
+      openModal(trade);
+    }
+  };
+
+  const handleDeleteSelected = () => {
+    selectedTrades.forEach(id => deleteTrade(id));
+    setSelectedTrades(new Set());
+    setDeleteDialogOpen(false);
   };
 
   const formatDuration = (duration: string) => {
@@ -208,7 +223,12 @@ const Trades = () => {
             </Button>
 
             {/* Import */}
-            <Button variant="outline" size="sm" className="gap-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="gap-2"
+              onClick={() => setImportModalOpen(true)}
+            >
               <Upload className="w-4 h-4" />
               Import
             </Button>
@@ -236,15 +256,35 @@ const Trades = () => {
             </Button>
 
             {/* Delete */}
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="gap-2 text-destructive hover:text-destructive"
-              disabled={selectedTrades.size === 0}
-            >
-              <Trash2 className="w-4 h-4" />
-              Delete ({selectedTrades.size})
-            </Button>
+            <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="gap-2 text-destructive hover:text-destructive"
+                disabled={selectedTrades.size === 0}
+                onClick={() => setDeleteDialogOpen(true)}
+              >
+                <Trash2 className="w-4 h-4" />
+                Delete ({selectedTrades.size})
+              </Button>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Delete Selected Trades</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Are you sure you want to delete {selectedTrades.size} selected trade{selectedTrades.size > 1 ? 's' : ''}? This action cannot be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={handleDeleteSelected}
+                    className="bg-loss hover:bg-loss/90"
+                  >
+                    Delete
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
 
           {/* Right Controls */}
@@ -275,31 +315,29 @@ const Trades = () => {
             <Table>
               <TableHeader className="sticky top-0 bg-card z-10">
                 <TableRow className="border-border hover:bg-transparent">
-                  <TableHead className="w-10">
+                  <TableHead className="w-8 px-2">
                     <Checkbox
                       checked={allSelected}
                       onCheckedChange={handleSelectAll}
                       aria-label="Select all trades"
                     />
                   </TableHead>
-                  {isColumnVisible('symbol') && <TableHead>Symbol</TableHead>}
-                  {isColumnVisible('side') && <TableHead>Side</TableHead>}
-                  {isColumnVisible('volume') && <TableHead>Volume</TableHead>}
-                  {isColumnVisible('ticksPips') && <TableHead>Ticks/Pips</TableHead>}
-                  {isColumnVisible('instrument') && <TableHead>Instrument</TableHead>}
-                  {isColumnVisible('accountName') && <TableHead>Account</TableHead>}
-                  {isColumnVisible('openDate') && <TableHead>Open Date</TableHead>}
-                  {isColumnVisible('closeDate') && <TableHead>Close Date</TableHead>}
-                  {isColumnVisible('closeTime') && <TableHead>Close Time</TableHead>}
-                  {isColumnVisible('duration') && <TableHead>Duration</TableHead>}
-                  {isColumnVisible('avgEntry') && <TableHead>Avg Entry</TableHead>}
-                  {isColumnVisible('avgExit') && <TableHead>Avg Exit</TableHead>}
-                  {isColumnVisible('initialRisk') && <TableHead>Initial Risk</TableHead>}
-                  {isColumnVisible('initialTarget') && <TableHead>Initial Target</TableHead>}
-                  {isColumnVisible('grossPnl') && <TableHead>Gross P&L</TableHead>}
-                  {isColumnVisible('netPnl') && <TableHead>Net P&L</TableHead>}
-                  {isColumnVisible('realizedRMultiple') && <TableHead>R Multiple</TableHead>}
-                  <TableHead className="text-right sticky right-0 bg-card">Actions</TableHead>
+                  {isColumnVisible('symbol') && <TableHead className="px-2">Symbol</TableHead>}
+                  {isColumnVisible('side') && <TableHead className="px-2">Side</TableHead>}
+                  {isColumnVisible('volume') && <TableHead className="px-2">Volume</TableHead>}
+                  {isColumnVisible('ticksPips') && <TableHead className="px-2">Ticks/Pips</TableHead>}
+                  {isColumnVisible('instrument') && <TableHead className="px-2">Instrument</TableHead>}
+                  {isColumnVisible('accountName') && <TableHead className="px-2">Account</TableHead>}
+                  {isColumnVisible('openDateTime') && <TableHead className="px-2">Open Date / Time</TableHead>}
+                  {isColumnVisible('closeDateTime') && <TableHead className="px-2">Close Date / Time</TableHead>}
+                  {isColumnVisible('duration') && <TableHead className="px-2">Duration</TableHead>}
+                  {isColumnVisible('avgEntry') && <TableHead className="px-2">Avg Entry</TableHead>}
+                  {isColumnVisible('avgExit') && <TableHead className="px-2">Avg Exit</TableHead>}
+                  {isColumnVisible('initialRisk') && <TableHead className="px-2">Stop Loss</TableHead>}
+                  {isColumnVisible('initialTarget') && <TableHead className="px-2">Take Profit</TableHead>}
+                  {isColumnVisible('grossPnl') && <TableHead className="px-2">Gross P&L</TableHead>}
+                  {isColumnVisible('netPnl') && <TableHead className="px-2">Net P&L</TableHead>}
+                  {isColumnVisible('realizedRMultiple') && <TableHead className="px-2">R Multiple</TableHead>}
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -310,27 +348,38 @@ const Trades = () => {
                   return (
                     <TableRow
                       key={trade.id}
+                      onClick={() => handleRowClick(trade.id)}
                       className={cn(
-                        "border-border hover:bg-secondary/30",
+                        "border-border hover:bg-secondary/30 cursor-pointer h-10",
                         isSelected && "bg-secondary/50"
                       )}
                     >
-                      <TableCell className="w-10">
+                      <TableCell className="w-8 px-2 py-1" onClick={(e) => e.stopPropagation()}>
                         <Checkbox
                           checked={isSelected}
-                          onCheckedChange={() => handleSelectTrade(trade.id)}
+                          onCheckedChange={(checked) => {
+                            setSelectedTrades(prev => {
+                              const next = new Set(prev);
+                              if (checked) {
+                                next.add(trade.id);
+                              } else {
+                                next.delete(trade.id);
+                              }
+                              return next;
+                            });
+                          }}
                           aria-label={`Select trade ${trade.symbol}`}
                         />
                       </TableCell>
                       
                       {isColumnVisible('symbol') && (
-                        <TableCell className="font-semibold">{trade.symbol}</TableCell>
+                        <TableCell className="font-semibold px-2 py-1">{trade.symbol}</TableCell>
                       )}
                       
                       {isColumnVisible('side') && (
-                        <TableCell>
+                        <TableCell className="px-2 py-1">
                           <div className={cn(
-                            "inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium",
+                            "inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-xs font-medium",
                             trade.side === 'LONG' ? "bg-profit/20 profit-text" : "bg-loss/20 loss-text"
                           )}>
                             {trade.side === 'LONG' ? (
@@ -344,72 +393,66 @@ const Trades = () => {
                       )}
                       
                       {isColumnVisible('volume') && (
-                        <TableCell className="font-mono">{metrics.totalQuantity}</TableCell>
+                        <TableCell className="font-mono px-2 py-1">{metrics.totalQuantity}</TableCell>
                       )}
                       
                       {isColumnVisible('ticksPips') && (
-                        <TableCell className="text-muted-foreground">—</TableCell>
+                        <TableCell className="text-muted-foreground px-2 py-1">—</TableCell>
                       )}
                       
                       {isColumnVisible('instrument') && (
-                        <TableCell>{trade.instrument}</TableCell>
+                        <TableCell className="px-2 py-1">{trade.instrument}</TableCell>
                       )}
                       
                       {isColumnVisible('accountName') && (
-                        <TableCell className="text-muted-foreground">{trade.accountName || '—'}</TableCell>
+                        <TableCell className="text-muted-foreground px-2 py-1">{trade.accountName || '—'}</TableCell>
                       )}
                       
-                      {isColumnVisible('openDate') && (
-                        <TableCell className="text-muted-foreground text-sm">
+                      {isColumnVisible('openDateTime') && (
+                        <TableCell className="text-muted-foreground text-xs px-2 py-1">
                           {metrics.openDate ? format(new Date(metrics.openDate), 'MMM dd, yyyy HH:mm') : '—'}
                         </TableCell>
                       )}
                       
-                      {isColumnVisible('closeDate') && (
-                        <TableCell className="text-muted-foreground text-sm">
-                          {metrics.closeDate ? format(new Date(metrics.closeDate), 'MMM dd, yyyy') : '—'}
-                        </TableCell>
-                      )}
-                      
-                      {isColumnVisible('closeTime') && (
-                        <TableCell className="text-muted-foreground text-sm">
-                          {metrics.closeDate ? format(new Date(metrics.closeDate), 'HH:mm') : '—'}
+                      {isColumnVisible('closeDateTime') && (
+                        <TableCell className="text-muted-foreground text-xs px-2 py-1">
+                          {metrics.closeDate ? format(new Date(metrics.closeDate), 'MMM dd, yyyy HH:mm') : '—'}
                         </TableCell>
                       )}
                       
                       {isColumnVisible('duration') && (
-                        <TableCell className="text-muted-foreground text-sm">
+                        <TableCell className="text-muted-foreground text-xs px-2 py-1">
                           {formatDuration(metrics.duration)}
                         </TableCell>
                       )}
                       
                       {isColumnVisible('avgEntry') && (
-                        <TableCell className="font-mono">
+                        <TableCell className="font-mono px-2 py-1">
                           {metrics.avgEntryPrice > 0 ? metrics.avgEntryPrice.toFixed(2) : '—'}
                         </TableCell>
                       )}
                       
                       {isColumnVisible('avgExit') && (
-                        <TableCell className="font-mono">
+                        <TableCell className="font-mono px-2 py-1">
                           {metrics.avgExitPrice > 0 ? metrics.avgExitPrice.toFixed(2) : '—'}
                         </TableCell>
                       )}
                       
                       {isColumnVisible('initialRisk') && (
-                        <TableCell className="font-mono">
-                          {trade.tradeRisk > 0 ? maskCurrency(trade.tradeRisk, formatCurrency) : '—'}
+                        <TableCell className="font-mono px-2 py-1">
+                          {trade.stopLoss !== undefined && trade.stopLoss !== null ? trade.stopLoss.toFixed(2) : '—'}
                         </TableCell>
                       )}
                       
                       {isColumnVisible('initialTarget') && (
-                        <TableCell className="font-mono">
-                          {trade.tradeTarget > 0 ? maskCurrency(trade.tradeTarget, formatCurrency) : '—'}
+                        <TableCell className="font-mono px-2 py-1">
+                          {trade.takeProfit !== undefined && trade.takeProfit !== null ? trade.takeProfit.toFixed(2) : '—'}
                         </TableCell>
                       )}
                       
                       {isColumnVisible('grossPnl') && (
                         <TableCell className={cn(
-                          "font-mono font-semibold",
+                          "font-mono font-semibold px-2 py-1",
                           isPrivacyMode ? "text-foreground" : metrics.grossPnl >= 0 ? "profit-text" : "loss-text"
                         )}>
                           {maskCurrency(metrics.grossPnl, formatCurrency)}
@@ -418,7 +461,7 @@ const Trades = () => {
                       
                       {isColumnVisible('netPnl') && (
                         <TableCell className={cn(
-                          "font-mono font-semibold",
+                          "font-mono font-semibold px-2 py-1",
                           isPrivacyMode ? "text-foreground" : metrics.netPnl >= 0 ? "profit-text" : "loss-text"
                         )}>
                           {maskCurrency(metrics.netPnl, formatCurrency)}
@@ -426,53 +469,10 @@ const Trades = () => {
                       )}
                       
                       {isColumnVisible('realizedRMultiple') && (
-                        <TableCell className="font-mono">
-                          {trade.savedRMultiple !== undefined && trade.savedRMultiple !== null 
-                            ? trade.savedRMultiple.toFixed(2) 
-                            : '—'}
+                        <TableCell className="font-mono px-2 py-1">
+                          {metrics.rFactor !== 0 ? metrics.rFactor.toFixed(2) : (trade.savedRMultiple !== undefined && trade.savedRMultiple !== null ? trade.savedRMultiple.toFixed(2) : '—')}
                         </TableCell>
                       )}
-                      
-                      <TableCell className="text-right sticky right-0 bg-card">
-                        <div className="flex items-center justify-end gap-1">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => openModal(trade)}
-                            className="h-8 w-8 text-muted-foreground hover:text-foreground"
-                          >
-                            <Pencil className="w-4 h-4" />
-                          </Button>
-                          <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-8 w-8 text-muted-foreground hover:text-loss"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                              <AlertDialogHeader>
-                                <AlertDialogTitle>Delete Trade</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                  Are you sure you want to delete this trade? This action cannot be undone.
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction
-                                  onClick={() => deleteTrade(trade.id)}
-                                  className="bg-loss hover:bg-loss/90"
-                                >
-                                  Delete
-                                </AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
-                        </div>
-                      </TableCell>
                     </TableRow>
                   );
                 })}
@@ -481,6 +481,12 @@ const Trades = () => {
           )}
         </div>
       </motion.div>
+
+      {/* Import Modal */}
+      <AccountImportModal 
+        open={importModalOpen} 
+        onOpenChange={setImportModalOpen} 
+      />
     </div>
   );
 };
