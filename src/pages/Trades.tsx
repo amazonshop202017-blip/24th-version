@@ -9,7 +9,9 @@ import {
   GitMerge,
   Copy,
   CheckSquare,
-  Square
+  Square,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
@@ -44,6 +46,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 const Trades = () => {
   const { filteredTrades, deleteTrades, stats } = useFilteredTrades();
@@ -55,6 +64,8 @@ const Trades = () => {
   const [selectedTrades, setSelectedTrades] = useState<Set<string>>(new Set());
   const [importModalOpen, setImportModalOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [tradesPerPage, setTradesPerPage] = useState(50);
 
   const sortedTrades = useMemo(() => {
     return [...filteredTrades].sort((a, b) => {
@@ -64,15 +75,63 @@ const Trades = () => {
     });
   }, [filteredTrades]);
 
-  const allSelected = sortedTrades.length > 0 && selectedTrades.size === sortedTrades.length;
+  // Pagination calculations
+  const totalTrades = sortedTrades.length;
+  const totalPages = Math.ceil(totalTrades / tradesPerPage);
+  const startIndex = (currentPage - 1) * tradesPerPage;
+  const endIndex = Math.min(startIndex + tradesPerPage, totalTrades);
+  
+  const paginatedTrades = useMemo(() => {
+    return sortedTrades.slice(startIndex, endIndex);
+  }, [sortedTrades, startIndex, endIndex]);
+
+  // Reset to page 1 if current page exceeds new page count
+  useMemo(() => {
+    if (currentPage > totalPages && totalPages > 0) {
+      setCurrentPage(1);
+    }
+  }, [totalPages, currentPage]);
+
+  const allSelected = paginatedTrades.length > 0 && paginatedTrades.every(t => selectedTrades.has(t.id));
   const someSelected = selectedTrades.size > 0;
 
   const handleSelectAll = () => {
-    if (someSelected) {
-      setSelectedTrades(new Set());
+    if (allSelected) {
+      // Deselect all on current page
+      setSelectedTrades(prev => {
+        const next = new Set(prev);
+        paginatedTrades.forEach(t => next.delete(t.id));
+        return next;
+      });
     } else {
-      setSelectedTrades(new Set(sortedTrades.map(t => t.id)));
+      // Select all on current page
+      setSelectedTrades(prev => {
+        const next = new Set(prev);
+        paginatedTrades.forEach(t => next.add(t.id));
+        return next;
+      });
     }
+  };
+
+  const handleTradesPerPageChange = (value: string) => {
+    setTradesPerPage(Number(value));
+    setCurrentPage(1);
+  };
+
+  const getPageNumbers = () => {
+    const pages: (number | 'ellipsis')[] = [];
+    if (totalPages <= 7) {
+      for (let i = 1; i <= totalPages; i++) pages.push(i);
+    } else {
+      if (currentPage <= 3) {
+        pages.push(1, 2, 3, 4, 'ellipsis', totalPages);
+      } else if (currentPage >= totalPages - 2) {
+        pages.push(1, 'ellipsis', totalPages - 3, totalPages - 2, totalPages - 1, totalPages);
+      } else {
+        pages.push(1, 'ellipsis', currentPage - 1, currentPage, currentPage + 1, 'ellipsis', totalPages);
+      }
+    }
+    return pages;
   };
 
   const handleSelectTrade = (tradeId: string, e: React.MouseEvent) => {
@@ -312,7 +371,7 @@ const Trades = () => {
 
         {/* Scrollable Table Container */}
         <div className="flex-1 overflow-auto min-h-0">
-          {sortedTrades.length === 0 ? (
+          {paginatedTrades.length === 0 ? (
             <div className="text-center py-16 text-muted-foreground">
               <p className="text-lg">No trades recorded yet</p>
               <p className="text-sm mt-1">Click "Enter Trade" or the + button to add your first trade</p>
@@ -325,7 +384,7 @@ const Trades = () => {
                     <Checkbox
                       checked={allSelected}
                       onCheckedChange={handleSelectAll}
-                      aria-label="Select all trades"
+                      aria-label="Select all trades on this page"
                     />
                   </TableHead>
                   {isColumnVisible('symbol') && <TableHead className="px-2">Symbol</TableHead>}
@@ -347,7 +406,7 @@ const Trades = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {sortedTrades.map((trade) => {
+                {paginatedTrades.map((trade) => {
                   const metrics = calculateTradeMetrics(trade);
                   const isSelected = selectedTrades.has(trade.id);
                   
@@ -497,6 +556,75 @@ const Trades = () => {
             </Table>
           )}
         </div>
+
+        {/* Pagination Footer */}
+        {totalTrades > 0 && (
+          <div className="flex items-center justify-between px-4 py-3 border-t border-border flex-shrink-0">
+            {/* Left side: Trades per page & range */}
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground">Trades per page:</span>
+                <Select value={String(tradesPerPage)} onValueChange={handleTradesPerPageChange}>
+                  <SelectTrigger className="w-[70px] h-8">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="25">25</SelectItem>
+                    <SelectItem value="50">50</SelectItem>
+                    <SelectItem value="75">75</SelectItem>
+                    <SelectItem value="100">100</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <span className="text-sm text-muted-foreground">
+                {startIndex + 1} – {endIndex} of {totalTrades} trades
+              </span>
+            </div>
+
+            {/* Right side: Pagination controls */}
+            <div className="flex items-center gap-1">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              
+              {getPageNumbers().map((page, idx) => (
+                page === 'ellipsis' ? (
+                  <span key={`ellipsis-${idx}`} className="px-2 text-muted-foreground">...</span>
+                ) : (
+                  <Button
+                    key={page}
+                    variant={currentPage === page ? "default" : "ghost"}
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={() => setCurrentPage(page)}
+                  >
+                    {page}
+                  </Button>
+                )
+              ))}
+
+              <span className="text-sm text-muted-foreground ml-2">
+                of {totalPages} pages
+              </span>
+              
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        )}
       </motion.div>
 
       {/* Import Modal */}
