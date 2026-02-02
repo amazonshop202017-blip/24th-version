@@ -96,7 +96,15 @@ const Trades = () => {
   };
 
   const handleDeleteSelected = () => {
-    selectedTrades.forEach(id => deleteTrade(id));
+    // Create a snapshot of all selected trade IDs to ensure all are deleted
+    const idsToDelete = Array.from(selectedTrades);
+    
+    // Delete each selected trade explicitly
+    idsToDelete.forEach(id => {
+      deleteTrade(id);
+    });
+    
+    // Clear selection and close dialog after all deletions
     setSelectedTrades(new Set());
     setDeleteDialogOpen(false);
   };
