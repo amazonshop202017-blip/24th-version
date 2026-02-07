@@ -132,7 +132,7 @@ export const ChartDisplayDropdown = ({
           variant="outline"
           size="sm"
           className={cn(
-            'h-8 w-[140px] justify-between bg-background border-border text-xs font-normal',
+            'h-8 w-[180px] justify-between bg-background border-border text-xs font-normal',
             className
           )}
         >
@@ -142,7 +142,7 @@ export const ChartDisplayDropdown = ({
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="end"
-        className="w-[220px] max-h-[320px] overflow-y-auto bg-popover border-border p-1 z-50"
+        className="w-[260px] max-h-[320px] overflow-y-auto bg-popover border-border p-1 z-50"
       >
         {displayGroups.map((group) => {
           const isExpanded = expandedGroups.has(group.name);
