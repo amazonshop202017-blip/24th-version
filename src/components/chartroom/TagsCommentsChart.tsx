@@ -44,6 +44,12 @@ interface GroupedData {
   shortWinrate: number;
   longTradeCount: number;
   shortTradeCount: number;
+  avgWin: number;
+  avgLoss: number;
+  largestWin: number;
+  largestLoss: number;
+  winPnlSum: number;
+  lossPnlSum: number;
 }
 
 interface TagsCommentsChartProps {
@@ -113,6 +119,10 @@ export const TagsCommentsChart = ({
       shortLossCount: number;
       longTradeCount: number;
       shortTradeCount: number;
+      winPnlSum: number;
+      lossPnlSum: number;
+      largestWin: number;
+      largestLoss: number;
     }>();
 
     if (selectionType === 'tradeComments') {
@@ -130,6 +140,7 @@ export const TagsCommentsChart = ({
         const isShort = trade.side === 'SHORT';
         const isWin = outcome === 'win';
         const isLoss = outcome === 'loss';
+        const pnl = metrics.netPnl;
         
         const existing = dataMap.get(commentValue) || {
           totalPnl: 0,
@@ -145,10 +156,14 @@ export const TagsCommentsChart = ({
           shortLossCount: 0,
           longTradeCount: 0,
           shortTradeCount: 0,
+          winPnlSum: 0,
+          lossPnlSum: 0,
+          largestWin: 0,
+          largestLoss: 0,
         };
 
         dataMap.set(commentValue, {
-          totalPnl: existing.totalPnl + metrics.netPnl,
+          totalPnl: existing.totalPnl + pnl,
           tradeCount: existing.tradeCount + 1,
           winCount: existing.winCount + (isWin ? 1 : 0),
           lossCount: existing.lossCount + (isLoss ? 1 : 0),
@@ -161,6 +176,10 @@ export const TagsCommentsChart = ({
           shortLossCount: existing.shortLossCount + (isShort && isLoss ? 1 : 0),
           longTradeCount: existing.longTradeCount + (isLong ? 1 : 0),
           shortTradeCount: existing.shortTradeCount + (isShort ? 1 : 0),
+          winPnlSum: existing.winPnlSum + (isWin ? pnl : 0),
+          lossPnlSum: existing.lossPnlSum + (isLoss ? pnl : 0),
+          largestWin: isWin ? Math.max(existing.largestWin, pnl) : existing.largestWin,
+          largestLoss: isLoss ? Math.min(existing.largestLoss, pnl) : existing.largestLoss,
         });
       });
     } else {
@@ -180,6 +199,7 @@ export const TagsCommentsChart = ({
 
         const tradeTagIds = trade.tags || [];
         const matchedTagIds = tradeTagIds.filter(tagId => targetTagIds.includes(tagId));
+        const pnl = metrics.netPnl;
         
         if (matchedTagIds.length === 0 && selectedTagIds.length === 0) {
           const existing = dataMap.get('Untagged') || {
@@ -196,9 +216,13 @@ export const TagsCommentsChart = ({
             shortLossCount: 0,
             longTradeCount: 0,
             shortTradeCount: 0,
+            winPnlSum: 0,
+            lossPnlSum: 0,
+            largestWin: 0,
+            largestLoss: 0,
           };
           dataMap.set('Untagged', {
-            totalPnl: existing.totalPnl + metrics.netPnl,
+            totalPnl: existing.totalPnl + pnl,
             tradeCount: existing.tradeCount + 1,
             winCount: existing.winCount + (isWin ? 1 : 0),
             lossCount: existing.lossCount + (isLoss ? 1 : 0),
@@ -211,6 +235,10 @@ export const TagsCommentsChart = ({
             shortLossCount: existing.shortLossCount + (isShort && isLoss ? 1 : 0),
             longTradeCount: existing.longTradeCount + (isLong ? 1 : 0),
             shortTradeCount: existing.shortTradeCount + (isShort ? 1 : 0),
+            winPnlSum: existing.winPnlSum + (isWin ? pnl : 0),
+            lossPnlSum: existing.lossPnlSum + (isLoss ? pnl : 0),
+            largestWin: isWin ? Math.max(existing.largestWin, pnl) : existing.largestWin,
+            largestLoss: isLoss ? Math.min(existing.largestLoss, pnl) : existing.largestLoss,
           });
         } else {
           matchedTagIds.forEach(tagId => {
@@ -229,9 +257,13 @@ export const TagsCommentsChart = ({
               shortLossCount: 0,
               longTradeCount: 0,
               shortTradeCount: 0,
+              winPnlSum: 0,
+              lossPnlSum: 0,
+              largestWin: 0,
+              largestLoss: 0,
             };
             dataMap.set(tagName, {
-              totalPnl: existing.totalPnl + metrics.netPnl,
+              totalPnl: existing.totalPnl + pnl,
               tradeCount: existing.tradeCount + 1,
               winCount: existing.winCount + (isWin ? 1 : 0),
               lossCount: existing.lossCount + (isLoss ? 1 : 0),
@@ -244,6 +276,10 @@ export const TagsCommentsChart = ({
               shortLossCount: existing.shortLossCount + (isShort && isLoss ? 1 : 0),
               longTradeCount: existing.longTradeCount + (isLong ? 1 : 0),
               shortTradeCount: existing.shortTradeCount + (isShort ? 1 : 0),
+              winPnlSum: existing.winPnlSum + (isWin ? pnl : 0),
+              lossPnlSum: existing.lossPnlSum + (isLoss ? pnl : 0),
+              largestWin: isWin ? Math.max(existing.largestWin, pnl) : existing.largestWin,
+              largestLoss: isLoss ? Math.min(existing.largestLoss, pnl) : existing.largestLoss,
             });
           });
         }
@@ -268,6 +304,12 @@ export const TagsCommentsChart = ({
         // Short Win % = Short Wins / (Short Wins + Short Losses)
         const shortWinsAndLosses = data.shortWinCount + data.shortLossCount;
         const shortWinrate = shortWinsAndLosses > 0 ? (data.shortWinCount / shortWinsAndLosses) * 100 : 0;
+        
+        // Profitability metrics
+        const avgWin = data.winCount > 0 ? data.winPnlSum / data.winCount : 0;
+        const avgLoss = data.lossCount > 0 ? data.lossPnlSum / data.lossCount : 0;
+        const largestWin = data.largestWin;
+        const largestLoss = data.largestLoss;
 
         let displayValue: number;
         switch (displayType) {
@@ -301,6 +343,18 @@ export const TagsCommentsChart = ({
           case 'tradecount_short':
             displayValue = data.shortTradeCount;
             break;
+          case 'avg_win':
+            displayValue = avgWin;
+            break;
+          case 'avg_loss':
+            displayValue = avgLoss;
+            break;
+          case 'largest_win':
+            displayValue = largestWin;
+            break;
+          case 'largest_loss':
+            displayValue = largestLoss;
+            break;
           default:
             displayValue = data.totalPnl;
         }
@@ -326,6 +380,12 @@ export const TagsCommentsChart = ({
           shortWinrate,
           longTradeCount: data.longTradeCount,
           shortTradeCount: data.shortTradeCount,
+          avgWin,
+          avgLoss,
+          largestWin,
+          largestLoss,
+          winPnlSum: data.winPnlSum,
+          lossPnlSum: data.lossPnlSum,
         };
       })
       .sort((a, b) => b.displayValue - a.displayValue);
@@ -443,6 +503,62 @@ export const TagsCommentsChart = ({
       );
     }
 
+    if (displayType === 'avg_win') {
+      return (
+        <div className="bg-popover border border-border rounded-lg p-3 shadow-xl text-sm">
+          <p className="font-medium text-foreground mb-2">{label}</p>
+          <div className="space-y-1 text-muted-foreground">
+            <p>Avg Win: <span className={data.avgWin >= 0 ? 'text-profit' : 'text-foreground'}>
+              {isPrivacyMode ? '**' : `${currencyConfig.symbol}${data.avgWin.toFixed(2)}`}
+            </span></p>
+            <p>Winning Trades: {data.winCount}</p>
+          </div>
+        </div>
+      );
+    }
+
+    if (displayType === 'avg_loss') {
+      return (
+        <div className="bg-popover border border-border rounded-lg p-3 shadow-xl text-sm">
+          <p className="font-medium text-foreground mb-2">{label}</p>
+          <div className="space-y-1 text-muted-foreground">
+            <p>Avg Loss: <span className={data.avgLoss < 0 ? 'text-loss' : 'text-foreground'}>
+              {isPrivacyMode ? '**' : `${data.avgLoss < 0 ? '-' : ''}${currencyConfig.symbol}${Math.abs(data.avgLoss).toFixed(2)}`}
+            </span></p>
+            <p>Losing Trades: {data.lossCount}</p>
+          </div>
+        </div>
+      );
+    }
+
+    if (displayType === 'largest_win') {
+      return (
+        <div className="bg-popover border border-border rounded-lg p-3 shadow-xl text-sm">
+          <p className="font-medium text-foreground mb-2">{label}</p>
+          <div className="space-y-1 text-muted-foreground">
+            <p>Largest Win: <span className={data.largestWin >= 0 ? 'text-profit' : 'text-foreground'}>
+              {isPrivacyMode ? '**' : `${currencyConfig.symbol}${data.largestWin.toFixed(2)}`}
+            </span></p>
+            <p>Winning Trades: {data.winCount}</p>
+          </div>
+        </div>
+      );
+    }
+
+    if (displayType === 'largest_loss') {
+      return (
+        <div className="bg-popover border border-border rounded-lg p-3 shadow-xl text-sm">
+          <p className="font-medium text-foreground mb-2">{label}</p>
+          <div className="space-y-1 text-muted-foreground">
+            <p>Largest Loss: <span className={data.largestLoss < 0 ? 'text-loss' : 'text-foreground'}>
+              {isPrivacyMode ? '**' : `${data.largestLoss < 0 ? '-' : ''}${currencyConfig.symbol}${Math.abs(data.largestLoss).toFixed(2)}`}
+            </span></p>
+            <p>Losing Trades: {data.lossCount}</p>
+          </div>
+        </div>
+      );
+    }
+
     if (displayType === 'dollar') {
       const pnlValue = isPrivacyMode ? '**' : `${data.totalPnl >= 0 ? '+' : ''}${currencyConfig.symbol}${Math.abs(data.totalPnl).toFixed(2)}`;
       return (
@@ -539,14 +655,13 @@ export const TagsCommentsChart = ({
                   tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 11 }}
                   tickFormatter={(value) => {
                     // Mask $ and % values in privacy mode
-                    if (isPrivacyMode && (displayType === 'dollar' || displayType === 'percent')) {
+                    if (isPrivacyMode && (displayType === 'dollar' || displayType === 'percent' || displayType === 'avg_win' || displayType === 'avg_loss' || displayType === 'largest_win' || displayType === 'largest_loss')) {
                       return '**';
                     }
                     if (displayType === 'percent' || displayType === 'winrate' || displayType === 'long_winrate' || displayType === 'short_winrate') return `${value.toFixed(0)}%`;
                     if (displayType === 'tradecount' || displayType === 'tradecount_long' || displayType === 'tradecount_short') return value.toString();
                     if (displayType === 'privacy') return '•••';
                     if (displayType === 'avg_hold_time' || displayType === 'longest_duration') return formatDurationTick(value);
-                    return `${currencyConfig.symbol}${Math.abs(value) >= 1000 ? `${(value / 1000).toFixed(0)}k` : value.toFixed(0)}`;
                     return `${currencyConfig.symbol}${Math.abs(value) >= 1000 ? `${(value / 1000).toFixed(0)}k` : value.toFixed(0)}`;
                   }}
                   width={50}

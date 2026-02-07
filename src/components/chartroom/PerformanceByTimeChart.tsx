@@ -51,6 +51,12 @@ interface TimeData {
   shortWinrate: number;
   longTradeCount: number;
   shortTradeCount: number;
+  avgWin: number;
+  avgLoss: number;
+  largestWin: number;
+  largestLoss: number;
+  winPnlSum: number;
+  lossPnlSum: number;
 }
 
 interface PerformanceByTimeChartProps {
@@ -203,6 +209,10 @@ export const PerformanceByTimeChart = ({
       shortLossCount: number;
       longTradeCount: number;
       shortTradeCount: number;
+      winPnlSum: number;
+      lossPnlSum: number;
+      largestWin: number;
+      largestLoss: number;
     }>();
 
     closedTrades.forEach(trade => {
@@ -221,6 +231,7 @@ export const PerformanceByTimeChart = ({
       const isShort = trade.side === 'SHORT';
       const isWin = outcome === 'win';
       const isLoss = outcome === 'loss';
+      const pnl = metrics.netPnl;
       
       const existing = timeMap.get(bucket.label) || { 
         sortOrder: bucket.sortOrder,
@@ -237,11 +248,15 @@ export const PerformanceByTimeChart = ({
         shortLossCount: 0,
         longTradeCount: 0,
         shortTradeCount: 0,
+        winPnlSum: 0,
+        lossPnlSum: 0,
+        largestWin: 0,
+        largestLoss: 0,
       };
       
       timeMap.set(bucket.label, {
         sortOrder: bucket.sortOrder,
-        totalPnl: existing.totalPnl + metrics.netPnl,
+        totalPnl: existing.totalPnl + pnl,
         tradeCount: existing.tradeCount + 1,
         winCount: existing.winCount + (isWin ? 1 : 0),
         lossCount: existing.lossCount + (isLoss ? 1 : 0),
@@ -254,6 +269,10 @@ export const PerformanceByTimeChart = ({
         shortLossCount: existing.shortLossCount + (isShort && isLoss ? 1 : 0),
         longTradeCount: existing.longTradeCount + (isLong ? 1 : 0),
         shortTradeCount: existing.shortTradeCount + (isShort ? 1 : 0),
+        winPnlSum: existing.winPnlSum + (isWin ? pnl : 0),
+        lossPnlSum: existing.lossPnlSum + (isLoss ? pnl : 0),
+        largestWin: isWin ? Math.max(existing.largestWin, pnl) : existing.largestWin,
+        largestLoss: isLoss ? Math.min(existing.largestLoss, pnl) : existing.largestLoss,
       });
     });
 
@@ -277,6 +296,12 @@ export const PerformanceByTimeChart = ({
         // Short Win % = Short Wins / (Short Wins + Short Losses)
         const shortWinsAndLosses = data.shortWinCount + data.shortLossCount;
         const shortWinrate = shortWinsAndLosses > 0 ? (data.shortWinCount / shortWinsAndLosses) * 100 : 0;
+        
+        // Profitability metrics
+        const avgWin = data.winCount > 0 ? data.winPnlSum / data.winCount : 0;
+        const avgLoss = data.lossCount > 0 ? data.lossPnlSum / data.lossCount : 0;
+        const largestWin = data.largestWin;
+        const largestLoss = data.largestLoss;
         
         let displayValue: number;
         
@@ -308,6 +333,18 @@ export const PerformanceByTimeChart = ({
           case 'tradecount_short':
             displayValue = data.shortTradeCount;
             break;
+          case 'avg_win':
+            displayValue = avgWin;
+            break;
+          case 'avg_loss':
+            displayValue = avgLoss;
+            break;
+          case 'largest_win':
+            displayValue = largestWin;
+            break;
+          case 'largest_loss':
+            displayValue = largestLoss;
+            break;
           case 'dollar':
           default:
             displayValue = data.totalPnl;
@@ -335,6 +372,12 @@ export const PerformanceByTimeChart = ({
           shortWinrate,
           longTradeCount: data.longTradeCount,
           shortTradeCount: data.shortTradeCount,
+          avgWin,
+          avgLoss,
+          largestWin,
+          largestLoss,
+          winPnlSum: data.winPnlSum,
+          lossPnlSum: data.lossPnlSum,
         };
       })
       .sort((a, b) => a.sortOrder - b.sortOrder);
@@ -456,10 +499,10 @@ export const PerformanceByTimeChart = ({
                   tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 10 }}
                   tickFormatter={(value) => {
                     // Mask $ and % values in privacy mode
-                    if (isPrivacyMode && (displayType === 'dollar' || displayType === 'percent')) {
+                    if (isPrivacyMode && (displayType === 'dollar' || displayType === 'percent' || displayType === 'avg_win' || displayType === 'avg_loss' || displayType === 'largest_win' || displayType === 'largest_loss')) {
                       return '**';
                     }
-                    if (displayType === 'dollar') {
+                    if (displayType === 'dollar' || displayType === 'avg_win' || displayType === 'avg_loss' || displayType === 'largest_win' || displayType === 'largest_loss') {
                       return `${currencyConfig.symbol}${value.toFixed(0)}`;
                     }
                     if (displayType === 'tradecount' || displayType === 'tradecount_long' || displayType === 'tradecount_short') {
@@ -626,6 +669,70 @@ export const PerformanceByTimeChart = ({
                             </p>
                             <p className="text-muted-foreground">
                               Direction: Short
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    }
+                    
+                    if (displayType === 'avg_win') {
+                      return (
+                        <div className="bg-card border border-border rounded-lg p-3 shadow-lg z-50">
+                          <p className="text-foreground font-medium mb-2">{data.label}</p>
+                          <div className="space-y-1 text-sm">
+                            <p className={data.avgWin >= 0 ? 'text-profit' : 'text-foreground'}>
+                              Avg Win: {isPrivacyMode ? '**' : `${currencyConfig.symbol}${data.avgWin.toFixed(2)}`}
+                            </p>
+                            <p className="text-muted-foreground">
+                              Winning Trades: {data.winCount}
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    }
+                    
+                    if (displayType === 'avg_loss') {
+                      return (
+                        <div className="bg-card border border-border rounded-lg p-3 shadow-lg z-50">
+                          <p className="text-foreground font-medium mb-2">{data.label}</p>
+                          <div className="space-y-1 text-sm">
+                            <p className={data.avgLoss < 0 ? 'text-loss' : 'text-foreground'}>
+                              Avg Loss: {isPrivacyMode ? '**' : `${data.avgLoss < 0 ? '-' : ''}${currencyConfig.symbol}${Math.abs(data.avgLoss).toFixed(2)}`}
+                            </p>
+                            <p className="text-muted-foreground">
+                              Losing Trades: {data.lossCount}
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    }
+                    
+                    if (displayType === 'largest_win') {
+                      return (
+                        <div className="bg-card border border-border rounded-lg p-3 shadow-lg z-50">
+                          <p className="text-foreground font-medium mb-2">{data.label}</p>
+                          <div className="space-y-1 text-sm">
+                            <p className={data.largestWin >= 0 ? 'text-profit' : 'text-foreground'}>
+                              Largest Win: {isPrivacyMode ? '**' : `${currencyConfig.symbol}${data.largestWin.toFixed(2)}`}
+                            </p>
+                            <p className="text-muted-foreground">
+                              Winning Trades: {data.winCount}
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    }
+                    
+                    if (displayType === 'largest_loss') {
+                      return (
+                        <div className="bg-card border border-border rounded-lg p-3 shadow-lg z-50">
+                          <p className="text-foreground font-medium mb-2">{data.label}</p>
+                          <div className="space-y-1 text-sm">
+                            <p className={data.largestLoss < 0 ? 'text-loss' : 'text-foreground'}>
+                              Largest Loss: {isPrivacyMode ? '**' : `${data.largestLoss < 0 ? '-' : ''}${currencyConfig.symbol}${Math.abs(data.largestLoss).toFixed(2)}`}
+                            </p>
+                            <p className="text-muted-foreground">
+                              Losing Trades: {data.lossCount}
                             </p>
                           </div>
                         </div>
