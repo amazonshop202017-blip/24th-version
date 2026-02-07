@@ -39,6 +39,8 @@ interface SetupData {
   shortWinCount: number;
   shortLossCount: number;
   shortWinrate: number;
+  longTradeCount: number;
+  shortTradeCount: number;
 }
 
 interface SetupPerformanceChartProps {
@@ -109,6 +111,8 @@ export const SetupPerformanceChart = ({
       longLossCount: number;
       shortWinCount: number;
       shortLossCount: number;
+      longTradeCount: number;
+      shortTradeCount: number;
     }>();
 
     // Group trades by their strategyId (setup)
@@ -137,6 +141,8 @@ export const SetupPerformanceChart = ({
         longLossCount: 0,
         shortWinCount: 0,
         shortLossCount: 0,
+        longTradeCount: 0,
+        shortTradeCount: 0,
       };
       
       // Use global classifyTradeOutcome for consistent classification
@@ -159,6 +165,8 @@ export const SetupPerformanceChart = ({
         longLossCount: existing.longLossCount + (isLong && isLoss ? 1 : 0),
         shortWinCount: existing.shortWinCount + (isShort && isWin ? 1 : 0),
         shortLossCount: existing.shortLossCount + (isShort && isLoss ? 1 : 0),
+        longTradeCount: existing.longTradeCount + (isLong ? 1 : 0),
+        shortTradeCount: existing.shortTradeCount + (isShort ? 1 : 0),
       });
     });
 
@@ -211,6 +219,12 @@ export const SetupPerformanceChart = ({
           case 'short_winrate':
             displayValue = shortWinrate;
             break;
+          case 'tradecount_long':
+            displayValue = data.longTradeCount;
+            break;
+          case 'tradecount_short':
+            displayValue = data.shortTradeCount;
+            break;
           default:
             displayValue = data.totalPnl;
         }
@@ -234,6 +248,8 @@ export const SetupPerformanceChart = ({
           shortWinCount: data.shortWinCount,
           shortLossCount: data.shortLossCount,
           shortWinrate,
+          longTradeCount: data.longTradeCount,
+          shortTradeCount: data.shortTradeCount,
         };
       })
       // Sort by value descending (best first)
@@ -315,6 +331,8 @@ export const SetupPerformanceChart = ({
                       case 'short_winrate':
                         return `${value.toFixed(0)}%`;
                       case 'tradecount':
+                      case 'tradecount_long':
+                      case 'tradecount_short':
                         return `${Math.round(value)}`;
                       case 'avg_hold_time':
                       case 'longest_duration':
@@ -453,6 +471,38 @@ export const SetupPerformanceChart = ({
                       );
                     }
                     
+                    if (displayType === 'tradecount_long') {
+                      return (
+                        <div className="bg-card border border-border rounded-lg p-3 shadow-lg">
+                          <p className="text-foreground font-medium mb-2">{data.setup}</p>
+                          <div className="space-y-1 text-sm">
+                            <p className="text-foreground">
+                              Trade Count (Long): {data.longTradeCount}
+                            </p>
+                            <p className="text-muted-foreground">
+                              Direction: Long
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    }
+                    
+                    if (displayType === 'tradecount_short') {
+                      return (
+                        <div className="bg-card border border-border rounded-lg p-3 shadow-lg">
+                          <p className="text-foreground font-medium mb-2">{data.setup}</p>
+                          <div className="space-y-1 text-sm">
+                            <p className="text-foreground">
+                              Trade Count (Short): {data.shortTradeCount}
+                            </p>
+                            <p className="text-muted-foreground">
+                              Direction: Short
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    }
+                    
                     // Dollar mode: show Net PNL + counts
                     if (displayType === 'dollar') {
                       return (
@@ -538,7 +588,7 @@ export const SetupPerformanceChart = ({
                 >
                   {setupData.map((entry, index) => {
                     let fillColor: string;
-                    if (displayType === 'winrate' || displayType === 'tradecount' || displayType === 'avg_hold_time' || displayType === 'longest_duration' || displayType === 'long_winrate' || displayType === 'short_winrate') {
+                    if (displayType === 'winrate' || displayType === 'tradecount' || displayType === 'avg_hold_time' || displayType === 'longest_duration' || displayType === 'long_winrate' || displayType === 'short_winrate' || displayType === 'tradecount_long' || displayType === 'tradecount_short') {
                       fillColor = 'hsl(var(--primary))';
                     } else {
                       fillColor = entry.displayValue >= 0 ? 'hsl(var(--profit))' : 'hsl(var(--loss))';

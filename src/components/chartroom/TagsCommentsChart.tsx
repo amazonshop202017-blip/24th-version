@@ -42,6 +42,8 @@ interface GroupedData {
   shortWinCount: number;
   shortLossCount: number;
   shortWinrate: number;
+  longTradeCount: number;
+  shortTradeCount: number;
 }
 
 interface TagsCommentsChartProps {
@@ -109,6 +111,8 @@ export const TagsCommentsChart = ({
       longLossCount: number;
       shortWinCount: number;
       shortLossCount: number;
+      longTradeCount: number;
+      shortTradeCount: number;
     }>();
 
     if (selectionType === 'tradeComments') {
@@ -139,6 +143,8 @@ export const TagsCommentsChart = ({
           longLossCount: 0,
           shortWinCount: 0,
           shortLossCount: 0,
+          longTradeCount: 0,
+          shortTradeCount: 0,
         };
 
         dataMap.set(commentValue, {
@@ -153,6 +159,8 @@ export const TagsCommentsChart = ({
           longLossCount: existing.longLossCount + (isLong && isLoss ? 1 : 0),
           shortWinCount: existing.shortWinCount + (isShort && isWin ? 1 : 0),
           shortLossCount: existing.shortLossCount + (isShort && isLoss ? 1 : 0),
+          longTradeCount: existing.longTradeCount + (isLong ? 1 : 0),
+          shortTradeCount: existing.shortTradeCount + (isShort ? 1 : 0),
         });
       });
     } else {
@@ -186,6 +194,8 @@ export const TagsCommentsChart = ({
             longLossCount: 0,
             shortWinCount: 0,
             shortLossCount: 0,
+            longTradeCount: 0,
+            shortTradeCount: 0,
           };
           dataMap.set('Untagged', {
             totalPnl: existing.totalPnl + metrics.netPnl,
@@ -199,6 +209,8 @@ export const TagsCommentsChart = ({
             longLossCount: existing.longLossCount + (isLong && isLoss ? 1 : 0),
             shortWinCount: existing.shortWinCount + (isShort && isWin ? 1 : 0),
             shortLossCount: existing.shortLossCount + (isShort && isLoss ? 1 : 0),
+            longTradeCount: existing.longTradeCount + (isLong ? 1 : 0),
+            shortTradeCount: existing.shortTradeCount + (isShort ? 1 : 0),
           });
         } else {
           matchedTagIds.forEach(tagId => {
@@ -215,6 +227,8 @@ export const TagsCommentsChart = ({
               longLossCount: 0,
               shortWinCount: 0,
               shortLossCount: 0,
+              longTradeCount: 0,
+              shortTradeCount: 0,
             };
             dataMap.set(tagName, {
               totalPnl: existing.totalPnl + metrics.netPnl,
@@ -228,6 +242,8 @@ export const TagsCommentsChart = ({
               longLossCount: existing.longLossCount + (isLong && isLoss ? 1 : 0),
               shortWinCount: existing.shortWinCount + (isShort && isWin ? 1 : 0),
               shortLossCount: existing.shortLossCount + (isShort && isLoss ? 1 : 0),
+              longTradeCount: existing.longTradeCount + (isLong ? 1 : 0),
+              shortTradeCount: existing.shortTradeCount + (isShort ? 1 : 0),
             });
           });
         }
@@ -279,6 +295,12 @@ export const TagsCommentsChart = ({
           case 'short_winrate':
             displayValue = shortWinrate;
             break;
+          case 'tradecount_long':
+            displayValue = data.longTradeCount;
+            break;
+          case 'tradecount_short':
+            displayValue = data.shortTradeCount;
+            break;
           default:
             displayValue = data.totalPnl;
         }
@@ -302,6 +324,8 @@ export const TagsCommentsChart = ({
           shortWinCount: data.shortWinCount,
           shortLossCount: data.shortLossCount,
           shortWinrate,
+          longTradeCount: data.longTradeCount,
+          shortTradeCount: data.shortTradeCount,
         };
       })
       .sort((a, b) => b.displayValue - a.displayValue);
@@ -390,6 +414,30 @@ export const TagsCommentsChart = ({
             <p>Short Wins: {data.shortWinCount}</p>
             <p>Short Losses: {data.shortLossCount}</p>
             <p>Total Short Trades: {shortTotal}</p>
+          </div>
+        </div>
+      );
+    }
+
+    if (displayType === 'tradecount_long') {
+      return (
+        <div className="bg-popover border border-border rounded-lg p-3 shadow-xl text-sm">
+          <p className="font-medium text-foreground mb-2">{label}</p>
+          <div className="space-y-1 text-muted-foreground">
+            <p>Trade Count (Long): <span className="text-foreground">{data.longTradeCount}</span></p>
+            <p>Direction: Long</p>
+          </div>
+        </div>
+      );
+    }
+
+    if (displayType === 'tradecount_short') {
+      return (
+        <div className="bg-popover border border-border rounded-lg p-3 shadow-xl text-sm">
+          <p className="font-medium text-foreground mb-2">{label}</p>
+          <div className="space-y-1 text-muted-foreground">
+            <p>Trade Count (Short): <span className="text-foreground">{data.shortTradeCount}</span></p>
+            <p>Direction: Short</p>
           </div>
         </div>
       );
@@ -495,9 +543,10 @@ export const TagsCommentsChart = ({
                       return '**';
                     }
                     if (displayType === 'percent' || displayType === 'winrate' || displayType === 'long_winrate' || displayType === 'short_winrate') return `${value.toFixed(0)}%`;
-                    if (displayType === 'tradecount') return value.toString();
+                    if (displayType === 'tradecount' || displayType === 'tradecount_long' || displayType === 'tradecount_short') return value.toString();
                     if (displayType === 'privacy') return '•••';
                     if (displayType === 'avg_hold_time' || displayType === 'longest_duration') return formatDurationTick(value);
+                    return `${currencyConfig.symbol}${Math.abs(value) >= 1000 ? `${(value / 1000).toFixed(0)}k` : value.toFixed(0)}`;
                     return `${currencyConfig.symbol}${Math.abs(value) >= 1000 ? `${(value / 1000).toFixed(0)}k` : value.toFixed(0)}`;
                   }}
                   width={50}
@@ -509,7 +558,7 @@ export const TagsCommentsChart = ({
                     <Cell 
                       key={`cell-${index}`}
                       fill={
-                        displayType === 'winrate' || displayType === 'tradecount' || displayType === 'avg_hold_time' || displayType === 'longest_duration' || displayType === 'long_winrate' || displayType === 'short_winrate'
+                        displayType === 'winrate' || displayType === 'tradecount' || displayType === 'avg_hold_time' || displayType === 'longest_duration' || displayType === 'long_winrate' || displayType === 'short_winrate' || displayType === 'tradecount_long' || displayType === 'tradecount_short'
                           ? 'hsl(var(--primary))'
                           : entry.displayValue >= 0
                             ? 'hsl(142.1 76.2% 36.3%)'

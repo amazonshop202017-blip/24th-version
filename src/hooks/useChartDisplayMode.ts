@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useGlobalFilters, DisplayMode } from '@/contexts/GlobalFiltersContext';
 
 // Extended chart display type including new options
-export type ChartDisplayType = 'dollar' | 'percent' | 'winrate' | 'tradecount' | 'tickpip' | 'privacy' | 'avg_hold_time' | 'longest_duration' | 'long_winrate' | 'short_winrate';
+export type ChartDisplayType = 'dollar' | 'percent' | 'winrate' | 'tradecount' | 'tickpip' | 'privacy' | 'avg_hold_time' | 'longest_duration' | 'long_winrate' | 'short_winrate' | 'tradecount_long' | 'tradecount_short';
 
 /**
  * Maps the global DisplayMode to a chart-specific DisplayType.
@@ -97,6 +97,10 @@ export const getDisplayLabel = (displayType: ChartDisplayType): string => {
       return 'Long Win %';
     case 'short_winrate':
       return 'Short Win %';
+    case 'tradecount_long':
+      return 'Trade Count (Long)';
+    case 'tradecount_short':
+      return 'Trade Count (Short)';
     default:
       return 'Return ($)';
   }

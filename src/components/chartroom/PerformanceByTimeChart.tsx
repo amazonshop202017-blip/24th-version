@@ -49,6 +49,8 @@ interface TimeData {
   shortWinCount: number;
   shortLossCount: number;
   shortWinrate: number;
+  longTradeCount: number;
+  shortTradeCount: number;
 }
 
 interface PerformanceByTimeChartProps {
@@ -199,6 +201,8 @@ export const PerformanceByTimeChart = ({
       longLossCount: number;
       shortWinCount: number;
       shortLossCount: number;
+      longTradeCount: number;
+      shortTradeCount: number;
     }>();
 
     closedTrades.forEach(trade => {
@@ -231,6 +235,8 @@ export const PerformanceByTimeChart = ({
         longLossCount: 0,
         shortWinCount: 0,
         shortLossCount: 0,
+        longTradeCount: 0,
+        shortTradeCount: 0,
       };
       
       timeMap.set(bucket.label, {
@@ -246,6 +252,8 @@ export const PerformanceByTimeChart = ({
         longLossCount: existing.longLossCount + (isLong && isLoss ? 1 : 0),
         shortWinCount: existing.shortWinCount + (isShort && isWin ? 1 : 0),
         shortLossCount: existing.shortLossCount + (isShort && isLoss ? 1 : 0),
+        longTradeCount: existing.longTradeCount + (isLong ? 1 : 0),
+        shortTradeCount: existing.shortTradeCount + (isShort ? 1 : 0),
       });
     });
 
@@ -294,6 +302,12 @@ export const PerformanceByTimeChart = ({
           case 'short_winrate':
             displayValue = shortWinrate;
             break;
+          case 'tradecount_long':
+            displayValue = data.longTradeCount;
+            break;
+          case 'tradecount_short':
+            displayValue = data.shortTradeCount;
+            break;
           case 'dollar':
           default:
             displayValue = data.totalPnl;
@@ -319,6 +333,8 @@ export const PerformanceByTimeChart = ({
           shortWinCount: data.shortWinCount,
           shortLossCount: data.shortLossCount,
           shortWinrate,
+          longTradeCount: data.longTradeCount,
+          shortTradeCount: data.shortTradeCount,
         };
       })
       .sort((a, b) => a.sortOrder - b.sortOrder);
@@ -446,7 +462,7 @@ export const PerformanceByTimeChart = ({
                     if (displayType === 'dollar') {
                       return `${currencyConfig.symbol}${value.toFixed(0)}`;
                     }
-                    if (displayType === 'tradecount') {
+                    if (displayType === 'tradecount' || displayType === 'tradecount_long' || displayType === 'tradecount_short') {
                       return `${Math.round(value)}`;
                     }
                     if (displayType === 'avg_hold_time' || displayType === 'longest_duration') {
@@ -584,6 +600,38 @@ export const PerformanceByTimeChart = ({
                       );
                     }
                     
+                    if (displayType === 'tradecount_long') {
+                      return (
+                        <div className="bg-card border border-border rounded-lg p-3 shadow-lg z-50">
+                          <p className="text-foreground font-medium mb-2">{data.label}</p>
+                          <div className="space-y-1 text-sm">
+                            <p className="text-foreground">
+                              Trade Count (Long): {data.longTradeCount}
+                            </p>
+                            <p className="text-muted-foreground">
+                              Direction: Long
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    }
+                    
+                    if (displayType === 'tradecount_short') {
+                      return (
+                        <div className="bg-card border border-border rounded-lg p-3 shadow-lg z-50">
+                          <p className="text-foreground font-medium mb-2">{data.label}</p>
+                          <div className="space-y-1 text-sm">
+                            <p className="text-foreground">
+                              Trade Count (Short): {data.shortTradeCount}
+                            </p>
+                            <p className="text-muted-foreground">
+                              Direction: Short
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    }
+                    
                     // Dollar mode: show Net PNL + counts
                     if (displayType === 'dollar') {
                       return (
@@ -671,7 +719,7 @@ export const PerformanceByTimeChart = ({
                     <Cell 
                       key={`cell-${index}`}
                       fill={
-                        displayType === 'tradecount' || displayType === 'avg_hold_time' || displayType === 'longest_duration' || displayType === 'long_winrate' || displayType === 'short_winrate'
+                        displayType === 'tradecount' || displayType === 'avg_hold_time' || displayType === 'longest_duration' || displayType === 'long_winrate' || displayType === 'short_winrate' || displayType === 'tradecount_long' || displayType === 'tradecount_short'
                           ? 'hsl(var(--primary))'
                           : displayType === 'winrate'
                             ? entry.displayValue >= 50 ? 'hsl(142, 71%, 45%)' : 'hsl(0, 84%, 60%)'
