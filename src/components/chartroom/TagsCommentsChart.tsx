@@ -17,14 +17,8 @@ import {
   CartesianGrid,
   Cell,
 } from 'recharts';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Card, CardContent } from '@/components/ui/card';
+import { ChartDisplayDropdown } from './ChartDisplayDropdown';
 
 type SelectionType = 'tradeComments' | 'tags';
 type CommentCategory = 'entryComments' | 'tradeManagement' | 'exitComments';
@@ -308,21 +302,10 @@ export const TagsCommentsChart = ({
         {/* Header with Display Dropdown */}
         <div className="flex items-start justify-between mb-3 flex-wrap gap-3">
           <div className="flex items-center gap-3 flex-wrap">
-            <Select value={displayType} onValueChange={(v) => setDisplayType(v as ChartDisplayType)}>
-              <SelectTrigger className="w-[140px] bg-background border-border h-auto py-1.5">
-                <div className="flex flex-col items-start">
-                  <span className="text-[10px] text-muted-foreground">Display</span>
-                  <SelectValue />
-                </div>
-              </SelectTrigger>
-              <SelectContent className="bg-popover border-border z-50">
-                <SelectItem value="dollar">Return ($)</SelectItem>
-                <SelectItem value="percent">Return (%)</SelectItem>
-                <SelectItem value="winrate">Winrate (%)</SelectItem>
-                <SelectItem value="tradecount">Trade Count</SelectItem>
-                <SelectItem value="tickpip">Tick / Pip</SelectItem>
-              </SelectContent>
-            </Select>
+            <ChartDisplayDropdown
+              value={displayType}
+              onValueChange={(v) => setDisplayType(v)}
+            />
           </div>
 
           {/* Legend */}

@@ -17,14 +17,8 @@ import {
   CartesianGrid,
   Cell,
 } from 'recharts';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Card, CardContent } from '@/components/ui/card';
+import { ChartDisplayDropdown } from './ChartDisplayDropdown';
 
 interface SetupData {
   setup: string;
@@ -213,18 +207,10 @@ export const SetupPerformanceChart = ({
         <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
           <h3 className="text-sm font-medium text-muted-foreground">{title}</h3>
           <div className="flex items-center gap-2">
-            <Select value={displayType} onValueChange={(v) => setDisplayType(v as ChartDisplayType)}>
-              <SelectTrigger className="w-[140px] h-8 bg-background border-border text-xs">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="bg-popover border-border z-50">
-                <SelectItem value="dollar">Return ($)</SelectItem>
-                <SelectItem value="percent">Return (%)</SelectItem>
-                <SelectItem value="winrate">Winrate (%)</SelectItem>
-                <SelectItem value="tradecount">Trade Count</SelectItem>
-                <SelectItem value="tickpip">Tick / Pip</SelectItem>
-              </SelectContent>
-            </Select>
+            <ChartDisplayDropdown
+              value={displayType}
+              onValueChange={(v) => setDisplayType(v)}
+            />
           </div>
         </div>
 
