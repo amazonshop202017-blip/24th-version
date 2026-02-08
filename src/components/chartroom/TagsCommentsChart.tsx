@@ -394,6 +394,9 @@ export const TagsCommentsChart = ({
           case '90th_percentile_trades':
             displayValue = getGroupTradingActivityStats(groupDailyCounts, name).percentile90TradesPerDay;
             break;
+          case 'logged_days':
+            displayValue = getGroupTradingActivityStats(groupDailyCounts, name).loggedDays;
+            break;
           default:
             displayValue = data.totalPnl;
         }
@@ -648,6 +651,19 @@ export const TagsCommentsChart = ({
       );
     }
 
+    if (displayType === 'logged_days') {
+      return (
+        <div className="bg-popover border border-border rounded-lg p-3 shadow-xl text-sm">
+          <p className="font-medium text-foreground mb-2">{label}</p>
+          <div className="space-y-1 text-muted-foreground">
+            <p>Logged Days: <span className="text-foreground">{data.loggedDays}</span></p>
+            <p>Total Trades: {data.tradeCount}</p>
+            <p>Median Trades / Day: {data.medianTradesPerDay.toFixed(1)}</p>
+          </div>
+        </div>
+      );
+    }
+
     if (displayType === 'dollar') {
       const pnlValue = isPrivacyMode ? '**' : `${data.totalPnl >= 0 ? '+' : ''}${currencyConfig.symbol}${Math.abs(data.totalPnl).toFixed(2)}`;
       return (
@@ -748,7 +764,7 @@ export const TagsCommentsChart = ({
                       return '**';
                     }
                     if (displayType === 'percent' || displayType === 'winrate' || displayType === 'long_winrate' || displayType === 'short_winrate') return `${value.toFixed(0)}%`;
-                    if (displayType === 'tradecount' || displayType === 'tradecount_long' || displayType === 'tradecount_short' || displayType === 'avg_trades_per_day' || displayType === 'median_trades_per_day' || displayType === '90th_percentile_trades') return value % 1 === 0 ? value.toString() : value.toFixed(1);
+                    if (displayType === 'tradecount' || displayType === 'tradecount_long' || displayType === 'tradecount_short' || displayType === 'avg_trades_per_day' || displayType === 'median_trades_per_day' || displayType === '90th_percentile_trades' || displayType === 'logged_days') return value % 1 === 0 ? value.toString() : value.toFixed(1);
                     if (displayType === 'privacy') return '•••';
                     if (displayType === 'avg_hold_time' || displayType === 'longest_duration') return formatDurationTick(value);
                     return `${currencyConfig.symbol}${Math.abs(value) >= 1000 ? `${(value / 1000).toFixed(0)}k` : value.toFixed(0)}`;
@@ -762,7 +778,7 @@ export const TagsCommentsChart = ({
                     <Cell 
                       key={`cell-${index}`}
                       fill={
-                        displayType === 'winrate' || displayType === 'tradecount' || displayType === 'avg_hold_time' || displayType === 'longest_duration' || displayType === 'long_winrate' || displayType === 'short_winrate' || displayType === 'tradecount_long' || displayType === 'tradecount_short'
+                        displayType === 'winrate' || displayType === 'tradecount' || displayType === 'avg_hold_time' || displayType === 'longest_duration' || displayType === 'long_winrate' || displayType === 'short_winrate' || displayType === 'tradecount_long' || displayType === 'tradecount_short' || displayType === 'logged_days'
                           ? 'hsl(var(--primary))'
                           : entry.displayValue >= 0
                             ? 'hsl(142.1 76.2% 36.3%)'

@@ -288,6 +288,9 @@ export const SetupPerformanceChart = ({
           case '90th_percentile_trades':
             displayValue = getGroupTradingActivityStats(groupDailyCounts, setup).percentile90TradesPerDay;
             break;
+          case 'logged_days':
+            displayValue = getGroupTradingActivityStats(groupDailyCounts, setup).loggedDays;
+            break;
           default:
             displayValue = data.totalPnl;
         }
@@ -411,13 +414,14 @@ export const SetupPerformanceChart = ({
                       case 'long_winrate':
                       case 'short_winrate':
                         return `${value.toFixed(0)}%`;
-                      case 'tradecount':
-                      case 'tradecount_long':
-                      case 'tradecount_short':
-                      case 'avg_trades_per_day':
-                      case 'median_trades_per_day':
-                      case '90th_percentile_trades':
-                        return value % 1 === 0 ? `${Math.round(value)}` : value.toFixed(1);
+                       case 'tradecount':
+                       case 'tradecount_long':
+                       case 'tradecount_short':
+                       case 'avg_trades_per_day':
+                       case 'median_trades_per_day':
+                       case '90th_percentile_trades':
+                       case 'logged_days':
+                         return value % 1 === 0 ? `${Math.round(value)}` : value.toFixed(1);
                       case 'avg_hold_time':
                       case 'longest_duration':
                         return formatDurationTick(value);
@@ -705,6 +709,25 @@ export const SetupPerformanceChart = ({
                             </p>
                             <p className="text-muted-foreground text-xs mt-2 italic border-t border-border pt-2">
                               Largest drawdowns occur when trades/day &gt; {Math.round(data.percentile90TradesPerDay)}
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    }
+                    
+                    if (displayType === 'logged_days') {
+                      return (
+                        <div className="bg-card border border-border rounded-lg p-3 shadow-lg">
+                          <p className="text-foreground font-medium mb-2">{data.setup}</p>
+                          <div className="space-y-1 text-sm">
+                            <p className="text-foreground">
+                              Logged Days: {data.loggedDays}
+                            </p>
+                            <p className="text-muted-foreground">
+                              Total Trades: {data.tradeCount}
+                            </p>
+                            <p className="text-muted-foreground">
+                              Median Trades / Day: {data.medianTradesPerDay.toFixed(1)}
                             </p>
                           </div>
                         </div>

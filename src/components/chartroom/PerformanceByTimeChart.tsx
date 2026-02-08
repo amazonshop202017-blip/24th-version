@@ -378,6 +378,7 @@ export const PerformanceByTimeChart = ({
           case 'avg_trades_per_day':
           case 'median_trades_per_day':
           case '90th_percentile_trades':
+          case 'logged_days':
             // Will be calculated below
             displayValue = 0;
             break;
@@ -399,6 +400,8 @@ export const PerformanceByTimeChart = ({
           displayValue = tradingActivityStats.medianTradesPerDay;
         } else if (displayType === '90th_percentile_trades') {
           displayValue = tradingActivityStats.percentile90TradesPerDay;
+        } else if (displayType === 'logged_days') {
+          displayValue = tradingActivityStats.loggedDays;
         }
 
         return {
@@ -560,7 +563,7 @@ export const PerformanceByTimeChart = ({
                     if (displayType === 'dollar' || displayType === 'avg_win' || displayType === 'avg_loss' || displayType === 'largest_win' || displayType === 'largest_loss') {
                       return `${currencyConfig.symbol}${value.toFixed(0)}`;
                     }
-                    if (displayType === 'tradecount' || displayType === 'tradecount_long' || displayType === 'tradecount_short' || displayType === 'avg_trades_per_day' || displayType === 'median_trades_per_day' || displayType === '90th_percentile_trades') {
+                    if (displayType === 'tradecount' || displayType === 'tradecount_long' || displayType === 'tradecount_short' || displayType === 'avg_trades_per_day' || displayType === 'median_trades_per_day' || displayType === '90th_percentile_trades' || displayType === 'logged_days') {
                       return value % 1 === 0 ? `${Math.round(value)}` : value.toFixed(1);
                     }
                     if (displayType === 'avg_hold_time' || displayType === 'longest_duration') {
@@ -848,6 +851,25 @@ export const PerformanceByTimeChart = ({
                             </p>
                             <p className="text-muted-foreground text-xs mt-2 italic border-t border-border pt-2">
                               Largest drawdowns occur when trades/day &gt; {Math.round(data.percentile90TradesPerDay)}
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    }
+                    
+                    if (displayType === 'logged_days') {
+                      return (
+                        <div className="bg-card border border-border rounded-lg p-3 shadow-lg z-50">
+                          <p className="text-foreground font-medium mb-2">{data.label}</p>
+                          <div className="space-y-1 text-sm">
+                            <p className="text-foreground">
+                              Logged Days: {data.loggedDays}
+                            </p>
+                            <p className="text-muted-foreground">
+                              Total Trades: {data.tradeCount}
+                            </p>
+                            <p className="text-muted-foreground">
+                              Median Trades / Day: {data.medianTradesPerDay.toFixed(1)}
                             </p>
                           </div>
                         </div>
