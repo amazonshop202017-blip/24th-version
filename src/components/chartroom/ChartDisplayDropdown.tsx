@@ -29,6 +29,7 @@ interface ChartDisplayDropdownProps {
 const functionalValues: Set<ChartDisplayType> = new Set([
   'dollar', 'percent', 'winrate', 'tradecount', 'tickpip', 'avg_hold_time', 'longest_duration', 'long_winrate', 'short_winrate', 'tradecount_long', 'tradecount_short', 'avg_win', 'avg_loss', 'largest_win', 'largest_loss', 'avg_trades_per_day', 'median_trades_per_day', '90th_percentile_trades', 'logged_days', 'profit_factor', 'trade_expectancy', 'avg_net_trade_pnl', 'avg_realized_r', 'avg_planned_r', 'avg_daily_drawdown', 'largest_daily_loss'
 ]);
+// Note: winning_days_count, losing_days_count, breakeven_days_count are intentionally NOT in functionalValues (disabled)
 
 // Display options grouped by category
 const displayGroups: DisplayGroup[] = [
@@ -84,11 +85,10 @@ const displayGroups: DisplayGroup[] = [
   {
     name: 'Others',
     options: [
-      { value: 'dollar', label: 'Return ($)' },
       { value: 'percent', label: 'Return (%)' },
-      { value: 'winrate', label: 'Winrate (%)' },
-      { value: 'tradecount', label: 'Trade Count' },
-      { value: 'tickpip', label: 'Tick / Pip' },
+      { value: 'winning_days_count' as ChartDisplayType, label: 'Winning Days Count' },
+      { value: 'losing_days_count' as ChartDisplayType, label: 'Losing Days Count' },
+      { value: 'breakeven_days_count' as ChartDisplayType, label: 'Breakeven Days Count' },
     ],
   },
 ];
