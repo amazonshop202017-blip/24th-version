@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useFilteredTrades } from '@/hooks/useFilteredTrades';
-import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
+import { useGlobalFilters, BreakevenTolerance } from '@/contexts/GlobalFiltersContext';
 import { useAccountsContext } from '@/contexts/AccountsContext';
 import { usePrivacyMode } from '@/hooks/usePrivacyMode';
 import { calculateTradeMetrics, Trade } from '@/types/trade';
@@ -99,7 +99,7 @@ export const PerformanceByTimeChart = ({
   useGlobalDefault = true
 }: PerformanceByTimeChartProps) => {
   const { filteredTrades } = useFilteredTrades();
-  const { currencyConfig, selectedAccounts, isAllAccountsSelected, classifyTradeOutcome, displayMode } = useGlobalFilters();
+  const { currencyConfig, selectedAccounts, isAllAccountsSelected, classifyTradeOutcome, displayMode, breakevenTolerance } = useGlobalFilters();
   const { accounts, getAccountBalanceBeforeTrades } = useAccountsContext();
   const { isPrivacyMode } = usePrivacyMode();
   
@@ -443,7 +443,7 @@ export const PerformanceByTimeChart = ({
         
         // Calculate Risk & Drawdown stats for this bucket
         const bucketTradesList = bucketTrades.get(label) || [];
-        const riskDrawdownStats = calculateRiskDrawdownStats(bucketTradesList);
+        const riskDrawdownStats = calculateRiskDrawdownStats(bucketTradesList, breakevenTolerance);
         
         // Override displayValue for trading activity and profitability metrics
         if (displayType === 'avg_trades_per_day') {

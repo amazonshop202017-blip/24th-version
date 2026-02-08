@@ -85,7 +85,7 @@ export const InstrumentPerformanceChart = ({
   useGlobalDefault = true
 }: InstrumentPerformanceChartProps) => {
   const { filteredTrades } = useFilteredTrades();
-  const { currencyConfig, selectedAccounts, isAllAccountsSelected, classifyTradeOutcome, displayMode } = useGlobalFilters();
+  const { currencyConfig, selectedAccounts, isAllAccountsSelected, classifyTradeOutcome, displayMode, breakevenTolerance } = useGlobalFilters();
   const { isPrivacyMode } = usePrivacyMode();
   const { accounts, getAccountBalanceBeforeTrades } = useAccountsContext();
   
@@ -303,25 +303,25 @@ export const InstrumentPerformanceChart = ({
             displayValue = data.tradeCount > 0 ? data.totalPnl / data.tradeCount : 0;
             break;
           case 'avg_realized_r':
-            displayValue = getGroupRiskDrawdownStats(groupedTradesMap, symbol).avgRealizedR;
+            displayValue = getGroupRiskDrawdownStats(groupedTradesMap, symbol, breakevenTolerance).avgRealizedR;
             break;
           case 'avg_planned_r':
-            displayValue = getGroupRiskDrawdownStats(groupedTradesMap, symbol).avgPlannedR;
+            displayValue = getGroupRiskDrawdownStats(groupedTradesMap, symbol, breakevenTolerance).avgPlannedR;
             break;
           case 'avg_daily_drawdown':
-            displayValue = getGroupRiskDrawdownStats(groupedTradesMap, symbol).avgDailyDrawdown;
+            displayValue = getGroupRiskDrawdownStats(groupedTradesMap, symbol, breakevenTolerance).avgDailyDrawdown;
             break;
           case 'largest_daily_loss':
-            displayValue = getGroupRiskDrawdownStats(groupedTradesMap, symbol).largestDailyLoss;
+            displayValue = getGroupRiskDrawdownStats(groupedTradesMap, symbol, breakevenTolerance).largestDailyLoss;
             break;
           case 'winning_days_count':
-            displayValue = getGroupRiskDrawdownStats(groupedTradesMap, symbol).winningDaysCount;
+            displayValue = getGroupRiskDrawdownStats(groupedTradesMap, symbol, breakevenTolerance).winningDaysCount;
             break;
           case 'losing_days_count':
-            displayValue = getGroupRiskDrawdownStats(groupedTradesMap, symbol).losingDaysCount;
+            displayValue = getGroupRiskDrawdownStats(groupedTradesMap, symbol, breakevenTolerance).losingDaysCount;
             break;
           case 'breakeven_days_count':
-            displayValue = getGroupRiskDrawdownStats(groupedTradesMap, symbol).breakevenDaysCount;
+            displayValue = getGroupRiskDrawdownStats(groupedTradesMap, symbol, breakevenTolerance).breakevenDaysCount;
             break;
           default:
             displayValue = data.totalPnl;
@@ -340,7 +340,7 @@ export const InstrumentPerformanceChart = ({
         const tradeExpectancy = (winPctForExp * avgWin) - (lossPctForExp * Math.abs(avgLoss));
         
         // Get Risk & Drawdown stats for this symbol
-        const riskDrawdownStats = getGroupRiskDrawdownStats(groupedTradesMap, symbol);
+        const riskDrawdownStats = getGroupRiskDrawdownStats(groupedTradesMap, symbol, breakevenTolerance);
         
         return {
           symbol,
