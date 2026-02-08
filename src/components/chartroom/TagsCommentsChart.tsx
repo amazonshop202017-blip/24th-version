@@ -55,6 +55,7 @@ interface GroupedData {
   avgTradesPerDay: number;
   medianTradesPerDay: number;
   percentile90TradesPerDay: number;
+  maxTradesInDay: number;
   loggedDays: number;
 }
 
@@ -430,6 +431,7 @@ export const TagsCommentsChart = ({
           avgTradesPerDay: tradingActivityStats.avgTradesPerDay,
           medianTradesPerDay: tradingActivityStats.medianTradesPerDay,
           percentile90TradesPerDay: tradingActivityStats.percentile90TradesPerDay,
+          maxTradesInDay: tradingActivityStats.maxTradesInDay,
           loggedDays: tradingActivityStats.loggedDays,
         };
       })
@@ -635,9 +637,12 @@ export const TagsCommentsChart = ({
         <div className="bg-popover border border-border rounded-lg p-3 shadow-xl text-sm">
           <p className="font-medium text-foreground mb-2">{label}</p>
           <div className="space-y-1 text-muted-foreground">
-            <p>90th Pctl Trades/Day: <span className="text-foreground">{data.percentile90TradesPerDay.toFixed(1)}</span></p>
-            <p>Logged Days: {data.loggedDays}</p>
-            <p>Total Trades: {data.tradeCount}</p>
+            <p>90th Percentile Trades / Day: <span className="text-foreground">{Math.round(data.percentile90TradesPerDay)}</span></p>
+            <p>Median Trades / Day: {data.medianTradesPerDay.toFixed(1)}</p>
+            <p>Max Trades in a Day: {data.maxTradesInDay}</p>
+            <p className="text-xs mt-2 italic border-t border-border pt-2">
+              Largest drawdowns occur when trades/day &gt; {Math.round(data.percentile90TradesPerDay)}
+            </p>
           </div>
         </div>
       );

@@ -51,6 +51,7 @@ interface InstrumentData {
   avgTradesPerDay: number;
   medianTradesPerDay: number;
   percentile90TradesPerDay: number;
+  maxTradesInDay: number;
   loggedDays: number;
 }
 
@@ -302,6 +303,7 @@ export const InstrumentPerformanceChart = ({
           avgTradesPerDay: tradingActivityStats.avgTradesPerDay,
           medianTradesPerDay: tradingActivityStats.medianTradesPerDay,
           percentile90TradesPerDay: tradingActivityStats.percentile90TradesPerDay,
+          maxTradesInDay: tradingActivityStats.maxTradesInDay,
           loggedDays: tradingActivityStats.loggedDays,
         };
       })
@@ -671,13 +673,16 @@ export const InstrumentPerformanceChart = ({
                           <p className="text-foreground font-medium mb-2">{data.symbol}</p>
                           <div className="space-y-1 text-sm">
                             <p className="text-foreground">
-                              90th Pctl Trades/Day: {data.percentile90TradesPerDay.toFixed(1)}
+                              90th Percentile Trades / Day: {Math.round(data.percentile90TradesPerDay)}
                             </p>
                             <p className="text-muted-foreground">
-                              Logged Days: {data.loggedDays}
+                              Median Trades / Day: {data.medianTradesPerDay.toFixed(1)}
                             </p>
                             <p className="text-muted-foreground">
-                              Total Trades: {data.tradeCount}
+                              Max Trades in a Day: {data.maxTradesInDay}
+                            </p>
+                            <p className="text-muted-foreground text-xs mt-2 italic border-t border-border pt-2">
+                              Largest drawdowns occur when trades/day &gt; {Math.round(data.percentile90TradesPerDay)}
                             </p>
                           </div>
                         </div>

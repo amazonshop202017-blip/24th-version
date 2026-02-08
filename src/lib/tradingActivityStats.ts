@@ -8,6 +8,7 @@ export interface TradingActivityStats {
   avgTradesPerDay: number;
   medianTradesPerDay: number;
   percentile90TradesPerDay: number;
+  maxTradesInDay: number;
   loggedDays: number;
 }
 
@@ -24,6 +25,7 @@ export const calculateTradingActivityStatsFromCounts = (dailyCounts: number[]): 
       avgTradesPerDay: 0,
       medianTradesPerDay: 0,
       percentile90TradesPerDay: 0,
+      maxTradesInDay: 0,
       loggedDays: 0,
     };
   }
@@ -47,10 +49,14 @@ export const calculateTradingActivityStatsFromCounts = (dailyCounts: number[]): 
   const percentileIndex = Math.ceil(0.9 * n) - 1;
   const percentile90TradesPerDay = sortedCounts[Math.min(percentileIndex, n - 1)];
   
+  // Max trades in a day
+  const maxTradesInDay = sortedCounts[n - 1];
+  
   return {
     avgTradesPerDay,
     medianTradesPerDay,
     percentile90TradesPerDay,
+    maxTradesInDay,
     loggedDays,
   };
 };
@@ -106,6 +112,7 @@ export const getGroupTradingActivityStats = (
       avgTradesPerDay: 0,
       medianTradesPerDay: 0,
       percentile90TradesPerDay: 0,
+      maxTradesInDay: 0,
       loggedDays: 0,
     };
   }
