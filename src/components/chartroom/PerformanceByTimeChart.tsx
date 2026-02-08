@@ -405,7 +405,7 @@ export const PerformanceByTimeChart = ({
         // Calculate profitability metrics
         const grossProfit = data.winPnlSum;
         const grossLoss = Math.abs(data.lossPnlSum);
-        const profitFactor = grossLoss > 0 ? grossProfit / grossLoss : (grossProfit > 0 ? Infinity : 0);
+        const profitFactor = grossLoss > 0 ? grossProfit / grossLoss : 0;
         const avgNetTradePnl = data.tradeCount > 0 ? data.totalPnl / data.tradeCount : 0;
         const winPctForExp = data.tradeCount > 0 ? data.winCount / data.tradeCount : 0;
         const lossPctForExp = data.tradeCount > 0 ? data.lossCount / data.tradeCount : 0;
