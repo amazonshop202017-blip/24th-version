@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useGlobalFilters, DisplayMode } from '@/contexts/GlobalFiltersContext';
 
 // Extended chart display type including new options
-export type ChartDisplayType = 'dollar' | 'percent' | 'winrate' | 'tradecount' | 'tickpip' | 'privacy' | 'avg_hold_time' | 'longest_duration' | 'long_winrate' | 'short_winrate' | 'tradecount_long' | 'tradecount_short' | 'avg_win' | 'avg_loss' | 'largest_win' | 'largest_loss' | 'avg_trades_per_day' | 'median_trades_per_day' | '90th_percentile_trades' | 'logged_days' | 'profit_factor' | 'trade_expectancy' | 'avg_net_trade_pnl';
+export type ChartDisplayType = 'dollar' | 'percent' | 'winrate' | 'tradecount' | 'tickpip' | 'privacy' | 'avg_hold_time' | 'longest_duration' | 'long_winrate' | 'short_winrate' | 'tradecount_long' | 'tradecount_short' | 'avg_win' | 'avg_loss' | 'largest_win' | 'largest_loss' | 'avg_trades_per_day' | 'median_trades_per_day' | '90th_percentile_trades' | 'logged_days' | 'profit_factor' | 'trade_expectancy' | 'avg_net_trade_pnl' | 'avg_realized_r' | 'avg_planned_r' | 'avg_daily_drawdown' | 'largest_daily_loss';
 
 /**
  * Maps the global DisplayMode to a chart-specific DisplayType.
@@ -123,6 +123,14 @@ export const getDisplayLabel = (displayType: ChartDisplayType): string => {
       return 'Trade Expectancy';
     case 'avg_net_trade_pnl':
       return 'Avg Net P&L/Trade';
+    case 'avg_realized_r':
+      return 'Avg Realized R';
+    case 'avg_planned_r':
+      return 'Avg Planned R';
+    case 'avg_daily_drawdown':
+      return 'Avg Daily Drawdown';
+    case 'largest_daily_loss':
+      return 'Largest Daily Loss';
     default:
       return 'Return ($)';
   }

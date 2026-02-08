@@ -6,6 +6,7 @@ import { useAccountsContext } from '@/contexts/AccountsContext';
 import { calculateTradeMetrics, Trade } from '@/types/trade';
 import { ChartDisplayType, mapGlobalToChartDisplay, formatDuration, formatDurationTick } from '@/hooks/useChartDisplayMode';
 import { buildGroupDailyCounts, getGroupTradingActivityStats } from '@/lib/tradingActivityStats';
+import { buildGroupedTradesMap, getGroupRiskDrawdownStats } from '@/lib/riskDrawdownStats';
 import {
   BarChart,
   Bar,
@@ -59,6 +60,15 @@ interface InstrumentData {
   avgNetTradePnl: number;
   grossProfit: number;
   grossLoss: number;
+  // Risk & Drawdown metrics
+  avgRealizedR: number;
+  avgPlannedR: number;
+  avgDailyDrawdown: number;
+  largestDailyLoss: number;
+  largestDailyLossDate: string;
+  losingDaysCount: number;
+  tradesWithRealizedR: number;
+  tradesWithPlannedR: number;
 }
 
 interface InstrumentPerformanceChartProps {
@@ -114,8 +124,9 @@ export const InstrumentPerformanceChart = ({
 
     // Build daily counts per symbol for trading activity metrics
     const groupDailyCounts = buildGroupDailyCounts(allTrades, (trade) => trade.symbol.toUpperCase());
-
-    // Group trades by instrument symbol
+    
+    // Build grouped trades map for Risk & Drawdown calculations
+    const groupedTradesMap = buildGroupedTradesMap(closedTrades, (trade) => trade.symbol.toUpperCase());
     const instrumentMap = new Map<string, {
       totalPnl: number;
       tradeCount: number;
@@ -289,6 +300,18 @@ export const InstrumentPerformanceChart = ({
             // Avg Net P&L per Trade = Net P&L / Total Trades
             displayValue = data.tradeCount > 0 ? data.totalPnl / data.tradeCount : 0;
             break;
+          case 'avg_realized_r':
+            displayValue = getGroupRiskDrawdownStats(groupedTradesMap, symbol).avgRealizedR;
+            break;
+          case 'avg_planned_r':
+            displayValue = getGroupRiskDrawdownStats(groupedTradesMap, symbol).avgPlannedR;
+            break;
+          case 'avg_daily_drawdown':
+            displayValue = getGroupRiskDrawdownStats(groupedTradesMap, symbol).avgDailyDrawdown;
+            break;
+          case 'largest_daily_loss':
+            displayValue = getGroupRiskDrawdownStats(groupedTradesMap, symbol).largestDailyLoss;
+            break;
           default:
             displayValue = data.totalPnl;
         }
@@ -304,6 +327,9 @@ export const InstrumentPerformanceChart = ({
         const winPctForExp = data.tradeCount > 0 ? data.winCount / data.tradeCount : 0;
         const lossPctForExp = data.tradeCount > 0 ? data.lossCount / data.tradeCount : 0;
         const tradeExpectancy = (winPctForExp * avgWin) - (lossPctForExp * Math.abs(avgLoss));
+        
+        // Get Risk & Drawdown stats for this symbol
+        const riskDrawdownStats = getGroupRiskDrawdownStats(groupedTradesMap, symbol);
         
         return {
           symbol,
@@ -342,6 +368,15 @@ export const InstrumentPerformanceChart = ({
           avgNetTradePnl,
           grossProfit,
           grossLoss,
+          // Risk & Drawdown metrics
+          avgRealizedR: riskDrawdownStats.avgRealizedR,
+          avgPlannedR: riskDrawdownStats.avgPlannedR,
+          avgDailyDrawdown: riskDrawdownStats.avgDailyDrawdown,
+          largestDailyLoss: riskDrawdownStats.largestDailyLoss,
+          largestDailyLossDate: riskDrawdownStats.largestDailyLossDate,
+          losingDaysCount: riskDrawdownStats.losingDaysCount,
+          tradesWithRealizedR: riskDrawdownStats.tradesWithRealizedR,
+          tradesWithPlannedR: riskDrawdownStats.tradesWithPlannedR,
         };
       })
       // Sort by value descending (best first)
@@ -411,7 +446,7 @@ export const InstrumentPerformanceChart = ({
                   tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 10 }}
                   tickFormatter={(value) => {
                     // Hide Y-axis values for monetary modes when privacy is active
-                    if (isPrivacyMode && (displayType === 'dollar' || displayType === 'percent' || displayType === 'avg_win' || displayType === 'avg_loss' || displayType === 'largest_win' || displayType === 'largest_loss' || displayType === 'trade_expectancy' || displayType === 'avg_net_trade_pnl' || displayType === 'profit_factor')) {
+                    if (isPrivacyMode && (displayType === 'dollar' || displayType === 'percent' || displayType === 'avg_win' || displayType === 'avg_loss' || displayType === 'largest_win' || displayType === 'largest_loss' || displayType === 'trade_expectancy' || displayType === 'avg_net_trade_pnl' || displayType === 'profit_factor' || displayType === 'avg_daily_drawdown' || displayType === 'largest_daily_loss')) {
                       return PRIVACY_MASK;
                     }
                     switch (displayType) {
@@ -422,6 +457,8 @@ export const InstrumentPerformanceChart = ({
                       case 'largest_loss':
                       case 'trade_expectancy':
                       case 'avg_net_trade_pnl':
+                      case 'avg_daily_drawdown':
+                      case 'largest_daily_loss':
                         return `${currencyConfig.symbol}${value.toFixed(0)}`;
                       case 'percent':
                       case 'winrate':
@@ -441,6 +478,9 @@ export const InstrumentPerformanceChart = ({
                         return formatDurationTick(value);
                       case 'profit_factor':
                         return value === Infinity ? '∞' : value.toFixed(2);
+                      case 'avg_realized_r':
+                      case 'avg_planned_r':
+                        return value.toFixed(2);
                       default:
                         return `${value}`;
                     }
@@ -449,7 +489,7 @@ export const InstrumentPerformanceChart = ({
                 />
                 
                 {/* Reference Line at 0 - for monetary and percent modes */}
-                {(displayType === 'dollar' || displayType === 'percent' || displayType === 'avg_win' || displayType === 'avg_loss' || displayType === 'largest_win' || displayType === 'largest_loss' || displayType === 'trade_expectancy' || displayType === 'avg_net_trade_pnl') && (
+                {(displayType === 'dollar' || displayType === 'percent' || displayType === 'avg_win' || displayType === 'avg_loss' || displayType === 'largest_win' || displayType === 'largest_loss' || displayType === 'trade_expectancy' || displayType === 'avg_net_trade_pnl' || displayType === 'avg_daily_drawdown' || displayType === 'largest_daily_loss' || displayType === 'avg_realized_r' || displayType === 'avg_planned_r') && (
                   <ReferenceLine 
                     y={0} 
                     stroke="hsl(var(--muted-foreground))" 
@@ -814,6 +854,72 @@ export const InstrumentPerformanceChart = ({
                       );
                     }
                     
+                    if (displayType === 'avg_realized_r') {
+                      return (
+                        <div className="bg-card border border-border rounded-lg p-3 shadow-lg">
+                          <p className="text-foreground font-medium mb-2">{data.symbol}</p>
+                          <div className="space-y-1 text-sm">
+                            <p className={data.avgRealizedR >= 0 ? 'text-profit' : 'text-loss'}>
+                              Avg Realized R: {data.avgRealizedR.toFixed(2)}
+                            </p>
+                            <p className="text-muted-foreground">
+                              Total Trades: {data.tradesWithRealizedR}
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    }
+                    
+                    if (displayType === 'avg_planned_r') {
+                      return (
+                        <div className="bg-card border border-border rounded-lg p-3 shadow-lg">
+                          <p className="text-foreground font-medium mb-2">{data.symbol}</p>
+                          <div className="space-y-1 text-sm">
+                            <p className="text-foreground">
+                              Avg Planned R: {data.avgPlannedR.toFixed(2)}
+                            </p>
+                            <p className="text-muted-foreground">
+                              Total Trades: {data.tradesWithPlannedR}
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    }
+                    
+                    if (displayType === 'avg_daily_drawdown') {
+                      return (
+                        <div className="bg-card border border-border rounded-lg p-3 shadow-lg">
+                          <p className="text-foreground font-medium mb-2">{data.symbol}</p>
+                          <div className="space-y-1 text-sm">
+                            <p className="text-loss">
+                              Avg Daily Net Drawdown: {isPrivacyMode ? PRIVACY_MASK : `${currencyConfig.symbol}${data.avgDailyDrawdown.toFixed(2)}`}
+                            </p>
+                            <p className="text-muted-foreground">
+                              Losing Days: {data.losingDaysCount}
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    }
+                    
+                    if (displayType === 'largest_daily_loss') {
+                      return (
+                        <div className="bg-card border border-border rounded-lg p-3 shadow-lg">
+                          <p className="text-foreground font-medium mb-2">{data.symbol}</p>
+                          <div className="space-y-1 text-sm">
+                            <p className="text-loss">
+                              Largest Daily Loss: {isPrivacyMode ? PRIVACY_MASK : `${currencyConfig.symbol}${data.largestDailyLoss.toFixed(2)}`}
+                            </p>
+                            {data.largestDailyLossDate && (
+                              <p className="text-muted-foreground">
+                                Date: {data.largestDailyLossDate}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    }
+                    
                     if (displayType === 'dollar') {
                       return (
                         <div className="bg-card border border-border rounded-lg p-3 shadow-lg">
@@ -898,7 +1004,7 @@ export const InstrumentPerformanceChart = ({
                 >
                   {instrumentData.map((entry, index) => {
                     let fillColor: string;
-                    if (displayType === 'winrate' || displayType === 'tradecount' || displayType === 'avg_hold_time' || displayType === 'longest_duration' || displayType === 'long_winrate' || displayType === 'short_winrate' || displayType === 'tradecount_long' || displayType === 'tradecount_short') {
+                    if (displayType === 'winrate' || displayType === 'tradecount' || displayType === 'avg_hold_time' || displayType === 'longest_duration' || displayType === 'long_winrate' || displayType === 'short_winrate' || displayType === 'tradecount_long' || displayType === 'tradecount_short' || displayType === 'avg_planned_r') {
                       fillColor = 'hsl(var(--primary))';
                     } else {
                       fillColor = entry.displayValue >= 0 ? 'hsl(var(--profit))' : 'hsl(var(--loss))';

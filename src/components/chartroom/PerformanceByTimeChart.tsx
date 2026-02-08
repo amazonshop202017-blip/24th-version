@@ -7,6 +7,7 @@ import { calculateTradeMetrics, Trade } from '@/types/trade';
 import { parseISO, getDay, getMonth, getWeek, getHours, getMinutes, format } from 'date-fns';
 import { ChartDisplayType, mapGlobalToChartDisplay, formatDuration, formatDurationTick } from '@/hooks/useChartDisplayMode';
 import { calculateTradingActivityStatsFromCounts } from '@/lib/tradingActivityStats';
+import { calculateRiskDrawdownStats } from '@/lib/riskDrawdownStats';
 import {
   BarChart,
   Bar,
@@ -70,6 +71,15 @@ interface TimeData {
   avgNetTradePnl: number;
   grossProfit: number;
   grossLoss: number;
+  // Risk & Drawdown metrics
+  avgRealizedR: number;
+  avgPlannedR: number;
+  avgDailyDrawdown: number;
+  largestDailyLoss: number;
+  largestDailyLossDate: string;
+  losingDaysCount: number;
+  tradesWithRealizedR: number;
+  tradesWithPlannedR: number;
 }
 
 interface PerformanceByTimeChartProps {
@@ -212,6 +222,9 @@ export const PerformanceByTimeChart = ({
     // Track daily counts per time bucket for trading activity stats
     // Map: bucket label -> Map: calendar day -> trade count
     const bucketDailyCounts = new Map<string, Map<string, number>>();
+    
+    // Track trades per bucket for Risk & Drawdown stats
+    const bucketTrades = new Map<string, Trade[]>();
 
     const timeMap = new Map<string, {
       sortOrder: number;
@@ -233,6 +246,21 @@ export const PerformanceByTimeChart = ({
       largestWin: number;
       largestLoss: number;
     }>();
+    
+    // Build bucket trades mapping for Risk & Drawdown
+    closedTrades.forEach(trade => {
+      const metrics = calculateTradeMetrics(trade);
+      const dateStr = dateSetting === 'entry' ? metrics.openDate : metrics.closeDate;
+      if (!dateStr) return;
+      
+      const date = parseISO(dateStr);
+      const bucket = getBucket(date, period);
+      
+      if (!bucketTrades.has(bucket.label)) {
+        bucketTrades.set(bucket.label, []);
+      }
+      bucketTrades.get(bucket.label)!.push(trade);
+    });
 
     // First pass: build daily counts per bucket for all trades
     allTrades.forEach(trade => {
@@ -411,6 +439,10 @@ export const PerformanceByTimeChart = ({
         const lossPctForExp = data.tradeCount > 0 ? data.lossCount / data.tradeCount : 0;
         const tradeExpectancy = (winPctForExp * avgWin) - (lossPctForExp * Math.abs(avgLoss));
         
+        // Calculate Risk & Drawdown stats for this bucket
+        const bucketTradesList = bucketTrades.get(label) || [];
+        const riskDrawdownStats = calculateRiskDrawdownStats(bucketTradesList);
+        
         // Override displayValue for trading activity and profitability metrics
         if (displayType === 'avg_trades_per_day') {
           displayValue = tradingActivityStats.avgTradesPerDay;
@@ -426,6 +458,14 @@ export const PerformanceByTimeChart = ({
           displayValue = tradeExpectancy;
         } else if (displayType === 'avg_net_trade_pnl') {
           displayValue = avgNetTradePnl;
+        } else if (displayType === 'avg_realized_r') {
+          displayValue = riskDrawdownStats.avgRealizedR;
+        } else if (displayType === 'avg_planned_r') {
+          displayValue = riskDrawdownStats.avgPlannedR;
+        } else if (displayType === 'avg_daily_drawdown') {
+          displayValue = riskDrawdownStats.avgDailyDrawdown;
+        } else if (displayType === 'largest_daily_loss') {
+          displayValue = riskDrawdownStats.largestDailyLoss;
         }
 
         return {
@@ -465,6 +505,15 @@ export const PerformanceByTimeChart = ({
           avgNetTradePnl,
           grossProfit,
           grossLoss,
+          // Risk & Drawdown metrics
+          avgRealizedR: riskDrawdownStats.avgRealizedR,
+          avgPlannedR: riskDrawdownStats.avgPlannedR,
+          avgDailyDrawdown: riskDrawdownStats.avgDailyDrawdown,
+          largestDailyLoss: riskDrawdownStats.largestDailyLoss,
+          largestDailyLossDate: riskDrawdownStats.largestDailyLossDate,
+          losingDaysCount: riskDrawdownStats.losingDaysCount,
+          tradesWithRealizedR: riskDrawdownStats.tradesWithRealizedR,
+          tradesWithPlannedR: riskDrawdownStats.tradesWithPlannedR,
         };
       })
       .sort((a, b) => a.sortOrder - b.sortOrder);
@@ -586,14 +635,17 @@ export const PerformanceByTimeChart = ({
                   tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 10 }}
                   tickFormatter={(value) => {
                     // Mask $ and % values in privacy mode
-                    if (isPrivacyMode && (displayType === 'dollar' || displayType === 'percent' || displayType === 'avg_win' || displayType === 'avg_loss' || displayType === 'largest_win' || displayType === 'largest_loss' || displayType === 'trade_expectancy' || displayType === 'avg_net_trade_pnl' || displayType === 'profit_factor')) {
+                    if (isPrivacyMode && (displayType === 'dollar' || displayType === 'percent' || displayType === 'avg_win' || displayType === 'avg_loss' || displayType === 'largest_win' || displayType === 'largest_loss' || displayType === 'trade_expectancy' || displayType === 'avg_net_trade_pnl' || displayType === 'profit_factor' || displayType === 'avg_daily_drawdown' || displayType === 'largest_daily_loss')) {
                       return '**';
                     }
-                    if (displayType === 'dollar' || displayType === 'avg_win' || displayType === 'avg_loss' || displayType === 'largest_win' || displayType === 'largest_loss' || displayType === 'trade_expectancy' || displayType === 'avg_net_trade_pnl') {
+                    if (displayType === 'dollar' || displayType === 'avg_win' || displayType === 'avg_loss' || displayType === 'largest_win' || displayType === 'largest_loss' || displayType === 'trade_expectancy' || displayType === 'avg_net_trade_pnl' || displayType === 'avg_daily_drawdown' || displayType === 'largest_daily_loss') {
                       return `${currencyConfig.symbol}${value.toFixed(0)}`;
                     }
                     if (displayType === 'profit_factor') {
                       return value === Infinity ? '∞' : value.toFixed(2);
+                    }
+                    if (displayType === 'avg_realized_r' || displayType === 'avg_planned_r') {
+                      return value.toFixed(2);
                     }
                     if (displayType === 'tradecount' || displayType === 'tradecount_long' || displayType === 'tradecount_short' || displayType === 'avg_trades_per_day' || displayType === 'median_trades_per_day' || displayType === '90th_percentile_trades' || displayType === 'logged_days') {
                       return value % 1 === 0 ? `${Math.round(value)}` : value.toFixed(1);
@@ -610,7 +662,7 @@ export const PerformanceByTimeChart = ({
                 />
                 
                 {/* Reference Line at 0 - for monetary modes */}
-                {(displayType === 'dollar' || displayType === 'percent' || displayType === 'avg_win' || displayType === 'avg_loss' || displayType === 'largest_win' || displayType === 'largest_loss' || displayType === 'trade_expectancy' || displayType === 'avg_net_trade_pnl') && (
+                {(displayType === 'dollar' || displayType === 'percent' || displayType === 'avg_win' || displayType === 'avg_loss' || displayType === 'largest_win' || displayType === 'largest_loss' || displayType === 'trade_expectancy' || displayType === 'avg_net_trade_pnl' || displayType === 'avg_daily_drawdown' || displayType === 'largest_daily_loss' || displayType === 'avg_realized_r' || displayType === 'avg_planned_r') && (
                   <ReferenceLine 
                     y={0} 
                     stroke="hsl(var(--muted-foreground))" 
@@ -975,6 +1027,72 @@ export const PerformanceByTimeChart = ({
                       );
                     }
                     
+                    if (displayType === 'avg_realized_r') {
+                      return (
+                        <div className="bg-card border border-border rounded-lg p-3 shadow-lg z-50">
+                          <p className="text-foreground font-medium mb-2">{data.label}</p>
+                          <div className="space-y-1 text-sm">
+                            <p className={data.avgRealizedR >= 0 ? 'text-profit' : 'text-loss'}>
+                              Avg Realized R: {data.avgRealizedR.toFixed(2)}
+                            </p>
+                            <p className="text-muted-foreground">
+                              Total Trades: {data.tradesWithRealizedR}
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    }
+                    
+                    if (displayType === 'avg_planned_r') {
+                      return (
+                        <div className="bg-card border border-border rounded-lg p-3 shadow-lg z-50">
+                          <p className="text-foreground font-medium mb-2">{data.label}</p>
+                          <div className="space-y-1 text-sm">
+                            <p className="text-foreground">
+                              Avg Planned R: {data.avgPlannedR.toFixed(2)}
+                            </p>
+                            <p className="text-muted-foreground">
+                              Total Trades: {data.tradesWithPlannedR}
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    }
+                    
+                    if (displayType === 'avg_daily_drawdown') {
+                      return (
+                        <div className="bg-card border border-border rounded-lg p-3 shadow-lg z-50">
+                          <p className="text-foreground font-medium mb-2">{data.label}</p>
+                          <div className="space-y-1 text-sm">
+                            <p className="text-loss">
+                              Avg Daily Net Drawdown: {isPrivacyMode ? '**' : `${currencyConfig.symbol}${data.avgDailyDrawdown.toFixed(2)}`}
+                            </p>
+                            <p className="text-muted-foreground">
+                              Losing Days: {data.losingDaysCount}
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    }
+                    
+                    if (displayType === 'largest_daily_loss') {
+                      return (
+                        <div className="bg-card border border-border rounded-lg p-3 shadow-lg z-50">
+                          <p className="text-foreground font-medium mb-2">{data.label}</p>
+                          <div className="space-y-1 text-sm">
+                            <p className="text-loss">
+                              Largest Daily Loss: {isPrivacyMode ? '**' : `${currencyConfig.symbol}${data.largestDailyLoss.toFixed(2)}`}
+                            </p>
+                            {data.largestDailyLossDate && (
+                              <p className="text-muted-foreground">
+                                Date: {data.largestDailyLossDate}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    }
+                    
                     // Dollar mode: show Net PNL + counts
                     if (displayType === 'dollar') {
                       return (
@@ -1062,7 +1180,7 @@ export const PerformanceByTimeChart = ({
                     <Cell 
                       key={`cell-${index}`}
                       fill={
-                        displayType === 'tradecount' || displayType === 'avg_hold_time' || displayType === 'longest_duration' || displayType === 'long_winrate' || displayType === 'short_winrate' || displayType === 'tradecount_long' || displayType === 'tradecount_short'
+                        displayType === 'tradecount' || displayType === 'avg_hold_time' || displayType === 'longest_duration' || displayType === 'long_winrate' || displayType === 'short_winrate' || displayType === 'tradecount_long' || displayType === 'tradecount_short' || displayType === 'avg_planned_r'
                           ? 'hsl(var(--primary))'
                           : displayType === 'winrate'
                             ? entry.displayValue >= 50 ? 'hsl(142, 71%, 45%)' : 'hsl(0, 84%, 60%)'

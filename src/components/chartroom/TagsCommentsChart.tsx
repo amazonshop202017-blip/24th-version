@@ -7,6 +7,7 @@ import { usePrivacyMode } from '@/hooks/usePrivacyMode';
 import { calculateTradeMetrics, Trade } from '@/types/trade';
 import { ChartDisplayType, mapGlobalToChartDisplay, formatDuration, formatDurationTick } from '@/hooks/useChartDisplayMode';
 import { buildGroupDailyCounts, getGroupTradingActivityStats } from '@/lib/tradingActivityStats';
+import { buildGroupedTradesMap, getGroupRiskDrawdownStats } from '@/lib/riskDrawdownStats';
 import {
   BarChart,
   Bar,
@@ -63,6 +64,15 @@ interface GroupedData {
   avgNetTradePnl: number;
   grossProfit: number;
   grossLoss: number;
+  // Risk & Drawdown metrics
+  avgRealizedR: number;
+  avgPlannedR: number;
+  avgDailyDrawdown: number;
+  largestDailyLoss: number;
+  largestDailyLossDate: string;
+  losingDaysCount: number;
+  tradesWithRealizedR: number;
+  tradesWithPlannedR: number;
 }
 
 interface TagsCommentsChartProps {
@@ -119,6 +129,27 @@ export const TagsCommentsChart = ({
     });
 
     if (closedTrades.length === 0) return [];
+
+    // Build grouped trades map for Risk & Drawdown calculations
+    const groupedTradesMap = buildGroupedTradesMap(closedTrades, (trade) => {
+      if (selectionType === 'tradeComments') {
+        const fieldKey = selectedCommentCategory === 'entryComments' ? 'entryComment' :
+                         selectedCommentCategory === 'tradeManagement' ? 'tradeManagement' :
+                         'exitComment';
+        return (trade[fieldKey as keyof Trade] as string) || 'No Comment';
+      } else {
+        const tagIdToName = new Map<string, string>();
+        tags.forEach(tag => tagIdToName.set(tag.id, tag.name));
+        const targetTagIds = selectedTagIds.length > 0 ? selectedTagIds : tags.map(t => t.id);
+        const tradeTagIds = trade.tags || [];
+        const matchedTagIds = tradeTagIds.filter(tagId => targetTagIds.includes(tagId));
+        
+        if (matchedTagIds.length === 0 && selectedTagIds.length === 0) {
+          return 'Untagged';
+        }
+        return matchedTagIds.map(tagId => tagIdToName.get(tagId) || 'Unknown Tag');
+      }
+    });
 
     // Build daily counts per group for trading activity metrics
     const groupDailyCounts = buildGroupDailyCounts(allTrades, (trade) => {
@@ -415,6 +446,18 @@ export const TagsCommentsChart = ({
           case 'avg_net_trade_pnl':
             displayValue = data.tradeCount > 0 ? data.totalPnl / data.tradeCount : 0;
             break;
+          case 'avg_realized_r':
+            displayValue = getGroupRiskDrawdownStats(groupedTradesMap, name).avgRealizedR;
+            break;
+          case 'avg_planned_r':
+            displayValue = getGroupRiskDrawdownStats(groupedTradesMap, name).avgPlannedR;
+            break;
+          case 'avg_daily_drawdown':
+            displayValue = getGroupRiskDrawdownStats(groupedTradesMap, name).avgDailyDrawdown;
+            break;
+          case 'largest_daily_loss':
+            displayValue = getGroupRiskDrawdownStats(groupedTradesMap, name).largestDailyLoss;
+            break;
           default:
             displayValue = data.totalPnl;
         }
@@ -430,6 +473,9 @@ export const TagsCommentsChart = ({
         const winPctForExp = data.tradeCount > 0 ? data.winCount / data.tradeCount : 0;
         const lossPctForExp = data.tradeCount > 0 ? data.lossCount / data.tradeCount : 0;
         const tradeExpectancy = (winPctForExp * avgWin) - (lossPctForExp * Math.abs(avgLoss));
+        
+        // Get Risk & Drawdown stats for this group
+        const riskDrawdownStats = getGroupRiskDrawdownStats(groupedTradesMap, name);
 
         return {
           name,
@@ -468,6 +514,15 @@ export const TagsCommentsChart = ({
           avgNetTradePnl,
           grossProfit,
           grossLoss,
+          // Risk & Drawdown metrics
+          avgRealizedR: riskDrawdownStats.avgRealizedR,
+          avgPlannedR: riskDrawdownStats.avgPlannedR,
+          avgDailyDrawdown: riskDrawdownStats.avgDailyDrawdown,
+          largestDailyLoss: riskDrawdownStats.largestDailyLoss,
+          largestDailyLossDate: riskDrawdownStats.largestDailyLossDate,
+          losingDaysCount: riskDrawdownStats.losingDaysCount,
+          tradesWithRealizedR: riskDrawdownStats.tradesWithRealizedR,
+          tradesWithPlannedR: riskDrawdownStats.tradesWithPlannedR,
         };
       })
       .sort((a, b) => b.displayValue - a.displayValue);
