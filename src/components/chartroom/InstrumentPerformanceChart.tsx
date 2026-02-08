@@ -276,8 +276,8 @@ export const InstrumentPerformanceChart = ({
             displayValue = getGroupTradingActivityStats(groupDailyCounts, symbol).loggedDays;
             break;
           case 'profit_factor':
-            // Profit Factor = Gross Profit / |Gross Loss|
-            displayValue = Math.abs(data.lossPnlSum) > 0 ? data.winPnlSum / Math.abs(data.lossPnlSum) : (data.winPnlSum > 0 ? Infinity : 0);
+            // Profit Factor = Gross Profit / |Gross Loss| (guard: 0 when grossLoss is 0 to prevent Infinity)
+            displayValue = Math.abs(data.lossPnlSum) > 0 ? data.winPnlSum / Math.abs(data.lossPnlSum) : 0;
             break;
           case 'trade_expectancy':
             // Trade Expectancy = (Win% × Avg Win) - (Loss% × |Avg Loss|)

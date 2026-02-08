@@ -404,7 +404,8 @@ export const TagsCommentsChart = ({
             displayValue = getGroupTradingActivityStats(groupDailyCounts, name).loggedDays;
             break;
           case 'profit_factor':
-            displayValue = Math.abs(data.lossPnlSum) > 0 ? data.winPnlSum / Math.abs(data.lossPnlSum) : (data.winPnlSum > 0 ? Infinity : 0);
+            // Guard: 0 when grossLoss is 0 to prevent Infinity
+            displayValue = Math.abs(data.lossPnlSum) > 0 ? data.winPnlSum / Math.abs(data.lossPnlSum) : 0;
             break;
           case 'trade_expectancy':
             const winPct = data.tradeCount > 0 ? data.winCount / data.tradeCount : 0;
