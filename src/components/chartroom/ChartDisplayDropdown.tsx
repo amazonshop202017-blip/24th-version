@@ -45,6 +45,7 @@ const displayGroups: DisplayGroup[] = [
       { value: 'avg_realized_r' as ChartDisplayType, label: 'Average realized R-multiple' },
       { value: 'avg_planned_r' as ChartDisplayType, label: 'Average planned R-multiple' },
       { value: 'avg_daily_drawdown' as ChartDisplayType, label: 'Average daily net drawdown' },
+      { value: 'largest_daily_loss' as ChartDisplayType, label: 'Largest daily loss' },
     ],
   },
   {
