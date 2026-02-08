@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useGlobalFilters, DisplayMode } from '@/contexts/GlobalFiltersContext';
 
 // Extended chart display type including new options
-export type ChartDisplayType = 'dollar' | 'percent' | 'winrate' | 'tradecount' | 'tickpip' | 'privacy' | 'avg_hold_time' | 'longest_duration' | 'long_winrate' | 'short_winrate' | 'tradecount_long' | 'tradecount_short' | 'avg_win' | 'avg_loss' | 'largest_win' | 'largest_loss';
+export type ChartDisplayType = 'dollar' | 'percent' | 'winrate' | 'tradecount' | 'tickpip' | 'privacy' | 'avg_hold_time' | 'longest_duration' | 'long_winrate' | 'short_winrate' | 'tradecount_long' | 'tradecount_short' | 'avg_win' | 'avg_loss' | 'largest_win' | 'largest_loss' | 'avg_trades_per_day' | 'median_trades_per_day' | '90th_percentile_trades';
 
 /**
  * Maps the global DisplayMode to a chart-specific DisplayType.
@@ -109,6 +109,12 @@ export const getDisplayLabel = (displayType: ChartDisplayType): string => {
       return 'Largest Win';
     case 'largest_loss':
       return 'Largest Loss';
+    case 'avg_trades_per_day':
+      return 'Avg Trades/Day';
+    case 'median_trades_per_day':
+      return 'Median Trades/Day';
+    case '90th_percentile_trades':
+      return '90th Pctl Trades';
     default:
       return 'Return ($)';
   }

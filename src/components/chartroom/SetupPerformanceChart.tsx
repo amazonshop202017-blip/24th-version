@@ -6,6 +6,7 @@ import { usePrivacyMode } from '@/hooks/usePrivacyMode';
 import { calculateTradeMetrics, Trade } from '@/types/trade';
 import { useStrategiesContext } from '@/contexts/StrategiesContext';
 import { ChartDisplayType, mapGlobalToChartDisplay, formatDuration, formatDurationTick } from '@/hooks/useChartDisplayMode';
+import { buildGroupDailyCounts, getGroupTradingActivityStats } from '@/lib/tradingActivityStats';
 import {
   BarChart,
   Bar,
@@ -47,6 +48,11 @@ interface SetupData {
   largestLoss: number;
   winPnlSum: number;
   lossPnlSum: number;
+  // Trading Activity stats
+  avgTradesPerDay: number;
+  medianTradesPerDay: number;
+  percentile90TradesPerDay: number;
+  loggedDays: number;
 }
 
 interface SetupPerformanceChartProps {
@@ -92,6 +98,8 @@ export const SetupPerformanceChart = ({
 
   // Calculate setup data - SETUP-CENTRIC approach
   const setupData = useMemo(() => {
+    // Include all trades for trading activity stats
+    const allTrades = filteredTrades;
     const closedTrades = filteredTrades.filter((trade: Trade) => {
       const metrics = calculateTradeMetrics(trade);
       return metrics.positionStatus === 'CLOSED';
@@ -103,6 +111,14 @@ export const SetupPerformanceChart = ({
     const setupIdToName = new Map<string, string>();
     strategies.forEach(strategy => {
       setupIdToName.set(strategy.id, strategy.name);
+    });
+
+    // Build daily counts per setup for trading activity metrics
+    const groupDailyCounts = buildGroupDailyCounts(allTrades, (trade) => {
+      if (trade.strategyId && setupIdToName.has(trade.strategyId)) {
+        return setupIdToName.get(trade.strategyId)!;
+      }
+      return 'Unassigned';
     });
 
     const setupMap = new Map<string, {
@@ -262,9 +278,21 @@ export const SetupPerformanceChart = ({
           case 'largest_loss':
             displayValue = largestLoss;
             break;
+          case 'avg_trades_per_day':
+            displayValue = getGroupTradingActivityStats(groupDailyCounts, setup).avgTradesPerDay;
+            break;
+          case 'median_trades_per_day':
+            displayValue = getGroupTradingActivityStats(groupDailyCounts, setup).medianTradesPerDay;
+            break;
+          case '90th_percentile_trades':
+            displayValue = getGroupTradingActivityStats(groupDailyCounts, setup).percentile90TradesPerDay;
+            break;
           default:
             displayValue = data.totalPnl;
         }
+        
+        // Get trading activity stats for this setup
+        const tradingActivityStats = getGroupTradingActivityStats(groupDailyCounts, setup);
         
         return {
           setup,
@@ -293,6 +321,10 @@ export const SetupPerformanceChart = ({
           largestLoss,
           winPnlSum: data.winPnlSum,
           lossPnlSum: data.lossPnlSum,
+          avgTradesPerDay: tradingActivityStats.avgTradesPerDay,
+          medianTradesPerDay: tradingActivityStats.medianTradesPerDay,
+          percentile90TradesPerDay: tradingActivityStats.percentile90TradesPerDay,
+          loggedDays: tradingActivityStats.loggedDays,
         };
       })
       // Sort by value descending (best first)
@@ -380,7 +412,10 @@ export const SetupPerformanceChart = ({
                       case 'tradecount':
                       case 'tradecount_long':
                       case 'tradecount_short':
-                        return `${Math.round(value)}`;
+                      case 'avg_trades_per_day':
+                      case 'median_trades_per_day':
+                      case '90th_percentile_trades':
+                        return value % 1 === 0 ? `${Math.round(value)}` : value.toFixed(1);
                       case 'avg_hold_time':
                       case 'longest_duration':
                         return formatDurationTick(value);
@@ -608,6 +643,63 @@ export const SetupPerformanceChart = ({
                             </p>
                             <p className="text-muted-foreground">
                               Losing Trades: {data.lossCount}
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    }
+                    
+                    if (displayType === 'avg_trades_per_day') {
+                      return (
+                        <div className="bg-card border border-border rounded-lg p-3 shadow-lg">
+                          <p className="text-foreground font-medium mb-2">{data.setup}</p>
+                          <div className="space-y-1 text-sm">
+                            <p className="text-foreground">
+                              Avg Trades/Day: {data.avgTradesPerDay.toFixed(1)}
+                            </p>
+                            <p className="text-muted-foreground">
+                              Logged Days: {data.loggedDays}
+                            </p>
+                            <p className="text-muted-foreground">
+                              Total Trades: {data.tradeCount}
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    }
+                    
+                    if (displayType === 'median_trades_per_day') {
+                      return (
+                        <div className="bg-card border border-border rounded-lg p-3 shadow-lg">
+                          <p className="text-foreground font-medium mb-2">{data.setup}</p>
+                          <div className="space-y-1 text-sm">
+                            <p className="text-foreground">
+                              Median Trades/Day: {data.medianTradesPerDay.toFixed(1)}
+                            </p>
+                            <p className="text-muted-foreground">
+                              Logged Days: {data.loggedDays}
+                            </p>
+                            <p className="text-muted-foreground">
+                              Total Trades: {data.tradeCount}
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    }
+                    
+                    if (displayType === '90th_percentile_trades') {
+                      return (
+                        <div className="bg-card border border-border rounded-lg p-3 shadow-lg">
+                          <p className="text-foreground font-medium mb-2">{data.setup}</p>
+                          <div className="space-y-1 text-sm">
+                            <p className="text-foreground">
+                              90th Pctl Trades/Day: {data.percentile90TradesPerDay.toFixed(1)}
+                            </p>
+                            <p className="text-muted-foreground">
+                              Logged Days: {data.loggedDays}
+                            </p>
+                            <p className="text-muted-foreground">
+                              Total Trades: {data.tradeCount}
                             </p>
                           </div>
                         </div>
