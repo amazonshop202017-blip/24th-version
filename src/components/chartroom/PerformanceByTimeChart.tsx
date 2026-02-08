@@ -78,6 +78,8 @@ interface TimeData {
   largestDailyLoss: number;
   largestDailyLossDate: string;
   losingDaysCount: number;
+  winningDaysCount: number;
+  breakevenDaysCount: number;
   tradesWithRealizedR: number;
   tradesWithPlannedR: number;
 }
@@ -466,6 +468,12 @@ export const PerformanceByTimeChart = ({
           displayValue = riskDrawdownStats.avgDailyDrawdown;
         } else if (displayType === 'largest_daily_loss') {
           displayValue = riskDrawdownStats.largestDailyLoss;
+        } else if (displayType === 'winning_days_count') {
+          displayValue = riskDrawdownStats.winningDaysCount;
+        } else if (displayType === 'losing_days_count') {
+          displayValue = riskDrawdownStats.losingDaysCount;
+        } else if (displayType === 'breakeven_days_count') {
+          displayValue = riskDrawdownStats.breakevenDaysCount;
         }
 
         return {
@@ -512,6 +520,8 @@ export const PerformanceByTimeChart = ({
           largestDailyLoss: riskDrawdownStats.largestDailyLoss,
           largestDailyLossDate: riskDrawdownStats.largestDailyLossDate,
           losingDaysCount: riskDrawdownStats.losingDaysCount,
+          winningDaysCount: riskDrawdownStats.winningDaysCount,
+          breakevenDaysCount: riskDrawdownStats.breakevenDaysCount,
           tradesWithRealizedR: riskDrawdownStats.tradesWithRealizedR,
           tradesWithPlannedR: riskDrawdownStats.tradesWithPlannedR,
         };
@@ -1088,6 +1098,57 @@ export const PerformanceByTimeChart = ({
                                 Date: {data.largestDailyLossDate}
                               </p>
                             )}
+                          </div>
+                        </div>
+                      );
+                    }
+                    
+                    if (displayType === 'winning_days_count') {
+                      return (
+                        <div className="bg-card border border-border rounded-lg p-3 shadow-lg z-50">
+                          <p className="text-foreground font-medium mb-2">{data.label}</p>
+                          <div className="space-y-1 text-sm">
+                            <p className="text-profit">
+                              Winning Days: {data.winningDaysCount}
+                            </p>
+                            <p className="text-muted-foreground">
+                              Total Logged Days: {data.loggedDays}
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    }
+                    
+                    if (displayType === 'losing_days_count') {
+                      return (
+                        <div className="bg-card border border-border rounded-lg p-3 shadow-lg z-50">
+                          <p className="text-foreground font-medium mb-2">{data.label}</p>
+                          <div className="space-y-1 text-sm">
+                            <p className="text-loss">
+                              Losing Days: {data.losingDaysCount}
+                            </p>
+                            <p className="text-muted-foreground">
+                              Total Logged Days: {data.loggedDays}
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    }
+                    
+                    if (displayType === 'breakeven_days_count') {
+                      return (
+                        <div className="bg-card border border-border rounded-lg p-3 shadow-lg z-50">
+                          <p className="text-foreground font-medium mb-2">{data.label}</p>
+                          <div className="space-y-1 text-sm">
+                            <p className="text-foreground">
+                              Breakeven Days: {data.breakevenDaysCount}
+                            </p>
+                            <p className="text-muted-foreground">
+                              Breakeven Threshold: {currencyConfig.symbol}250
+                            </p>
+                            <p className="text-muted-foreground">
+                              Total Logged Days: {data.loggedDays}
+                            </p>
                           </div>
                         </div>
                       );
