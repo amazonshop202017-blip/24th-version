@@ -71,6 +71,8 @@ interface GroupedData {
   largestDailyLoss: number;
   largestDailyLossDate: string;
   losingDaysCount: number;
+  winningDaysCount: number;
+  breakevenDaysCount: number;
   tradesWithRealizedR: number;
   tradesWithPlannedR: number;
 }
@@ -458,6 +460,15 @@ export const TagsCommentsChart = ({
           case 'largest_daily_loss':
             displayValue = getGroupRiskDrawdownStats(groupedTradesMap, name).largestDailyLoss;
             break;
+          case 'winning_days_count':
+            displayValue = getGroupRiskDrawdownStats(groupedTradesMap, name).winningDaysCount;
+            break;
+          case 'losing_days_count':
+            displayValue = getGroupRiskDrawdownStats(groupedTradesMap, name).losingDaysCount;
+            break;
+          case 'breakeven_days_count':
+            displayValue = getGroupRiskDrawdownStats(groupedTradesMap, name).breakevenDaysCount;
+            break;
           default:
             displayValue = data.totalPnl;
         }
@@ -521,6 +532,8 @@ export const TagsCommentsChart = ({
           largestDailyLoss: riskDrawdownStats.largestDailyLoss,
           largestDailyLossDate: riskDrawdownStats.largestDailyLossDate,
           losingDaysCount: riskDrawdownStats.losingDaysCount,
+          winningDaysCount: riskDrawdownStats.winningDaysCount,
+          breakevenDaysCount: riskDrawdownStats.breakevenDaysCount,
           tradesWithRealizedR: riskDrawdownStats.tradesWithRealizedR,
           tradesWithPlannedR: riskDrawdownStats.tradesWithPlannedR,
         };
@@ -820,6 +833,43 @@ export const TagsCommentsChart = ({
             <p>Winners: {data.winCount}</p>
             <p>Losers: {data.lossCount}</p>
             <p>BE: {data.beCount}</p>
+          </div>
+        </div>
+      );
+    }
+
+    if (displayType === 'winning_days_count') {
+      return (
+        <div className="bg-popover border border-border rounded-lg p-3 shadow-xl text-sm">
+          <p className="font-medium text-foreground mb-2">{label}</p>
+          <div className="space-y-1 text-muted-foreground">
+            <p>Winning Days: <span className="text-profit">{data.winningDaysCount}</span></p>
+            <p>Total Logged Days: {data.loggedDays}</p>
+          </div>
+        </div>
+      );
+    }
+
+    if (displayType === 'losing_days_count') {
+      return (
+        <div className="bg-popover border border-border rounded-lg p-3 shadow-xl text-sm">
+          <p className="font-medium text-foreground mb-2">{label}</p>
+          <div className="space-y-1 text-muted-foreground">
+            <p>Losing Days: <span className="text-loss">{data.losingDaysCount}</span></p>
+            <p>Total Logged Days: {data.loggedDays}</p>
+          </div>
+        </div>
+      );
+    }
+
+    if (displayType === 'breakeven_days_count') {
+      return (
+        <div className="bg-popover border border-border rounded-lg p-3 shadow-xl text-sm">
+          <p className="font-medium text-foreground mb-2">{label}</p>
+          <div className="space-y-1 text-muted-foreground">
+            <p>Breakeven Days: <span className="text-foreground">{data.breakevenDaysCount}</span></p>
+            <p>Breakeven Threshold: {currencyConfig.symbol}250</p>
+            <p>Total Logged Days: {data.loggedDays}</p>
           </div>
         </div>
       );

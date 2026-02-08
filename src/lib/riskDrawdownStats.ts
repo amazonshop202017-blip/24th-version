@@ -2,6 +2,12 @@ import { Trade, calculateTradeMetrics } from '@/types/trade';
 import { format, parseISO } from 'date-fns';
 
 /**
+ * Breakeven threshold for determining breakeven days
+ * Using a fixed threshold in base currency units (e.g., ±250)
+ */
+const BREAKEVEN_THRESHOLD = 250;
+
+/**
  * Calculate Risk & Drawdown metrics for a group of trades
  */
 export interface RiskDrawdownStats {
@@ -11,6 +17,9 @@ export interface RiskDrawdownStats {
   largestDailyLoss: number;   // Most negative single-day P&L
   largestDailyLossDate: string; // Date of the largest daily loss
   losingDaysCount: number;    // Number of losing days
+  winningDaysCount: number;   // Number of winning days
+  breakevenDaysCount: number; // Number of breakeven days
+  totalLoggedDays: number;    // Total number of days with trades
   totalRealizedRSum: number;  // Sum of realized R-multiples
   totalPlannedRSum: number;   // Sum of planned R-multiples
   tradesWithRealizedR: number; // Count of trades with realized R-multiple
@@ -26,14 +35,22 @@ export function calculateRiskDrawdownStats(trades: Trade[]): RiskDrawdownStats {
   let tradesWithRealizedR = 0;
   let tradesWithPlannedR = 0;
 
-  // Daily P&L tracking
+  // Daily P&L tracking (includes both open and closed trades)
   const dailyPnL = new Map<string, number>();
 
   trades.forEach(trade => {
     const metrics = calculateTradeMetrics(trade);
     
-    // Only process closed trades for P&L calculations
-    if (metrics.positionStatus !== 'CLOSED') return;
+    // Track daily P&L from open date (both open and closed trades)
+    if (metrics.openDate) {
+      const dateKey = format(parseISO(metrics.openDate), 'yyyy-MM-dd');
+      dailyPnL.set(dateKey, (dailyPnL.get(dateKey) || 0) + metrics.netPnl);
+    }
+    
+    // Only process closed trades for R-multiple calculations
+    if (metrics.positionStatus !== 'CLOSED') {
+      return;
+    }
     
     // Realized R-Multiple from savedRMultiple
     if (typeof trade.savedRMultiple === 'number' && isFinite(trade.savedRMultiple)) {
@@ -46,23 +63,25 @@ export function calculateRiskDrawdownStats(trades: Trade[]): RiskDrawdownStats {
       totalPlannedRSum += trade.savedRRR;
       tradesWithPlannedR++;
     }
-    
-    // Group trades by close date for daily P&L
-    if (metrics.closeDate) {
-      const dateKey = format(parseISO(metrics.closeDate), 'yyyy-MM-dd');
-      dailyPnL.set(dateKey, (dailyPnL.get(dateKey) || 0) + metrics.netPnl);
-    }
   });
 
   // Calculate average R-multiples
   const avgRealizedR = tradesWithRealizedR > 0 ? totalRealizedRSum / tradesWithRealizedR : 0;
   const avgPlannedR = tradesWithPlannedR > 0 ? totalPlannedRSum / tradesWithPlannedR : 0;
 
-  // Calculate daily drawdown stats
+  // Calculate daily metrics
   const dailyPnLValues = Array.from(dailyPnL.entries());
+  const totalLoggedDays = dailyPnLValues.length;
+
+  const winningDays = dailyPnLValues.filter(([_, pnl]) => pnl > 0);
   const losingDays = dailyPnLValues.filter(([_, pnl]) => pnl < 0);
-  
+  const breakevenDays = dailyPnLValues.filter(([_, pnl]) => Math.abs(pnl) <= BREAKEVEN_THRESHOLD);
+
+  const winningDaysCount = winningDays.length;
   const losingDaysCount = losingDays.length;
+  const breakevenDaysCount = breakevenDays.length;
+
+  // Calculate average daily drawdown (average P&L of losing days only)
   const avgDailyDrawdown = losingDaysCount > 0 
     ? losingDays.reduce((sum, [_, pnl]) => sum + pnl, 0) / losingDaysCount 
     : 0;
@@ -84,6 +103,9 @@ export function calculateRiskDrawdownStats(trades: Trade[]): RiskDrawdownStats {
     largestDailyLoss,
     largestDailyLossDate,
     losingDaysCount,
+    winningDaysCount,
+    breakevenDaysCount,
+    totalLoggedDays,
     totalRealizedRSum,
     totalPlannedRSum,
     tradesWithRealizedR,
