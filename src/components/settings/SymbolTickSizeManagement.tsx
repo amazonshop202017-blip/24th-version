@@ -16,10 +16,11 @@ import {
 
 export const SymbolTickSizeManagement = () => {
   const { trades } = useTradesContext();
-  const { tickSizes, setAllTickSizes } = useSymbolTickSize();
+  const { tickSizes, setAllTickSizes, contractSizes, setAllContractSizes } = useSymbolTickSize();
   
   // Local state for editing
   const [localTickSizes, setLocalTickSizes] = useState<Record<string, string>>({});
+  const [localContractSizes, setLocalContractSizes] = useState<Record<string, string>>({});
 
   // Get unique symbols from all trades
   const tradedSymbols = useMemo(() => {
@@ -34,24 +35,31 @@ export const SymbolTickSizeManagement = () => {
 
   // Initialize local state with saved values
   useEffect(() => {
-    const initial: Record<string, string> = {};
+    const initialTick: Record<string, string> = {};
+    const initialContract: Record<string, string> = {};
     tradedSymbols.forEach(symbol => {
-      initial[symbol] = tickSizes[symbol]?.toString() || '';
+      initialTick[symbol] = tickSizes[symbol]?.toString() || '';
+      initialContract[symbol] = contractSizes[symbol]?.toString() || '';
     });
-    setLocalTickSizes(initial);
-  }, [tradedSymbols, tickSizes]);
+    setLocalTickSizes(initialTick);
+    setLocalContractSizes(initialContract);
+  }, [tradedSymbols, tickSizes, contractSizes]);
 
-  const handleInputChange = (symbol: string, value: string) => {
+  const handleTickChange = (symbol: string, value: string) => {
     setLocalTickSizes(prev => ({ ...prev, [symbol]: value }));
+  };
+
+  const handleContractChange = (symbol: string, value: string) => {
+    setLocalContractSizes(prev => ({ ...prev, [symbol]: value }));
   };
 
   const handleSave = () => {
     const newTickSizes: Record<string, number> = {};
+    const newContractSizes: Record<string, number> = {};
     let hasErrors = false;
 
     Object.entries(localTickSizes).forEach(([symbol, value]) => {
-      if (value.trim() === '') return; // Skip empty values
-      
+      if (value.trim() === '') return;
       const numValue = parseFloat(value);
       if (isNaN(numValue) || numValue <= 0) {
         hasErrors = true;
@@ -60,13 +68,24 @@ export const SymbolTickSizeManagement = () => {
       newTickSizes[symbol] = numValue;
     });
 
+    Object.entries(localContractSizes).forEach(([symbol, value]) => {
+      if (value.trim() === '') return;
+      const numValue = parseFloat(value);
+      if (isNaN(numValue) || numValue <= 0) {
+        hasErrors = true;
+        return;
+      }
+      newContractSizes[symbol] = numValue;
+    });
+
     if (hasErrors) {
-      toast.error('Invalid values detected. Please enter positive decimal numbers only.');
+      toast.error('Invalid values detected. Please enter positive numbers only.');
       return;
     }
 
     setAllTickSizes(newTickSizes);
-    toast.success('Tick/Pip sizes saved successfully');
+    setAllContractSizes(newContractSizes);
+    toast.success('Symbol settings saved successfully');
   };
 
   if (tradedSymbols.length === 0) {
@@ -87,6 +106,7 @@ export const SymbolTickSizeManagement = () => {
             <TableRow className="bg-muted/30">
               <TableHead className="font-semibold">Symbol</TableHead>
               <TableHead className="font-semibold">Tick / Pip Size</TableHead>
+              <TableHead className="font-semibold">Contract Size</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -100,7 +120,18 @@ export const SymbolTickSizeManagement = () => {
                     min="0"
                     placeholder="e.g. 0.01"
                     value={localTickSizes[symbol] || ''}
-                    onChange={(e) => handleInputChange(symbol, e.target.value)}
+                    onChange={(e) => handleTickChange(symbol, e.target.value)}
+                    className="w-40 bg-background"
+                  />
+                </TableCell>
+                <TableCell>
+                  <Input
+                    type="number"
+                    step="any"
+                    min="0"
+                    placeholder="e.g. 100"
+                    value={localContractSizes[symbol] || ''}
+                    onChange={(e) => handleContractChange(symbol, e.target.value)}
                     className="w-40 bg-background"
                   />
                 </TableCell>
