@@ -37,7 +37,7 @@ import TradeManagement from "./pages/chartroom/TradeManagement";
 
 const queryClient = new QueryClient();
 
-// App component with all providers properly nested
+// App component with all providers properly nested (contract size registry synced via SymbolTickSizeProvider)
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
