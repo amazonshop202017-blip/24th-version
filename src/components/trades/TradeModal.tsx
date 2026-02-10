@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo, useRef, useCallback } from 'react';
+import { useTradedSymbols } from '@/hooks/useTradedSymbols';
 import { X, Calendar, Star, Settings2, Clock, ChevronDown, Check, Plus, Info, Tags } from 'lucide-react';
 import { ScaleInOutModal } from './ScaleInOutModal';
 import { AssignTagsModal } from './AssignTagsModal';
@@ -59,16 +60,8 @@ export const TradeModal = () => {
     getActiveExitComments,
   } = useCustomStats();
 
-  // Build symbol options from trades + tick size settings (same source as Settings → Symbol Tick/Pip)
-  const symbolOptions = useMemo(() => {
-    const allSymbols = new Set<string>();
-    trades.forEach(trade => {
-      if (trade.symbol) allSymbols.add(trade.symbol);
-    });
-    Object.keys(tickSizes).forEach(s => allSymbols.add(s));
-    Object.keys(contractSizes).forEach(s => allSymbols.add(s));
-    return Array.from(allSymbols).sort();
-  }, [trades, tickSizes, contractSizes]);
+  // Symbol options: single source of truth shared with Settings → Symbol Tick/Pip
+  const symbolOptions = useTradedSymbols();
 
   // Refs
   const scrollContainerRef = useRef<HTMLDivElement>(null);

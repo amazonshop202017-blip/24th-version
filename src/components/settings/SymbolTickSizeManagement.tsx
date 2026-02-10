@@ -1,7 +1,7 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { useTradesContext } from '@/contexts/TradesContext';
+import { useTradedSymbols } from '@/hooks/useTradedSymbols';
 import { useSymbolTickSize } from '@/contexts/SymbolTickSizeContext';
 import { toast } from 'sonner';
 import { Save, Ruler } from 'lucide-react';
@@ -15,23 +15,12 @@ import {
 } from '@/components/ui/table';
 
 export const SymbolTickSizeManagement = () => {
-  const { trades } = useTradesContext();
+  const tradedSymbols = useTradedSymbols();
   const { tickSizes, setAllTickSizes, contractSizes, setAllContractSizes } = useSymbolTickSize();
   
   // Local state for editing
   const [localTickSizes, setLocalTickSizes] = useState<Record<string, string>>({});
   const [localContractSizes, setLocalContractSizes] = useState<Record<string, string>>({});
-
-  // Get unique symbols from all trades
-  const tradedSymbols = useMemo(() => {
-    const symbols = new Set<string>();
-    trades.forEach(trade => {
-      if (trade.symbol) {
-        symbols.add(trade.symbol);
-      }
-    });
-    return Array.from(symbols).sort();
-  }, [trades]);
 
   // Initialize local state with saved values
   useEffect(() => {
