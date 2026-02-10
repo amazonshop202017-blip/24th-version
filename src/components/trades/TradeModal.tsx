@@ -36,7 +36,7 @@ const defaultEntry = (): TradeEntry => ({
 
 export const TradeModal = () => {
   const { isOpen, editingTrade, closeModal } = useTradeModal();
-  const { addTrade, updateTrade } = useTradesContext();
+  const { trades, addTrade, updateTrade } = useTradesContext();
   const { strategies, getStrategyById } = useStrategiesContext();
   const { accounts, getAccountWithStats, getAccountBalanceBeforeTrades } = useAccountsContext();
   const { currencyConfig, selectedAccounts: globalSelectedAccounts, isAllAccountsSelected } = useGlobalFilters();
@@ -59,12 +59,16 @@ export const TradeModal = () => {
     getActiveExitComments,
   } = useCustomStats();
 
-  // Build symbol options from tick size settings
+  // Build symbol options from trades + tick size settings (same source as Settings → Symbol Tick/Pip)
   const symbolOptions = useMemo(() => {
-    const fromTickSizes = Object.keys(tickSizes);
-    const fromContractSizes = Object.keys(contractSizes);
-    return Array.from(new Set([...fromTickSizes, ...fromContractSizes])).sort();
-  }, [tickSizes, contractSizes]);
+    const allSymbols = new Set<string>();
+    trades.forEach(trade => {
+      if (trade.symbol) allSymbols.add(trade.symbol);
+    });
+    Object.keys(tickSizes).forEach(s => allSymbols.add(s));
+    Object.keys(contractSizes).forEach(s => allSymbols.add(s));
+    return Array.from(allSymbols).sort();
+  }, [trades, tickSizes, contractSizes]);
 
   // Refs
   const scrollContainerRef = useRef<HTMLDivElement>(null);
