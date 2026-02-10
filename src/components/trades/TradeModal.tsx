@@ -743,6 +743,7 @@ export const TradeModal = () => {
                     value={symbol}
                     onChange={setSymbol}
                     options={symbolOptions}
+                    onAddNew={(val) => setSymbol(val)}
                     placeholder="e.g., EURUSD, CL, WTI, AAPL..."
                   />
                 </div>
