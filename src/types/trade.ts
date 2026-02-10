@@ -18,7 +18,6 @@ export interface Trade {
   id: string;
   symbol: string;
   side: 'LONG' | 'SHORT';
-  instrument: 'Equity' | 'Futures' | 'Options' | 'Crypto';
   entries: TradeEntry[];
   tradeRisk: number;
   tradeTarget: number;

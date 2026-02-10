@@ -19,10 +19,15 @@ export const useTrades = () => {
           if (!updated.entries) {
             updated = {
               ...updated,
-              instrument: updated.instrument || 'Equity',
               entries: [],
               notes: updated.notes || '',
             };
+          }
+          
+          // Migration: Remove deprecated instrument field (asset class concept)
+          if ('instrument' in updated) {
+            const { instrument, ...rest } = updated;
+            updated = rest;
           }
           
           // Calculate metrics once for all derived field reconciliation

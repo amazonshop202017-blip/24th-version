@@ -8,13 +8,13 @@ import { calculateTradeMetrics } from '@/types/trade';
 import { Info } from 'lucide-react';
 import { Tooltip as UITooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
-interface InstrumentData {
+interface SymbolData {
   symbol: string;
   pnl: number;
   tradeCount: number;
 }
 
-export const InstrumentAnalysisChart = () => {
+export const SymbolAnalysisChart = () => {
   const { filteredTrades: trades } = useFilteredTrades();
   const { currencyConfig } = useGlobalFilters();
   const { isPrivacyMode } = usePrivacyMode();
@@ -22,23 +22,23 @@ export const InstrumentAnalysisChart = () => {
   const chartData = useMemo(() => {
     if (trades.length === 0) return [];
 
-    // Group trades by instrument symbol (case-insensitive)
-    const instrumentMap = new Map<string, { pnl: number; count: number }>();
+    // Group trades by symbol (case-insensitive)
+    const symbolMap = new Map<string, { pnl: number; count: number }>();
 
     trades.forEach(trade => {
       const metrics = calculateTradeMetrics(trade);
       // Normalize symbol to uppercase for grouping
       const normalizedSymbol = trade.symbol.toUpperCase();
       
-      const existing = instrumentMap.get(normalizedSymbol) || { pnl: 0, count: 0 };
-      instrumentMap.set(normalizedSymbol, {
+      const existing = symbolMap.get(normalizedSymbol) || { pnl: 0, count: 0 };
+      symbolMap.set(normalizedSymbol, {
         pnl: existing.pnl + metrics.netPnl,
         count: existing.count + 1,
       });
     });
 
     // Convert to array and sort by absolute P&L descending
-    const data: InstrumentData[] = Array.from(instrumentMap.entries())
+    const data: SymbolData[] = Array.from(symbolMap.entries())
       .map(([symbol, data]) => ({
         symbol,
         pnl: data.pnl,
@@ -66,18 +66,18 @@ export const InstrumentAnalysisChart = () => {
         className="glass-card rounded-xl p-4 h-full flex flex-col min-h-[300px]"
       >
         <div className="flex items-center gap-2 mb-4">
-          <h3 className="text-sm font-medium text-muted-foreground">Instrument analysis</h3>
+          <h3 className="text-sm font-medium text-muted-foreground">Symbol analysis</h3>
           <UITooltip>
             <TooltipTrigger>
               <Info className="h-3.5 w-3.5 text-muted-foreground" />
             </TooltipTrigger>
             <TooltipContent>
-              <p>Shows net P&L breakdown by trading instrument</p>
+              <p>Shows net P&L breakdown by trading symbol</p>
             </TooltipContent>
           </UITooltip>
         </div>
         <div className="flex-1 flex items-center justify-center text-muted-foreground text-sm">
-          Add trades to see instrument analysis
+          Add trades to see symbol analysis
         </div>
       </motion.div>
     );
@@ -91,13 +91,13 @@ export const InstrumentAnalysisChart = () => {
       className="glass-card rounded-xl p-4 h-full flex flex-col min-h-[300px]"
     >
       <div className="flex items-center gap-2 mb-4">
-        <h3 className="text-sm font-medium text-muted-foreground">Instrument analysis</h3>
+        <h3 className="text-sm font-medium text-muted-foreground">Symbol analysis</h3>
         <UITooltip>
           <TooltipTrigger>
             <Info className="h-3.5 w-3.5 text-muted-foreground" />
           </TooltipTrigger>
           <TooltipContent>
-            <p>Shows net P&L breakdown by trading instrument</p>
+            <p>Shows net P&L breakdown by trading symbol</p>
           </TooltipContent>
         </UITooltip>
       </div>
@@ -132,7 +132,7 @@ export const InstrumentAnalysisChart = () => {
               cursor={{ fill: 'hsl(var(--muted))', opacity: 0.3 }}
               content={({ active, payload }) => {
                 if (active && payload && payload.length) {
-                  const data = payload[0].payload as InstrumentData;
+                  const data = payload[0].payload as SymbolData;
                   return (
                     <div className="glass-card rounded-lg px-3 py-2 border border-border/50">
                       <p className="text-xs text-muted-foreground mb-1">{data.symbol}</p>

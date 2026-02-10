@@ -18,7 +18,7 @@ export const COLUMN_GROUPS: ColumnGroup[] = [
   {
     id: 'identification',
     label: 'Trade Identification',
-    columns: ['symbol', 'side', 'volume', 'ticksPips', 'instrument', 'accountName'],
+    columns: ['symbol', 'side', 'volume', 'ticksPips', 'accountName'],
   },
   {
     id: 'timing',
@@ -43,7 +43,6 @@ export const ALL_COLUMNS: ColumnConfig[] = [
   { id: 'side', label: 'Side', group: 'identification', visible: true },
   { id: 'volume', label: 'Volume', group: 'identification', visible: true },
   { id: 'ticksPips', label: 'Ticks / Pips', group: 'identification', visible: false },
-  { id: 'instrument', label: 'Instrument', group: 'identification', visible: true },
   { id: 'accountName', label: 'Account Name', group: 'identification', visible: false },
   
   // Timing - consolidated columns

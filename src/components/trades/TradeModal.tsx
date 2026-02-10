@@ -62,7 +62,7 @@ export const TradeModal = () => {
 
   // Form state
   const [activeTab, setActiveTab] = useState('regular');
-  const [instrument, setInstrument] = useState<'Equity' | 'Futures' | 'Options' | 'Crypto'>('Equity');
+  
   const [strategyId, setStrategyId] = useState<string>('');
   const [direction, setDirection] = useState<'LONG' | 'SHORT'>('LONG');
   const [selectedAccountId, setSelectedAccountId] = useState<string>('');
@@ -187,7 +187,6 @@ export const TradeModal = () => {
   useEffect(() => {
     if (editingTrade) {
       setSymbol(editingTrade.symbol);
-      setInstrument(editingTrade.instrument);
       setAccountName(editingTrade.accountName);
       // Set account ID from accountName
       const matchedAccount = accounts.find(a => a.name === editingTrade.accountName);
@@ -281,7 +280,6 @@ export const TradeModal = () => {
   const resetForm = () => {
     setActiveTab('regular');
     setSymbol('');
-    setInstrument('Equity');
     setAccountName('');
     setSelectedAccountId('');
     setAccountError(false);
@@ -334,7 +332,6 @@ export const TradeModal = () => {
     const formData: TradeFormData = {
       symbol,
       side: direction,
-      instrument,
       entries,
       tradeRisk,
       tradeTarget,
@@ -349,7 +346,7 @@ export const TradeModal = () => {
       missedTrade,
     };
     return calculateTradeMetrics(formData);
-  }, [symbol, direction, instrument, entries, tradeRisk, tradeTarget, accountName, strategyId, selectedTags, notes, positionMAE, positionMFE, potentialMAE, potentialMFE, missedTrade]);
+  }, [symbol, direction, entries, tradeRisk, tradeTarget, accountName, strategyId, selectedTags, notes, positionMAE, positionMFE, potentialMAE, potentialMFE, missedTrade]);
 
   // Calculate actual gross and net P/L
   const effectiveGrossPnl = manualGrossPnl !== '' ? parseFloat(manualGrossPnl) || 0 : metrics.grossPnl;
@@ -467,7 +464,6 @@ export const TradeModal = () => {
     const tradeData: TradeFormData = {
       symbol: symbol.trim(),
       side: direction,
-      instrument,
       entries,
       tradeRisk,
       tradeTarget,

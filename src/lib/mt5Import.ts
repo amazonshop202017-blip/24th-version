@@ -335,7 +335,6 @@ export function parseCSVToTrades(
       const trade: TradeFormData = {
         symbol,
         side,
-        instrument: 'Futures', // MT5 is typically forex/futures
         entries,
         tradeRisk: 0,
         tradeTarget: 0,

@@ -114,7 +114,7 @@ export const useFilteredTradesContext = (activeAccountNames?: string[]) => {
   const { 
     dateRange, 
     selectedAccounts,
-    selectedInstruments,
+    selectedSymbols,
     selectedOutcomes,
     selectedHours,
     selectedSetups,
@@ -167,10 +167,10 @@ export const useFilteredTradesContext = (activeAccountNames?: string[]) => {
       });
     }
 
-    // Filter by instrument
-    if (selectedInstruments.length > 0) {
+    // Filter by symbol
+    if (selectedSymbols.length > 0) {
       filtered = filtered.filter(trade => 
-        selectedInstruments.includes(trade.symbol)
+        selectedSymbols.includes(trade.symbol)
       );
     }
 
@@ -312,7 +312,7 @@ export const useFilteredTradesContext = (activeAccountNames?: string[]) => {
     }
 
     return filtered;
-  }, [trades, dateRange, selectedAccounts, accountNames, selectedInstruments, selectedOutcomes, selectedHours, selectedSetups, selectedDays, lastTradesFilter, selectedDirections, selectedReturnRanges, selectedRMultipleRanges, selectedYear, selectedChecklistItems, selectedTagsByCategory, selectedTradeComments, classifyTradeOutcome]);
+  }, [trades, dateRange, selectedAccounts, accountNames, selectedSymbols, selectedOutcomes, selectedHours, selectedSetups, selectedDays, lastTradesFilter, selectedDirections, selectedReturnRanges, selectedRMultipleRanges, selectedYear, selectedChecklistItems, selectedTagsByCategory, selectedTradeComments, classifyTradeOutcome]);
 
   const stats = useMemo(() => {
     // Classify trades using breakeven tolerance (pass trade-level isBreakeven flag)

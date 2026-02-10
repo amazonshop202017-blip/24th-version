@@ -81,7 +81,7 @@ interface InstrumentPerformanceChartProps {
 
 export const InstrumentPerformanceChart = ({ 
   defaultDisplayType = 'dollar',
-  title = 'Performance by Instrument',
+  title = 'Performance by Symbol',
   useGlobalDefault = true
 }: InstrumentPerformanceChartProps) => {
   const { filteredTrades } = useFilteredTrades();

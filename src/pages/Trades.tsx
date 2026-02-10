@@ -149,7 +149,6 @@ const TableWithStickyHorizontalScroll = ({
                 {isColumnVisible('side') && <TableHead className="px-2">Side</TableHead>}
                 {isColumnVisible('volume') && <TableHead className="px-2">Volume</TableHead>}
                 {isColumnVisible('ticksPips') && <TableHead className="px-2">Ticks/Pips</TableHead>}
-                {isColumnVisible('instrument') && <TableHead className="px-2">Instrument</TableHead>}
                 {isColumnVisible('accountName') && <TableHead className="px-2">Account</TableHead>}
                 {isColumnVisible('openDateTime') && <TableHead className="px-2">Open Date / Time</TableHead>}
                 {isColumnVisible('closeDateTime') && <TableHead className="px-2">Close Date / Time</TableHead>}
@@ -222,10 +221,6 @@ const TableWithStickyHorizontalScroll = ({
                     
                     {isColumnVisible('ticksPips') && (
                       <TableCell className="text-muted-foreground px-2 py-1">—</TableCell>
-                    )}
-                    
-                    {isColumnVisible('instrument') && (
-                      <TableCell className="px-2 py-1">{trade.instrument}</TableCell>
                     )}
                     
                     {isColumnVisible('accountName') && (

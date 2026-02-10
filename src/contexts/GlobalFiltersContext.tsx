@@ -83,8 +83,8 @@ interface GlobalFiltersContextType {
   isAllAccountsSelected: boolean;
   
   // Basic Filters
-  selectedInstruments: string[];
-  setSelectedInstruments: (instruments: string[]) => void;
+  selectedSymbols: string[];
+  setSelectedSymbols: (symbols: string[]) => void;
   selectedOutcomes: OutcomeFilter[];
   setSelectedOutcomes: (outcomes: OutcomeFilter[]) => void;
   selectedHours: number[];
@@ -207,7 +207,7 @@ export const GlobalFiltersProvider = ({ children }: { children: ReactNode }) => 
   const [selectedAccounts, setSelectedAccounts] = useState<string[]>([]);
   
   // Basic filters state
-  const [selectedInstruments, setSelectedInstruments] = useState<string[]>([]);
+  const [selectedSymbols, setSelectedSymbols] = useState<string[]>([]);
   const [selectedOutcomes, setSelectedOutcomes] = useState<OutcomeFilter[]>([]);
   const [selectedHours, setSelectedHours] = useState<number[]>([]);
   const [selectedSetups, setSelectedSetups] = useState<string[]>([]);
@@ -452,8 +452,8 @@ export const GlobalFiltersProvider = ({ children }: { children: ReactNode }) => 
     setSelectedAccounts,
     isAllAccountsSelected,
     // Basic Filters
-    selectedInstruments,
-    setSelectedInstruments,
+    selectedSymbols,
+    setSelectedSymbols,
     selectedOutcomes,
     setSelectedOutcomes,
     selectedHours,
@@ -504,7 +504,7 @@ export const GlobalFiltersProvider = ({ children }: { children: ReactNode }) => 
     dateRange, 
     datePreset, 
     selectedAccounts,
-    selectedInstruments,
+    selectedSymbols,
     selectedOutcomes,
     selectedHours,
     selectedSetups,

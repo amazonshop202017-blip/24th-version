@@ -109,8 +109,8 @@ export const GlobalHeader = () => {
     setSelectedAccounts,
     isAllAccountsSelected,
     // Basic filters
-    selectedInstruments,
-    setSelectedInstruments,
+    selectedSymbols,
+    setSelectedSymbols,
     selectedOutcomes,
     setSelectedOutcomes,
     selectedHours,
@@ -148,10 +148,10 @@ export const GlobalHeader = () => {
   // Get active accounts (excluding archived)
   const activeAccounts = useMemo(() => getActiveAccountsWithStats(), [getActiveAccountsWithStats]);
 
-  // Get unique instruments from trades
-  const availableInstruments = useMemo(() => {
-    const instruments = new Set(trades.map(t => t.symbol));
-    return Array.from(instruments).filter(Boolean).sort();
+  // Get unique symbols from trades
+  const availableSymbols = useMemo(() => {
+    const symbols = new Set(trades.map(t => t.symbol));
+    return Array.from(symbols).filter(Boolean).sort();
   }, [trades]);
 
   // Get available years from trades
@@ -206,12 +206,12 @@ export const GlobalHeader = () => {
     setSelectedAccounts([]);
   };
 
-  // Instrument filter handlers
-  const handleInstrumentToggle = (instrument: string) => {
-    if (selectedInstruments.includes(instrument)) {
-      setSelectedInstruments(selectedInstruments.filter(i => i !== instrument));
+  // Symbol filter handlers
+  const handleSymbolToggle = (symbol: string) => {
+    if (selectedSymbols.includes(symbol)) {
+      setSelectedSymbols(selectedSymbols.filter(i => i !== symbol));
     } else {
-      setSelectedInstruments([...selectedInstruments, instrument]);
+      setSelectedSymbols([...selectedSymbols, symbol]);
     }
   };
 
@@ -322,7 +322,7 @@ export const GlobalHeader = () => {
   // Count active basic filters
   const activeBasicFiltersCount = useMemo(() => {
     let count = 0;
-    if (selectedInstruments.length > 0) count++;
+    if (selectedSymbols.length > 0) count++;
     if (selectedOutcomes.length > 0) count++;
     if (selectedHours.length > 0) count++;
     if (selectedSetups.length > 0) count++;
@@ -334,7 +334,7 @@ export const GlobalHeader = () => {
     if (selectedRMultipleRanges.length > 0) count++;
     if (selectedYear !== null) count++;
     return count;
-  }, [selectedInstruments, selectedOutcomes, selectedHours, selectedSetups, selectedChecklistItems, selectedDays, lastTradesFilter, selectedDirections, selectedReturnRanges, selectedRMultipleRanges, selectedYear]);
+  }, [selectedSymbols, selectedOutcomes, selectedHours, selectedSetups, selectedChecklistItems, selectedDays, lastTradesFilter, selectedDirections, selectedReturnRanges, selectedRMultipleRanges, selectedYear]);
 
   return (
     <div className="flex items-center gap-3 px-8 py-4 border-b border-border bg-card/50 backdrop-blur-sm">
@@ -354,46 +354,46 @@ export const GlobalHeader = () => {
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start" className="w-[900px] p-4 bg-popover border-border z-50">
           <div className="space-y-4">
-            {/* Row 1: Core Trade Context - Instrument, Setup, Checklist of Setup, Outcome, Direction, Starred */}
+            {/* Row 1: Core Trade Context - Symbol, Setup, Checklist of Setup, Outcome, Direction, Starred */}
             <div className="grid grid-cols-6 gap-3">
-              {/* Instrument - Multi-select from trades */}
+              {/* Symbol - Multi-select from trades */}
               <div className="space-y-1.5">
                 <label className="text-xs text-muted-foreground flex items-center gap-1.5">
                   <Globe className="w-3 h-3" />
-                  Instrument
+                  Symbol
                 </label>
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button variant="outline" className="w-full h-9 justify-between text-sm font-normal bg-background border-border">
-                      {selectedInstruments.length === 0 ? 'All' : `${selectedInstruments.length} selected`}
+                      {selectedSymbols.length === 0 ? 'All' : `${selectedSymbols.length} selected`}
                       <ChevronDown className="w-3 h-3 opacity-50" />
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-48 p-2 bg-popover border-border z-[70]" align="start">
                     <div className="space-y-1 max-h-48 overflow-auto">
-                      {availableInstruments.length === 0 ? (
-                        <div className="text-xs text-muted-foreground py-2 text-center">No instruments found</div>
+                      {availableSymbols.length === 0 ? (
+                        <div className="text-xs text-muted-foreground py-2 text-center">No symbols found</div>
                       ) : (
-                        availableInstruments.map((instrument) => (
+                        availableSymbols.map((sym) => (
                           <div 
-                            key={instrument} 
+                            key={sym} 
                             className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-accent cursor-pointer"
-                            onClick={() => handleInstrumentToggle(instrument)}
+                            onClick={() => handleSymbolToggle(sym)}
                           >
-                            <Checkbox checked={selectedInstruments.includes(instrument)} />
-                            <span className="text-sm">{instrument}</span>
+                            <Checkbox checked={selectedSymbols.includes(sym)} />
+                            <span className="text-sm">{sym}</span>
                           </div>
                         ))
                       )}
                     </div>
-                    {selectedInstruments.length > 0 && (
+                    {selectedSymbols.length > 0 && (
                       <>
                         <DropdownMenuSeparator className="my-2" />
                         <Button 
                           variant="ghost" 
                           size="sm" 
                           className="w-full text-xs"
-                          onClick={() => setSelectedInstruments([])}
+                          onClick={() => setSelectedSymbols([])}
                         >
                           Clear selection
                         </Button>

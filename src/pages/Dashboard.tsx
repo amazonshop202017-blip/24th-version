@@ -7,7 +7,7 @@ import { NetDailyPnLChart } from '@/components/dashboard/NetDailyPnLChart';
 import { TradeTimePerformanceChart } from '@/components/dashboard/TradeTimePerformanceChart';
 import { TradeDurationPerformanceChart } from '@/components/dashboard/TradeDurationPerformanceChart';
 import { MonthlyPerformanceCalendar } from '@/components/dashboard/MonthlyPerformanceCalendar';
-import { InstrumentAnalysisChart } from '@/components/dashboard/InstrumentAnalysisChart';
+import { SymbolAnalysisChart } from '@/components/dashboard/InstrumentAnalysisChart';
 import { LongShortAnalysisChart } from '@/components/dashboard/LongShortAnalysisChart';
 import { useFilteredTrades } from '@/hooks/useFilteredTrades';
 import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
@@ -134,9 +134,9 @@ const Dashboard = () => {
           <TradeDurationPerformanceChart />
         </div>
 
-        {/* Row 4: Instrument Analysis (2 cols) | Long/Short Analysis (1 col) */}
+        {/* Row 4: Symbol Analysis (2 cols) | Long/Short Analysis (1 col) */}
         <div className="lg:col-span-2">
-          <InstrumentAnalysisChart />
+          <SymbolAnalysisChart />
         </div>
         <div className="lg:col-span-1">
           <LongShortAnalysisChart />
