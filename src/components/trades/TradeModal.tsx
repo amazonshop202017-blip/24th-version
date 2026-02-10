@@ -21,6 +21,7 @@ import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useCustomStats } from '@/contexts/CustomStatsContext';
 import { useTagsContext } from '@/contexts/TagsContext';
+import { useSymbolTickSize } from '@/contexts/SymbolTickSizeContext';
 import { TradeFormData, TradeEntry, ScaleEntry, calculateTradeMetrics } from '@/types/trade';
 import { cn } from '@/lib/utils';
 
@@ -39,6 +40,7 @@ export const TradeModal = () => {
   const { strategies, getStrategyById } = useStrategiesContext();
   const { accounts, getAccountWithStats, getAccountBalanceBeforeTrades } = useAccountsContext();
   const { currencyConfig, selectedAccounts: globalSelectedAccounts, isAllAccountsSelected } = useGlobalFilters();
+  const { tickSizes, contractSizes, setContractSize } = useSymbolTickSize();
   const { 
     options: customStatsOptions,
     addTimeframe,
@@ -56,6 +58,13 @@ export const TradeModal = () => {
     getActiveTradeManagements,
     getActiveExitComments,
   } = useCustomStats();
+
+  // Build symbol options from tick size settings
+  const symbolOptions = useMemo(() => {
+    const fromTickSizes = Object.keys(tickSizes);
+    const fromContractSizes = Object.keys(contractSizes);
+    return Array.from(new Set([...fromTickSizes, ...fromContractSizes])).sort();
+  }, [tickSizes, contractSizes]);
 
   // Refs
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -525,6 +534,13 @@ export const TradeModal = () => {
     } else {
       addTrade(tradeData);
     }
+
+    // Auto-register new symbol in settings if it doesn't exist
+    const trimmedSymbol = symbol.trim();
+    if (trimmedSymbol && !symbolOptions.includes(trimmedSymbol)) {
+      setContractSize(trimmedSymbol, 1);
+    }
+
     closeModal();
     resetForm();
   };
@@ -716,15 +732,14 @@ export const TradeModal = () => {
                   </div>
                 </div>
 
-                {/* Symbol - Free text input */}
+                {/* Symbol - Searchable/Creatable Dropdown */}
                 <div className="space-y-1.5">
                   <Label className="text-xs text-muted-foreground">Symbol *</Label>
-                  <Input
-                    type="text"
-                    placeholder="e.g., EURUSD, CL, WTI, AAPL..."
+                  <TypeableCombobox
                     value={symbol}
-                    onChange={(e) => setSymbol(e.target.value)}
-                    className="h-10 bg-input border-border"
+                    onChange={setSymbol}
+                    options={symbolOptions}
+                    placeholder="e.g., EURUSD, CL, WTI, AAPL..."
                   />
                 </div>
 
