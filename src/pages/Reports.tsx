@@ -5,6 +5,7 @@ import OverviewStats from '@/components/reports/OverviewStats';
 import YearlyCalendar from '@/components/reports/YearlyCalendar';
 import { CompareView } from '@/components/reports/CompareView';
 import WinsVsLosses from '@/components/reports/WinsVsLosses';
+import { YearlyMonthlyOverview } from '@/components/reports/YearlyMonthlyOverview';
 import { cn } from '@/lib/utils';
 
 const mainTabs = [
@@ -64,7 +65,10 @@ const Reports = () => {
         {activeMainTab === 'overview' ? (
           <OverviewStats />
         ) : activeMainTab === 'calendar' ? (
-          <YearlyCalendar />
+          <div className="space-y-6">
+            <YearlyMonthlyOverview />
+            <YearlyCalendar />
+          </div>
         ) : activeMainTab === 'compare' ? (
           <CompareView />
         ) : activeMainTab === 'reports' ? (
