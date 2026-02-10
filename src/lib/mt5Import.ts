@@ -5,6 +5,7 @@ export interface MT5ImportResult {
   tradesImported: number;
   rowsSkipped: number;
   errors: string[];
+  importedSymbols: string[];
 }
 
 // ========================
@@ -385,17 +386,22 @@ export async function importMT5Trades(
         tradesImported: 0,
         rowsSkipped: skipped,
         errors: ['No valid trades found in the file'],
+        importedSymbols: [],
       };
     }
     
     // Add all trades at once (single state update)
     bulkAddTrades(trades);
+
+    // Collect unique symbols from imported trades
+    const importedSymbols = Array.from(new Set(trades.map(t => t.symbol).filter(Boolean)));
     
     return {
       success: true,
       tradesImported: trades.length,
       rowsSkipped: skipped,
       errors: [],
+      importedSymbols,
     };
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
@@ -406,6 +412,7 @@ export async function importMT5Trades(
       tradesImported: 0,
       rowsSkipped: 0,
       errors,
+      importedSymbols: [],
     };
   }
 }

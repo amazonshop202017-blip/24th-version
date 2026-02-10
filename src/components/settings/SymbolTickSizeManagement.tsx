@@ -39,7 +39,8 @@ export const SymbolTickSizeManagement = () => {
     const initialContract: Record<string, string> = {};
     tradedSymbols.forEach(symbol => {
       initialTick[symbol] = tickSizes[symbol]?.toString() || '';
-      initialContract[symbol] = contractSizes[symbol]?.toString() || '';
+      // Default contract size to 1 if not set
+      initialContract[symbol] = contractSizes[symbol]?.toString() || '1';
     });
     setLocalTickSizes(initialTick);
     setLocalContractSizes(initialContract);

@@ -31,6 +31,7 @@ import {
 } from '@/components/ui/popover';
 import { useAccountsContext } from '@/contexts/AccountsContext';
 import { useTradesContext } from '@/contexts/TradesContext';
+import { useSymbolTickSize } from '@/contexts/SymbolTickSizeContext';
 import { importMT5Trades } from '@/lib/mt5Import';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
@@ -49,6 +50,7 @@ interface AccountImportModalProps {
 export function AccountImportModal({ open, onOpenChange }: AccountImportModalProps) {
   const { accounts, getAccountBalanceBeforeTrades } = useAccountsContext();
   const { bulkAddTrades } = useTradesContext();
+  const { contractSizes, setContractSize } = useSymbolTickSize();
   
   const [selectedAccountId, setSelectedAccountId] = useState<string>('');
   const [importSource, setImportSource] = useState<string>('');
@@ -138,6 +140,12 @@ export function AccountImportModal({ open, onOpenChange }: AccountImportModalPro
       );
       
       if (result.success) {
+        // Auto-register imported symbols with default contract size = 1
+        result.importedSymbols.forEach(sym => {
+          if (!(sym in contractSizes)) {
+            setContractSize(sym, 1);
+          }
+        });
         toast.success(
           `Successfully imported ${result.tradesImported} trades${result.rowsSkipped > 0 ? ` (${result.rowsSkipped} rows skipped)` : ''}`
         );
