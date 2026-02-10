@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
+import { setContractSizeRegistry } from '@/lib/contractSizeRegistry';
 
 interface SymbolTickSizes {
   [symbol: string]: number;
@@ -37,7 +38,10 @@ export const SymbolTickSizeProvider = ({ children }: { children: ReactNode }) =>
   const [contractSizes, setContractSizes] = useState<SymbolContractSizes>(() => {
     try {
       const stored = localStorage.getItem(CONTRACT_STORAGE_KEY);
-      return stored ? JSON.parse(stored) : {};
+      const parsed = stored ? JSON.parse(stored) : {};
+      // Initialize registry on first load
+      setContractSizeRegistry(parsed);
+      return parsed;
     } catch {
       return {};
     }
@@ -49,6 +53,8 @@ export const SymbolTickSizeProvider = ({ children }: { children: ReactNode }) =>
 
   useEffect(() => {
     localStorage.setItem(CONTRACT_STORAGE_KEY, JSON.stringify(contractSizes));
+    // Keep the module-level registry in sync for calculateTradeMetrics
+    setContractSizeRegistry(contractSizes);
   }, [contractSizes]);
 
   const setTickSize = (symbol: string, size: number) => {

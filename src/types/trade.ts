@@ -1,3 +1,5 @@
+import { getContractSizeForSymbol } from '@/lib/contractSizeRegistry';
+
 export interface TradeEntry {
   id: string;
   type: 'BUY' | 'SELL';
@@ -170,11 +172,14 @@ export function calculateTradeMetrics(trade: Trade | TradeFormData): TradeCalcul
   let calculatedGrossPnl = 0;
   
   if (closedQty > 0 && avgEntryPrice > 0 && avgExitPrice > 0) {
+    // Contract size from symbol settings (defaults to 1 if not configured)
+    const contractSize = trade.symbol ? getContractSizeForSymbol(trade.symbol) : 1;
+    
     if (side === 'LONG') {
-      calculatedGrossPnl = (avgExitPrice - avgEntryPrice) * closedQty;
+      calculatedGrossPnl = (avgExitPrice - avgEntryPrice) * closedQty * contractSize;
     } else {
       // SHORT: sell high, buy low to profit
-      calculatedGrossPnl = (avgEntryPrice - avgExitPrice) * closedQty;
+      calculatedGrossPnl = (avgEntryPrice - avgExitPrice) * closedQty * contractSize;
     }
   }
   
