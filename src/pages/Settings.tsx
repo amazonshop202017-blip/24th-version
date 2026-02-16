@@ -14,6 +14,7 @@ import { TradeCommentsManagement } from '@/components/settings/TradeCommentsMana
 import { AccountImportModal } from '@/components/settings/AccountImportModal';
 import { SymbolTickSizeManagement } from '@/components/settings/SymbolTickSizeManagement';
 import { TpSlSettings } from '@/components/settings/TpSlSettings';
+import { FeesSettings } from '@/components/settings/FeesSettings';
 import { toast } from 'sonner';
 import {
   DropdownMenu,
@@ -65,7 +66,7 @@ const Settings = () => {
   };
 
   // Settings tab state - now with 4 tabs
-  const [activeSettingsTab, setActiveSettingsTab] = useState<'main' | 'accounts' | 'custom-tags' | 'trade-comments' | 'symbol-tick' | 'tpsl'>('main');
+  const [activeSettingsTab, setActiveSettingsTab] = useState<'main' | 'accounts' | 'custom-tags' | 'trade-comments' | 'symbol-tick' | 'tpsl' | 'fees'>('main');
   
   // Custom Tags sub-tab state
   const [activeTagsSubTab, setActiveTagsSubTab] = useState<'categories' | 'tags'>('categories');
@@ -207,6 +208,18 @@ const Settings = () => {
         >
           <Target className="w-4 h-4" />
           TP / SL Settings
+        </button>
+        <button
+          onClick={() => setActiveSettingsTab('fees')}
+          className={cn(
+            "flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors",
+            activeSettingsTab === 'fees'
+              ? "bg-background text-foreground shadow-sm"
+              : "text-muted-foreground hover:text-foreground hover:bg-background/50"
+          )}
+        >
+          <DollarSign className="w-4 h-4" />
+          Fees Settings
         </button>
       </div>
 
@@ -683,6 +696,11 @@ const Settings = () => {
       {/* TP / SL Settings Tab Content */}
       {activeSettingsTab === 'tpsl' && (
         <TpSlSettings />
+      )}
+
+      {/* Fees Settings Tab Content */}
+      {activeSettingsTab === 'fees' && (
+        <FeesSettings />
       )}
 
       {/* Deposit/Withdraw Modal */}
