@@ -1,0 +1,268 @@
+import { useMemo } from 'react';
+import { X, Trash2 } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { useGlobalFilters, DayFilter, OutcomeFilter, DirectionFilter, ReturnPercentRange, RMultipleRange } from '@/contexts/GlobalFiltersContext';
+import { useStrategiesContext } from '@/contexts/StrategiesContext';
+import { useCategoriesContext } from '@/contexts/CategoriesContext';
+import { useTagsContext } from '@/contexts/TagsContext';
+
+interface FilterChip {
+  id: string;
+  label: string;
+  value: string;
+  onRemove: () => void;
+}
+
+const DAY_LABELS: Record<DayFilter, string> = {
+  monday: 'Monday', tuesday: 'Tuesday', wednesday: 'Wednesday',
+  thursday: 'Thursday', friday: 'Friday', saturday: 'Saturday', sunday: 'Sunday',
+};
+
+const OUTCOME_LABELS: Record<OutcomeFilter, string> = {
+  win: 'Win', loss: 'Loss', breakeven: 'Breakeven',
+};
+
+const DIRECTION_LABELS: Record<DirectionFilter, string> = {
+  long: 'Long', short: 'Short',
+};
+
+const RETURN_LABELS: Record<ReturnPercentRange, string> = {
+  '<0': '< 0%', '0-1': '0–1%', '1-2': '1–2%', '3-5': '3–5%', '5-10': '5–10%', '>10': '> 10%',
+};
+
+const R_MULTIPLE_LABELS: Record<RMultipleRange, string> = {
+  '<-2': '< -2R', '-2-0': '-2R to 0R', '0-1': '0R to 1R', '1-2': '1R to 2R', '2-4': '2R to 4R', '>4': '> 4R',
+};
+
+export const SelectedFiltersBar = () => {
+  const {
+    selectedSymbols, setSelectedSymbols,
+    selectedOutcomes, setSelectedOutcomes,
+    selectedHours, setSelectedHours,
+    selectedSetups, setSelectedSetups,
+    selectedDays, setSelectedDays,
+    lastTradesFilter, setLastTradesFilter,
+    selectedDirections, setSelectedDirections,
+    selectedReturnRanges, setSelectedReturnRanges,
+    selectedRMultipleRanges, setSelectedRMultipleRanges,
+    selectedYear, setSelectedYear,
+    selectedChecklistItems, setSelectedChecklistItems,
+    selectedTagsByCategory, setSelectedTagsByCategory,
+    selectedTradeComments, setSelectedTradeComments,
+    selectedAccounts, setSelectedAccounts,
+    datePreset, applyDatePreset,
+  } = useGlobalFilters();
+
+  const { strategies } = useStrategiesContext();
+  const { categories } = useCategoriesContext();
+  const { tags } = useTagsContext();
+
+  const chips = useMemo<FilterChip[]>(() => {
+    const result: FilterChip[] = [];
+
+    // Date preset
+    if (datePreset !== 'all') {
+      const presetLabels: Record<string, string> = {
+        today: 'Today', this_week: 'This Week', this_month: 'This Month',
+        last_30_days: 'Last 30 Days', last_month: 'Last Month',
+        this_quarter: 'This Quarter', ytd: 'YTD', custom: 'Custom Range',
+      };
+      result.push({
+        id: 'date', label: 'Date', value: presetLabels[datePreset] || datePreset,
+        onRemove: () => applyDatePreset('all'),
+      });
+    }
+
+    // Accounts
+    selectedAccounts.forEach(acc => {
+      result.push({
+        id: `account-${acc}`, label: 'Account', value: acc,
+        onRemove: () => setSelectedAccounts(selectedAccounts.filter(a => a !== acc)),
+      });
+    });
+
+    // Symbols
+    selectedSymbols.forEach(sym => {
+      result.push({
+        id: `symbol-${sym}`, label: 'Symbol', value: sym,
+        onRemove: () => setSelectedSymbols(selectedSymbols.filter(s => s !== sym)),
+      });
+    });
+
+    // Setups
+    selectedSetups.forEach(setupId => {
+      const name = strategies.find(s => s.id === setupId)?.name || setupId;
+      result.push({
+        id: `setup-${setupId}`, label: 'Setup', value: name,
+        onRemove: () => setSelectedSetups(selectedSetups.filter(s => s !== setupId)),
+      });
+    });
+
+    // Checklist items
+    selectedChecklistItems.forEach(item => {
+      result.push({
+        id: `checklist-${item}`, label: 'Checklist', value: item,
+        onRemove: () => setSelectedChecklistItems(selectedChecklistItems.filter(i => i !== item)),
+      });
+    });
+
+    // Outcomes
+    selectedOutcomes.forEach(o => {
+      result.push({
+        id: `outcome-${o}`, label: 'Outcome', value: OUTCOME_LABELS[o],
+        onRemove: () => setSelectedOutcomes(selectedOutcomes.filter(x => x !== o)),
+      });
+    });
+
+    // Directions
+    selectedDirections.forEach(d => {
+      result.push({
+        id: `direction-${d}`, label: 'Direction', value: DIRECTION_LABELS[d],
+        onRemove: () => setSelectedDirections(selectedDirections.filter(x => x !== d)),
+      });
+    });
+
+    // Year
+    if (selectedYear !== null) {
+      result.push({
+        id: 'year', label: 'Year', value: selectedYear.toString(),
+        onRemove: () => setSelectedYear(null),
+      });
+    }
+
+    // Days
+    selectedDays.forEach(d => {
+      result.push({
+        id: `day-${d}`, label: 'Day', value: DAY_LABELS[d],
+        onRemove: () => setSelectedDays(selectedDays.filter(x => x !== d)),
+      });
+    });
+
+    // Hours
+    selectedHours.forEach(h => {
+      result.push({
+        id: `hour-${h}`, label: 'Hour', value: `${h.toString().padStart(2, '0')}:00`,
+        onRemove: () => setSelectedHours(selectedHours.filter(x => x !== h)),
+      });
+    });
+
+    // Last trades
+    if (lastTradesFilter !== null) {
+      result.push({
+        id: 'last-trades', label: 'Last Trades', value: lastTradesFilter.toString(),
+        onRemove: () => setLastTradesFilter(null),
+      });
+    }
+
+    // Return %
+    selectedReturnRanges.forEach(r => {
+      result.push({
+        id: `return-${r}`, label: 'Return %', value: RETURN_LABELS[r],
+        onRemove: () => setSelectedReturnRanges(selectedReturnRanges.filter(x => x !== r)),
+      });
+    });
+
+    // R-Multiple
+    selectedRMultipleRanges.forEach(r => {
+      result.push({
+        id: `rmultiple-${r}`, label: 'R-Multiple', value: R_MULTIPLE_LABELS[r],
+        onRemove: () => setSelectedRMultipleRanges(selectedRMultipleRanges.filter(x => x !== r)),
+      });
+    });
+
+    // Tags by category
+    Object.entries(selectedTagsByCategory).forEach(([categoryId, tagIds]) => {
+      const categoryName = categories.find(c => c.id === categoryId)?.name || 'Tag';
+      tagIds.forEach(tagId => {
+        const tagName = tags.find(t => t.id === tagId)?.name || tagId;
+        result.push({
+          id: `tag-${categoryId}-${tagId}`, label: categoryName, value: tagName,
+          onRemove: () => {
+            const remaining = tagIds.filter(id => id !== tagId);
+            if (remaining.length === 0) {
+              const { [categoryId]: _, ...rest } = selectedTagsByCategory;
+              setSelectedTagsByCategory(rest);
+            } else {
+              setSelectedTagsByCategory({ ...selectedTagsByCategory, [categoryId]: remaining });
+            }
+          },
+        });
+      });
+    });
+
+    // Trade comments
+    (['entryComments', 'tradeManagements', 'exitComments'] as const).forEach(category => {
+      const labelMap = { entryComments: 'Entry Comment', tradeManagements: 'Trade Mgmt', exitComments: 'Exit Comment' };
+      selectedTradeComments[category].forEach(comment => {
+        result.push({
+          id: `comment-${category}-${comment}`, label: labelMap[category], value: comment,
+          onRemove: () => {
+            setSelectedTradeComments({
+              ...selectedTradeComments,
+              [category]: selectedTradeComments[category].filter(c => c !== comment),
+            });
+          },
+        });
+      });
+    });
+
+    return result;
+  }, [
+    datePreset, selectedAccounts, selectedSymbols, selectedSetups, selectedChecklistItems,
+    selectedOutcomes, selectedDirections, selectedYear, selectedDays, selectedHours,
+    lastTradesFilter, selectedReturnRanges, selectedRMultipleRanges,
+    selectedTagsByCategory, selectedTradeComments, strategies, categories, tags,
+  ]);
+
+  const clearAll = () => {
+    applyDatePreset('all');
+    setSelectedAccounts([]);
+    setSelectedSymbols([]);
+    setSelectedOutcomes([]);
+    setSelectedHours([]);
+    setSelectedSetups([]);
+    setSelectedDays([]);
+    setLastTradesFilter(null);
+    setSelectedDirections([]);
+    setSelectedReturnRanges([]);
+    setSelectedRMultipleRanges([]);
+    setSelectedYear(null);
+    setSelectedChecklistItems([]);
+    setSelectedTagsByCategory({});
+    setSelectedTradeComments({ entryComments: [], tradeManagements: [], exitComments: [] });
+  };
+
+  if (chips.length === 0) return null;
+
+  return (
+    <div className="flex items-center gap-2 px-8 py-2 border-b border-border bg-card/30 flex-wrap">
+      <span className="text-xs font-medium text-muted-foreground shrink-0">Selected Filters:</span>
+      {chips.map((chip) => (
+        <Badge
+          key={chip.id}
+          variant="secondary"
+          className="gap-1 pl-2 pr-1 py-0.5 text-xs font-normal cursor-default"
+        >
+          <span className="text-muted-foreground">{chip.label}:</span>
+          <span>{chip.value}</span>
+          <button
+            onClick={chip.onRemove}
+            className="ml-0.5 rounded-full p-0.5 hover:bg-muted-foreground/20 transition-colors"
+          >
+            <X className="w-3 h-3" />
+          </button>
+        </Badge>
+      ))}
+      <Button
+        variant="ghost"
+        size="sm"
+        className="h-6 px-2 text-xs text-destructive hover:text-destructive gap-1 shrink-0"
+        onClick={clearAll}
+      >
+        <Trash2 className="w-3 h-3" />
+        Clear all
+      </Button>
+    </div>
+  );
+};
