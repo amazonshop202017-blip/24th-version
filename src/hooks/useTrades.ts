@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Trade, TradeFormData, calculateTradeMetrics } from '@/types/trade';
+import { getContractSizeForSymbol } from '@/lib/contractSizeRegistry';
 
 const STORAGE_KEY = 'trading-journal-trades';
 
@@ -28,6 +29,14 @@ export const useTrades = () => {
           if ('instrument' in updated) {
             const { instrument, ...rest } = updated;
             updated = rest;
+          }
+          
+          // Migration: Backfill contractSize from registry for pre-existing trades
+          if (updated.contractSize === undefined && updated.symbol) {
+            updated = {
+              ...updated,
+              contractSize: getContractSizeForSymbol(updated.symbol),
+            };
           }
           
           // Calculate metrics once for all derived field reconciliation

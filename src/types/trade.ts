@@ -1,4 +1,4 @@
-import { getContractSizeForSymbol } from '@/lib/contractSizeRegistry';
+// contractSize is now stored per trade — no registry import needed
 
 export interface TradeEntry {
   id: string;
@@ -70,6 +70,8 @@ export interface Trade {
   // Account snapshot at trade creation time
   accountId?: string;
   accountBalanceSnapshot?: number;
+  // Contract size snapshot — captured at trade creation, never re-read from registry
+  contractSize?: number;
 }
 
 // Calculated values (not stored, computed on-the-fly)
@@ -172,8 +174,8 @@ export function calculateTradeMetrics(trade: Trade | TradeFormData): TradeCalcul
   let calculatedGrossPnl = 0;
   
   if (closedQty > 0 && avgEntryPrice > 0 && avgExitPrice > 0) {
-    // Contract size from symbol settings (defaults to 1 if not configured)
-    const contractSize = trade.symbol ? getContractSizeForSymbol(trade.symbol) : 1;
+    // Contract size stored on trade (defaults to 1 for backward compatibility)
+    const contractSize = trade.contractSize ?? 1;
     
     if (side === 'LONG') {
       calculatedGrossPnl = (avgExitPrice - avgEntryPrice) * closedQty * contractSize;

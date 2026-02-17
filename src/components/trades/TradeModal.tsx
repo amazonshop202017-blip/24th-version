@@ -23,7 +23,8 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { useCustomStats } from '@/contexts/CustomStatsContext';
 import { useTagsContext } from '@/contexts/TagsContext';
 import { useSymbolTickSize } from '@/contexts/SymbolTickSizeContext';
-import { TradeFormData, TradeEntry, ScaleEntry, calculateTradeMetrics } from '@/types/trade';
+import { TradeFormData, TradeEntry, ScaleEntry, calculateTradeMetrics, Trade } from '@/types/trade';
+import { getContractSizeForSymbol } from '@/lib/contractSizeRegistry';
 import { cn } from '@/lib/utils';
 
 const defaultEntry = (): TradeEntry => ({
@@ -524,6 +525,10 @@ export const TradeModal = () => {
       accountBalanceSnapshot: editingTrade && !pnlFieldsChanged
         ? editingTrade.accountBalanceSnapshot
         : accountBalanceSnapshot,
+      // Contract size: snapshot from registry for new trades, preserve stored value for edits
+      contractSize: editingTrade
+        ? editingTrade.contractSize
+        : (getContractSizeForSymbol(symbol.trim()) || 1),
     };
 
     if (editingTrade) {

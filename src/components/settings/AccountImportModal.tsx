@@ -136,7 +136,8 @@ export function AccountImportModal({ open, onOpenChange }: AccountImportModalPro
         account.name,
         selectedAccountId,
         accountBalanceSnapshot,
-        bulkAddTrades
+        bulkAddTrades,
+        contractSizes
       );
       
       if (result.success) {

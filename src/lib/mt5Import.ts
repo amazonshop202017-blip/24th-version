@@ -219,7 +219,8 @@ export function parseCSVToTrades(
   csvContent: string,
   accountName: string,
   accountId: string,
-  accountBalanceSnapshot: number
+  accountBalanceSnapshot: number,
+  contractSizes?: Record<string, number>
 ): { trades: TradeFormData[]; skipped: number } {
   const lines = csvContent.split('\n').filter(line => line.trim().length > 0);
   
@@ -349,6 +350,8 @@ export function parseCSVToTrades(
         savedRMultiple: calculatedRMultiple,
         // Store account balance snapshot for potential recalculation on edit
         accountBalanceSnapshot,
+        // Snapshot contract size from registry at import time
+        contractSize: contractSizes?.[symbol] ?? 1,
       };
       
       trades.push(trade);
@@ -367,7 +370,8 @@ export async function importMT5Trades(
   accountName: string,
   accountId: string,
   accountBalanceSnapshot: number,
-  bulkAddTrades: (tradesData: TradeFormData[]) => void
+  bulkAddTrades: (tradesData: TradeFormData[]) => void,
+  contractSizes?: Record<string, number>
 ): Promise<MT5ImportResult> {
   const errors: string[] = [];
   
@@ -378,7 +382,7 @@ export async function importMT5Trades(
     const csvContent = parseMT5HtmlToCSV(htmlContent);
     
     // Step 2: CSV → Trades (pass account balance for Return % calculation)
-    const { trades, skipped } = parseCSVToTrades(csvContent, accountName, accountId, accountBalanceSnapshot);
+    const { trades, skipped } = parseCSVToTrades(csvContent, accountName, accountId, accountBalanceSnapshot, contractSizes);
     
     if (trades.length === 0) {
       return {
