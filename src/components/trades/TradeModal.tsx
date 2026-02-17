@@ -351,9 +351,13 @@ export const TradeModal = () => {
       potentialMAE,
       potentialMFE,
       missedTrade,
+      // Use stored contractSize for edits, registry value for new trades
+      contractSize: editingTrade
+        ? editingTrade.contractSize
+        : (getContractSizeForSymbol(symbol.trim()) || 1),
     };
     return calculateTradeMetrics(formData);
-  }, [symbol, direction, entries, tradeRisk, tradeTarget, accountName, strategyId, selectedTags, notes, positionMAE, positionMFE, potentialMAE, potentialMFE, missedTrade]);
+  }, [symbol, direction, entries, tradeRisk, tradeTarget, accountName, strategyId, selectedTags, notes, positionMAE, positionMFE, potentialMAE, potentialMFE, missedTrade, editingTrade]);
 
   // Calculate actual gross and net P/L
   const effectiveGrossPnl = manualGrossPnl !== '' ? parseFloat(manualGrossPnl) || 0 : metrics.grossPnl;
