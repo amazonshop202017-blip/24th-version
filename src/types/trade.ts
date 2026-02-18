@@ -41,6 +41,8 @@ export interface Trade {
   missedTrade?: boolean;
   // Manual Gross P/L override
   manualGrossPnl?: number;
+  // Manual Fees override (like manualGrossPnl - undefined means "use computed")
+  manualFees?: number;
   // Scale In/Out entries and exits for persistence
   scaleEntries?: ScaleEntry[];
   scaleExits?: ScaleEntry[];

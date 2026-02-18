@@ -242,10 +242,14 @@ export const TradeModal = () => {
         if (lastEntry && lastEntry.id !== firstEntry.id) {
           setExitDate(lastEntry.datetime);
           setExitPrice(lastEntry.price.toString());
-          setFees(lastEntry.charges > 0 ? lastEntry.charges.toString() : '');
         }
         
         setEntries(editingTrade.entries);
+      }
+
+      // Set manual fees if it exists (user-entered override, even if 0)
+      if (editingTrade.manualFees !== undefined) {
+        setFees(editingTrade.manualFees.toString());
       }
 
       // Set manual gross P/L if it exists
@@ -491,6 +495,8 @@ export const TradeModal = () => {
       potentialMFE,
       missedTrade,
       manualGrossPnl: manualGrossPnl !== '' ? parseFloat(manualGrossPnl) : undefined,
+      // Persist manual fees override (even if 0)
+      manualFees: fees !== '' ? parseFloat(fees) : undefined,
       // Persist scale entries and exits
       scaleEntries: scaleEntries.length > 0 ? scaleEntries : undefined,
       scaleExits: scaleExits.length > 0 ? scaleExits : undefined,
