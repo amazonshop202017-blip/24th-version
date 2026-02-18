@@ -38,7 +38,7 @@ export const ApplyToModal = ({ open, onOpenChange }: ApplyToModalProps) => {
             />
             <div>
               <p className="text-sm font-medium">Apply to existing trades with empty fields only</p>
-              <p className="text-xs text-muted-foreground">Only trades where the related field is null or 0</p>
+              <p className="text-xs text-muted-foreground">Only trades where the related field is null/empty.</p>
             </div>
           </label>
 
