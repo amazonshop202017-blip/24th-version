@@ -8,14 +8,17 @@ import {
 interface ApplyToModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onApply?: (emptyOnly: boolean, overwrite: boolean) => void;
 }
 
-export const ApplyToModal = ({ open, onOpenChange }: ApplyToModalProps) => {
+export const ApplyToModal = ({ open, onOpenChange, onApply }: ApplyToModalProps) => {
   const [emptyOnly, setEmptyOnly] = useState(false);
   const [overwrite, setOverwrite] = useState(false);
 
   const handleApply = () => {
-    // UI only – no trade modifications
+    if (onApply && (emptyOnly || overwrite)) {
+      onApply(emptyOnly, overwrite);
+    }
     onOpenChange(false);
   };
 
