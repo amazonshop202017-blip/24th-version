@@ -371,12 +371,45 @@ export const TradeModal = () => {
     const rules = loadFeeRules();
     const rule = findMatchingFeeRule(rules, selectedAccount.name, symbol.trim());
     if (!rule) return 0;
+
     // When editing, use the original trade's full entries array (preserves all executions)
-    // The modal's `entries` state is a simplified rebuild (max 2) that loses scale-in/out detail
-    const effectiveEntries = editingTrade ? editingTrade.entries : entries;
-    const effectiveSide = editingTrade ? editingTrade.side : direction;
-    return calculateFeeFromRule(rule, effectiveEntries, effectiveSide);
-  }, [selectedAccountId, symbol, entries, direction, accounts, editingTrade]);
+    if (editingTrade) {
+      return calculateFeeFromRule(rule, editingTrade.entries, editingTrade.side);
+    }
+
+    // For new trades: if scale entries/exits exist, build a full TradeEntry[] from them
+    // so fee calculation counts every individual execution (not the simplified 2-entry array)
+    if (scaleEntries.length > 0) {
+      const fullEntries: TradeEntry[] = [];
+      const entryType: 'BUY' | 'SELL' = direction === 'LONG' ? 'BUY' : 'SELL';
+      const exitType: 'BUY' | 'SELL' = direction === 'LONG' ? 'SELL' : 'BUY';
+
+      for (const se of scaleEntries) {
+        fullEntries.push({
+          id: se.id,
+          type: entryType,
+          datetime: entryDate || new Date().toISOString(),
+          quantity: se.quantity,
+          price: se.price,
+          charges: 0,
+        });
+      }
+      for (const sx of scaleExits) {
+        fullEntries.push({
+          id: sx.id,
+          type: exitType,
+          datetime: exitDate || new Date().toISOString(),
+          quantity: sx.quantity,
+          price: sx.price,
+          charges: 0,
+        });
+      }
+      return calculateFeeFromRule(rule, fullEntries, direction);
+    }
+
+    // Fallback: use the simplified modal entries (simple entry + exit)
+    return calculateFeeFromRule(rule, entries, direction);
+  }, [selectedAccountId, symbol, entries, direction, accounts, editingTrade, scaleEntries, scaleExits, entryDate, exitDate]);
 
   // For editing, use the original trade's metrics for auto-calculated gross PnL
   // so multi-entry trades retain correct values instead of using rebuilt simplified entries
