@@ -242,7 +242,7 @@ export const TradeModal = () => {
         if (lastEntry && lastEntry.id !== firstEntry.id) {
           setExitDate(lastEntry.datetime);
           setExitPrice(lastEntry.price.toString());
-          setFees(lastEntry.charges.toString());
+          setFees(lastEntry.charges > 0 ? lastEntry.charges.toString() : '');
         }
         
         setEntries(editingTrade.entries);
