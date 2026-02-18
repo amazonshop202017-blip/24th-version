@@ -20,9 +20,6 @@ import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
 import { useTradedSymbols } from '@/hooks/useTradedSymbols';
 import { useSymbolTickSize } from '@/contexts/SymbolTickSizeContext';
 import { TypeableCombobox } from '@/components/trades/TypeableCombobox';
-import { useTradesContext } from '@/contexts/TradesContext';
-import { Trade } from '@/types/trade';
-import { toast } from 'sonner';
 
 export interface FeeRule {
   id: string;
@@ -67,7 +64,7 @@ export const FeesSettings = () => {
   const [showModal, setShowModal] = useState(false);
   const [editingRuleId, setEditingRuleId] = useState<string | null>(null);
   const [showApplyTo, setShowApplyTo] = useState(false);
-  const [applyingRule, setApplyingRule] = useState<FeeRule | null>(null);
+
   // Form state
   const [formAccountId, setFormAccountId] = useState('');
   const [formSymbol, setFormSymbol] = useState('');
@@ -79,7 +76,6 @@ export const FeesSettings = () => {
   const { selectedAccounts, isAllAccountsSelected, currencyConfig } = useGlobalFilters();
   const tradedSymbols = useTradedSymbols();
   const { setTickSize } = useSymbolTickSize();
-  const { trades, updateTrade } = useTradesContext();
 
   const activeAccounts = accounts.filter(a => !a.isArchived);
 
@@ -167,65 +163,6 @@ export const FeesSettings = () => {
     setFormSymbol(symbol);
   };
 
-  const calculateFeeForTrade = (trade: Trade, rule: FeeRule): number => {
-    const entries = trade.entries || [];
-    const side = trade.side;
-
-    const entryEntries = entries.filter(e =>
-      side === 'LONG' ? e.type === 'BUY' : e.type === 'SELL'
-    );
-    const exitEntries = entries.filter(e =>
-      side === 'LONG' ? e.type === 'SELL' : e.type === 'BUY'
-    );
-
-    if (rule.mode === 'per-execution') {
-      if (rule.apply === 'all') return rule.feeValue * entries.length;
-      if (rule.apply === 'entry-only') return rule.feeValue * entryEntries.length;
-      if (rule.apply === 'exit-only') return rule.feeValue * exitEntries.length;
-    } else {
-      // per-contract
-      const sumQty = (execs: typeof entries) =>
-        execs.reduce((sum, e) => sum + rule.feeValue * e.quantity, 0);
-
-      if (rule.apply === 'all') return sumQty(entries);
-      if (rule.apply === 'entry-only') return sumQty(entryEntries);
-      if (rule.apply === 'exit-only') return sumQty(exitEntries);
-    }
-    return 0;
-  };
-
-  const handleApplyFees = (emptyOnly: boolean, overwrite: boolean) => {
-    if (!applyingRule) return;
-    const rule = applyingRule;
-
-    // Match trades by accountName and symbol
-    const matchingTrades = trades.filter(
-      t => t.accountName === rule.accountName && t.symbol === rule.symbol
-    );
-
-    let updatedCount = 0;
-
-    for (const trade of matchingTrades) {
-      const shouldApply = overwrite
-        ? true
-        : emptyOnly
-          ? trade.manualFees === undefined
-          : false;
-
-      if (!shouldApply) continue;
-
-      const totalFee = calculateFeeForTrade(trade, rule);
-
-      // Build trade form data excluding id/createdAt/updatedAt
-      const { id, createdAt, updatedAt, ...formData } = trade;
-      updateTrade(id, { ...formData, manualFees: totalFee });
-      updatedCount++;
-    }
-
-    toast.success(`Applied fee rule to ${updatedCount} trade${updatedCount !== 1 ? 's' : ''}`);
-    setApplyingRule(null);
-  };
-
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -307,7 +244,7 @@ export const FeesSettings = () => {
                             <Edit2 className="w-4 h-4 mr-2" />
                             Edit
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => { setApplyingRule(rule); setShowApplyTo(true); }} className="cursor-pointer">
+                          <DropdownMenuItem onClick={() => setShowApplyTo(true)} className="cursor-pointer">
                             <PlayCircle className="w-4 h-4 mr-2" />
                             Apply To
                           </DropdownMenuItem>
@@ -419,7 +356,7 @@ export const FeesSettings = () => {
         </DialogContent>
       </Dialog>
 
-      <ApplyToModal open={showApplyTo} onOpenChange={setShowApplyTo} onApply={handleApplyFees} />
+      <ApplyToModal open={showApplyTo} onOpenChange={setShowApplyTo} />
     </div>
   );
 };
