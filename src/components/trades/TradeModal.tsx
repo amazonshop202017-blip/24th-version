@@ -255,8 +255,8 @@ export const TradeModal = () => {
       setEntryComment(editingTrade.entryComment || '');
       setTradeManagement(editingTrade.tradeManagement || '');
       setExitComment(editingTrade.exitComment || '');
-      setFarthestPriceInProfit(editingTrade.farthestPriceInProfit !== undefined ? editingTrade.farthestPriceInProfit.toString() : '');
-      setFarthestPriceInLoss(editingTrade.farthestPriceInLoss !== undefined ? editingTrade.farthestPriceInLoss.toString() : '');
+      setFarthestPriceInProfit(editingTrade.farthestPriceInProfit != null ? editingTrade.farthestPriceInProfit.toString() : '');
+      setFarthestPriceInLoss(editingTrade.farthestPriceInLoss != null ? editingTrade.farthestPriceInLoss.toString() : '');
       setPriceReachedFirst(editingTrade.priceReachedFirst || '');
       setBreakEven(editingTrade.breakEven ?? null);
       
