@@ -39,6 +39,14 @@ export const useTrades = () => {
             };
           }
           
+          // Migration: Normalize mfeTickPip/maeTickPip — ensure they are number|null, never undefined
+          if (updated.mfeTickPip === undefined) {
+            updated = { ...updated, mfeTickPip: null };
+          }
+          if (updated.maeTickPip === undefined) {
+            updated = { ...updated, maeTickPip: null };
+          }
+          
           // Calculate metrics once for all derived field reconciliation
           const metrics = calculateTradeMetrics(updated);
           

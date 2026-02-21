@@ -558,10 +558,13 @@ export const TradeModal = () => {
 
     // For NEW trades only: auto-calculate MFE/MAE in tick/pip units
     if (!editingTrade) {
-      const tickSize = tickSizes[symbol.trim()];
+      const trimmedSymbol = symbol.trim();
+      const tickSize = tickSizes[trimmedSymbol];
       const ep = parseFloat(entryPrice);
       const fpProfit = farthestPriceInProfit !== '' ? parseFloat(farthestPriceInProfit) : NaN;
       const fpLoss = farthestPriceInLoss !== '' ? parseFloat(farthestPriceInLoss) : NaN;
+
+      console.log('[MFE/MAE Debug] symbol:', trimmedSymbol, 'tickSize:', tickSize, 'ep:', ep, 'fpProfit:', fpProfit, 'fpLoss:', fpLoss, 'direction:', direction);
 
       if (tickSize && tickSize > 0 && !isNaN(ep) && !isNaN(fpProfit) && !isNaN(fpLoss)) {
         let profitTicks: number;
@@ -579,6 +582,8 @@ export const TradeModal = () => {
         tradeData.maeTickPip = Math.max(0, Math.floor(lossTicks));
       }
       // else: already null from default assignment
+
+      console.log('[MFE/MAE Debug] Saving mfeTickPip:', tradeData.mfeTickPip, 'maeTickPip:', tradeData.maeTickPip);
     }
 
     if (editingTrade) {
