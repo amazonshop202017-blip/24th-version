@@ -557,32 +557,30 @@ export const TradeModal = () => {
       maeTickPip: editingTrade ? editingTrade.maeTickPip ?? null : null,
     };
 
-    // For NEW trades only: auto-calculate MFE/MAE in tick/pip units
+    // For NEW trades only: auto-calculate MFE/MAE in tick/pip units (independently)
     if (!editingTrade) {
       const trimmedSymbol = symbol.trim();
       const tickSize = tickSizes[trimmedSymbol];
       const ep = parseFloat(entryPrice);
       const fpProfit = farthestPriceInProfit !== '' ? parseFloat(farthestPriceInProfit) : NaN;
       const fpLoss = farthestPriceInLoss !== '' ? parseFloat(farthestPriceInLoss) : NaN;
+      const canCompute = tickSize && tickSize > 0 && !isNaN(ep);
 
-      console.log('[MFE/MAE Debug] symbol:', trimmedSymbol, 'tickSize:', tickSize, 'ep:', ep, 'fpProfit:', fpProfit, 'fpLoss:', fpLoss, 'direction:', direction);
-
-      if (tickSize && tickSize > 0 && !isNaN(ep) && !isNaN(fpProfit) && !isNaN(fpLoss)) {
-        let profitTicks: number;
-        let lossTicks: number;
-
-        if (direction === 'LONG') {
-          profitTicks = (fpProfit - ep) / tickSize;
-          lossTicks = (ep - fpLoss) / tickSize;
-        } else {
-          profitTicks = (ep - fpProfit) / tickSize;
-          lossTicks = (fpLoss - ep) / tickSize;
-        }
-
+      // MFE — independent
+      if (canCompute && !isNaN(fpProfit)) {
+        const profitTicks = direction === 'LONG'
+          ? (fpProfit - ep) / tickSize
+          : (ep - fpProfit) / tickSize;
         tradeData.mfeTickPip = Math.max(0, Math.floor(profitTicks));
+      }
+
+      // MAE — independent
+      if (canCompute && !isNaN(fpLoss)) {
+        const lossTicks = direction === 'LONG'
+          ? (ep - fpLoss) / tickSize
+          : (fpLoss - ep) / tickSize;
         tradeData.maeTickPip = Math.max(0, Math.floor(lossTicks));
       }
-      // else: already null from default assignment
 
       console.log('[MFE/MAE Debug] Saving mfeTickPip:', tradeData.mfeTickPip, 'maeTickPip:', tradeData.maeTickPip);
     }
