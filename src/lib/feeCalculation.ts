@@ -2,8 +2,12 @@ import { TradeEntry } from '@/types/trade';
 
 export interface FeeRule {
   id: string;
-  accountId: string;
-  accountName: string;
+  /** @deprecated Use accountIds */
+  accountId?: string;
+  /** @deprecated Use accountNames */
+  accountName?: string;
+  accountIds: string[];
+  accountNames: string[];
   symbol: string;
   mode: 'per-contract' | 'per-execution';
   apply: 'all' | 'entry-only' | 'exit-only';
@@ -12,10 +16,21 @@ export interface FeeRule {
 
 const FEE_RULES_STORAGE_KEY = 'trading-journal-fee-rules';
 
+/** Migrate legacy single-account rule to multi-account */
+const migrateRule = (raw: any): FeeRule => {
+  if (raw.accountIds && raw.accountNames) return raw as FeeRule;
+  return {
+    ...raw,
+    accountIds: raw.accountId ? [raw.accountId] : [],
+    accountNames: raw.accountName ? [raw.accountName] : [],
+  };
+};
+
 export function loadFeeRules(): FeeRule[] {
   try {
     const stored = localStorage.getItem(FEE_RULES_STORAGE_KEY);
-    return stored ? JSON.parse(stored) : [];
+    if (!stored) return [];
+    return (JSON.parse(stored) as any[]).map(migrateRule);
   } catch {
     return [];
   }
@@ -26,7 +41,7 @@ export function findMatchingFeeRule(
   accountName: string,
   symbol: string
 ): FeeRule | null {
-  return rules.find(r => r.accountName === accountName && r.symbol === symbol) || null;
+  return rules.find(r => r.accountNames.includes(accountName) && r.symbol === symbol) || null;
 }
 
 /**
