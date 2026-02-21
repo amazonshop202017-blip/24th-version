@@ -3,8 +3,12 @@ import { setContractSizeRegistry, setTickSizeRegistry } from '@/lib/contractSize
 
 export interface TickPipRule {
   id: string;
-  accountId: string;
-  accountName: string;
+  /** @deprecated Use accountIds */
+  accountId?: string;
+  /** @deprecated Use accountNames */
+  accountName?: string;
+  accountIds: string[];
+  accountNames: string[];
   symbol: string;
   tickSize: number;
   contractSize: number;
@@ -44,10 +48,23 @@ const RULES_STORAGE_KEY = 'trading-journal-tickpip-rules';
 
 const SymbolTickSizeContext = createContext<SymbolTickSizeContextType | undefined>(undefined);
 
+/** Migrate legacy single-account rules to multi-account format */
+const migrateRule = (raw: any): TickPipRule => {
+  if (raw.accountIds && raw.accountNames) return raw as TickPipRule;
+  // Legacy single-account rule
+  return {
+    ...raw,
+    accountIds: raw.accountId ? [raw.accountId] : [],
+    accountNames: raw.accountName ? [raw.accountName] : [],
+  };
+};
+
 const loadRules = (): TickPipRule[] => {
   try {
     const stored = localStorage.getItem(RULES_STORAGE_KEY);
-    return stored ? JSON.parse(stored) : [];
+    if (!stored) return [];
+    const parsed = JSON.parse(stored) as any[];
+    return parsed.map(migrateRule);
   } catch {
     return [];
   }
@@ -90,11 +107,7 @@ export const SymbolTickSizeProvider = ({ children }: { children: ReactNode }) =>
     setContractSizeRegistry(contractSizes);
   }, [contractSizes]);
 
-  // Keep legacy flat dicts synced to registries (rules are NOT merged here;
-  // rules are strictly account+symbol and resolved via getTickSizeForAccountSymbol)
-  // This ensures the registry only contains legacy/global defaults.
-
-  const setTickSize = (symbol: string, size: number) => {
+  const setTickSizeValue = (symbol: string, size: number) => {
     setTickSizes(prev => ({ ...prev, [symbol]: size }));
   };
 
@@ -146,17 +159,17 @@ export const SymbolTickSizeProvider = ({ children }: { children: ReactNode }) =>
     saveRules(updated);
   };
 
-  // Account+Symbol lookup with fallback
+  // Account+Symbol lookup — strict: only account+symbol rule match
   const getTickSizeForAccountSymbol = (accountName: string, symbol: string): number | undefined => {
     const accountRule = tickPipRules.find(
-      r => r.accountName === accountName && r.symbol === symbol
+      r => r.accountNames.includes(accountName) && r.symbol === symbol
     );
     return accountRule ? accountRule.tickSize : undefined;
   };
 
   const getContractSizeForAccountSymbol = (accountName: string, symbol: string): number => {
     const accountRule = tickPipRules.find(
-      r => r.accountName === accountName && r.symbol === symbol
+      r => r.accountNames.includes(accountName) && r.symbol === symbol
     );
     return accountRule ? accountRule.contractSize : 1;
   };
@@ -164,7 +177,7 @@ export const SymbolTickSizeProvider = ({ children }: { children: ReactNode }) =>
   return (
     <SymbolTickSizeContext.Provider value={{
       tickSizes, contractSizes,
-      setTickSize, setAllTickSizes, getTickSize,
+      setTickSize: setTickSizeValue, setAllTickSizes, getTickSize,
       setContractSize: setContractSizeValue, setAllContractSizes, getContractSize,
       tickPipRules, addTickPipRule, updateTickPipRule, deleteTickPipRule,
       getTickSizeForAccountSymbol, getContractSizeForAccountSymbol,

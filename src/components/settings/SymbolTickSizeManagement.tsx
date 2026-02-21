@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Plus, MoreVertical, ExternalLink, Ruler, Edit2, Trash2, PlayCircle } from 'lucide-react';
 import { ApplyToModal } from '@/components/settings/ApplyToModal';
+import { MultiAccountSelect } from '@/components/settings/MultiAccountSelect';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -9,9 +11,6 @@ import {
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription,
 } from '@/components/ui/dialog';
-import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from '@/components/ui/select';
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
@@ -28,7 +27,7 @@ export const SymbolTickSizeManagement = () => {
   const [showApplyTo, setShowApplyTo] = useState(false);
 
   // Form state
-  const [formAccountId, setFormAccountId] = useState('');
+  const [formAccountIds, setFormAccountIds] = useState<string[]>([]);
   const [formSymbol, setFormSymbol] = useState('');
   const [formTickSize, setFormTickSize] = useState('');
   const [formContractSize, setFormContractSize] = useState('1');
@@ -40,26 +39,28 @@ export const SymbolTickSizeManagement = () => {
 
   const activeAccounts = accounts.filter(a => !a.isArchived);
 
-  // Auto-select account if global filter has a specific one
+  // Auto-select accounts from global filter when opening Add modal
   useEffect(() => {
     if (showModal && !editingRuleId) {
-      if (!isAllAccountsSelected && selectedAccounts.length === 1) {
-        setFormAccountId(selectedAccounts[0]);
+      if (!isAllAccountsSelected && selectedAccounts.length > 0) {
+        // selectedAccounts contains account names, map to IDs
+        const ids = selectedAccounts
+          .map(name => accounts.find(a => a.name === name)?.id)
+          .filter(Boolean) as string[];
+        setFormAccountIds(ids);
       }
     }
-  }, [showModal, isAllAccountsSelected, selectedAccounts, editingRuleId]);
+  }, [showModal, isAllAccountsSelected, selectedAccounts, editingRuleId, accounts]);
 
   const resetForm = () => {
-    setFormAccountId('');
+    setFormAccountIds([]);
     setFormSymbol('');
     setFormTickSize('');
     setFormContractSize('1');
   };
 
   const handleSave = () => {
-    if (!formAccountId || !formSymbol.trim()) return;
-    const account = accounts.find(a => a.id === formAccountId);
-    if (!account) return;
+    if (formAccountIds.length === 0 || !formSymbol.trim()) return;
 
     const tickVal = parseFloat(formTickSize);
     const contractVal = parseFloat(formContractSize);
@@ -73,6 +74,12 @@ export const SymbolTickSizeManagement = () => {
       return;
     }
 
+    const resolvedNames = formAccountIds
+      .map(id => accounts.find(a => a.id === id)?.name)
+      .filter(Boolean) as string[];
+
+    if (resolvedNames.length === 0) return;
+
     // Register new symbol in tick-size registry with default value
     if (!tradedSymbols.includes(formSymbol.trim())) {
       setTickSize(formSymbol.trim(), tickVal);
@@ -80,8 +87,8 @@ export const SymbolTickSizeManagement = () => {
 
     if (editingRuleId) {
       updateTickPipRule(editingRuleId, {
-        accountId: formAccountId,
-        accountName: account.name,
+        accountIds: formAccountIds,
+        accountNames: resolvedNames,
         symbol: formSymbol.trim(),
         tickSize: tickVal,
         contractSize: contractVal,
@@ -89,8 +96,8 @@ export const SymbolTickSizeManagement = () => {
       toast.success('Rule updated');
     } else {
       addTickPipRule({
-        accountId: formAccountId,
-        accountName: account.name,
+        accountIds: formAccountIds,
+        accountNames: resolvedNames,
         symbol: formSymbol.trim(),
         tickSize: tickVal,
         contractSize: contractVal,
@@ -105,7 +112,7 @@ export const SymbolTickSizeManagement = () => {
 
   const handleEdit = (rule: TickPipRule) => {
     setEditingRuleId(rule.id);
-    setFormAccountId(rule.accountId);
+    setFormAccountIds(rule.accountIds);
     setFormSymbol(rule.symbol);
     setFormTickSize(rule.tickSize.toString());
     setFormContractSize(rule.contractSize.toString());
@@ -183,7 +190,13 @@ export const SymbolTickSizeManagement = () => {
               ) : (
                 tickPipRules.map((rule) => (
                   <TableRow key={rule.id} className="border-border">
-                    <TableCell className="font-medium">{rule.accountName}</TableCell>
+                    <TableCell>
+                      <div className="flex flex-wrap gap-1">
+                        {rule.accountNames.map((name) => (
+                          <Badge key={name} variant="secondary" className="text-xs">{name}</Badge>
+                        ))}
+                      </div>
+                    </TableCell>
                     <TableCell>{rule.symbol}</TableCell>
                     <TableCell>{rule.tickSize}</TableCell>
                     <TableCell>{rule.contractSize}</TableCell>
@@ -229,17 +242,13 @@ export const SymbolTickSizeManagement = () => {
           <div className="space-y-5 py-2">
             {/* Account */}
             <div className="space-y-1.5">
-              <label className="text-sm font-medium">Account</label>
-              <Select value={formAccountId} onValueChange={setFormAccountId}>
-                <SelectTrigger className="bg-input border-border">
-                  <SelectValue placeholder="Select account" />
-                </SelectTrigger>
-                <SelectContent>
-                  {activeAccounts.map(acc => (
-                    <SelectItem key={acc.id} value={acc.id}>{acc.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <label className="text-sm font-medium">Account(s)</label>
+              <MultiAccountSelect
+                accounts={activeAccounts}
+                selectedIds={formAccountIds}
+                onChange={setFormAccountIds}
+                placeholder="Select accounts..."
+              />
             </div>
 
             {/* Symbol */}
@@ -285,7 +294,7 @@ export const SymbolTickSizeManagement = () => {
 
           <DialogFooter className="gap-2">
             <Button variant="outline" onClick={resetForm}>Reset</Button>
-            <Button onClick={handleSave} disabled={!formAccountId || !formSymbol.trim()}>Save</Button>
+            <Button onClick={handleSave} disabled={formAccountIds.length === 0 || !formSymbol.trim()}>Save</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

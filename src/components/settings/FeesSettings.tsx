@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Plus, MoreVertical, ExternalLink, DollarSign, Edit2, Trash2, PlayCircle } from 'lucide-react';
 import { ApplyToModal } from '@/components/settings/ApplyToModal';
+import { MultiAccountSelect } from '@/components/settings/MultiAccountSelect';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -27,8 +29,12 @@ import { toast } from 'sonner';
 
 export interface FeeRule {
   id: string;
-  accountId: string;
-  accountName: string;
+  /** @deprecated Use accountIds */
+  accountId?: string;
+  /** @deprecated Use accountNames */
+  accountName?: string;
+  accountIds: string[];
+  accountNames: string[];
   instrument: string;
   symbol: string;
   mode: 'per-contract' | 'per-execution';
@@ -39,10 +45,20 @@ export interface FeeRule {
 
 const STORAGE_KEY = 'trading-journal-fee-rules';
 
+const migrateRule = (raw: any): FeeRule => {
+  if (raw.accountIds && raw.accountNames) return raw as FeeRule;
+  return {
+    ...raw,
+    accountIds: raw.accountId ? [raw.accountId] : [],
+    accountNames: raw.accountName ? [raw.accountName] : [],
+  };
+};
+
 const loadRules = (): FeeRule[] => {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
-    return stored ? JSON.parse(stored) : [];
+    if (!stored) return [];
+    return (JSON.parse(stored) as any[]).map(migrateRule);
   } catch {
     return [];
   }
@@ -70,7 +86,7 @@ export const FeesSettings = () => {
   const [showApplyTo, setShowApplyTo] = useState(false);
   const [applyingRule, setApplyingRule] = useState<FeeRule | null>(null);
   // Form state
-  const [formAccountId, setFormAccountId] = useState('');
+  const [formAccountIds, setFormAccountIds] = useState<string[]>([]);
   const [formSymbol, setFormSymbol] = useState('');
   const [formMode, setFormMode] = useState<FeeRule['mode']>('per-contract');
   const [formApply, setFormApply] = useState<FeeRule['apply']>('all');
@@ -88,7 +104,7 @@ export const FeesSettings = () => {
 
     const rule = applyingRule;
     const matchingTrades = trades.filter(
-      t => t.accountName === rule.accountName && t.symbol === rule.symbol
+      t => rule.accountNames.includes(t.accountName) && t.symbol === rule.symbol
     );
 
     const updates = new Map<string, Partial<import('@/types/trade').TradeFormData>>();
@@ -98,18 +114,15 @@ export const FeesSettings = () => {
       if (!shouldApply) continue;
 
       const fee = calculateFeeFromRule(rule, trade.entries, trade.side);
-      // Build patch with manualFees and recomputed derived fields
       const updatedTrade = { ...trade, manualFees: fee };
       const metrics = calculateTradeMetrics(updatedTrade);
       
       const patch: Partial<import('@/types/trade').TradeFormData> = { manualFees: fee };
       
-      // Recompute savedRMultiple
       if (trade.tradeRisk > 0 && metrics.positionStatus === 'CLOSED') {
         patch.savedRMultiple = metrics.netPnl / trade.tradeRisk;
       }
       
-      // Recompute savedReturnPercent
       if (trade.accountBalanceSnapshot && trade.accountBalanceSnapshot > 0) {
         patch.savedReturnPercent = (metrics.netPnl / trade.accountBalanceSnapshot) * 100;
       }
@@ -128,14 +141,17 @@ export const FeesSettings = () => {
 
   useEffect(() => {
     if (showModal && !editingRuleId) {
-      if (!isAllAccountsSelected && selectedAccounts.length === 1) {
-        setFormAccountId(selectedAccounts[0]);
+      if (!isAllAccountsSelected && selectedAccounts.length > 0) {
+        const ids = selectedAccounts
+          .map(name => accounts.find(a => a.name === name)?.id)
+          .filter(Boolean) as string[];
+        setFormAccountIds(ids);
       }
     }
-  }, [showModal, isAllAccountsSelected, selectedAccounts, editingRuleId]);
+  }, [showModal, isAllAccountsSelected, selectedAccounts, editingRuleId, accounts]);
 
   const resetForm = () => {
-    setFormAccountId('');
+    setFormAccountIds([]);
     setFormSymbol('');
     setFormMode('per-contract');
     setFormApply('all');
@@ -143,9 +159,12 @@ export const FeesSettings = () => {
   };
 
   const handleSave = () => {
-    if (!formAccountId || !formSymbol) return;
-    const account = accounts.find(a => a.id === formAccountId);
-    if (!account) return;
+    if (formAccountIds.length === 0 || !formSymbol) return;
+
+    const resolvedNames = formAccountIds
+      .map(id => accounts.find(a => a.id === id)?.name)
+      .filter(Boolean) as string[];
+    if (resolvedNames.length === 0) return;
 
     if (!tradedSymbols.includes(formSymbol)) {
       setTickSize(formSymbol, 0.01);
@@ -156,8 +175,8 @@ export const FeesSettings = () => {
         r.id === editingRuleId
           ? {
               ...r,
-              accountId: formAccountId,
-              accountName: account.name,
+              accountIds: formAccountIds,
+              accountNames: resolvedNames,
               symbol: formSymbol,
               mode: formMode,
               apply: formApply,
@@ -170,8 +189,8 @@ export const FeesSettings = () => {
     } else {
       const newRule: FeeRule = {
         id: crypto.randomUUID(),
-        accountId: formAccountId,
-        accountName: account.name,
+        accountIds: formAccountIds,
+        accountNames: resolvedNames,
         instrument: '—',
         symbol: formSymbol,
         mode: formMode,
@@ -191,7 +210,7 @@ export const FeesSettings = () => {
 
   const handleEdit = (rule: FeeRule) => {
     setEditingRuleId(rule.id);
-    setFormAccountId(rule.accountId);
+    setFormAccountIds(rule.accountIds);
     setFormSymbol(rule.symbol);
     setFormMode(rule.mode);
     setFormApply(rule.apply);
@@ -273,7 +292,13 @@ export const FeesSettings = () => {
               ) : (
                 rules.map((rule) => (
                   <TableRow key={rule.id} className="border-border">
-                    <TableCell className="font-medium">{rule.accountName}</TableCell>
+                    <TableCell>
+                      <div className="flex flex-wrap gap-1">
+                        {rule.accountNames.map((name) => (
+                          <Badge key={name} variant="secondary" className="text-xs">{name}</Badge>
+                        ))}
+                      </div>
+                    </TableCell>
                     <TableCell className="text-muted-foreground">{rule.instrument}</TableCell>
                     <TableCell>{rule.symbol}</TableCell>
                     <TableCell>{MODE_LABELS[rule.mode]}</TableCell>
@@ -321,17 +346,13 @@ export const FeesSettings = () => {
           <div className="space-y-5 py-2">
             {/* Account */}
             <div className="space-y-1.5">
-              <label className="text-sm font-medium">Account</label>
-              <Select value={formAccountId} onValueChange={setFormAccountId}>
-                <SelectTrigger className="bg-input border-border">
-                  <SelectValue placeholder="Select account" />
-                </SelectTrigger>
-                <SelectContent>
-                  {activeAccounts.map(acc => (
-                    <SelectItem key={acc.id} value={acc.id}>{acc.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <label className="text-sm font-medium">Account(s)</label>
+              <MultiAccountSelect
+                accounts={activeAccounts}
+                selectedIds={formAccountIds}
+                onChange={setFormAccountIds}
+                placeholder="Select accounts..."
+              />
             </div>
 
             {/* Instrument (disabled) */}
@@ -398,7 +419,7 @@ export const FeesSettings = () => {
 
           <DialogFooter className="gap-2">
             <Button variant="outline" onClick={resetForm}>Reset</Button>
-            <Button onClick={handleSave} disabled={!formAccountId || !formSymbol}>Save</Button>
+            <Button onClick={handleSave} disabled={formAccountIds.length === 0 || !formSymbol}>Save</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
