@@ -324,6 +324,8 @@ export const TradeModal = () => {
       contractSize: editingTrade
         ? editingTrade.contractSize
         : (getContractSizeForSymbol(symbol.trim()) || 1),
+      mfeTickPip: null,
+      maeTickPip: null,
     };
     return calculateTradeMetrics(formData);
   }, [symbol, direction, entries, tradeRisk, tradeTarget, accountName, strategyId, selectedTags, notes, editingTrade]);
@@ -549,7 +551,35 @@ export const TradeModal = () => {
       contractSize: editingTrade
         ? editingTrade.contractSize
         : (getContractSizeForSymbol(symbol.trim()) || 1),
+      // MFE/MAE in ticks — preserve existing values for edits, calculate for new trades
+      mfeTickPip: editingTrade ? editingTrade.mfeTickPip ?? null : null,
+      maeTickPip: editingTrade ? editingTrade.maeTickPip ?? null : null,
     };
+
+    // For NEW trades only: auto-calculate MFE/MAE in tick/pip units
+    if (!editingTrade) {
+      const tickSize = tickSizes[symbol.trim()];
+      const ep = parseFloat(entryPrice);
+      const fpProfit = farthestPriceInProfit !== '' ? parseFloat(farthestPriceInProfit) : NaN;
+      const fpLoss = farthestPriceInLoss !== '' ? parseFloat(farthestPriceInLoss) : NaN;
+
+      if (tickSize && tickSize > 0 && !isNaN(ep) && !isNaN(fpProfit) && !isNaN(fpLoss)) {
+        let profitTicks: number;
+        let lossTicks: number;
+
+        if (direction === 'LONG') {
+          profitTicks = (fpProfit - ep) / tickSize;
+          lossTicks = (ep - fpLoss) / tickSize;
+        } else {
+          profitTicks = (ep - fpProfit) / tickSize;
+          lossTicks = (fpLoss - ep) / tickSize;
+        }
+
+        tradeData.mfeTickPip = Math.max(0, Math.floor(profitTicks));
+        tradeData.maeTickPip = Math.max(0, Math.floor(lossTicks));
+      }
+      // else: already null from default assignment
+    }
 
     if (editingTrade) {
       updateTrade(editingTrade.id, tradeData);
