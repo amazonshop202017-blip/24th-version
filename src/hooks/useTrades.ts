@@ -14,6 +14,7 @@ export const useTrades = () => {
         const parsed = JSON.parse(stored);
         // Migrate old trades
         const migrated = parsed.map((trade: any) => {
+          try {
           let updated = trade;
           
           // Migration 1: Convert trades without entries array
@@ -95,7 +96,12 @@ export const useTrades = () => {
           }
           
           return updated;
-        });
+          } catch (err) {
+            console.error('[useTrades] Migration error for trade:', trade?.id, err);
+            // Return trade as-is with safe defaults to prevent app crash
+            return { ...trade, mfeTickPip: trade.mfeTickPip ?? null, maeTickPip: trade.maeTickPip ?? null };
+          }
+        }).filter(Boolean);
         setTrades(migrated);
         // Save migrated trades back to localStorage
         localStorage.setItem(STORAGE_KEY, JSON.stringify(migrated));

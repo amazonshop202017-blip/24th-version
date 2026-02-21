@@ -27,6 +27,7 @@ import { TradeFormData, TradeEntry, ScaleEntry, calculateTradeMetrics, Trade } f
 import { getContractSizeForSymbol } from '@/lib/contractSizeRegistry';
 import { loadFeeRules, findMatchingFeeRule, calculateFeeFromRule } from '@/lib/feeCalculation';
 import { cn } from '@/lib/utils';
+import { TradeModalErrorBoundary } from './TradeModalErrorBoundary';
 
 const defaultEntry = (): TradeEntry => ({
   id: crypto.randomUUID(),
@@ -707,6 +708,7 @@ export const TradeModal = () => {
         side="right" 
         className="w-full sm:max-w-[520px] p-0 flex flex-col bg-background border-l border-border overflow-hidden"
       >
+        <TradeModalErrorBoundary>
         {/* Header */}
         <SheetHeader className="px-6 py-4 border-b border-border flex-shrink-0">
           <div className="flex items-center justify-between">
@@ -1332,9 +1334,10 @@ export const TradeModal = () => {
             </div>
           </div>
         </div>
+        </TradeModalErrorBoundary>
       </SheetContent>
 
-      {/* Scale In/Out Modal */}
+
       <ScaleInOutModal
         isOpen={scaleModalOpen}
         onClose={() => setScaleModalOpen(false)}
