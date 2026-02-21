@@ -523,8 +523,8 @@ export const TradeModal = () => {
       entryComment: entryComment || undefined,
       tradeManagement: tradeManagement || undefined,
       exitComment: exitComment || undefined,
-      farthestPriceInProfit: farthestPriceInProfit !== '' ? parseFloat(farthestPriceInProfit) : undefined,
-      farthestPriceInLoss: farthestPriceInLoss !== '' ? parseFloat(farthestPriceInLoss) : undefined,
+      farthestPriceInProfit: farthestPriceInProfit !== '' ? parseFloat(farthestPriceInProfit) : null,
+      farthestPriceInLoss: farthestPriceInLoss !== '' ? parseFloat(farthestPriceInLoss) : null,
       priceReachedFirst: priceReachedFirst || undefined,
       breakEven: breakEven ?? undefined,
       // Save Return (%) - for new trades, always calculate; for edits, update if P/L or account changed

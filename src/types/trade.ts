@@ -44,8 +44,8 @@ export interface Trade {
   entryComment?: string;
   tradeManagement?: string;
   exitComment?: string;
-  farthestPriceInProfit?: number;
-  farthestPriceInLoss?: number;
+  farthestPriceInProfit?: number | null;
+  farthestPriceInLoss?: number | null;
   priceReachedFirst?: 'takeProfit' | 'stopLoss';
   breakEven?: boolean;
   // Maximum Favorable/Adverse Excursion in ticks/pips (storage only, no auto-calculation)
