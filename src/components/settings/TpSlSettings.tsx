@@ -111,15 +111,22 @@ export const TpSlSettings = () => {
 
       const { tp, sl } = computeAutoTpSl(rule, metrics.avgEntryPrice, trade.side, tickSize);
 
+      const tpEmpty = trade.takeProfit === undefined || trade.takeProfit === null;
+      const slEmpty = trade.stopLoss === undefined || trade.stopLoss === null;
+
       let newTp = trade.takeProfit;
       let newSl = trade.stopLoss;
 
-      if (overwrite) {
+      if (emptyOnly) {
+        // Only apply to trades where BOTH TP and SL are empty
+        if (!tpEmpty || !slEmpty) continue;
         newTp = tp;
         newSl = sl;
-      } else if (emptyOnly) {
-        if (trade.takeProfit === undefined || trade.takeProfit === null) newTp = tp;
-        if (trade.stopLoss === undefined || trade.stopLoss === null) newSl = sl;
+      } else if (overwrite) {
+        // Only apply to trades that have at least one existing TP or SL value
+        if (tpEmpty && slEmpty) continue;
+        newTp = tp;
+        newSl = sl;
       }
 
       // Skip if nothing changed
