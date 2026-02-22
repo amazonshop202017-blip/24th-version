@@ -294,9 +294,9 @@ const TableWithStickyHorizontalScroll = ({
                         "font-mono px-2 py-1",
                         typeof trade.savedRMultiple === 'number'
                           ? trade.savedRMultiple > 0 
-                            ? "profit-text" 
+                            ? "text-profit" 
                             : trade.savedRMultiple < 0 
-                              ? "loss-text" 
+                              ? "text-loss" 
                               : ""
                           : ""
                       )}>
