@@ -205,7 +205,7 @@ const TableWithStickyHorizontalScroll = ({
                       <TableCell className="px-2 py-1">
                         <div className={cn(
                           "inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-xs font-medium",
-                          trade.side === 'LONG' ? "bg-profit/20 profit-text" : "bg-loss/20 loss-text"
+                          trade.side === 'LONG' ? "bg-profit/20 text-profit" : "bg-loss/20 text-loss"
                         )}>
                           {trade.side === 'LONG' ? (
                             <ArrowUpRight className="w-3 h-3" />
@@ -274,7 +274,7 @@ const TableWithStickyHorizontalScroll = ({
                     {isColumnVisible('grossPnl') && (
                       <TableCell className={cn(
                         "font-mono font-semibold px-2 py-1",
-                        isPrivacyMode ? "text-foreground" : metrics.grossPnl >= 0 ? "profit-text" : "loss-text"
+                        isPrivacyMode ? "text-foreground" : metrics.grossPnl >= 0 ? "text-profit" : "text-loss"
                       )}>
                         {maskCurrency(metrics.grossPnl, formatCurrency)}
                       </TableCell>
@@ -283,33 +283,48 @@ const TableWithStickyHorizontalScroll = ({
                     {isColumnVisible('netPnl') && (
                       <TableCell className={cn(
                         "font-mono font-semibold px-2 py-1",
-                        isPrivacyMode ? "text-foreground" : metrics.netPnl >= 0 ? "profit-text" : "loss-text"
+                        isPrivacyMode ? "text-foreground" : metrics.netPnl >= 0 ? "text-profit" : "text-loss"
                       )}>
                         {maskCurrency(metrics.netPnl, formatCurrency)}
                       </TableCell>
                     )}
                     
-                    {isColumnVisible('realizedRMultiple') && (
+                    {isColumnVisible('realizedRMultiple') && (() => {
+                      // Use savedRMultiple if meaningfully stored, otherwise compute from trade data
+                      let rMultiple: number | null = null;
+                      if (typeof trade.savedRMultiple === 'number' && trade.savedRMultiple !== 0) {
+                        rMultiple = trade.savedRMultiple;
+                      } else if (metrics.avgEntryPrice > 0 && metrics.avgExitPrice > 0 && trade.stopLoss && trade.stopLoss > 0) {
+                        const entry = metrics.avgEntryPrice;
+                        const exit = metrics.avgExitPrice;
+                        const sl = trade.stopLoss;
+                        const risk = trade.side === 'LONG' ? entry - sl : sl - entry;
+                        const realizedPnl = trade.side === 'LONG' ? exit - entry : entry - exit;
+                        if (risk > 0) rMultiple = realizedPnl / risk;
+                      }
+                      return (
                       <TableCell className={cn(
                         "font-mono px-2 py-1",
-                        typeof trade.savedRMultiple === 'number'
-                          ? trade.savedRMultiple > 0 
+                        rMultiple !== null
+                          ? rMultiple > 0 
                             ? "text-profit" 
-                            : trade.savedRMultiple < 0 
+                            : rMultiple < 0 
                               ? "text-loss" 
                               : ""
                           : ""
                       )}>
-                        {typeof trade.savedRMultiple === 'number'
-                          ? trade.savedRMultiple.toFixed(2) 
+                        {rMultiple !== null
+                          ? rMultiple.toFixed(2) 
                           : '—'}
                       </TableCell>
-                    )}
+                      );
+                    })()}
+                    
                     {isColumnVisible('plannedRRR') && (
                       <TableCell className={cn(
                         "font-mono px-2 py-1",
                         typeof trade.savedRRR === 'number' && trade.savedRRR > 0
-                          ? "profit-text"
+                          ? "text-profit"
                           : ""
                       )}>
                         {typeof trade.savedRRR === 'number'
@@ -501,7 +516,7 @@ const Trades = () => {
               {stats.totalTrades}
             </span>
           </div>
-          <p className={`text-2xl font-bold font-mono ${isPrivacyMode ? 'text-foreground' : stats.netPnl >= 0 ? 'profit-text' : 'loss-text'}`}>
+          <p className={`text-2xl font-bold font-mono ${isPrivacyMode ? 'text-foreground' : stats.netPnl >= 0 ? 'text-profit' : 'text-loss'}`}>
             {maskCurrency(stats.netPnl, formatCurrency)}
           </p>
         </motion.div>
