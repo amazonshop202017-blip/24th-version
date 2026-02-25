@@ -37,6 +37,7 @@ const chartRoomItems = [
   { label: 'Tags/Comments Analysis', path: '/chart-room/tags-analytics' },
   { label: 'Risk Distribution', path: '/chart-room/risk-distribution' },
   { label: 'Trade Management', path: '/chart-room/trade-management' },
+  { label: 'Exit Analyzer', path: '/chart-room/exit-analyzer' },
 ];
 
 export const Sidebar = () => {

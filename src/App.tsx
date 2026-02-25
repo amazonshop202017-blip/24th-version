@@ -34,6 +34,7 @@ import PerformanceByTime from "./pages/chartroom/PerformanceByTime";
 import TagsAnalytics from "./pages/chartroom/TagsAnalytics";
 import RiskDistribution from "./pages/chartroom/RiskDistribution";
 import TradeManagement from "./pages/chartroom/TradeManagement";
+import ExitAnalyzer from "./pages/chartroom/ExitAnalyzer";
 
 const queryClient = new QueryClient();
 
@@ -73,6 +74,7 @@ const App = () => (
                               <Route path="/chart-room/tags-analytics" element={<TagsAnalytics />} />
                               <Route path="/chart-room/risk-distribution" element={<RiskDistribution />} />
                               <Route path="/chart-room/trade-management" element={<TradeManagement />} />
+                              <Route path="/chart-room/exit-analyzer" element={<ExitAnalyzer />} />
                               <Route path="/settings" element={<Settings />} />
                               <Route path="*" element={<NotFound />} />
                             </Routes>
