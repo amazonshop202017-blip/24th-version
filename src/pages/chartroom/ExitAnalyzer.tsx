@@ -279,6 +279,7 @@ const ExitAnalyzer = () => {
               </div>
             ))}
           </div>
+          </div>
           {/* Legend */}
           <div className="mt-4 flex items-center gap-2 text-xs text-muted-foreground">
             <span>Negative</span>
