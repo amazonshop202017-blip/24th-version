@@ -57,6 +57,10 @@ const ExitAnalyzer = () => {
   const [selectedCells, setSelectedCells] = useState<Set<string>>(new Set());
   const [activeModel, setActiveModel] = useState<{ sl: number; tp: number } | null>(null);
 
+  // Scatter overlay inputs
+  const [scatterTP, setScatterTP] = useState<number>(0);
+  const [scatterSL, setScatterSL] = useState<number>(0);
+
   // Prepare trades
   const exitTrades = useMemo(
     () => prepareExitTrades(filteredTrades, treatMissingAsZero),
