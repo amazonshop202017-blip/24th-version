@@ -222,6 +222,7 @@ const ExitAnalyzer = () => {
           className="glass-card rounded-2xl p-5 overflow-x-auto"
         >
           <h2 className="text-lg font-semibold mb-4">SL / TP Performance Heatmap</h2>
+          <div className="overflow-auto" style={{ maxWidth: `${16*4 + 15 * 82}px`, maxHeight: `${10 + 10 * 82}px` }}>
           <div className="inline-block">
             {/* Header row */}
             <div className="flex">
