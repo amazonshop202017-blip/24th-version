@@ -270,7 +270,6 @@ const ExitAnalyzer = () => {
                         <p>SL: {cell.sl} | TP: {cell.tp}</p>
                         <p>Expectancy: {cell.expectancy.toFixed(3)}R</p>
                         <p>Win Rate: {cell.winRate.toFixed(1)}%</p>
-                        <p>Avg R: {cell.avgR.toFixed(3)}</p>
                         <p>Trades: {cell.tradesCount}</p>
                       </TooltipContent>
                     </Tooltip>
