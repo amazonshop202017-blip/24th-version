@@ -57,6 +57,10 @@ const ExitAnalyzer = () => {
   const [selectedCells, setSelectedCells] = useState<Set<string>>(new Set());
   const [activeModel, setActiveModel] = useState<{ sl: number; tp: number } | null>(null);
 
+  // Scatter overlay inputs
+  const [scatterTP, setScatterTP] = useState<number>(0);
+  const [scatterSL, setScatterSL] = useState<number>(0);
+
   // Prepare trades
   const exitTrades = useMemo(
     () => prepareExitTrades(filteredTrades, treatMissingAsZero),
@@ -344,7 +348,17 @@ const ExitAnalyzer = () => {
           initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
           className="glass-card rounded-2xl p-5"
         >
-          <h2 className="text-lg font-semibold mb-4">MFE / MAE Scatter</h2>
+          <h2 className="text-lg font-semibold mb-3">MFE / MAE Scatter</h2>
+          <div className="flex items-end gap-4 mb-4">
+            <InputField label="Profit (TP) Ticks" value={scatterTP} onChange={setScatterTP} min={0} />
+            <InputField label="Loss (SL) Ticks" value={scatterSL} onChange={setScatterSL} min={0} />
+            {(scatterTP > 0 || scatterSL > 0) && (
+              <div className="text-xs text-muted-foreground pb-1.5 space-y-0.5">
+                {scatterTP > 0 && <p className="text-profit">TP hit: {scatterData.filter(d => d.y >= scatterTP).length} trades</p>}
+                {scatterSL > 0 && <p className="text-loss">SL hit: {scatterData.filter(d => d.x >= scatterSL).length} trades</p>}
+              </div>
+            )}
+          </div>
           <ResponsiveContainer width="100%" height={400}>
             <ScatterChart margin={{ top: 10, right: 20, bottom: 20, left: 10 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(222 47% 18%)" />
@@ -370,6 +384,24 @@ const ExitAnalyzer = () => {
                 }}
                 formatter={(value: number, name: string) => [value, name]}
               />
+              {scatterSL > 0 && (
+                <ReferenceLine
+                  x={scatterSL}
+                  stroke="hsl(0 84% 60%)"
+                  strokeDasharray="6 3"
+                  strokeWidth={2}
+                  label={{ value: `SL ${scatterSL}`, fill: 'hsl(0 84% 60%)', fontSize: 11, position: 'top' }}
+                />
+              )}
+              {scatterTP > 0 && (
+                <ReferenceLine
+                  y={scatterTP}
+                  stroke="hsl(142 76% 45%)"
+                  strokeDasharray="6 3"
+                  strokeWidth={2}
+                  label={{ value: `TP ${scatterTP}`, fill: 'hsl(142 76% 45%)', fontSize: 11, position: 'right' }}
+                />
+              )}
               {activeModel && (
                 <>
                   <ReferenceLine
