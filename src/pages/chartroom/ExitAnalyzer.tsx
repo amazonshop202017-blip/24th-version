@@ -343,8 +343,9 @@ const ExitAnalyzer = () => {
                   },
                 },
                 itemStyle: {
-                  borderWidth: 1,
+                  borderWidth: 3,
                   borderColor: 'hsl(222, 47%, 14%)',
+                  borderRadius: 6,
                 },
               }],
               backgroundColor: 'transparent',
