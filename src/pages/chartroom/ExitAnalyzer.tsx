@@ -480,24 +480,6 @@ const ExitAnalyzer = () => {
                   label={{ value: `TP ${scatterTP}`, fill: 'hsl(142 76% 45%)', fontSize: 11, position: 'right' }}
                 />
               )}
-              {activeModel && (
-                <>
-                  <ReferenceLine
-                    x={activeModel.sl}
-                    stroke="hsl(0 84% 60%)"
-                    strokeDasharray="6 3"
-                    strokeWidth={2}
-                    label={{ value: `SL ${activeModel.sl}`, fill: 'hsl(0 84% 60%)', fontSize: 11, position: 'top' }}
-                  />
-                  <ReferenceLine
-                    y={activeModel.tp}
-                    stroke="hsl(142 76% 45%)"
-                    strokeDasharray="6 3"
-                    strokeWidth={2}
-                    label={{ value: `TP ${activeModel.tp}`, fill: 'hsl(142 76% 45%)', fontSize: 11, position: 'right' }}
-                  />
-                </>
-              )}
               <Scatter data={scatterData} fill="hsl(199 89% 48%)" fillOpacity={0.6} r={4}>
                 {scatterData.map((_, i) => (
                   <RechartsCell key={i} fill="hsl(199 89% 48%)" />
