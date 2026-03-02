@@ -77,28 +77,8 @@ const ExitAnalyzer = () => {
     [filteredTrades, treatMissingAsZero]
   );
 
-  // Check for zoom
-  const zoomedRange = useMemo(() => {
-    if (selectedCells.size === 0) return null;
-    const selected = Array.from(selectedCells).map(k => {
-      const [s, t] = k.split(':').map(Number);
-      return { sl: s, tp: t };
-    });
-    const sls = selected.map(s => s.sl);
-    const tps = selected.map(s => s.tp);
-    const margin = 2;
-    return {
-      minSL: Math.max(1, Math.min(...sls) - margin * slStep),
-      maxSL: Math.max(...sls) + margin * slStep,
-      minTP: Math.max(1, Math.min(...tps) - margin * tpStep),
-      maxTP: Math.max(...tps) + margin * tpStep,
-      slStep: Math.max(1, Math.round(slStep / 2)),
-      tpStep: Math.max(1, Math.round(tpStep / 2)),
-    };
-  }, [selectedCells, slStep, tpStep]);
-
   // Compute heatmap
-  const heatmapRange = zoomedRange || { minSL, maxSL, minTP, maxTP, slStep, tpStep };
+  const heatmapRange = { minSL, maxSL, minTP, maxTP, slStep, tpStep };
   const isValidRange = heatmapRange.minSL > 0 && heatmapRange.maxSL >= heatmapRange.minSL &&
     heatmapRange.minTP > 0 && heatmapRange.maxTP >= heatmapRange.minTP &&
     heatmapRange.slStep > 0 && heatmapRange.tpStep > 0;
@@ -207,9 +187,6 @@ const ExitAnalyzer = () => {
             <button onClick={clearSelection} className="text-primary hover:underline">
               Clear selection ({selectedCells.size})
             </button>
-          )}
-          {zoomedRange && (
-            <span className="text-primary">🔍 Zoomed view</span>
           )}
         </div>
       </motion.div>
