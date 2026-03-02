@@ -210,10 +210,9 @@ const ExitAnalyzer = () => {
       {heatmapCells.length > 0 && (
         <motion.div
           initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-          className="glass-card rounded-2xl p-5 overflow-auto"
-          style={{ maxHeight: 700 }}
+          className="glass-card rounded-2xl overflow-hidden"
         >
-          <div className="flex items-center justify-between mb-4 sticky top-0 left-0 z-10 bg-card pb-3 -mx-5 -mt-5 px-5 pt-5 rounded-t-2xl">
+          <div className="flex items-center justify-between px-5 py-4">
             <h2 className="text-lg font-semibold">SL / TP Performance Heatmap</h2>
             <div className="flex items-center gap-2">
               <span className="text-xs text-muted-foreground">Coloring:</span>
@@ -233,6 +232,7 @@ const ExitAnalyzer = () => {
               </div>
             </div>
           </div>
+          <div className="overflow-auto px-5 pb-5" style={{ maxHeight: 600 }}>
           <ReactEChartsCore
             echarts={echarts}
             style={{ width: Math.max(600, tpValues.length * 80 + 120), height: Math.max(400, slValues.length * 60 + 120) }}
