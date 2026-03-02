@@ -258,7 +258,7 @@ const ExitAnalyzer = () => {
           </div>
           <ReactEChartsCore
             echarts={echarts}
-            style={{ width: Math.max(600, tpValues.length * 60 + 120), height: Math.max(400, slValues.length * 50 + 120) }}
+            style={{ width: Math.max(600, tpValues.length * 80 + 120), height: Math.max(400, slValues.length * 60 + 120) }}
             option={{
               tooltip: {
                 position: 'top',
@@ -327,18 +327,37 @@ const ExitAnalyzer = () => {
                   const xi = tpValues.indexOf(c.tp);
                   const yi = slValues.indexOf(c.sl);
                   const colorVal = coloringMode === 'expectancy' ? c.expectancy : c.winRate;
-                  return [xi, yi, colorVal];
+                  return { value: [xi, yi, colorVal], expectancy: c.expectancy, winRate: c.winRate };
                 }),
                 label: {
                   show: true,
                   formatter: (params: any) => {
-                    const val = params.value[2] as number;
-                    if (coloringMode === 'winrate') return `${val.toFixed(1)}%`;
-                    return `${val >= 0 ? '+' : ''}${val.toFixed(2)}R`;
+                    const exp = params.data.expectancy as number;
+                    const wr = params.data.winRate as number;
+                    const expStr = `${exp >= 0 ? '+' : ''}${exp.toFixed(2)}R`;
+                    const wrStr = `${wr.toFixed(1)}%`;
+                    if (coloringMode === 'expectancy') {
+                      return `{primary|${expStr}}\n{secondary|WR: ${wrStr}}`;
+                    }
+                    return `{primary|${wrStr}}\n{secondary|Exp: ${expStr}}`;
                   },
-                  color: 'hsl(210, 40%, 98%)',
-                  fontSize: 11,
-                  fontFamily: 'monospace',
+                  rich: {
+                    primary: {
+                      fontSize: 11,
+                      fontFamily: 'monospace',
+                      fontWeight: 'bold' as const,
+                      color: 'hsl(210, 40%, 98%)',
+                      align: 'center' as const,
+                      lineHeight: 16,
+                    },
+                    secondary: {
+                      fontSize: 9,
+                      fontFamily: 'monospace',
+                      color: 'hsla(210, 40%, 98%, 0.65)',
+                      align: 'center' as const,
+                      lineHeight: 14,
+                    },
+                  },
                 },
                 emphasis: {
                   itemStyle: {
