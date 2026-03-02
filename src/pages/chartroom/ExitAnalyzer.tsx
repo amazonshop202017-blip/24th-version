@@ -236,7 +236,26 @@ const ExitAnalyzer = () => {
           className="glass-card rounded-2xl p-5 overflow-auto"
           style={{ maxHeight: 700 }}
         >
-          <h2 className="text-lg font-semibold mb-4 sticky top-0 left-0 z-10">SL / TP Performance Heatmap</h2>
+          <div className="flex items-center justify-between mb-4 sticky top-0 left-0 z-10">
+            <h2 className="text-lg font-semibold">SL / TP Performance Heatmap</h2>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-muted-foreground">Coloring:</span>
+              <div className="flex rounded-md border border-border overflow-hidden">
+                <button
+                  onClick={() => setColoringMode('expectancy')}
+                  className={`px-3 py-1 text-xs font-medium transition-colors ${coloringMode === 'expectancy' ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground hover:text-foreground'}`}
+                >
+                  Expectancy
+                </button>
+                <button
+                  onClick={() => setColoringMode('winrate')}
+                  className={`px-3 py-1 text-xs font-medium transition-colors ${coloringMode === 'winrate' ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground hover:text-foreground'}`}
+                >
+                  Win Rate
+                </button>
+              </div>
+            </div>
+          </div>
           <ReactEChartsCore
             echarts={echarts}
             style={{ width: Math.max(600, tpValues.length * 60 + 120), height: Math.max(400, slValues.length * 50 + 120) }}
