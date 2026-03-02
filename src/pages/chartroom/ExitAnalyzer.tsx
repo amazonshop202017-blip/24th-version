@@ -232,135 +232,78 @@ const ExitAnalyzer = () => {
               </div>
             </div>
           </div>
-          <div className="overflow-auto px-5 pb-5" style={{ maxHeight: 600 }}>
-          <ReactEChartsCore
-            echarts={echarts}
-            style={{ width: Math.max(600, tpValues.length * 80 + 120), height: Math.max(400, slValues.length * 60 + 120) }}
-            option={{
-              tooltip: {
-                position: 'top',
-                formatter: (params: any) => {
-                  const cell = cellMap.get(`${slValues[params.value[1]]}:${tpValues[params.value[0]]}`);
-                  if (!cell) return '';
-                  return `<div style="font-family:monospace;font-size:12px">
-                    <div>SL: ${cell.sl} | TP: ${cell.tp}</div>
-                    <div>Expectancy: ${cell.expectancy >= 0 ? '+' : ''}${cell.expectancy.toFixed(3)}R</div>
-                    <div>Win Rate: ${cell.winRate.toFixed(1)}%</div>
-                    <div>Trades: ${cell.tradesCount}</div>
-                  </div>`;
-                },
-              },
-              grid: {
-                top: 30,
-                bottom: 60,
-                left: 70,
-                right: 30,
-                containLabel: false,
-              },
-              xAxis: {
-                type: 'category',
-                data: tpValues.map(String),
-                name: 'TP (ticks)',
-                nameLocation: 'middle',
-                nameGap: 35,
-                nameTextStyle: { color: 'hsl(215, 20%, 55%)', fontSize: 12 },
-                splitArea: { show: true },
-                axisLabel: { color: 'hsl(215, 20%, 55%)', fontSize: 11 },
-                axisLine: { lineStyle: { color: 'hsl(222, 47%, 18%)' } },
-                axisTick: { lineStyle: { color: 'hsl(222, 47%, 18%)' } },
-              },
-              yAxis: {
-                type: 'category',
-                data: slValues.map(String),
-                name: 'SL (ticks)',
-                nameLocation: 'middle',
-                nameGap: 45,
-                nameTextStyle: { color: 'hsl(215, 20%, 55%)', fontSize: 12 },
-                splitArea: { show: true },
-                axisLabel: { color: 'hsl(215, 20%, 55%)', fontSize: 11 },
-                axisLine: { lineStyle: { color: 'hsl(222, 47%, 18%)' } },
-                axisTick: { lineStyle: { color: 'hsl(222, 47%, 18%)' } },
-              },
-              visualMap: {
-                min: coloringMode === 'expectancy'
-                  ? Math.min(...heatmapCells.map(c => c.expectancy))
-                  : Math.min(...heatmapCells.map(c => c.winRate)),
-                max: coloringMode === 'expectancy'
-                  ? Math.max(...heatmapCells.map(c => c.expectancy))
-                  : Math.max(...heatmapCells.map(c => c.winRate)),
-                calculable: false,
-                orient: 'horizontal',
-                left: 'center',
-                bottom: 0,
-                inRange: {
-                  color: ['#8B3A1A', '#C96A2B', '#D4944A', '#6BAF6E', '#2FAF7A', '#1A7A4E'],
-                },
-                textStyle: { color: 'hsl(215, 20%, 55%)' },
-              },
-              series: [{
-                name: coloringMode === 'expectancy' ? 'Expectancy' : 'Win Rate',
-                type: 'heatmap',
-                data: heatmapCells.map(c => {
-                  const xi = tpValues.indexOf(c.tp);
-                  const yi = slValues.indexOf(c.sl);
-                  const colorVal = coloringMode === 'expectancy' ? c.expectancy : c.winRate;
-                  return { value: [xi, yi, colorVal], expectancy: c.expectancy, winRate: c.winRate };
-                }),
-                label: {
-                  show: true,
-                  formatter: (params: any) => {
-                    const exp = params.data.expectancy as number;
-                    const wr = params.data.winRate as number;
-                    const expStr = `${exp >= 0 ? '+' : ''}${exp.toFixed(2)}R`;
-                    const wrStr = `${wr.toFixed(1)}%`;
-                    if (coloringMode === 'expectancy') {
-                      return `{primary|${expStr}}\n{secondary|WR: ${wrStr}}`;
-                    }
-                    return `{primary|${wrStr}}\n{secondary|Exp: ${expStr}}`;
-                  },
-                  rich: {
-                    primary: {
-                      fontSize: 11,
-                      fontFamily: 'monospace',
-                      fontWeight: 'bold' as const,
-                      color: 'hsl(210, 40%, 98%)',
-                      align: 'center' as const,
-                      lineHeight: 16,
-                    },
-                    secondary: {
-                      fontSize: 9,
-                      fontFamily: 'monospace',
-                      color: 'hsla(210, 40%, 98%, 0.65)',
-                      align: 'center' as const,
-                      lineHeight: 14,
-                    },
-                  },
-                },
-                emphasis: {
-                  itemStyle: {
-                    shadowBlur: 10,
-                    shadowColor: 'rgba(0, 0, 0, 0.5)',
-                  },
-                },
-                itemStyle: {
-                  borderWidth: 6,
-                  borderColor: 'hsl(222, 47%, 8%)',
-                  borderRadius: 10,
-                },
-              }],
-              backgroundColor: 'transparent',
-            }}
-            onEvents={{
-              click: (params: any) => {
-                if (params.componentType === 'series' && params.data?.value) {
-                  const val = params.data.value;
-                  const key = `${slValues[val[1]]}:${tpValues[val[0]]}`;
-                  toggleCell(key);
-                }
-              },
-            }}
-            notMerge={true}
-          />
+          <div className="overflow-auto" style={{ maxHeight: 600 }}>
+            <table className="border-separate" style={{ borderSpacing: 6 }}>
+              <thead>
+                <tr>
+                  <th className="sticky top-0 left-0 z-30 bg-card px-3 py-2 text-xs font-medium text-muted-foreground whitespace-nowrap">
+                    SL \ TP
+                  </th>
+                  {tpValues.map(tp => (
+                    <th key={tp} className="sticky top-0 z-20 bg-card px-3 py-2 text-xs font-medium text-muted-foreground whitespace-nowrap text-center">
+                      {tp}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {slValues.map(sl => (
+                  <tr key={sl}>
+                    <td className="sticky left-0 z-10 bg-card px-3 py-2 text-xs font-medium text-muted-foreground whitespace-nowrap text-right">
+                      {sl}
+                    </td>
+                    {tpValues.map(tp => {
+                      const cell = cellMap.get(`${sl}:${tp}`);
+                      if (!cell) return <td key={tp} className="rounded-lg" style={{ minWidth: 80, minHeight: 50 }} />;
+                      
+                      const colorVal = coloringMode === 'expectancy' ? cell.expectancy : cell.winRate;
+                      const allVals = heatmapCells.map(c => coloringMode === 'expectancy' ? c.expectancy : c.winRate);
+                      const minVal = Math.min(...allVals);
+                      const maxVal = Math.max(...allVals);
+                      const range = maxVal - minVal || 1;
+                      const ratio = (colorVal - minVal) / range; // 0..1
+                      
+                      // Gradient: orange (#C96A2B) to green (#2FAF7A)
+                      const colors = [
+                        [139, 58, 26],   // #8B3A1A
+                        [201, 106, 43],  // #C96A2B
+                        [212, 148, 74],  // #D4944A
+                        [107, 175, 110], // #6BAF6E
+                        [47, 175, 122],  // #2FAF7A
+                        [26, 122, 78],   // #1A7A4E
+                      ];
+                      const segment = ratio * (colors.length - 1);
+                      const idx = Math.min(Math.floor(segment), colors.length - 2);
+                      const t = segment - idx;
+                      const r = Math.round(colors[idx][0] + t * (colors[idx + 1][0] - colors[idx][0]));
+                      const g = Math.round(colors[idx][1] + t * (colors[idx + 1][1] - colors[idx][1]));
+                      const b = Math.round(colors[idx][2] + t * (colors[idx + 1][2] - colors[idx][2]));
+                      const bgColor = `rgb(${r},${g},${b})`;
+
+                      const isSelected = selectedCells.has(`${sl}:${tp}`);
+                      const expStr = `${cell.expectancy >= 0 ? '+' : ''}${cell.expectancy.toFixed(2)}R`;
+                      const wrStr = `${cell.winRate.toFixed(1)}%`;
+
+                      return (
+                        <td
+                          key={tp}
+                          onClick={() => toggleCell(`${sl}:${tp}`)}
+                          className={`rounded-lg text-center cursor-pointer transition-all hover:brightness-125 ${isSelected ? 'ring-2 ring-primary ring-offset-1 ring-offset-background' : ''}`}
+                          style={{ backgroundColor: bgColor, minWidth: 80, padding: '8px 6px' }}
+                        >
+                          <div className="text-[11px] font-bold font-mono text-white leading-4">
+                            {coloringMode === 'expectancy' ? expStr : wrStr}
+                          </div>
+                          <div className="text-[9px] font-mono text-white/65 leading-3">
+                            {coloringMode === 'expectancy' ? `WR: ${wrStr}` : `Exp: ${expStr}`}
+                          </div>
+                        </td>
+                      );
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </motion.div>
       )}
