@@ -61,6 +61,7 @@ const ExitAnalyzer = () => {
   const [slStep, setSlStep] = useState(5);
   const [tpStep, setTpStep] = useState(5);
   const [treatMissingAsZero, setTreatMissingAsZero] = useState(true);
+  const [coloringMode, setColoringMode] = useState<'expectancy' | 'winrate'>('expectancy');
 
   // Selection
   const [selectedCells, setSelectedCells] = useState<Set<string>>(new Set());
