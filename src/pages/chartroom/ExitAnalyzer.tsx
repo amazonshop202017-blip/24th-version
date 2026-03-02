@@ -66,6 +66,7 @@ const ExitAnalyzer = () => {
   // Selection
   const [selectedCells, setSelectedCells] = useState<Set<string>>(new Set());
   const [activeModel, setActiveModel] = useState<{ sl: number; tp: number } | null>(null);
+  const [highlightRange, setHighlightRange] = useState<[number, number] | null>(null); // [min, max] value range from color bar hover
 
   // Scatter overlay inputs
   const [scatterTP, setScatterTP] = useState<number>(0);
@@ -284,12 +285,16 @@ const ExitAnalyzer = () => {
                       const expStr = `${cell.expectancy >= 0 ? '+' : ''}${cell.expectancy.toFixed(2)}R`;
                       const wrStr = `${cell.winRate.toFixed(1)}%`;
 
-                      return (
+                        const inHighlight = highlightRange
+                          ? colorVal >= highlightRange[0] && colorVal <= highlightRange[1]
+                          : true;
+
+                        return (
                         <td
                           key={tp}
                           onClick={() => toggleCell(`${sl}:${tp}`)}
                           className={`rounded-lg text-center cursor-pointer transition-all hover:brightness-125 ${isSelected ? 'ring-2 ring-primary ring-offset-1 ring-offset-background' : ''}`}
-                          style={{ backgroundColor: bgColor, minWidth: 80, padding: '8px 6px' }}
+                          style={{ backgroundColor: bgColor, minWidth: 80, padding: '8px 6px', opacity: inHighlight ? 1 : 0.15 }}
                         >
                           <div className="text-[11px] font-bold font-mono text-white leading-4">
                             {coloringMode === 'expectancy' ? expStr : wrStr}
@@ -315,10 +320,23 @@ const ExitAnalyzer = () => {
               })()}
             </span>
             <div
-              className="h-3 rounded-full flex-1 max-w-xs"
+              className="h-3 rounded-full flex-1 max-w-xs cursor-pointer relative"
               style={{
                 background: 'linear-gradient(to right, #8B3A1A, #C96A2B, #D4944A, #6BAF6E, #2FAF7A, #1A7A4E)',
               }}
+              onMouseMove={(e) => {
+                const rect = e.currentTarget.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const ratio = x / rect.width;
+                const allVals = heatmapCells.map(c => coloringMode === 'expectancy' ? c.expectancy : c.winRate);
+                const minV = Math.min(...allVals);
+                const maxV = Math.max(...allVals);
+                const range = maxV - minV || 1;
+                const hoverVal = minV + ratio * range;
+                const bandwidth = range * 0.08; // highlight ~8% band around cursor
+                setHighlightRange([hoverVal - bandwidth, hoverVal + bandwidth]);
+              }}
+              onMouseLeave={() => setHighlightRange(null)}
             />
             <span className="text-xs text-muted-foreground font-mono">
               {(() => {
