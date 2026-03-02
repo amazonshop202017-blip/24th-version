@@ -293,7 +293,7 @@ const ExitAnalyzer = () => {
                 left: 'center',
                 bottom: 0,
                 inRange: {
-                  color: ['#C96A2B', '#2A2F36', '#2FAF7A'],
+                  color: ['#8B3A1A', '#C96A2B', '#2A2F36', '#2FAF7A', '#1A7A4E'],
                 },
                 textStyle: { color: 'hsl(215, 20%, 55%)' },
               },
