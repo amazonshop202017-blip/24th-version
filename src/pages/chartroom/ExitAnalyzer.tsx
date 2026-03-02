@@ -229,115 +229,126 @@ const ExitAnalyzer = () => {
       )}
 
       {/* Heatmap */}
-      {heatmapCells.length > 0 && (
+      {heatmapCells.length > 0 && (() => {
+        const minExp = Math.min(...heatmapCells.map(c => c.expectancy));
+        const maxExp = Math.max(...heatmapCells.map(c => c.expectancy));
+        return (
         <motion.div
           initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-          className="glass-card rounded-2xl p-5 overflow-auto"
-          style={{ maxHeight: 700 }}
+          className="glass-card rounded-2xl p-5"
         >
-          <h2 className="text-lg font-semibold mb-4 sticky top-0 left-0 z-10">SL / TP Performance Heatmap</h2>
-          <ReactEChartsCore
-            echarts={echarts}
-            style={{ width: Math.max(600, tpValues.length * 60 + 120), height: Math.max(400, slValues.length * 50 + 120) }}
-            option={{
-              tooltip: {
-                position: 'top',
-                formatter: (params: any) => {
-                  const cell = cellMap.get(`${slValues[params.value[1]]}:${tpValues[params.value[0]]}`);
-                  if (!cell) return '';
-                  return `<div style="font-family:monospace;font-size:12px">
-                    <div>SL: ${cell.sl} | TP: ${cell.tp}</div>
-                    <div>Expectancy: ${cell.expectancy >= 0 ? '+' : ''}${cell.expectancy.toFixed(3)}R</div>
-                    <div>Win Rate: ${cell.winRate.toFixed(1)}%</div>
-                    <div>Trades: ${cell.tradesCount}</div>
-                  </div>`;
-                },
-              },
-              grid: {
-                top: 30,
-                bottom: 60,
-                left: 70,
-                right: 30,
-                containLabel: false,
-              },
-              xAxis: {
-                type: 'category',
-                data: tpValues.map(String),
-                name: 'TP (ticks)',
-                nameLocation: 'middle',
-                nameGap: 35,
-                nameTextStyle: { color: 'hsl(215, 20%, 55%)', fontSize: 12 },
-                splitArea: { show: true },
-                axisLabel: { color: 'hsl(215, 20%, 55%)', fontSize: 11 },
-                axisLine: { lineStyle: { color: 'hsl(222, 47%, 18%)' } },
-                axisTick: { lineStyle: { color: 'hsl(222, 47%, 18%)' } },
-              },
-              yAxis: {
-                type: 'category',
-                data: slValues.map(String),
-                name: 'SL (ticks)',
-                nameLocation: 'middle',
-                nameGap: 45,
-                nameTextStyle: { color: 'hsl(215, 20%, 55%)', fontSize: 12 },
-                splitArea: { show: true },
-                axisLabel: { color: 'hsl(215, 20%, 55%)', fontSize: 11 },
-                axisLine: { lineStyle: { color: 'hsl(222, 47%, 18%)' } },
-                axisTick: { lineStyle: { color: 'hsl(222, 47%, 18%)' } },
-              },
-              visualMap: {
-                min: Math.min(...heatmapCells.map(c => c.expectancy)),
-                max: Math.max(...heatmapCells.map(c => c.expectancy)),
-                calculable: true,
-                orient: 'horizontal',
-                left: 'center',
-                bottom: 0,
-                inRange: {
-                  color: ['hsl(0, 84%, 35%)', 'hsl(0, 84%, 25%)', 'hsl(0, 84%, 18%)', 'hsl(222, 47%, 14%)', 'hsl(142, 76%, 18%)', 'hsl(142, 76%, 25%)', 'hsl(142, 76%, 35%)'],
-                },
-                textStyle: { color: 'hsl(215, 20%, 55%)' },
-              },
-              series: [{
-                name: 'Expectancy',
-                type: 'heatmap',
-                data: heatmapCells.map(c => {
-                  const xi = tpValues.indexOf(c.tp);
-                  const yi = slValues.indexOf(c.sl);
-                  return [xi, yi, c.expectancy];
-                }),
-                label: {
-                  show: true,
+          <h2 className="text-lg font-semibold mb-4">SL / TP Performance Heatmap</h2>
+          <div className="overflow-auto" style={{ maxHeight: 600 }}>
+            <ReactEChartsCore
+              echarts={echarts}
+              style={{ width: Math.max(600, tpValues.length * 60 + 120), height: Math.max(350, slValues.length * 50 + 80) }}
+              option={{
+                tooltip: {
+                  position: 'top',
                   formatter: (params: any) => {
-                    const val = params.value[2] as number;
-                    return `${val >= 0 ? '+' : ''}${val.toFixed(2)}R`;
+                    const cell = cellMap.get(`${slValues[params.value[1]]}:${tpValues[params.value[0]]}`);
+                    if (!cell) return '';
+                    return `<div style="font-family:monospace;font-size:12px">
+                      <div>SL: ${cell.sl} | TP: ${cell.tp}</div>
+                      <div>Expectancy: ${cell.expectancy >= 0 ? '+' : ''}${cell.expectancy.toFixed(3)}R</div>
+                      <div>Win Rate: ${cell.winRate.toFixed(1)}%</div>
+                      <div>Trades: ${cell.tradesCount}</div>
+                    </div>`;
                   },
-                  color: 'hsl(210, 40%, 98%)',
-                  fontSize: 11,
-                  fontFamily: 'monospace',
                 },
-                emphasis: {
+                grid: {
+                  top: 10,
+                  bottom: 30,
+                  left: 70,
+                  right: 10,
+                  containLabel: false,
+                },
+                xAxis: {
+                  type: 'category',
+                  data: tpValues.map(String),
+                  name: 'TP (ticks)',
+                  nameLocation: 'middle',
+                  nameGap: 20,
+                  nameTextStyle: { color: 'hsl(215, 20%, 55%)', fontSize: 12 },
+                  splitArea: { show: true },
+                  axisLabel: { color: 'hsl(215, 20%, 55%)', fontSize: 11 },
+                  axisLine: { lineStyle: { color: 'hsl(222, 47%, 18%)' } },
+                  axisTick: { lineStyle: { color: 'hsl(222, 47%, 18%)' } },
+                },
+                yAxis: {
+                  type: 'category',
+                  data: slValues.map(String),
+                  name: 'SL (ticks)',
+                  nameLocation: 'middle',
+                  nameGap: 45,
+                  nameTextStyle: { color: 'hsl(215, 20%, 55%)', fontSize: 12 },
+                  splitArea: { show: true },
+                  axisLabel: { color: 'hsl(215, 20%, 55%)', fontSize: 11 },
+                  axisLine: { lineStyle: { color: 'hsl(222, 47%, 18%)' } },
+                  axisTick: { lineStyle: { color: 'hsl(222, 47%, 18%)' } },
+                },
+                visualMap: {
+                  show: false,
+                  min: minExp,
+                  max: maxExp,
+                  inRange: {
+                    color: ['hsl(0, 84%, 35%)', 'hsl(0, 84%, 25%)', 'hsl(0, 84%, 18%)', 'hsl(222, 47%, 14%)', 'hsl(142, 76%, 18%)', 'hsl(142, 76%, 25%)', 'hsl(142, 76%, 35%)'],
+                  },
+                },
+                series: [{
+                  name: 'Expectancy',
+                  type: 'heatmap',
+                  data: heatmapCells.map(c => {
+                    const xi = tpValues.indexOf(c.tp);
+                    const yi = slValues.indexOf(c.sl);
+                    return [xi, yi, c.expectancy];
+                  }),
+                  label: {
+                    show: true,
+                    formatter: (params: any) => {
+                      const val = params.value[2] as number;
+                      return `${val >= 0 ? '+' : ''}${val.toFixed(2)}R`;
+                    },
+                    color: 'hsl(210, 40%, 98%)',
+                    fontSize: 11,
+                    fontFamily: 'monospace',
+                  },
+                  emphasis: {
+                    itemStyle: {
+                      shadowBlur: 10,
+                      shadowColor: 'rgba(0, 0, 0, 0.5)',
+                    },
+                  },
                   itemStyle: {
-                    shadowBlur: 10,
-                    shadowColor: 'rgba(0, 0, 0, 0.5)',
+                    borderWidth: 1,
+                    borderColor: 'hsl(222, 47%, 14%)',
                   },
+                }],
+                backgroundColor: 'transparent',
+              }}
+              onEvents={{
+                click: (params: any) => {
+                  if (params.componentType === 'series') {
+                    const key = `${slValues[params.value[1]]}:${tpValues[params.value[0]]}`;
+                    toggleCell(key);
+                  }
                 },
-                itemStyle: {
-                  borderWidth: 1,
-                  borderColor: 'hsl(222, 47%, 14%)',
-                },
-              }],
-              backgroundColor: 'transparent',
-            }}
-            onEvents={{
-              click: (params: any) => {
-                if (params.componentType === 'series') {
-                  const key = `${slValues[params.value[1]]}:${tpValues[params.value[0]]}`;
-                  toggleCell(key);
-                }
-              },
-            }}
-          />
+              }}
+            />
+          </div>
+          {/* External color bar legend */}
+          <div className="mt-4 flex items-center justify-center gap-3 text-xs text-muted-foreground">
+            <span className="font-mono">{minExp.toFixed(2)}R</span>
+            <div className="flex h-3 rounded-sm overflow-hidden" style={{ width: 200 }}>
+              {['hsl(0, 84%, 35%)', 'hsl(0, 84%, 25%)', 'hsl(0, 84%, 18%)', 'hsl(222, 47%, 14%)', 'hsl(142, 76%, 18%)', 'hsl(142, 76%, 25%)', 'hsl(142, 76%, 35%)'].map((c, i) => (
+                <div key={i} className="flex-1" style={{ backgroundColor: c }} />
+              ))}
+            </div>
+            <span className="font-mono">{maxExp.toFixed(2)}R</span>
+          </div>
         </motion.div>
-      )}
+        );
+      })()}
 
       {/* Comparison Table */}
       {comparisonRows.length > 0 && (
