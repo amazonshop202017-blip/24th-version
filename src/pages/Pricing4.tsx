@@ -176,43 +176,43 @@ const Pricing4 = () => {
       ════════════════════════════════════════ */}
       <section style={{ background: '#F8F7F5', paddingTop: 64, paddingBottom: 80 }}>
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row items-stretch justify-center gap-8 max-w-[900px] mx-auto">
+          <div className="flex flex-col md:flex-row items-stretch justify-center gap-6 max-w-[880px] mx-auto">
 
-            {/* ── SOLO Card ── */}
+            {/* ── SOLO Card (Starter style - white, left yellow border) ── */}
             <motion.div
               initial="hidden" whileInView="visible" viewport={{ once: true }}
               variants={fadeUp} custom={0}
-              className="w-full md:w-[420px] flex flex-col"
+              className="w-full md:w-[420px] flex flex-col relative"
               style={{
                 background: '#FFFFFF',
-                border: '1px solid #E5E7EB',
-                boxShadow: '0 4px 24px rgba(0,0,0,0.06)',
-                borderRadius: 12,
-                padding: 32,
+                borderRadius: 16,
+                padding: '40px 36px',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.04)',
+                borderLeft: '4px solid #FCD34D',
               }}
             >
-              <h3 style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 20, fontWeight: 600, color: '#0F0F0F' }}>
+              <h3 style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 22, fontWeight: 700, color: '#0F172A', letterSpacing: '-0.01em' }}>
                 Solo
               </h3>
-              <p className="mt-1" style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#6B7280', fontStyle: 'italic' }}>
+              <p className="mt-1.5" style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#6B7280', fontStyle: 'italic', lineHeight: 1.5 }}>
                 Everything you need to begin your journaling discipline.
               </p>
 
               {/* Price */}
-              <div className="mt-6">
-                <span style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 700, fontSize: 48, color: '#0F0F0F', lineHeight: 1 }}>
+              <div className="mt-7">
+                <span style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 800, fontSize: 52, color: '#0F172A', lineHeight: 1, letterSpacing: '-0.02em' }}>
                   {isAnnual ? '₹399' : '₹499'}
                 </span>
-                <span className="ml-1" style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#6B7280' }}>/month</span>
+                <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: '#9CA3AF', fontWeight: 400 }}>/month</span>
                 {isAnnual && (
-                  <p className="mt-1" style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#6B7280' }}>
+                  <p className="mt-1" style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#9CA3AF' }}>
                     Billed ₹4,788 annually
                   </p>
                 )}
               </div>
 
               {/* Features */}
-              <ul className="mt-6 space-y-3 flex-1">
+              <ul className="mt-8 space-y-4 flex-1">
                 {[
                   'Unlimited trade logging',
                   'Performance dashboard',
@@ -221,11 +221,12 @@ const Pricing4 = () => {
                   '1 trading account',
                   'Manual trade entry',
                 ].map((f) => (
-                  <li key={f} className="flex items-center gap-3" style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#374151' }}>
-                    <svg className="w-5 h-5 flex-shrink-0" viewBox="0 0 20 20" fill="none">
-                      <circle cx="10" cy="10" r="10" fill="#D1FAE5" />
-                      <path d="M6 10.5L8.5 13L14 7" stroke="#059669" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
+                  <li key={f} className="flex items-center gap-3" style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#374151', lineHeight: 1.4 }}>
+                    <span className="flex-shrink-0 w-[22px] h-[22px] rounded-full flex items-center justify-center" style={{ background: '#D1FAE5' }}>
+                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                        <path d="M2.5 6.5L4.5 8.5L9.5 3.5" stroke="#059669" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </span>
                     {f}
                   </li>
                 ))}
@@ -233,68 +234,69 @@ const Pricing4 = () => {
 
               {/* CTA */}
               <button
-                className="w-full mt-8 transition-colors"
+                className="w-full mt-10 transition-all hover:opacity-90"
                 style={{
-                  background: '#E5E7EB', color: '#0F0F0F',
+                  background: '#F3F4F6', color: '#0F172A',
                   fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 600,
-                  padding: '14px 24px', borderRadius: 8,
+                  padding: '15px 24px', borderRadius: 50,
+                  border: 'none',
                 }}
               >
                 Start Free
               </button>
             </motion.div>
 
-            {/* ── PRO Card (Most Popular) ── */}
+            {/* ── PRO Card (Most Popular - dark navy) ── */}
             <motion.div
               initial="hidden" whileInView="visible" viewport={{ once: true }}
               variants={fadeUp} custom={1}
               className="w-full md:w-[420px] relative flex flex-col"
               style={{
-                background: '#1E293B',
-                border: '1px solid #334155',
-                boxShadow: '0 8px 32px rgba(0,0,0,0.25)',
-                borderRadius: 12,
-                padding: 32,
+                background: '#0F172A',
+                borderRadius: 16,
+                padding: '40px 36px',
+                boxShadow: '0 8px 32px rgba(15,23,42,0.35)',
               }}
             >
               {/* Most Popular Badge */}
-              <div className="absolute -top-4 left-1/2 -translate-x-1/2">
+              <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-10">
                 <span
-                  className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full"
+                  className="inline-flex items-center gap-1.5 px-5 py-2 rounded-full whitespace-nowrap"
                   style={{
                     background: '#FCD34D',
                     fontFamily: "'DM Sans', sans-serif",
-                    fontSize: 12,
+                    fontSize: 13,
                     fontWeight: 600,
-                    color: '#1E293B',
+                    color: '#0F172A',
+                    boxShadow: '0 2px 8px rgba(252,211,77,0.3)',
                   }}
                 >
-                  <span style={{ fontSize: 14 }}>✨</span> Most Popular
+                  <span style={{ fontSize: 13 }}>✨</span> Most Popular
                 </span>
               </div>
 
-              <h3 className="mt-2" style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 20, fontWeight: 600, color: '#FFFFFF' }}>
+              <h3 className="mt-3" style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 22, fontWeight: 700, color: '#FFFFFF', letterSpacing: '-0.01em' }}>
                 Professional
               </h3>
-              <p className="mt-1" style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#94A3B8', fontStyle: 'italic' }}>
+              <p className="mt-1.5" style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#94A3B8', fontStyle: 'italic', lineHeight: 1.5 }}>
                 For traders who are serious about finding their edge.
               </p>
 
               {/* Price */}
-              <div className="mt-6">
-                <span style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 700, fontSize: 48, color: '#FFFFFF', lineHeight: 1 }}>
+              <div className="mt-7">
+                <span style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 800, fontSize: 52, color: '#FFFFFF', lineHeight: 1, letterSpacing: '-0.02em' }}>
                   {isAnnual ? '₹639' : '₹799'}
                 </span>
-                <span className="ml-1" style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#94A3B8' }}>/month</span>
+                <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: '#64748B', fontWeight: 400 }}>/month</span>
                 {isAnnual && (
-                  <p className="mt-1" style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#94A3B8' }}>
+                  <p className="mt-1" style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#64748B' }}>
                     Billed ₹7,668 annually
                   </p>
                 )}
               </div>
 
               {/* Features */}
-              <ul className="mt-6 space-y-3 flex-1">
+              <ul className="mt-8 space-y-4 flex-1">
                 {[
                   'Everything in Solo',
                   'Full Chart Room (10 modules)',
@@ -307,11 +309,12 @@ const Pricing4 = () => {
                   'Privacy mode',
                   'Priority support',
                 ].map((f) => (
-                  <li key={f} className="flex items-center gap-3" style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#E2E8F0' }}>
-                    <svg className="w-5 h-5 flex-shrink-0" viewBox="0 0 20 20" fill="none">
-                      <circle cx="10" cy="10" r="10" fill="#34D399" />
-                      <path d="M6 10.5L8.5 13L14 7" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
+                  <li key={f} className="flex items-center gap-3" style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#E2E8F0', lineHeight: 1.4 }}>
+                    <span className="flex-shrink-0 w-[22px] h-[22px] rounded-full flex items-center justify-center" style={{ background: '#34D399' }}>
+                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                        <path d="M2.5 6.5L4.5 8.5L9.5 3.5" stroke="#FFFFFF" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </span>
                     {f}
                   </li>
                 ))}
@@ -319,12 +322,12 @@ const Pricing4 = () => {
 
               {/* CTA */}
               <button
-                className="w-full mt-8 transition-colors"
+                className="w-full mt-10 transition-all hover:opacity-90"
                 style={{
-                  background: '#FFFFFF', color: '#1E293B',
+                  background: '#FFFFFF', color: '#0F172A',
                   fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 600,
-                  padding: '14px 24px', borderRadius: 8,
-                  border: '2px solid #FFFFFF',
+                  padding: '15px 24px', borderRadius: 50,
+                  border: 'none',
                 }}
               >
                 Go Professional
