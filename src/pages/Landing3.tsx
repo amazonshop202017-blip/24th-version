@@ -202,7 +202,7 @@ const Landing3 = () => {
                 initial="hidden" animate="visible" variants={fadeUp} custom={2}
                 className="mt-6 text-base lg:text-lg text-slate-500 leading-relaxed max-w-xl"
               >
-                TradeValley turns your complete trade history into clear, brutally honest insights — so you stop repeating the same mistakes and start building a real edge.
+                Your past trades know things about you that you don't.
               </motion.p>
 
               {/* FIX 5 — Primary button + secondary text link below */}
