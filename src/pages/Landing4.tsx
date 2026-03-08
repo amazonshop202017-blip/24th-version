@@ -45,7 +45,7 @@ const Landing4Navbar = () => {
             {['Home', 'Features', 'Pricing', 'How It Works'].map((label) => (
               <Link
                 key={label}
-                to={label === 'Home' ? '/home-4' : label === 'How It Works' ? '#how-it-works' : `/${label.toLowerCase()}`}
+                to={label === 'Home' ? '/home-4' : label === 'How It Works' ? '#how-it-works' : label === 'Pricing' ? '#' : `/${label.toLowerCase()}`}
                 className="text-sm transition-colors"
                 style={{ color: '#8A8A8A', fontFamily: "'DM Sans', 'Inter', sans-serif" }}
                 onMouseEnter={e => (e.currentTarget.style.color = '#0F0F0F')}
