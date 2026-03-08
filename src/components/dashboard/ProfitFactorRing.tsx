@@ -50,9 +50,7 @@ export const ProfitFactorRing = ({
           ]}
           width={60}
           height={60}
-          slotProps={{
-            legend: { hidden: true },
-          }}
+          hideLegend
           tooltip={{ trigger: 'none' }}
         />
       </div>
