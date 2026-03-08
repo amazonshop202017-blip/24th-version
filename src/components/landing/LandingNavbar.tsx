@@ -195,6 +195,40 @@ export const LandingNavbar = () => {
                   {link.label}
                 </Link>
               ))}
+
+              {/* Mobile Pricing Accordion */}
+              <button
+                onClick={() => setMobilePricingOpen(!mobilePricingOpen)}
+                className="flex items-center justify-between w-full text-sm font-medium text-slate-600 hover:text-slate-900 py-2"
+              >
+                Pricing <ChevronDown className={cn("w-4 h-4 transition-transform", mobilePricingOpen && "rotate-180")} />
+              </button>
+              <AnimatePresence>
+                {mobilePricingOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="pl-4 space-y-1 overflow-hidden"
+                  >
+                    {pricingLinks.map((link) => (
+                      <Link
+                        key={link.path}
+                        to={link.path}
+                        onClick={() => setMobileOpen(false)}
+                        className={cn(
+                          "block text-sm py-1.5",
+                          location.pathname === link.path
+                            ? "text-slate-900 font-semibold"
+                            : "text-slate-500"
+                        )}
+                      >
+                        {link.label}
+                      </Link>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
               <div className="pt-3 border-t border-slate-100 space-y-2">
                 <Link
                   to="/entering"
