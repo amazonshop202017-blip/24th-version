@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion';
+import { PieChart } from '@mui/x-charts/PieChart';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface WinRateGaugeProps {
@@ -11,84 +11,51 @@ interface WinRateGaugeProps {
 
 export const WinRateGauge = ({ value, label, winners = 0, losers = 0, breakeven = 0 }: WinRateGaugeProps) => {
   const clampedValue = Math.min(100, Math.max(0, value));
-  const size = 90;
-  const strokeWidth = 8;
-  const radius = (size - strokeWidth) / 2;
-  const centerX = size / 2;
-  const centerY = size / 2;
-  
-  // Semi-circle arc (from 180° to 0°, left to right)
-  const startAngle = 180;
-  const endAngle = 0;
-  const totalAngle = 180;
-  
-  const polarToCartesian = (cx: number, cy: number, r: number, angle: number) => {
-    const rad = (angle) * Math.PI / 180;
-    return {
-      x: cx + r * Math.cos(rad),
-      y: cy - r * Math.sin(rad)
-    };
-  };
-  
-  const describeArc = (cx: number, cy: number, r: number, start: number, end: number) => {
-    const startPoint = polarToCartesian(cx, cy, r, start);
-    const endPoint = polarToCartesian(cx, cy, r, end);
-    const largeArcFlag = Math.abs(start - end) > 180 ? 1 : 0;
-    const sweepFlag = start > end ? 1 : 0;
-    
-    return `M ${startPoint.x} ${startPoint.y} A ${r} ${r} 0 ${largeArcFlag} ${sweepFlag} ${endPoint.x} ${endPoint.y}`;
-  };
-  
-  // Calculate angles for win and loss portions
-  const winAngle = startAngle - (totalAngle * clampedValue / 100);
-  const lossAngle = endAngle;
-  
-  // Win arc (green) - from left side
-  const winPath = clampedValue > 0 ? describeArc(centerX, centerY, radius, startAngle, winAngle) : '';
-  
-  // Loss arc (red) - from right side to where win ends
-  const lossPath = clampedValue < 100 ? describeArc(centerX, centerY, radius, winAngle, lossAngle) : '';
+  const lossValue = 100 - clampedValue;
+
+  const pieData = [
+    { id: 0, value: clampedValue, label: 'Win', color: 'hsl(142, 76%, 45%)' },
+    { id: 1, value: lossValue, label: 'Loss', color: 'hsl(0, 84%, 60%)' },
+  ].filter(d => d.value > 0);
+
+  // If no data at all, show empty
+  if (pieData.length === 0) {
+    pieData.push({ id: 0, value: 1, label: 'No Data', color: 'hsl(var(--muted))' });
+  }
 
   return (
     <TooltipProvider>
       <div className="flex flex-col items-center w-full">
         <span className="text-xs text-muted-foreground mb-1">{label}</span>
         
-        <div className="relative">
-          <svg width={size} height={size * 0.55} viewBox={`0 0 ${size} ${size * 0.55}`}>
-            {/* Loss arc (red) - background/right side */}
-            {clampedValue < 100 && (
-              <path
-                d={lossPath}
-                fill="none"
-                stroke="hsl(0, 84%, 60%)"
-                strokeWidth={strokeWidth}
-                strokeLinecap="round"
-              />
-            )}
-            
-            {/* Win arc (green) - left side with animation */}
-            {clampedValue > 0 && (
-              <motion.path
-                d={winPath}
-                fill="none"
-                stroke="hsl(142, 76%, 36%)"
-                strokeWidth={strokeWidth}
-                strokeLinecap="round"
-                initial={{ pathLength: 0 }}
-                animate={{ pathLength: 1 }}
-                transition={{ duration: 1, ease: "easeOut", delay: 0.2 }}
-              />
-            )}
-          </svg>
-          
-          {/* Percentage in center */}
+        <div className="relative" style={{ width: 100, height: 60 }}>
+          <PieChart
+            series={[
+              {
+                data: pieData,
+                innerRadius: 20,
+                outerRadius: 38,
+                startAngle: -90,
+                endAngle: 90,
+                paddingAngle: 2,
+                cornerRadius: 4,
+                cx: 45,
+                cy: 50,
+                arcLabel: () => '',
+              },
+            ]}
+            width={100}
+            height={65}
+            hideLegend
+            skipAnimation={false}
+          />
+          {/* Percentage overlay */}
           <div className="absolute inset-0 flex items-end justify-center pb-0">
-            <span className="font-bold font-mono" style={{ fontSize: 15 }}>{clampedValue.toFixed(2)}%</span>
+            <span className="font-bold font-mono" style={{ fontSize: 13 }}>{clampedValue.toFixed(2)}%</span>
           </div>
         </div>
         
-        {/* Numbers below gauge - aligned with chart edges */}
+        {/* Numbers below gauge */}
         <div className="flex items-center justify-between w-full mt-1 text-xs font-medium" style={{ maxWidth: 110 }}>
           <Tooltip>
             <TooltipTrigger asChild>

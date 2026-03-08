@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion';
+import { PieChart } from '@mui/x-charts/PieChart';
 import { usePrivacyMode } from '@/hooks/usePrivacyMode';
 
 interface ProfitFactorRingProps {
@@ -13,19 +13,19 @@ export const ProfitFactorRing = ({
   totalLosses
 }: ProfitFactorRingProps) => {
   const { isPrivacyMode, maskProfitFactor } = usePrivacyMode();
-  const size = 60;
-  const strokeWidth = 6;
-  const radius = (size - strokeWidth) / 2;
-  const centerX = size / 2;
-  const centerY = size / 2;
-  const circumference = 2 * Math.PI * radius;
   
   const total = totalProfits + Math.abs(totalLosses);
-  const profitPercent = total > 0 ? (totalProfits / total) * 100 : 50;
-  const lossPercent = 100 - profitPercent;
-  
-  const profitDash = (profitPercent / 100) * circumference;
-  const lossDash = (lossPercent / 100) * circumference;
+  const profitPercent = total > 0 ? totalProfits : 1;
+  const lossPercent = total > 0 ? Math.abs(totalLosses) : 1;
+
+  const pieData = [
+    { id: 0, value: profitPercent, label: 'Profits', color: 'hsl(142, 76%, 45%)' },
+    { id: 1, value: lossPercent, label: 'Losses', color: 'hsl(0, 84%, 60%)' },
+  ].filter(d => d.value > 0);
+
+  if (pieData.length === 0) {
+    pieData.push({ id: 0, value: 1, label: 'No Data', color: 'hsl(var(--muted))' });
+  }
 
   return (
     <div className="flex items-center justify-between w-full gap-2">
@@ -35,33 +35,25 @@ export const ProfitFactorRing = ({
           {maskProfitFactor(profitFactor)}
         </span>
       </div>
-      <div className="relative" style={{ width: size, height: size }}>
-        <svg width={size} height={size} className="-rotate-90">
-          <circle
-            cx={centerX}
-            cy={centerY}
-            r={radius}
-            fill="none"
-            stroke="hsl(0, 84%, 60%)"
-            strokeWidth={strokeWidth}
-            strokeDasharray={`${lossDash} ${circumference}`}
-            strokeDashoffset={-profitDash}
-            strokeLinecap="round"
-          />
-          <motion.circle
-            cx={centerX}
-            cy={centerY}
-            r={radius}
-            fill="none"
-            stroke="hsl(142, 76%, 36%)"
-            strokeWidth={strokeWidth}
-            strokeDasharray={`${profitDash} ${circumference}`}
-            strokeLinecap="round"
-            initial={{ strokeDashoffset: circumference }}
-            animate={{ strokeDashoffset: 0 }}
-            transition={{ duration: 1, ease: "easeOut", delay: 0.2 }}
-          />
-        </svg>
+      <div style={{ width: 60, height: 60 }}>
+        <PieChart
+          series={[
+            {
+              data: pieData,
+              innerRadius: 16,
+              outerRadius: 27,
+              paddingAngle: 2,
+              cornerRadius: 3,
+              cx: 26,
+              cy: 26,
+              arcLabel: () => '',
+            },
+          ]}
+          width={60}
+          height={60}
+          hideLegend
+          skipAnimation={false}
+        />
       </div>
     </div>
   );
