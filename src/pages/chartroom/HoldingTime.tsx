@@ -4,6 +4,7 @@ import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
 import { usePrivacyMode, PRIVACY_MASK } from '@/hooks/usePrivacyMode';
 import { calculateTradeMetrics, Trade } from '@/types/trade';
 import { mapGlobalToChartDisplay } from '@/hooks/useChartDisplayMode';
+import { PageHeader } from '@/components/layout/PageHeader';
 import {
   ScatterChart,
   Scatter,
