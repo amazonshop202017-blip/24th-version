@@ -349,9 +349,6 @@ const Landing4 = () => {
               transition={{ duration: 0.9, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
               className="flex flex-col items-end"
             >
-              <p className="text-[10px] uppercase tracking-[0.2em] mb-3" style={{ color: '#8A8A8A', fontFamily: "'JetBrains Mono', monospace" }}>
-                EXIT ANALYZER — LIVE PREVIEW
-              </p>
               <div className="w-full max-w-md">
                 <HeatmapCard />
               </div>
