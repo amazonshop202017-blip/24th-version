@@ -88,6 +88,31 @@ export const LandingNavbar = () => {
                 {link.label}
               </Link>
             ))}
+
+            {/* Pricing Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger className={cn(
+                "text-sm font-medium transition-colors flex items-center gap-1 outline-none",
+                isPricingPage ? "text-slate-900" : "text-slate-500 hover:text-slate-900"
+              )}>
+                Pricing <ChevronDown className="w-3.5 h-3.5" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="min-w-[140px]">
+                {pricingLinks.map((link) => (
+                  <DropdownMenuItem key={link.path} asChild>
+                    <Link
+                      to={link.path}
+                      className={cn(
+                        "w-full cursor-pointer",
+                        location.pathname === link.path && "font-semibold"
+                      )}
+                    >
+                      {link.label}
+                    </Link>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
 
           {/* CTA Buttons */}
