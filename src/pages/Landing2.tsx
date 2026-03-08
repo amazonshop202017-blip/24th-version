@@ -135,8 +135,8 @@ const HeatmapVisual = ({ large = false, variant = 'neutral' }: { large?: boolean
       <div className="flex items-center justify-between mb-3">
         <p className="text-sm font-semibold" style={{ color: '#0F0F0F' }}>SL / TP Heatmap</p>
         <div className="flex items-center gap-2 text-[10px]" style={{ color: '#8A8A8A' }}>
-          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full" style={{ backgroundColor: '#3d3d3d' }} /> High</span>
-          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full" style={{ backgroundColor: '#d8d8d8' }} /> Low</span>
+          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full" style={{ backgroundColor: highColor }} /> High</span>
+          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full" style={{ backgroundColor: lowColor }} /> Low</span>
         </div>
       </div>
 
