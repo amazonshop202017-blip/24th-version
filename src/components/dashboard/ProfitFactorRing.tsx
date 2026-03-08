@@ -50,8 +50,7 @@ export const ProfitFactorRing = ({
           ]}
           width={60}
           height={60}
-          hideLegend
-          tooltip={{ trigger: 'none' }}
+          skipAnimation={false}
         />
       </div>
     </div>
