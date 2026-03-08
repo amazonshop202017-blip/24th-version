@@ -34,6 +34,7 @@ import {
 const Settings = () => {
   const { accounts, addAccount, updateAccount, getActiveAccountsWithStats, getArchivedAccountsWithStats, archiveAccount, unarchiveAccount, deleteAccountPermanently, addTransaction, getTransactionsForAccount } = useAccountsContext();
   const { trades, deleteTradesByAccountId, deleteTradesByAccountName } = useTradesContext();
+  const { logout } = useAuth();
   const { currency, setCurrency, currencyConfig, breakevenTolerance, setBreakevenTolerance } = useGlobalFilters();
 
   const handleCurrencyChange = (newCurrency: CurrencyCode) => {
