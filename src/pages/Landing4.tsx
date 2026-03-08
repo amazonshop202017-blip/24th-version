@@ -385,8 +385,8 @@ const Landing4 = () => {
                 key={card.title}
                 initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.2 }}
                 variants={fadeUp} custom={i}
-                className="bg-white p-8"
-                style={{ border: '1px solid #EBEBEB', borderRadius: '2px' }}
+                className="bg-white p-8 hover:shadow-lg hover:shadow-slate-100/80 transition-shadow duration-300"
+                style={{ border: '1px solid #E0E0E0', borderRadius: '8px', boxShadow: '0 2px 12px rgba(0,0,0,0.04)' }}
               >
                 <h3 className="font-bold text-sm mb-4" style={{ color: '#0F0F0F' }}>{card.title}</h3>
                 <p className="text-sm leading-relaxed" style={{ color: '#8A8A8A' }}>{card.body}</p>
