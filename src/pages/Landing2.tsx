@@ -191,10 +191,10 @@ const Landing2 = () => {
               </motion.p>
 
               <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={1}>
-                <h1 className="text-4xl sm:text-5xl lg:text-[3.4rem] font-bold tracking-tight flex flex-col" style={{ fontFamily: "'Playfair Display', serif" }}>
-                  <span className="text-slate-400 leading-[1.15]">"Most traders have data."</span>
-                  <span className="text-slate-400 leading-[1.15]">"Almost none have answers."</span>
-                  <span className="text-slate-900 leading-[1.15] mt-3">TradeValley gives you both.</span>
+                <h1 className="text-3xl sm:text-4xl lg:text-[3.2rem] font-bold tracking-tight flex flex-col whitespace-nowrap" style={{ fontFamily: "'Playfair Display', serif" }}>
+                  <span className="text-slate-400 leading-[1.2]">"Most traders have data."</span>
+                  <span className="text-slate-400 leading-[1.2]">"Almost none have answers."</span>
+                  <span className="text-slate-900 leading-[1.2] mt-3">TradeValley gives you both.</span>
                 </h1>
               </motion.div>
 
