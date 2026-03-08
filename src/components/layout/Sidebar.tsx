@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { LayoutDashboard, LineChart, ListOrdered, FileText, Settings, Target, Plus, ChevronLeft, ChevronRight, BarChart3, ChevronDown, Crosshair } from 'lucide-react';
+import { LayoutDashboard, ListOrdered, FileText, Settings, Target, Plus, ChevronLeft, ChevronRight, BarChart3, ChevronDown, Crosshair } from 'lucide-react';
+import logo from '@/assets/logo.svg';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTradeModal } from '@/contexts/TradeModalContext';
