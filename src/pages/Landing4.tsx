@@ -269,22 +269,22 @@ const Landing4 = () => {
       {/* ════════════════════════════════════════
           SECTION 2 — HERO
       ════════════════════════════════════════ */}
-      <section className="min-h-screen flex items-center pt-16 px-6 lg:px-8">
+      <section className="min-h-screen flex items-center pt-8 px-6 lg:px-8">
         <div className="max-w-7xl mx-auto w-full">
           <div className="grid lg:grid-cols-[55%_45%] gap-12 lg:gap-16 items-center">
             {/* Left column */}
             <div>
               {/* Tagline mark */}
               <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0} className="mb-8">
-                <div className="flex items-center gap-2 text-sm tracking-[0.15em]" style={{ fontFamily: "'DM Sans', 'Inter', sans-serif" }}>
+                <div className="flex items-center gap-2 text-base lg:text-lg tracking-[0.15em]" style={{ fontFamily: "'DM Sans', 'Inter', sans-serif" }}>
                   <span className="font-normal" style={{ color: '#8A8A8A' }}>Look inward</span>
-                  <span className="text-lg font-light" style={{ color: '#059669' }}>/</span>
+                  <span className="text-xl font-light" style={{ color: '#059669' }}>/</span>
                   <span className="font-bold" style={{ color: '#0F0F0F' }}>Trade forward</span>
                 </div>
-                <p className="mt-2 text-xs italic max-w-md" style={{ color: '#8A8A8A', fontFamily: "'DM Sans', 'Inter', sans-serif" }}>
+                <p className="mt-2 text-sm lg:text-base italic max-w-md" style={{ color: '#8A8A8A', fontFamily: "'DM Sans', 'Inter', sans-serif" }}>
                   The traders who improve fastest aren't the ones who study markets harder. They're the ones who study themselves.
                 </p>
-                <div className="mt-5 w-full h-px" style={{ background: '#EBEBEB' }} />
+                <div className="w-full h-px" style={{ background: '#EBEBEB', margin: '24px 0' }} />
               </motion.div>
 
               {/* Headline */}
