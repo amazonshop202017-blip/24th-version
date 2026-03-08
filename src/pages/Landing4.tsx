@@ -349,7 +349,7 @@ const Landing4 = () => {
               transition={{ duration: 0.9, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
               className="flex flex-col items-end"
             >
-              <div className="w-full max-w-md">
+              <div className="w-full max-w-[370px]">
                 <HeatmapCard />
               </div>
             </motion.div>
