@@ -4,6 +4,7 @@ import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
 import { usePrivacyMode, PRIVACY_MASK } from '@/hooks/usePrivacyMode';
 import { useAccountsContext } from '@/contexts/AccountsContext';
 import { calculateTradeMetrics } from '@/types/trade';
+import { PageHeader } from '@/components/layout/PageHeader';
 import { parseISO } from 'date-fns';
 import { ChartDisplayType, mapGlobalToChartDisplay } from '@/hooks/useChartDisplayMode';
 import {
