@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { PageHeader } from '@/components/layout/PageHeader';
 import { DiaryFolderSidebar } from '@/components/diary/DiaryFolderSidebar';
 import { DiaryNotesList } from '@/components/diary/DiaryNotesList';
 import { DiaryNoteEditor } from '@/components/diary/DiaryNoteEditor';
