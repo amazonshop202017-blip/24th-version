@@ -257,24 +257,6 @@ const painCards = [
   },
 ];
 
-// ─── Testimonials ───
-const testimonials = [
-  {
-    quote: "I discovered I lose on 71% of my trades in the first 30 minutes of market open. I stopped trading that window entirely. One insight from TradeValley paid for years of subscription.",
-    name: 'Arjun M.',
-    role: 'Options Trader · Zerodha',
-  },
-  {
-    quote: "My Exit Score was 34 out of 100. I didn't want to believe it until the heatmap proved it trade by trade. Three months later it's 61 — and my monthly P&L reflects that number exactly.",
-    name: 'Sneha R.',
-    role: 'Futures Trader · Upstox',
-  },
-  {
-    quote: "I've quit every other journal within a week. TradeValley showed me exactly 4 things to fix — nothing more. That restraint is why I still use it every single day.",
-    name: 'Vikram T.',
-    role: 'Equity Trader · Angel One',
-  },
-];
 
 // ─── Broker logos (text-based, muted) ───
 const brokers = ['Zerodha', 'Upstox', 'Angel One', 'MT5', 'Tradovate'];
