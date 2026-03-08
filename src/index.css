@@ -188,3 +188,8 @@
 .scrollbar-thin::-webkit-scrollbar-corner {
   background: transparent;
 }
+
+/* Remove white outline from MUI PieChart arcs */
+.MuiPieArc-root {
+  stroke: none !important;
+}
