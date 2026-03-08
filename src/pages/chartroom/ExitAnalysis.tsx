@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { useFilteredTrades } from '@/hooks/useFilteredTrades';
 import { calculateTradeMetrics, Trade } from '@/types/trade';
 import { parseISO } from 'date-fns';
+import { PageHeader } from '@/components/layout/PageHeader';
 import {
   ComposedChart,
   Bar,
