@@ -3,6 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { TradeModalProvider } from "@/contexts/TradeModalContext";
 import { TradesProvider } from "@/contexts/TradesContext";
 import { TagsProvider } from "@/contexts/TagsContext";
@@ -24,6 +25,7 @@ import StrategyDetail from "./pages/StrategyDetail";
 import Reports from "./pages/Reports";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
+import Entering from "./pages/Entering";
 import Drawdown from "./pages/chartroom/Drawdown";
 import ConsecutiveWinnersLosers from "./pages/chartroom/ConsecutiveWinnersLosers";
 import ExitAnalysis from "./pages/chartroom/ExitAnalysis";
@@ -38,59 +40,72 @@ import ExitAnalyzer from "./pages/chartroom/ExitAnalyzer";
 
 const queryClient = new QueryClient();
 
-// App component with all providers properly nested (contract size registry synced via SymbolTickSizeProvider)
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <CategoriesProvider>
-        <TagsProvider>
-          <StrategiesProvider>
-            <TradesProvider>
-              <AccountsProvider>
-                <GlobalFiltersProvider>
-                  <CustomStatsProvider>
-                    <SymbolTickSizeProvider>
-                      <DiaryProvider>
-                        <TradeModalProvider>
-                        <BrowserRouter>
-                          <Toaster />
-                          <Sonner />
-                          <AppLayout>
-                            <Routes>
-                              <Route path="/" element={<Dashboard />} />
-                              <Route path="/trades" element={<Trades />} />
-                              <Route path="/day-view" element={<DayView />} />
-                              <Route path="/diary" element={<Diary />} />
-                              <Route path="/strategies" element={<Strategies />} />
-                              <Route path="/strategies/:id" element={<StrategyDetail />} />
-                              <Route path="/reports/*" element={<Reports />} />
-                              <Route path="/chart-room/drawdown" element={<Drawdown />} />
-                              <Route path="/chart-room/consecutive" element={<ConsecutiveWinnersLosers />} />
-                              <Route path="/chart-room/exit-analysis" element={<ExitAnalysis />} />
-                              <Route path="/chart-room/holding-time" element={<HoldingTime />} />
-                              <Route path="/chart-room/performance-by-symbol" element={<PerformanceBySymbol />} />
-                              <Route path="/chart-room/performance-by-setup" element={<PerformanceBySetup />} />
-                              <Route path="/chart-room/performance-by-time" element={<PerformanceByTime />} />
-                              <Route path="/chart-room/tags-analytics" element={<TagsAnalytics />} />
-                              <Route path="/chart-room/risk-distribution" element={<RiskDistribution />} />
-                              <Route path="/chart-room/trade-management" element={<TradeManagement />} />
-                              <Route path="/exit-analyzer" element={<ExitAnalyzer />} />
-                              <Route path="/settings" element={<Settings />} />
-                              <Route path="*" element={<NotFound />} />
-                            </Routes>
-                          </AppLayout>
-                          <TradeModal />
-                        </BrowserRouter>
+const AuthenticatedApp = () => {
+  const { isAuthenticated } = useAuth();
+
+  if (!isAuthenticated) {
+    return <Entering />;
+  }
+
+  return (
+    <CategoriesProvider>
+      <TagsProvider>
+        <StrategiesProvider>
+          <TradesProvider>
+            <AccountsProvider>
+              <GlobalFiltersProvider>
+                <CustomStatsProvider>
+                  <SymbolTickSizeProvider>
+                    <DiaryProvider>
+                      <TradeModalProvider>
+                        <AppLayout>
+                          <Routes>
+                            <Route path="/" element={<Dashboard />} />
+                            <Route path="/trades" element={<Trades />} />
+                            <Route path="/day-view" element={<DayView />} />
+                            <Route path="/diary" element={<Diary />} />
+                            <Route path="/strategies" element={<Strategies />} />
+                            <Route path="/strategies/:id" element={<StrategyDetail />} />
+                            <Route path="/reports/*" element={<Reports />} />
+                            <Route path="/chart-room/drawdown" element={<Drawdown />} />
+                            <Route path="/chart-room/consecutive" element={<ConsecutiveWinnersLosers />} />
+                            <Route path="/chart-room/exit-analysis" element={<ExitAnalysis />} />
+                            <Route path="/chart-room/holding-time" element={<HoldingTime />} />
+                            <Route path="/chart-room/performance-by-symbol" element={<PerformanceBySymbol />} />
+                            <Route path="/chart-room/performance-by-setup" element={<PerformanceBySetup />} />
+                            <Route path="/chart-room/performance-by-time" element={<PerformanceByTime />} />
+                            <Route path="/chart-room/tags-analytics" element={<TagsAnalytics />} />
+                            <Route path="/chart-room/risk-distribution" element={<RiskDistribution />} />
+                            <Route path="/chart-room/trade-management" element={<TradeManagement />} />
+                            <Route path="/exit-analyzer" element={<ExitAnalyzer />} />
+                            <Route path="/settings" element={<Settings />} />
+                            <Route path="*" element={<NotFound />} />
+                          </Routes>
+                        </AppLayout>
+                        <TradeModal />
                       </TradeModalProvider>
                     </DiaryProvider>
                   </SymbolTickSizeProvider>
                 </CustomStatsProvider>
-                </GlobalFiltersProvider>
-              </AccountsProvider>
-            </TradesProvider>
-          </StrategiesProvider>
-        </TagsProvider>
-      </CategoriesProvider>
+              </GlobalFiltersProvider>
+            </AccountsProvider>
+          </TradesProvider>
+        </StrategiesProvider>
+      </TagsProvider>
+    </CategoriesProvider>
+  );
+};
+
+const App = () => (
+  <QueryClientProvider client={queryClient}>
+    <TooltipProvider>
+      <AuthProvider>
+        <BrowserRouter>
+          <Toaster />
+          <Sonner />
+          <AuthenticatedApp />
+        </BrowserRouter>
+      </AuthProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );
