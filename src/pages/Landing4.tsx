@@ -347,7 +347,7 @@ const Landing4 = () => {
               initial={{ opacity: 0, x: 30 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.9, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
-              className="flex flex-col items-end"
+              className="flex flex-col items-end pt-12"
             >
               <div className="w-full max-w-[370px]">
                 <HeatmapCard />
