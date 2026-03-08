@@ -258,9 +258,6 @@ const painCards = [
 ];
 
 
-// ─── Broker logos (text-based, muted) ───
-const brokers = ['Zerodha', 'Upstox', 'Angel One', 'MT5', 'Tradovate'];
-
 // ═══════════════════════════════════════
 // MAIN PAGE
 // ═══════════════════════════════════════
@@ -363,22 +360,6 @@ const Landing4 = () => {
         </div>
       </section>
 
-      {/* ════════════════════════════════════════
-          SECTION 3 — SOCIAL PROOF / BROKER BAR
-      ════════════════════════════════════════ */}
-      <section className="py-12 px-6 lg:px-8" style={{ background: '#F8F7F5' }}>
-        <div className="max-w-4xl mx-auto text-center">
-          <p className="text-xs uppercase tracking-[0.2em] mb-6" style={{ color: '#8A8A8A' }}>Trusted by traders using</p>
-          <div className="flex items-center justify-center gap-10 flex-wrap">
-            {brokers.map((b) => (
-              <span key={b} className="text-sm font-medium" style={{ color: '#BEBEBE', fontFamily: "'DM Sans', 'Inter', sans-serif" }}>{b}</span>
-            ))}
-          </div>
-          <p className="mt-6 text-xs italic" style={{ color: '#8A8A8A', fontFamily: "'Playfair Display', serif" }}>
-            "Works with your existing broker. Import in under 5 minutes."
-          </p>
-        </div>
-      </section>
 
       {/* ════════════════════════════════════════
           SECTION 4 — PAIN
