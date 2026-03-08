@@ -144,6 +144,34 @@ const ExitAnalyzer = () => {
         </div>
       </motion.div>
 
+      {/* Sub-Navigation Menu */}
+      <div className="flex items-center gap-1 border-b border-border pb-2">
+        {subTabs.map((tab) => (
+          <div key={tab.id} className="relative">
+            <button
+              onClick={() => setActiveTab(tab.id)}
+              className={cn(
+                "flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
+                activeTab === tab.id
+                  ? "text-primary"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+              )}
+            >
+              <tab.icon className="w-4 h-4" />
+              <span>{tab.label}</span>
+            </button>
+            {activeTab === tab.id && (
+              <motion.div
+                layoutId="exitAnalyzerTab"
+                className="absolute bottom-[-9px] left-0 right-0 h-0.5 bg-primary"
+              />
+            )}
+          </div>
+        ))}
+      </div>
+
+      {activeTab === 'auto' ? (
+      <>
       {/* Inputs Section */}
       <motion.div
         initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}
