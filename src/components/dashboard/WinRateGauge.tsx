@@ -29,7 +29,7 @@ export const WinRateGauge = ({ value, label, winners = 0, losers = 0, breakeven 
       <div className="flex flex-col items-center w-full">
         <span className="text-xs text-muted-foreground mb-1">{label}</span>
         
-        <div className="relative" style={{ width: 100, height: 60 }}>
+        <div className="relative" style={{ width: 100, height: 55 }}>
           <PieChart
             series={[
               {
@@ -37,31 +37,30 @@ export const WinRateGauge = ({ value, label, winners = 0, losers = 0, breakeven 
                   ...d,
                   label: `${d.label}: ${d.value} (${total > 0 ? ((d.value / total) * 100).toFixed(1) : 0}%)`,
                 })),
-                innerRadius: 20,
-                outerRadius: 38,
+                innerRadius: 18,
+                outerRadius: 34,
                 startAngle: -90,
                 endAngle: 90,
                 paddingAngle: 2,
                 cornerRadius: 4,
                 cx: 45,
-                cy: 50,
+                cy: 42,
                 arcLabel: () => '',
                 highlightScope: { fade: 'global', highlight: 'item' },
               },
             ]}
             width={100}
-            height={65}
+            height={55}
             hideLegend
             skipAnimation={false}
           />
-          {/* Percentage overlay */}
-          <div className="absolute inset-0 flex items-end justify-center pb-0">
-            <span className="font-bold font-mono" style={{ fontSize: 13 }}>{clampedValue.toFixed(2)}%</span>
-          </div>
         </div>
         
+        {/* Percentage value */}
+        <span className="font-bold font-mono mt-1" style={{ fontSize: 13 }}>{clampedValue.toFixed(2)}%</span>
+        
         {/* Numbers below gauge */}
-        <div className="flex items-center justify-between w-full mt-1 text-xs font-medium" style={{ maxWidth: 110 }}>
+        <div className="flex items-center justify-between w-full mt-2 text-xs font-medium" style={{ maxWidth: 110 }}>
           <Tooltip>
             <TooltipTrigger asChild>
               <span className="profit-text cursor-help bg-profit/15 px-2 py-0.5 rounded-full">{winners}</span>
