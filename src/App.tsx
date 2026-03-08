@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { TradeModalProvider } from "@/contexts/TradeModalContext";
 import { TradesProvider } from "@/contexts/TradesContext";
@@ -26,6 +26,9 @@ import Reports from "./pages/Reports";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 import Entering from "./pages/Entering";
+import Landing from "./pages/Landing";
+import Features from "./pages/Features";
+import Pricing from "./pages/Pricing";
 import Drawdown from "./pages/chartroom/Drawdown";
 import ConsecutiveWinnersLosers from "./pages/chartroom/ConsecutiveWinnersLosers";
 import ExitAnalysis from "./pages/chartroom/ExitAnalysis";
@@ -44,7 +47,15 @@ const AuthenticatedApp = () => {
   const { isAuthenticated } = useAuth();
 
   if (!isAuthenticated) {
-    return <Entering />;
+    return (
+      <Routes>
+        <Route path="/" element={<Landing />} />
+        <Route path="/features" element={<Features />} />
+        <Route path="/pricing" element={<Pricing />} />
+        <Route path="/entering" element={<Entering />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    );
   }
 
   return (
@@ -79,6 +90,7 @@ const AuthenticatedApp = () => {
                             <Route path="/chart-room/trade-management" element={<TradeManagement />} />
                             <Route path="/exit-analyzer" element={<ExitAnalyzer />} />
                             <Route path="/settings" element={<Settings />} />
+                            <Route path="/entering" element={<Navigate to="/" replace />} />
                             <Route path="*" element={<NotFound />} />
                           </Routes>
                         </AppLayout>
