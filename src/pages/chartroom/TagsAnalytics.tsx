@@ -6,6 +6,7 @@ import { useTagsContext } from '@/contexts/TagsContext';
 import { useCategoriesContext } from '@/contexts/CategoriesContext';
 import { usePrivacyMode, PRIVACY_MASK } from '@/hooks/usePrivacyMode';
 import { calculateTradeMetrics, Trade } from '@/types/trade';
+import { PageHeader } from '@/components/layout/PageHeader';
 import { Card, CardContent } from '@/components/ui/card';
 import {
   Table,
