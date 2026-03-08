@@ -1,7 +1,8 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowRight, Play, Clock, CreditCard, Wifi, Grid3X3, TrendingDown, Timer, HelpCircle, XCircle, Sparkles } from 'lucide-react';
+import { ArrowRight, Play, TrendingDown, Timer, HelpCircle, XCircle, Sparkles } from 'lucide-react';
 import { LandingFooter } from '@/components/landing/LandingFooter';
+import logo from '@/assets/logo.svg';
 import { useState, useEffect } from 'react';
 
 // ─── Animations ───
