@@ -205,13 +205,6 @@ const Landing2 = () => {
                 TradeValley turns your complete trade history into clear, brutally honest insights — so you stop repeating the same mistakes and start building a real edge.
               </motion.p>
 
-              <motion.div
-                initial="hidden" animate="visible" variants={fadeUp} custom={3}
-                className="mt-5 text-sm text-slate-400 leading-relaxed max-w-xl space-y-2"
-              >
-                <p>Import your trades in minutes. No complexity. No overwhelming dashboards.</p>
-                <p>Just the patterns quietly costing you money — finally visible.</p>
-              </motion.div>
 
               {/* Buttons */}
               <motion.div
