@@ -39,7 +39,10 @@ export const ProfitFactorRing = ({
         <PieChart
           series={[
             {
-              data: pieData,
+              data: pieData.map(d => ({
+                ...d,
+                label: `${d.label}: ${total > 0 ? ((d.value / total) * 100).toFixed(1) : 0}%`,
+              })),
               innerRadius: 16,
               outerRadius: 27,
               paddingAngle: 2,
@@ -47,6 +50,7 @@ export const ProfitFactorRing = ({
               cx: 26,
               cy: 26,
               arcLabel: () => '',
+              highlightScope: { fade: 'global', highlight: 'item' },
             },
           ]}
           width={60}
