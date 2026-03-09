@@ -86,7 +86,7 @@ const Pricing = () => {
       <SharedNavbar />
 
       {/* Hero */}
-      <section className="pt-32 pb-16 lg:pt-40 lg:pb-20">
+      <section className="pt-20 pb-16 lg:pt-24 lg:pb-20">
         <div className="max-w-7xl mx-auto px-6 lg:px-8 text-center">
           <motion.p
             variants={fadeUp} initial="hidden" animate="visible" custom={0}
