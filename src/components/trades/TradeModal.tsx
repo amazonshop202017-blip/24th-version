@@ -24,7 +24,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { useCustomStats } from '@/contexts/CustomStatsContext';
 import { useTagsContext } from '@/contexts/TagsContext';
 import { useSymbolTickSize } from '@/contexts/SymbolTickSizeContext';
-import { TradeFormData, TradeEntry, ScaleEntry, calculateTradeMetrics, Trade } from '@/types/trade';
+import { TradeFormData, TradeEntry, ScaleEntry, TradeScreenshot, calculateTradeMetrics, Trade } from '@/types/trade';
 import { getContractSizeForSymbol } from '@/lib/contractSizeRegistry';
 import { loadFeeRules, findMatchingFeeRule, calculateFeeFromRule } from '@/lib/feeCalculation';
 import { loadTpSlRules, findMatchingTpSlRule, computeAutoTpSl } from '@/lib/tpslCalculation';
