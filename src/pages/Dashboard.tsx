@@ -1,3 +1,20 @@
+import { useState, useEffect } from 'react';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  rectSortingStrategy,
+} from '@dnd-kit/sortable';
+import { Pencil, Check } from 'lucide-react';
 import { RecentTrades } from '@/components/dashboard/RecentTrades';
 import { WinRateGauge } from '@/components/dashboard/WinRateGauge';
 import { ProfitFactorRing } from '@/components/dashboard/ProfitFactorRing';
@@ -9,16 +26,98 @@ import { TradeDurationPerformanceChart } from '@/components/dashboard/TradeDurat
 import { MonthlyPerformanceCalendar } from '@/components/dashboard/MonthlyPerformanceCalendar';
 import { SymbolAnalysisChart } from '@/components/dashboard/InstrumentAnalysisChart';
 import { LongShortAnalysisChart } from '@/components/dashboard/LongShortAnalysisChart';
+import { DraggableChartWrapper } from '@/components/dashboard/DraggableChartWrapper';
 import { useFilteredTrades } from '@/hooks/useFilteredTrades';
 import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
 import { usePrivacyMode } from '@/hooks/usePrivacyMode';
 import { PageHeader } from '@/components/layout/PageHeader';
+import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
+
+interface ChartConfig {
+  id: string;
+  component: React.ComponentType;
+  colSpan: number;
+  rowSpan: number;
+}
+
+const DEFAULT_CHART_ORDER = [
+  'recentTrades',
+  'dailyCumulativePnL',
+  'netDailyPnL',
+  'calendar',
+  'tradeTime',
+  'tradeDuration',
+  'symbolAnalysis',
+  'longShortAnalysis',
+];
+
+const CHART_CONFIGS: Record<string, Omit<ChartConfig, 'id'>> = {
+  recentTrades: { component: RecentTrades, colSpan: 1, rowSpan: 1 },
+  dailyCumulativePnL: { component: DailyCumulativePnLChart, colSpan: 1, rowSpan: 1 },
+  netDailyPnL: { component: NetDailyPnLChart, colSpan: 1, rowSpan: 1 },
+  calendar: { component: MonthlyPerformanceCalendar, colSpan: 2, rowSpan: 2 },
+  tradeTime: { component: TradeTimePerformanceChart, colSpan: 1, rowSpan: 1 },
+  tradeDuration: { component: TradeDurationPerformanceChart, colSpan: 1, rowSpan: 1 },
+  symbolAnalysis: { component: SymbolAnalysisChart, colSpan: 2, rowSpan: 1 },
+  longShortAnalysis: { component: LongShortAnalysisChart, colSpan: 1, rowSpan: 1 },
+};
+
+const STORAGE_KEY = 'dashboard-chart-order';
 
 const Dashboard = () => {
   const { stats } = useFilteredTrades();
   const { formatCurrency } = useGlobalFilters();
   const { isPrivacyMode, maskCurrency } = usePrivacyMode();
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [chartOrder, setChartOrder] = useState<string[]>(() => {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        // Validate that all charts exist
+        if (Array.isArray(parsed) && parsed.every(id => CHART_CONFIGS[id])) {
+          return parsed;
+        }
+      } catch {}
+    }
+    return DEFAULT_CHART_ORDER;
+  });
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(chartOrder));
+  }, [chartOrder]);
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      setChartOrder((items) => {
+        const oldIndex = items.indexOf(active.id as string);
+        const newIndex = items.indexOf(over.id as string);
+        return arrayMove(items, oldIndex, newIndex);
+      });
+    }
+  };
+
+  const renderChart = (chartId: string) => {
+    const config = CHART_CONFIGS[chartId];
+    if (!config) return null;
+    const ChartComponent = config.component;
+    return <ChartComponent />;
+  };
+
   return (
     <div className="space-y-8">
       <motion.div
@@ -26,9 +125,25 @@ const Dashboard = () => {
         animate={{ opacity: 1, y: 0 }}
         className="flex items-center justify-between"
       >
-        <PageHeader title="Dashboard" tooltip="Your trading overview — track net P&L, win rates, and key metrics at a glance." />
+        <div className="flex items-center gap-3">
+          <PageHeader title="Dashboard" tooltip="Your trading overview — track net P&L, win rates, and key metrics at a glance." />
+          <Button
+            variant={isEditMode ? "default" : "ghost"}
+            size="icon"
+            className="h-8 w-8"
+            onClick={() => setIsEditMode(!isEditMode)}
+          >
+            {isEditMode ? <Check className="h-4 w-4" /> : <Pencil className="h-4 w-4" />}
+          </Button>
+          {isEditMode && (
+            <span className="text-xs text-muted-foreground bg-secondary px-2 py-1 rounded">
+              Drag charts to reorder
+            </span>
+          )}
+        </div>
       </motion.div>
 
+      {/* Top 5 metrics - NOT draggable */}
       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-3">
         {/* Net P&L with Total Trades */}
         <motion.div
@@ -108,38 +223,32 @@ const Dashboard = () => {
         </motion.div>
       </div>
 
-      {/* 3-column grid layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        {/* Row 1: Recent Trades | Daily Cumulative P&L | Net Daily P&L */}
-        <div className="lg:col-span-1">
-          <RecentTrades />
-        </div>
-        <div className="lg:col-span-1">
-          <DailyCumulativePnLChart />
-        </div>
-        <div className="lg:col-span-1">
-          <NetDailyPnLChart />
-        </div>
-
-        {/* Row 2-3: Calendar (spans 2 cols × 2 rows) | Trade Time + Trade Duration (stacked in col 3) */}
-        <div className="lg:col-span-2 lg:row-span-2">
-          <MonthlyPerformanceCalendar />
-        </div>
-        <div className="lg:col-span-1">
-          <TradeTimePerformanceChart />
-        </div>
-        <div className="lg:col-span-1">
-          <TradeDurationPerformanceChart />
-        </div>
-
-        {/* Row 4: Symbol Analysis (2 cols) | Long/Short Analysis (1 col) */}
-        <div className="lg:col-span-2">
-          <SymbolAnalysisChart />
-        </div>
-        <div className="lg:col-span-1">
-          <LongShortAnalysisChart />
-        </div>
-      </div>
+      {/* Draggable charts section */}
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={handleDragEnd}
+      >
+        <SortableContext items={chartOrder} strategy={rectSortingStrategy}>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            {chartOrder.map((chartId) => {
+              const config = CHART_CONFIGS[chartId];
+              if (!config) return null;
+              return (
+                <DraggableChartWrapper
+                  key={chartId}
+                  id={chartId}
+                  isEditMode={isEditMode}
+                  colSpan={config.colSpan}
+                  rowSpan={config.rowSpan}
+                >
+                  {renderChart(chartId)}
+                </DraggableChartWrapper>
+              );
+            })}
+          </div>
+        </SortableContext>
+      </DndContext>
     </div>
   );
 };
