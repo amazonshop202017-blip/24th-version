@@ -163,6 +163,24 @@ const ManualExitTab = () => {
 
   return (
     <>
+      {/* QUICK */}
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.03 }}
+        className="glass-card rounded-2xl p-5"
+      >
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold">QUICK</h2>
+          <div className="text-xs text-muted-foreground font-mono">{quickResult.trades} trades</div>
+        </div>
+        <div className="flex flex-wrap items-end gap-3 mb-4">
+          <InputField label="SL" value={quickSL} onChange={setQuickSL} />
+          <InputField label="TP" value={quickTP} onChange={setQuickTP} />
+        </div>
+        <div className="flex flex-wrap items-center gap-5 text-sm">
+          <span className="text-muted-foreground">Win Rate: <span className="font-mono font-semibold text-foreground">{quickResult.winRate.toFixed(1)}%</span></span>
+          <span className="text-muted-foreground">Expectancy: <span className={`font-mono font-semibold ${quickResult.expectancy >= 0 ? 'profit-text' : 'loss-text'}`}>{quickResult.expectancy >= 0 ? '+' : ''}{quickResult.expectancy.toFixed(3)}R</span></span>
+        </div>
+      </motion.div>
+
       {/* Controls */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}
         className="glass-card rounded-2xl p-5"
