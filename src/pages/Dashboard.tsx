@@ -17,10 +17,8 @@ import {
 import { Pencil, Check } from 'lucide-react';
 import { AddWidgetPlaceholder } from '@/components/dashboard/AddWidgetPlaceholder';
 import { ChartLibraryModal } from '@/components/dashboard/ChartLibraryModal';
+import { DashboardMetrics } from '@/components/dashboard/DashboardMetrics';
 import { RecentTrades } from '@/components/dashboard/RecentTrades';
-import { WinRateGauge } from '@/components/dashboard/WinRateGauge';
-import { ProfitFactorRing } from '@/components/dashboard/ProfitFactorRing';
-import { AvgWinLossRatio } from '@/components/dashboard/AvgWinLossRatio';
 import { DailyCumulativePnLChart } from '@/components/dashboard/DailyCumulativePnLChart';
 import { NetDailyPnLChart } from '@/components/dashboard/NetDailyPnLChart';
 import { TradeTimePerformanceChart } from '@/components/dashboard/TradeTimePerformanceChart';
