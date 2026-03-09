@@ -44,17 +44,28 @@ export const SharedNavbar = () => {
           </div>
 
           {/* CTA */}
-          <Link
-            to="/entering"
-            className="hidden md:inline-flex text-sm font-semibold px-5 py-2.5 transition-colors"
-            style={{
-              background: '#0F0F0F',
-              color: '#FFFFFF',
-              borderRadius: 0,
-            }}
-          >
-            Start Free — 14 Days
-          </Link>
+          <div className="hidden md:flex items-center gap-3">
+            <Link
+              to="/entering"
+              className="text-sm font-semibold px-5 py-2.5 transition-colors"
+              style={{
+                background: '#0F0F0F',
+                color: '#FFFFFF',
+                borderRadius: 0,
+              }}
+            >
+              Get Started
+            </Link>
+            <Link
+              to="/entering"
+              className="text-sm font-medium px-4 py-2.5 transition-colors"
+              style={{ color: '#0F0F0F', fontFamily: "'DM Sans', 'Inter', sans-serif" }}
+              onMouseEnter={e => (e.currentTarget.style.color = '#8A8A8A')}
+              onMouseLeave={e => (e.currentTarget.style.color = '#0F0F0F')}
+            >
+              Login
+            </Link>
+          </div>
         </div>
       </div>
     </nav>
