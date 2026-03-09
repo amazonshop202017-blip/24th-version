@@ -76,13 +76,13 @@ const ManualExitTab = () => {
   );
 
   const slSweep = useMemo(
-    () => computeSLSweep(exitTrades, fixedTP, slRangeMin, slRangeMax, slStep),
-    [exitTrades, fixedTP, slRangeMin, slRangeMax, slStep]
+    () => computeSLSweep(exitTrades, fixedTP, slRangeMin, slRangeMax, slStep).filter(p => p.tradesCount >= minTradeCount),
+    [exitTrades, fixedTP, slRangeMin, slRangeMax, slStep, minTradeCount]
   );
 
   const tpSweep = useMemo(
-    () => computeTPSweep(exitTrades, fixedSL, tpRangeMin, tpRangeMax, tpStep),
-    [exitTrades, fixedSL, tpRangeMin, tpRangeMax, tpStep]
+    () => computeTPSweep(exitTrades, fixedSL, tpRangeMin, tpRangeMax, tpStep).filter(p => p.tradesCount >= minTradeCount),
+    [exitTrades, fixedSL, tpRangeMin, tpRangeMax, tpStep, minTradeCount]
   );
 
   // Find best point for display
