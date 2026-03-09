@@ -76,7 +76,7 @@ const steps = [
 const Landing = () => {
   return (
     <div className="min-h-screen bg-white text-slate-900 overflow-x-hidden">
-      <LandingNavbar />
+      <SharedNavbar />
 
       {/* ====== HERO ====== */}
       <section className="relative pt-32 pb-20 lg:pt-40 lg:pb-32 overflow-hidden">

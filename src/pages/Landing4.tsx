@@ -206,7 +206,7 @@ const painCards = [
 const Landing4 = () => {
   return (
     <div className="min-h-screen bg-white overflow-x-hidden" style={{ color: '#0F0F0F' }}>
-      <Landing4Navbar />
+      <SharedNavbar />
 
       {/* ════════════════════════════════════════
           SECTION 2 — HERO

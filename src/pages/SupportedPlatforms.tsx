@@ -40,7 +40,7 @@ const fadeUp = {
 const SupportedPlatforms = () => {
   return (
     <div className="min-h-screen bg-white">
-      <LandingNavbar />
+      <SharedNavbar />
 
       {/* Hero */}
       <section className="pt-32 pb-16 px-6 lg:px-8">

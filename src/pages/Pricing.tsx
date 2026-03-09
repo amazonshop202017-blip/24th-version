@@ -83,7 +83,7 @@ const faqs = [
 const Pricing = () => {
   return (
     <div className="min-h-screen bg-white text-slate-900">
-      <LandingNavbar />
+      <SharedNavbar />
 
       {/* Hero */}
       <section className="pt-32 pb-16 lg:pt-40 lg:pb-20">
