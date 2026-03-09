@@ -35,7 +35,7 @@ const Landing4Navbar = () => {
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Wordmark */}
-          <Link to="/home-4" className="text-lg tracking-tight" style={{ fontFamily: "'DM Sans', 'Inter', sans-serif" }}>
+          <Link to="/" className="text-lg tracking-tight" style={{ fontFamily: "'DM Sans', 'Inter', sans-serif" }}>
             <span className="font-normal" style={{ color: scrolled ? '#0F0F0F' : '#0F0F0F' }}>Trade</span>
             <span className="font-bold" style={{ color: scrolled ? '#0F0F0F' : '#0F0F0F' }}>Valley</span>
           </Link>
