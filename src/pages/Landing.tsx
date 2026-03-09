@@ -5,7 +5,7 @@ import {
   TrendingUp, Shield, Zap, LineChart, Eye, Crosshair,
   CheckCircle2, ChevronRight, Star
 } from 'lucide-react';
-import { LandingNavbar } from '@/components/landing/LandingNavbar';
+import { SharedNavbar } from '@/components/landing/SharedNavbar';
 import { LandingFooter } from '@/components/landing/LandingFooter';
 
 const fadeUp = {

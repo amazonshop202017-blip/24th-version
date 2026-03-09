@@ -6,7 +6,7 @@ import {
   ListOrdered, FileText, Sliders, ChevronRight, CheckCircle2,
   Clock, Tag, MessageSquare, Ruler, GitMerge, DollarSign
 } from 'lucide-react';
-import { LandingNavbar } from '@/components/landing/LandingNavbar';
+import { SharedNavbar } from '@/components/landing/SharedNavbar';
 import { LandingFooter } from '@/components/landing/LandingFooter';
 
 const fadeUp = {

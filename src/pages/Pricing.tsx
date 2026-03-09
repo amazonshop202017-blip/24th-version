@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowRight, CheckCircle2, Sparkles, XCircle } from 'lucide-react';
-import { LandingNavbar } from '@/components/landing/LandingNavbar';
+import { SharedNavbar } from '@/components/landing/SharedNavbar';
 import { LandingFooter } from '@/components/landing/LandingFooter';
 
 const fadeUp = {

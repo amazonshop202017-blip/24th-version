@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { LandingNavbar } from '@/components/landing/LandingNavbar';
+import { SharedNavbar } from '@/components/landing/SharedNavbar';
 import { LandingFooter } from '@/components/landing/LandingFooter';
 import { Check, Upload, Wifi, Clock, TrendingUp, BarChart3, Landmark, Bitcoin, DollarSign, Layers } from 'lucide-react';
 import { motion } from 'framer-motion';
