@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Trash2, Edit2, Check, X, Tag, Wallet, TrendingUp, TrendingDown, Settings as SettingsIcon, Download, DollarSign, FolderOpen, Archive, ArchiveRestore, ChevronDown, ChevronUp, Target, MessageSquare, Ruler, MoreVertical, ArrowRightLeft, Eraser, LogOut } from 'lucide-react';
+import { Plus, Trash2, Edit2, Check, X, Tag, Wallet, TrendingUp, TrendingDown, Settings as SettingsIcon, Download, DollarSign, FolderOpen, Archive, ArchiveRestore, ChevronDown, ChevronUp, Target, MessageSquare, Ruler, MoreVertical, ArrowRightLeft, Eraser, LogOut, Image } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,6 +11,7 @@ import { cn } from '@/lib/utils';
 import DepositWithdrawModal from '@/components/settings/DepositWithdrawModal';
 import { CategoriesManagement } from '@/components/settings/CategoriesManagement';
 import { TagsManagement } from '@/components/settings/TagsManagement';
+import { ScreenshotTagsManagement } from '@/components/settings/ScreenshotTagsManagement';
 import { TradeCommentsManagement } from '@/components/settings/TradeCommentsManagement';
 import { AccountImportModal } from '@/components/settings/AccountImportModal';
 import { SymbolTickSizeManagement } from '@/components/settings/SymbolTickSizeManagement';
@@ -71,7 +72,7 @@ const Settings = () => {
   const [activeSettingsTab, setActiveSettingsTab] = useState<'main' | 'accounts' | 'custom-tags' | 'trade-comments' | 'symbol-tick' | 'tpsl' | 'fees'>('main');
   
   // Custom Tags sub-tab state
-  const [activeTagsSubTab, setActiveTagsSubTab] = useState<'categories' | 'tags'>('categories');
+  const [activeTagsSubTab, setActiveTagsSubTab] = useState<'categories' | 'tags' | 'screenshot-tags'>('categories');
 
   // Account state
   const [newAccountName, setNewAccountName] = useState('');
@@ -665,6 +666,18 @@ const Settings = () => {
               <Tag className="w-4 h-4" />
               Tags
             </button>
+            <button
+              onClick={() => setActiveTagsSubTab('screenshot-tags')}
+              className={cn(
+                "flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors",
+                activeTagsSubTab === 'screenshot-tags'
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground hover:bg-background/50"
+              )}
+            >
+              <Image className="w-4 h-4" />
+              Screenshot Tags
+            </button>
           </div>
 
           {/* Categories Sub-tab */}
@@ -678,6 +691,13 @@ const Settings = () => {
           {activeTagsSubTab === 'tags' && (
             <div className="glass-card rounded-2xl p-6">
               <TagsManagement />
+            </div>
+          )}
+
+          {/* Screenshot Tags Sub-tab */}
+          {activeTagsSubTab === 'screenshot-tags' && (
+            <div className="glass-card rounded-2xl p-6">
+              <ScreenshotTagsManagement />
             </div>
           )}
         </div>
