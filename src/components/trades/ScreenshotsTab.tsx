@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { useScreenshotTagsContext } from '@/contexts/ScreenshotTagsContext';
 import { TradeScreenshot } from '@/types/trade';
 import { cn } from '@/lib/utils';
@@ -19,6 +20,7 @@ export const ScreenshotsTab = ({ screenshots, onScreenshotsChange }: Screenshots
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [viewingScreenshot, setViewingScreenshot] = useState<TradeScreenshot | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Extract TradingView snapshot ID from URL or text
@@ -302,7 +304,8 @@ export const ScreenshotsTab = ({ screenshots, onScreenshotsChange }: Screenshots
                   <img
                     src={screenshot.imageData}
                     alt="Trade screenshot"
-                    className="w-full object-contain"
+                    className="w-full object-contain cursor-pointer"
+                    onClick={() => setViewingScreenshot(screenshot)}
                   />
                   
                   {/* Tag badge (always visible if tagged) */}
@@ -353,6 +356,19 @@ export const ScreenshotsTab = ({ screenshots, onScreenshotsChange }: Screenshots
           </div>
         </div>
       )}
+
+      {/* Fullscreen View Dialog */}
+      <Dialog open={!!viewingScreenshot} onOpenChange={(open) => !open && setViewingScreenshot(null)}>
+        <DialogContent className="max-w-[90vw] max-h-[90vh] p-0 overflow-hidden bg-background/95 backdrop-blur">
+          {viewingScreenshot && (
+            <img
+              src={viewingScreenshot.imageData}
+              alt="Trade screenshot fullscreen"
+              className="w-full h-full object-contain max-h-[85vh]"
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
