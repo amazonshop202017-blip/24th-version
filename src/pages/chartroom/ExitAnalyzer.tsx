@@ -303,7 +303,7 @@ const ManualExitTab = () => {
   );
 };
 
-
+const ExitAnalyzer = () => {
   const { filteredTrades } = useFilteredTrades();
 
   // Inputs
