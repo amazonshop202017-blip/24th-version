@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowRight, Play, TrendingDown, Timer, HelpCircle, XCircle, Sparkles } from 'lucide-react';
 import { LandingFooter } from '@/components/landing/LandingFooter';
+import { SharedNavbar } from '@/components/landing/SharedNavbar';
 import logo from '@/assets/logo.svg';
 import { useState, useEffect } from 'react';
 
