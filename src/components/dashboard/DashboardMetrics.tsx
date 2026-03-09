@@ -97,6 +97,23 @@ export const DashboardMetrics = ({ isEditMode }: DashboardMetricsProps) => {
   const { isPrivacyMode, maskCurrency } = usePrivacyMode();
   const [isMetricsLibraryOpen, setIsMetricsLibraryOpen] = useState(false);
 
+  const microChartData = useMemo(() => {
+    if (filteredTrades.length === 0) return [];
+    const dailyPnL = new Map<string, number>();
+    filteredTrades.forEach(t => {
+      const m = calculateTradeMetrics(t);
+      if (m.openDate) {
+        const d = format(parseISO(m.openDate), 'yyyy-MM-dd');
+        dailyPnL.set(d, (dailyPnL.get(d) || 0) + m.netPnl);
+      }
+    });
+    let cum = 0;
+    return Array.from(dailyPnL.keys()).sort().map(d => {
+      cum += dailyPnL.get(d) || 0;
+      return { v: cum };
+    });
+  }, [filteredTrades]);
+
   const [metricsOrder, setMetricsOrder] = useState<string[]>(() => {
     const saved = localStorage.getItem(METRICS_STORAGE_KEY);
     if (saved) {
