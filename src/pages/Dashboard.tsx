@@ -141,20 +141,20 @@ const Dashboard = () => {
       >
         <div className="flex items-center gap-3">
           <PageHeader title="Dashboard" tooltip="Your trading overview — track net P&L, win rates, and key metrics at a glance." />
-          <Button
-            variant={isEditMode ? "default" : "ghost"}
-            size="icon"
-            className="h-8 w-8"
-            onClick={() => setIsEditMode(!isEditMode)}
-          >
-            {isEditMode ? <Check className="h-4 w-4" /> : <Pencil className="h-4 w-4" />}
-          </Button>
           {isEditMode && (
             <span className="text-xs text-muted-foreground bg-secondary px-2 py-1 rounded">
               Drag charts to reorder
             </span>
           )}
         </div>
+        <Button
+          variant={isEditMode ? "default" : "ghost"}
+          size="icon"
+          className="h-8 w-8"
+          onClick={() => setIsEditMode(!isEditMode)}
+        >
+          {isEditMode ? <Check className="h-4 w-4" /> : <Pencil className="h-4 w-4" />}
+        </Button>
       </motion.div>
 
       {/* Top metrics - draggable in edit mode */}
