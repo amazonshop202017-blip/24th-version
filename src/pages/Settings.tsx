@@ -72,7 +72,7 @@ const Settings = () => {
   const [activeSettingsTab, setActiveSettingsTab] = useState<'main' | 'accounts' | 'custom-tags' | 'trade-comments' | 'symbol-tick' | 'tpsl' | 'fees'>('main');
   
   // Custom Tags sub-tab state
-  const [activeTagsSubTab, setActiveTagsSubTab] = useState<'categories' | 'tags'>('categories');
+  const [activeTagsSubTab, setActiveTagsSubTab] = useState<'categories' | 'tags' | 'screenshot-tags'>('categories');
 
   // Account state
   const [newAccountName, setNewAccountName] = useState('');
