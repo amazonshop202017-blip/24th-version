@@ -89,6 +89,32 @@ const ManualExitTab = () => {
     [exitTrades, fixedSL, tpRangeMin, tpRangeMax, tpStep, minTradeCount]
   );
 
+  // Quick calculator computation
+  const quickResult = useMemo(() => {
+    if (exitTrades.length === 0 || quickSL <= 0 || quickTP <= 0) {
+      return { winRate: 0, expectancy: 0, trades: 0 };
+    }
+    let totalR = 0;
+    let wins = 0;
+    for (const trade of exitTrades) {
+      let r: number;
+      if (trade.mae >= quickSL) {
+        r = -1; // SL hit
+      } else if (trade.mfe >= quickTP) {
+        r = quickTP / quickSL; // TP hit
+      } else {
+        r = trade.realizedR; // Neither hit
+      }
+      totalR += r;
+      if (r > 0) wins++;
+    }
+    return {
+      winRate: (wins / exitTrades.length) * 100,
+      expectancy: totalR / exitTrades.length,
+      trades: exitTrades.length,
+    };
+  }, [exitTrades, quickSL, quickTP]);
+
   // Find best point for display
   const bestSL = useMemo(() => {
     if (slSweep.length === 0) return null;
