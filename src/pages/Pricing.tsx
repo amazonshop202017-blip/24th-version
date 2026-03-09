@@ -48,6 +48,8 @@ const plans: {
     period: '/month',
     description: 'For traders who are serious about finding their edge.',
     features: [
+      { text: 'Advance Analytics', included: true },
+      { text: 'Exit Analyzer', included: true },
       { text: 'Can add Unlimited Accounts', included: true },
       { text: 'Add unlimited setups', included: true },
       { text: 'Mentor Mode', included: true },
