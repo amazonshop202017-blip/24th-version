@@ -8,6 +8,7 @@ export const METRIC_LIST = [
   { id: 'profitFactor', name: 'Profit Factor', description: 'Ratio of total profits to total losses' },
   { id: 'dayWinRate', name: 'Day Win %', description: 'Win rate based on trading days' },
   { id: 'avgWinLoss', name: 'Avg Win/Loss Ratio', description: 'Average winning trade vs average losing trade' },
+  { id: 'currentStreak', name: 'Current Streak', description: 'Current win/loss streaks for days and trades' },
 ];
 
 interface MetricsLibraryModalProps {

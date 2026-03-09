@@ -21,6 +21,7 @@ import { motion } from 'framer-motion';
 import { WinRateGauge } from '@/components/dashboard/WinRateGauge';
 import { ProfitFactorRing } from '@/components/dashboard/ProfitFactorRing';
 import { AvgWinLossRatio } from '@/components/dashboard/AvgWinLossRatio';
+import { CurrentStreakMetric } from '@/components/dashboard/CurrentStreakMetric';
 import { AddWidgetPlaceholder } from '@/components/dashboard/AddWidgetPlaceholder';
 import { MetricsLibraryModal } from '@/components/dashboard/MetricsLibraryModal';
 import { useFilteredTrades } from '@/hooks/useFilteredTrades';
@@ -171,6 +172,12 @@ export const DashboardMetrics = ({ isEditMode }: DashboardMetricsProps) => {
         return (
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay }} className="glass-card rounded-xl px-4 py-3 h-full">
             <AvgWinLossRatio avgWin={stats.avgWin} avgLoss={stats.avgLoss} />
+          </motion.div>
+        );
+      case 'currentStreak':
+        return (
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay }} className="glass-card rounded-xl px-4 py-3 h-full">
+            <CurrentStreakMetric />
           </motion.div>
         );
       default:
