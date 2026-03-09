@@ -8,7 +8,8 @@ import { PageHeader } from '@/components/layout/PageHeader';
 import { cn } from '@/lib/utils';
 import {
   ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip,
-  ResponsiveContainer, ReferenceLine, Cell as RechartsCell
+  ResponsiveContainer, ReferenceLine, Cell as RechartsCell,
+  LineChart, Line
 } from 'recharts';
 
 const subTabs = [
