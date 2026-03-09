@@ -53,6 +53,7 @@ const plans: {
       { text: 'Exit Analyzer', included: true },
       { text: 'Can add Unlimited Accounts', included: true },
       { text: 'Add unlimited setups', included: true },
+      { text: 'Unlimited Tag Categories', included: true },
       { text: 'Mentor Mode', included: true },
     ],
     cta: 'Go Professional',
