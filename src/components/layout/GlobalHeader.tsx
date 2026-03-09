@@ -1001,7 +1001,7 @@ export const GlobalHeader = () => {
               />
             </div>
             {/* Presets */}
-            <div className="p-2 min-w-[150px]">
+            <div className="p-2">
               <button
                 onClick={() => {
                   applyDatePreset('all');
