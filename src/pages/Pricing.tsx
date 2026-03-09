@@ -33,6 +33,8 @@ const plans: {
     period: '/month',
     description: 'Everything you need to begin your journaling discipline.',
     features: [
+      { text: 'Advance Analytics', included: true },
+      { text: 'Exit Analyzer', included: true },
       { text: 'Can add upto 1 account', included: true },
       { text: 'Add upto 3 Setups', included: true },
       { text: 'Mentor Mode', included: false },
