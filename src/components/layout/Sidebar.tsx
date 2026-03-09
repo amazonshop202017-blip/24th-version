@@ -74,7 +74,7 @@ export const Sidebar = () => {
                   <span className="font-bold text-white">Valley</span>
                 </span>
                 <span className="text-[9px] tracking-widest uppercase text-white/40 mt-0.5 whitespace-nowrap" style={{ fontFamily: "'DM Sans', 'Inter', sans-serif" }}>
-                  Look inward · Trade forward
+                  Look inward<span className="text-[13px] font-bold text-white/50 mx-0.5">/</span>Trade forward
                 </span>
               </motion.div>
             ) : (
