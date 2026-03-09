@@ -264,6 +264,9 @@ export const TradeModal = () => {
       setPriceReachedFirst(editingTrade.priceReachedFirst || '');
       setBreakEven(editingTrade.breakEven ?? null);
       
+      // Load screenshots
+      setScreenshots(editingTrade.screenshots || []);
+      
     } else {
       resetForm();
       // Auto-select account when exactly one account is selected in global filter (Add Trade only)
