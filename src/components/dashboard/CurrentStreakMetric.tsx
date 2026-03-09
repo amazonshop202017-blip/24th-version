@@ -143,40 +143,43 @@ export const CurrentStreakMetric = () => {
 
   return (
     <div className="h-full flex flex-col">
-      <div className="flex items-center gap-1.5 mb-2">
+      <div className="flex items-center gap-1.5 mb-3">
         <span className="text-xs text-muted-foreground">Current streak</span>
+        <span className="text-muted-foreground/50 cursor-help" title="Shows current, best, and worst streaks">
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" strokeWidth="1.5"/><text x="8" y="12" textAnchor="middle" fontSize="10" fill="currentColor">i</text></svg>
+        </span>
       </div>
       
-      <div className="flex-1 grid grid-cols-2 gap-3">
+      <div className="flex-1 grid grid-cols-2 gap-4">
         {/* Days Column */}
-        <div className="flex flex-col items-center">
-          <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide mb-1">Days</span>
-          <div className="flex gap-1 mb-1">
-            <span className="text-[9px] px-1.5 py-0.5 rounded bg-profit/20 text-profit font-medium">
-              {dayStreaks.bestWinStreak} days
-            </span>
-          </div>
-          <StreakCircle value={dayStreaks.currentStreak} type={dayStreaks.currentStreakType} />
-          <div className="flex gap-1 mt-1">
-            <span className="text-[9px] px-1.5 py-0.5 rounded bg-loss/20 text-loss font-medium">
-              {dayStreaks.worstLossStreak} days
-            </span>
+        <div className="flex flex-col items-center gap-1">
+          <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Days</span>
+          <div className="flex items-center gap-2 mt-1">
+            <StreakCircle value={dayStreaks.currentStreak} type={dayStreaks.currentStreakType} />
+            <div className="flex flex-col gap-1">
+              <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-profit/15 text-profit font-medium whitespace-nowrap">
+                {dayStreaks.bestWinStreak} {dayStreaks.bestWinStreak === 1 ? 'day' : 'days'}
+              </span>
+              <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-loss/15 text-loss font-medium whitespace-nowrap">
+                {dayStreaks.worstLossStreak} {dayStreaks.worstLossStreak === 1 ? 'day' : 'days'}
+              </span>
+            </div>
           </div>
         </div>
 
         {/* Trades Column */}
-        <div className="flex flex-col items-center">
-          <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide mb-1">Trades</span>
-          <div className="flex gap-1 mb-1">
-            <span className="text-[9px] px-1.5 py-0.5 rounded bg-profit/20 text-profit font-medium">
-              {tradeStreaks.bestWinStreak} trades
-            </span>
-          </div>
-          <StreakCircle value={tradeStreaks.currentStreak} type={tradeStreaks.currentStreakType} />
-          <div className="flex gap-1 mt-1">
-            <span className="text-[9px] px-1.5 py-0.5 rounded bg-loss/20 text-loss font-medium">
-              {tradeStreaks.worstLossStreak} trades
-            </span>
+        <div className="flex flex-col items-center gap-1">
+          <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Trades</span>
+          <div className="flex items-center gap-2 mt-1">
+            <StreakCircle value={tradeStreaks.currentStreak} type={tradeStreaks.currentStreakType} />
+            <div className="flex flex-col gap-1">
+              <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-profit/15 text-profit font-medium whitespace-nowrap">
+                {tradeStreaks.bestWinStreak} {tradeStreaks.bestWinStreak === 1 ? 'trade' : 'trades'}
+              </span>
+              <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-loss/15 text-loss font-medium whitespace-nowrap">
+                {tradeStreaks.worstLossStreak} {tradeStreaks.worstLossStreak === 1 ? 'trade' : 'trades'}
+              </span>
+            </div>
           </div>
         </div>
       </div>
