@@ -255,9 +255,22 @@ const Dashboard = () => {
                 </DraggableChartWrapper>
               );
             })}
+            {isEditMode && (
+              <>
+                <AddWidgetPlaceholder onClick={() => setIsLibraryOpen(true)} />
+                <AddWidgetPlaceholder onClick={() => setIsLibraryOpen(true)} />
+              </>
+            )}
           </div>
         </SortableContext>
       </DndContext>
+
+      <ChartLibraryModal
+        open={isLibraryOpen}
+        onOpenChange={setIsLibraryOpen}
+        activeCharts={chartOrder}
+        onAddChart={handleAddChart}
+      />
     </div>
   );
 };
