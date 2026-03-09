@@ -1,14 +1,15 @@
 import { useState, useMemo, useCallback, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useFilteredTrades } from '@/hooks/useFilteredTrades';
-import { prepareExitTrades, computeHeatmap, HeatmapCell } from '@/lib/exitAnalyzerCalc';
+import { prepareExitTrades, computeHeatmap, computeSLSweep, computeTPSweep, HeatmapCell, SweepPoint } from '@/lib/exitAnalyzerCalc';
 import { Info, X, Zap, PenLine } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { cn } from '@/lib/utils';
 import {
   ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip,
-  ResponsiveContainer, ReferenceLine, Cell as RechartsCell
+  ResponsiveContainer, ReferenceLine, Cell as RechartsCell,
+  LineChart, Line
 } from 'recharts';
 
 const subTabs = [
@@ -47,6 +48,260 @@ function cellTextColor(expectancy: number): string {
   if (Math.abs(expectancy) > 0.2) return 'hsl(210 40% 98%)';
   return 'hsl(215 20% 55%)';
 }
+
+// ─── Manual Exit Tab ───
+const ManualExitTab = () => {
+  const { filteredTrades } = useFilteredTrades();
+
+  // Inputs
+  const [fixedTP, setFixedTP] = useState(20);
+  const [fixedSL, setFixedSL] = useState(10);
+  const [slRangeMin, setSlRangeMin] = useState(5);
+  const [slRangeMax, setSlRangeMax] = useState(50);
+  const [slStep, setSlStep] = useState(1);
+  const [tpRangeMin, setTpRangeMin] = useState(5);
+  const [tpRangeMax, setTpRangeMax] = useState(80);
+  const [tpStep, setTpStep] = useState(1);
+  const [optimiseMetric, setOptimiseMetric] = useState<'winrate' | 'expectancy'>('expectancy');
+  const [treatMissingAsZero, setTreatMissingAsZero] = useState(true);
+
+  // Draggable selection
+  const [selectedSL, setSelectedSL] = useState<number | null>(null);
+  const [selectedTP, setSelectedTP] = useState<number | null>(null);
+
+  const exitTrades = useMemo(
+    () => prepareExitTrades(filteredTrades, treatMissingAsZero),
+    [filteredTrades, treatMissingAsZero]
+  );
+
+  const slSweep = useMemo(
+    () => computeSLSweep(exitTrades, fixedTP, slRangeMin, slRangeMax, slStep),
+    [exitTrades, fixedTP, slRangeMin, slRangeMax, slStep]
+  );
+
+  const tpSweep = useMemo(
+    () => computeTPSweep(exitTrades, fixedSL, tpRangeMin, tpRangeMax, tpStep),
+    [exitTrades, fixedSL, tpRangeMin, tpRangeMax, tpStep]
+  );
+
+  // Find best point for display
+  const bestSL = useMemo(() => {
+    if (slSweep.length === 0) return null;
+    const sel = selectedSL != null ? slSweep.find(p => p.value === selectedSL) : null;
+    if (sel) return sel;
+    return slSweep.reduce((best, p) => {
+      const metric = optimiseMetric === 'expectancy' ? p.expectancy : p.winRate;
+      const bestMetric = optimiseMetric === 'expectancy' ? best.expectancy : best.winRate;
+      return metric > bestMetric ? p : best;
+    });
+  }, [slSweep, selectedSL, optimiseMetric]);
+
+  const bestTP = useMemo(() => {
+    if (tpSweep.length === 0) return null;
+    const sel = selectedTP != null ? tpSweep.find(p => p.value === selectedTP) : null;
+    if (sel) return sel;
+    return tpSweep.reduce((best, p) => {
+      const metric = optimiseMetric === 'expectancy' ? p.expectancy : p.winRate;
+      const bestMetric = optimiseMetric === 'expectancy' ? best.expectancy : best.winRate;
+      return metric > bestMetric ? p : best;
+    });
+  }, [tpSweep, selectedTP, optimiseMetric]);
+
+  const dataKey = optimiseMetric === 'expectancy' ? 'expectancy' : 'winRate';
+  const yLabel = optimiseMetric === 'expectancy' ? 'Expectancy (R)' : 'Win Rate (%)';
+  const formatVal = (v: number) => optimiseMetric === 'expectancy' ? `${v >= 0 ? '+' : ''}${v.toFixed(3)}R` : `${v.toFixed(1)}%`;
+
+  const handleChartClick = (chartType: 'sl' | 'tp', data: any) => {
+    if (data?.activePayload?.[0]) {
+      const val = data.activePayload[0].payload.value;
+      if (chartType === 'sl') setSelectedSL(val);
+      else setSelectedTP(val);
+    }
+  };
+
+  if (exitTrades.length === 0) {
+    return (
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
+        className="glass-card rounded-2xl p-12 flex flex-col items-center justify-center min-h-[300px]"
+      >
+        <p className="text-muted-foreground text-lg">No trades with MFE/MAE data available.</p>
+        <p className="text-muted-foreground text-sm mt-1">Add Farthest Price in Profit/Loss values to your trades to use the Exit Analyzer.</p>
+      </motion.div>
+    );
+  }
+
+  return (
+    <>
+      {/* Controls */}
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}
+        className="glass-card rounded-2xl p-5"
+      >
+        <div className="flex flex-wrap items-end gap-4">
+          <div className="flex flex-col gap-1">
+            <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Optimise</span>
+            <div className="flex rounded-md border border-border overflow-hidden">
+              <button
+                onClick={() => setOptimiseMetric('expectancy')}
+                className={`px-3 py-1.5 text-xs font-medium transition-colors ${optimiseMetric === 'expectancy' ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground hover:text-foreground'}`}
+              >
+                Expectancy
+              </button>
+              <button
+                onClick={() => setOptimiseMetric('winrate')}
+                className={`px-3 py-1.5 text-xs font-medium transition-colors ${optimiseMetric === 'winrate' ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground hover:text-foreground'}`}
+              >
+                Win Rate
+              </button>
+            </div>
+          </div>
+          <div className="w-px h-9 bg-border" />
+          <label className="flex items-center gap-2 cursor-pointer select-none pb-0.5">
+            <input
+              type="checkbox"
+              checked={treatMissingAsZero}
+              onChange={e => setTreatMissingAsZero(e.target.checked)}
+              className="h-4 w-4 rounded border-border accent-primary"
+            />
+            <span className="text-sm text-muted-foreground">Treat missing as 0</span>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Info className="h-3.5 w-3.5 text-muted-foreground" />
+              </TooltipTrigger>
+              <TooltipContent>
+                <p className="max-w-[200px] text-xs">When one of MFE/MAE is present and the other is missing, treat the missing value as 0. When disabled, such trades are excluded.</p>
+              </TooltipContent>
+            </Tooltip>
+          </label>
+        </div>
+        <div className="mt-3 text-xs text-muted-foreground font-mono">{exitTrades.length} trades</div>
+      </motion.div>
+
+      {/* SL Optimiser */}
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
+        className="glass-card rounded-2xl p-5"
+      >
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold">SL Optimiser</h2>
+          {bestSL && (
+            <div className="flex items-center gap-4 text-sm">
+              <span className="text-muted-foreground">Selected SL: <span className="font-mono font-semibold text-foreground">{selectedSL ?? bestSL.value}</span></span>
+              <span className="text-muted-foreground">WR: <span className="font-mono font-semibold text-foreground">{bestSL.winRate.toFixed(1)}%</span></span>
+              <span className="text-muted-foreground">Exp: <span className={`font-mono font-semibold ${bestSL.expectancy >= 0 ? 'profit-text' : 'loss-text'}`}>{bestSL.expectancy >= 0 ? '+' : ''}{bestSL.expectancy.toFixed(3)}R</span></span>
+            </div>
+          )}
+        </div>
+        <div className="flex flex-wrap items-end gap-3 mb-4">
+          <InputField label="Fixed TP" value={fixedTP} onChange={setFixedTP} />
+          <InputField label="SL From" value={slRangeMin} onChange={setSlRangeMin} />
+          <InputField label="SL To" value={slRangeMax} onChange={setSlRangeMax} />
+          <InputField label="Step" value={slStep} onChange={setSlStep} />
+        </div>
+        <p className="text-xs text-muted-foreground mb-3">Click on the chart to select an SL value. TP is held fixed at {fixedTP}.</p>
+        <ResponsiveContainer width="100%" height={300}>
+          <LineChart data={slSweep} onClick={(data) => handleChartClick('sl', data)} style={{ cursor: 'crosshair' }}
+            margin={{ top: 10, right: 20, bottom: 20, left: 10 }}
+          >
+            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+            <XAxis
+              dataKey="value" type="number" domain={['dataMin', 'dataMax']}
+              label={{ value: 'SL (ticks)', position: 'bottom', offset: 0, style: { fill: 'hsl(var(--muted-foreground))', fontSize: 12 } }}
+              tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 11 }}
+              stroke="hsl(var(--border))"
+            />
+            <YAxis
+              label={{ value: yLabel, angle: -90, position: 'insideLeft', style: { fill: 'hsl(var(--muted-foreground))', fontSize: 12 } }}
+              tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 11 }}
+              stroke="hsl(var(--border))"
+            />
+            <RechartsTooltip
+              contentStyle={{
+                backgroundColor: 'hsl(var(--card))',
+                border: '1px solid hsl(var(--border))',
+                borderRadius: '8px',
+                color: 'hsl(var(--foreground))',
+                fontSize: 12,
+              }}
+              formatter={(value: number) => [formatVal(value), yLabel]}
+              labelFormatter={(label) => `SL: ${label} ticks`}
+            />
+            <Line type="monotone" dataKey={dataKey} stroke="hsl(var(--primary))" strokeWidth={2} dot={false} activeDot={{ r: 5, fill: 'hsl(var(--primary))' }} />
+            {selectedSL != null && (
+              <ReferenceLine
+                x={selectedSL}
+                stroke="hsl(0 84% 60%)"
+                strokeDasharray="6 3"
+                strokeWidth={2}
+                label={{ value: `SL ${selectedSL}`, fill: 'hsl(0 84% 60%)', fontSize: 11, position: 'top' }}
+              />
+            )}
+          </LineChart>
+        </ResponsiveContainer>
+      </motion.div>
+
+      {/* TP Optimiser */}
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
+        className="glass-card rounded-2xl p-5"
+      >
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold">TP Optimiser</h2>
+          {bestTP && (
+            <div className="flex items-center gap-4 text-sm">
+              <span className="text-muted-foreground">Selected TP: <span className="font-mono font-semibold text-foreground">{selectedTP ?? bestTP.value}</span></span>
+              <span className="text-muted-foreground">WR: <span className="font-mono font-semibold text-foreground">{bestTP.winRate.toFixed(1)}%</span></span>
+              <span className="text-muted-foreground">Exp: <span className={`font-mono font-semibold ${bestTP.expectancy >= 0 ? 'profit-text' : 'loss-text'}`}>{bestTP.expectancy >= 0 ? '+' : ''}{bestTP.expectancy.toFixed(3)}R</span></span>
+            </div>
+          )}
+        </div>
+        <div className="flex flex-wrap items-end gap-3 mb-4">
+          <InputField label="Fixed SL" value={fixedSL} onChange={setFixedSL} />
+          <InputField label="TP From" value={tpRangeMin} onChange={setTpRangeMin} />
+          <InputField label="TP To" value={tpRangeMax} onChange={setTpRangeMax} />
+          <InputField label="Step" value={tpStep} onChange={setTpStep} />
+        </div>
+        <p className="text-xs text-muted-foreground mb-3">Click on the chart to select a TP value. SL is held fixed at {fixedSL}.</p>
+        <ResponsiveContainer width="100%" height={300}>
+          <LineChart data={tpSweep} onClick={(data) => handleChartClick('tp', data)} style={{ cursor: 'crosshair' }}
+            margin={{ top: 10, right: 20, bottom: 20, left: 10 }}
+          >
+            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+            <XAxis
+              dataKey="value" type="number" domain={['dataMin', 'dataMax']}
+              label={{ value: 'TP (ticks)', position: 'bottom', offset: 0, style: { fill: 'hsl(var(--muted-foreground))', fontSize: 12 } }}
+              tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 11 }}
+              stroke="hsl(var(--border))"
+            />
+            <YAxis
+              label={{ value: yLabel, angle: -90, position: 'insideLeft', style: { fill: 'hsl(var(--muted-foreground))', fontSize: 12 } }}
+              tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 11 }}
+              stroke="hsl(var(--border))"
+            />
+            <RechartsTooltip
+              contentStyle={{
+                backgroundColor: 'hsl(var(--card))',
+                border: '1px solid hsl(var(--border))',
+                borderRadius: '8px',
+                color: 'hsl(var(--foreground))',
+                fontSize: 12,
+              }}
+              formatter={(value: number) => [formatVal(value), yLabel]}
+              labelFormatter={(label) => `TP: ${label} ticks`}
+            />
+            <Line type="monotone" dataKey={dataKey} stroke="hsl(142 76% 45%)" strokeWidth={2} dot={false} activeDot={{ r: 5, fill: 'hsl(142 76% 45%)' }} />
+            {selectedTP != null && (
+              <ReferenceLine
+                x={selectedTP}
+                stroke="hsl(142 76% 45%)"
+                strokeDasharray="6 3"
+                strokeWidth={2}
+                label={{ value: `TP ${selectedTP}`, fill: 'hsl(142 76% 45%)', fontSize: 11, position: 'top' }}
+              />
+            )}
+          </LineChart>
+        </ResponsiveContainer>
+      </motion.div>
+    </>
+  );
+};
 
 const ExitAnalyzer = () => {
   const { filteredTrades } = useFilteredTrades();
@@ -497,21 +752,8 @@ const ExitAnalyzer = () => {
       )}
       </>
       ) : (
-        <motion.div
-          key="manual"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="glass-card rounded-2xl p-12 flex flex-col items-center justify-center min-h-[400px]"
-        >
-          <div className="w-20 h-20 rounded-2xl bg-primary/10 flex items-center justify-center mb-6">
-            <PenLine className="w-10 h-10 text-primary" />
-          </div>
-          <h3 className="text-2xl font-semibold mb-3">Manual Exit Analysis</h3>
-          <p className="text-muted-foreground text-center max-w-md">
-            Manually define and test specific SL/TP exit strategies against your trade history. Coming soon.
-          </p>
-        </motion.div>
+      <ManualExitTab />
+
       )}
     </div>
   );

@@ -103,8 +103,6 @@ export function computeHeatmap(
       let relevantCount = 0;
 
       for (const trade of trades) {
-        // Only count trades where MFE or MAE is within range of this cell's SL/TP
-        // i.e., trade could potentially interact with this exit model
         const r = simulateExit(trade, sl, tp);
         totalR += r;
         if (r > 0) wins++;
@@ -125,4 +123,71 @@ export function computeHeatmap(
   }
 
   return cells;
+}
+
+export interface SweepPoint {
+  value: number;       // The SL or TP tick value
+  expectancy: number;
+  winRate: number;
+  tradesCount: number;
+}
+
+/**
+ * Sweep SL values while holding TP fixed.
+ */
+export function computeSLSweep(
+  trades: ExitAnalyzerTrade[],
+  fixedTP: number,
+  minSL: number,
+  maxSL: number,
+  step: number
+): SweepPoint[] {
+  if (trades.length === 0 || step <= 0 || fixedTP <= 0) return [];
+  const points: SweepPoint[] = [];
+  for (let sl = minSL; sl <= maxSL; sl += step) {
+    let totalR = 0;
+    let wins = 0;
+    for (const trade of trades) {
+      const r = simulateExit(trade, sl, fixedTP);
+      totalR += r;
+      if (r > 0) wins++;
+    }
+    points.push({
+      value: sl,
+      expectancy: totalR / trades.length,
+      winRate: (wins / trades.length) * 100,
+      tradesCount: trades.length,
+    });
+  }
+  return points;
+}
+
+/**
+ * Sweep TP values while holding SL fixed.
+ */
+export function computeTPSweep(
+  trades: ExitAnalyzerTrade[],
+  fixedSL: number,
+  minTP: number,
+  maxTP: number,
+  step: number
+): SweepPoint[] {
+  if (trades.length === 0 || step <= 0 || fixedSL <= 0) return [];
+  const points: SweepPoint[] = [];
+  for (let tp = minTP; tp <= maxTP; tp += step) {
+    let totalR = 0;
+    let wins = 0;
+    for (const trade of trades) {
+      const r = simulateExit(trade, fixedSL, tp);
+      totalR += r;
+      if (r > 0) wins++;
+    }
+    points.push({
+      value: tp,
+      expectancy: totalR / trades.length,
+      winRate: (wins / trades.length) * 100,
+      tradesCount: trades.length,
+    });
+  }
+  return points;
 }
