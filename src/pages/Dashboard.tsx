@@ -17,10 +17,8 @@ import {
 import { Pencil, Check } from 'lucide-react';
 import { AddWidgetPlaceholder } from '@/components/dashboard/AddWidgetPlaceholder';
 import { ChartLibraryModal } from '@/components/dashboard/ChartLibraryModal';
+import { DashboardMetrics } from '@/components/dashboard/DashboardMetrics';
 import { RecentTrades } from '@/components/dashboard/RecentTrades';
-import { WinRateGauge } from '@/components/dashboard/WinRateGauge';
-import { ProfitFactorRing } from '@/components/dashboard/ProfitFactorRing';
-import { AvgWinLossRatio } from '@/components/dashboard/AvgWinLossRatio';
 import { DailyCumulativePnLChart } from '@/components/dashboard/DailyCumulativePnLChart';
 import { NetDailyPnLChart } from '@/components/dashboard/NetDailyPnLChart';
 import { TradeTimePerformanceChart } from '@/components/dashboard/TradeTimePerformanceChart';
@@ -159,85 +157,8 @@ const Dashboard = () => {
         </div>
       </motion.div>
 
-      {/* Top 5 metrics - NOT draggable */}
-      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-3">
-        {/* Net P&L with Total Trades */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0 }}
-          className="glass-card rounded-xl px-4 py-3"
-        >
-          <div className="flex items-center gap-1.5 mb-1">
-            <span className="text-xs text-muted-foreground">Net P&L</span>
-            <span className="text-[10px] text-muted-foreground bg-secondary px-1.5 py-0.5 rounded">
-              {stats.totalTrades}
-            </span>
-          </div>
-          <p className={`text-2xl font-bold font-mono ${isPrivacyMode ? 'text-foreground' : stats.netPnl >= 0 ? 'profit-text' : 'loss-text'}`}>
-            {maskCurrency(stats.netPnl, formatCurrency)}
-          </p>
-        </motion.div>
-
-        {/* Trade Win Rate */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.1 }}
-          className="glass-card rounded-xl px-4 py-3"
-        >
-          <WinRateGauge 
-            value={stats.tradeWinRate} 
-            label="Trade Win %"
-            winners={stats.winningTrades}
-            losers={stats.losingTrades}
-            breakeven={stats.breakevenTrades}
-          />
-        </motion.div>
-
-        {/* Profit Factor */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.2 }}
-          className="glass-card rounded-xl px-4 py-3"
-        >
-          <ProfitFactorRing 
-            profitFactor={stats.profitFactor}
-            totalProfits={stats.totalProfits}
-            totalLosses={stats.totalLosses}
-          />
-        </motion.div>
-
-        {/* Day Win Rate */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.3 }}
-          className="glass-card rounded-xl px-4 py-3"
-        >
-          <WinRateGauge 
-            value={stats.dayWinRate} 
-            label="Day Win %"
-            winners={stats.winningDays}
-            losers={stats.losingDays}
-            breakeven={stats.breakevenDays}
-          />
-        </motion.div>
-
-        {/* Avg Win/Loss Ratio */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.4 }}
-          className="glass-card rounded-xl px-4 py-3"
-        >
-          <AvgWinLossRatio 
-            avgWin={stats.avgWin}
-            avgLoss={stats.avgLoss}
-          />
-        </motion.div>
-      </div>
+      {/* Top metrics - draggable in edit mode */}
+      <DashboardMetrics isEditMode={isEditMode} />
 
       {/* Draggable charts section */}
       <DndContext
