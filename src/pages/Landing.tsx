@@ -5,7 +5,7 @@ import {
   TrendingUp, Shield, Zap, LineChart, Eye, Crosshair,
   CheckCircle2, ChevronRight, Star
 } from 'lucide-react';
-import { LandingNavbar } from '@/components/landing/LandingNavbar';
+import { SharedNavbar } from '@/components/landing/SharedNavbar';
 import { LandingFooter } from '@/components/landing/LandingFooter';
 
 const fadeUp = {
@@ -76,7 +76,7 @@ const steps = [
 const Landing = () => {
   return (
     <div className="min-h-screen bg-white text-slate-900 overflow-x-hidden">
-      <LandingNavbar />
+      <SharedNavbar />
 
       {/* ====== HERO ====== */}
       <section className="relative pt-32 pb-20 lg:pt-40 lg:pb-32 overflow-hidden">

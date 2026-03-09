@@ -6,7 +6,7 @@ import {
   ListOrdered, FileText, Sliders, ChevronRight, CheckCircle2,
   Clock, Tag, MessageSquare, Ruler, GitMerge, DollarSign
 } from 'lucide-react';
-import { LandingNavbar } from '@/components/landing/LandingNavbar';
+import { SharedNavbar } from '@/components/landing/SharedNavbar';
 import { LandingFooter } from '@/components/landing/LandingFooter';
 
 const fadeUp = {
@@ -82,7 +82,7 @@ const settingsFeatures = [
 const Features = () => {
   return (
     <div className="min-h-screen bg-white text-slate-900">
-      <LandingNavbar />
+      <SharedNavbar />
 
       {/* Hero */}
       <section className="pt-32 pb-16 lg:pt-40 lg:pb-20">

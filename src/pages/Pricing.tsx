@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowRight, CheckCircle2, Sparkles, XCircle } from 'lucide-react';
-import { LandingNavbar } from '@/components/landing/LandingNavbar';
+import { SharedNavbar } from '@/components/landing/SharedNavbar';
 import { LandingFooter } from '@/components/landing/LandingFooter';
 
 const fadeUp = {
@@ -83,7 +83,7 @@ const faqs = [
 const Pricing = () => {
   return (
     <div className="min-h-screen bg-white text-slate-900">
-      <LandingNavbar />
+      <SharedNavbar />
 
       {/* Hero */}
       <section className="pt-32 pb-16 lg:pt-40 lg:pb-20">
