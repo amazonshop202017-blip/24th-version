@@ -287,142 +287,74 @@ export const ScreenshotsTab = ({ screenshots, onScreenshotsChange }: Screenshots
             </div>
           </div>
         </div>
-
-        {/* Tag Selection for new screenshots */}
-        <div className="space-y-1.5">
-          <Label className="text-xs text-muted-foreground">Tag for new screenshots</Label>
-          <Select value={selectedTagId || "none"} onValueChange={(val) => setSelectedTagId(val === "none" ? "" : val)}>
-            <SelectTrigger className="h-10 bg-input border-border">
-              <SelectValue placeholder="Select tag..." />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="none">No tag</SelectItem>
-              {screenshotTags.map((tag) => (
-                <SelectItem key={tag.id} value={tag.id}>
-                  <div className="flex items-center gap-2">
-                    <div 
-                      className="w-3 h-3 rounded-full" 
-                      style={{ backgroundColor: tag.color }}
-                    />
-                    {tag.name}
-                  </div>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
       </div>
 
-      {/* Screenshots Gallery */}
+      {/* Screenshots List - Full Width */}
       {screenshots.length > 0 && (
         <div className="space-y-4">
           <h3 className="text-sm font-medium text-foreground">
             Screenshots ({screenshots.length})
           </h3>
           
-          <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-4">
             {screenshots.map((screenshot) => {
               const tag = getTagById(screenshot.tagId);
               return (
                 <div
                   key={screenshot.id}
-                  className="relative group rounded-lg overflow-hidden border border-border bg-muted/30 cursor-pointer"
-                  onClick={() => setSelectedScreenshot(screenshot)}
+                  className="relative group rounded-lg overflow-hidden border border-border"
                 >
                   <img
                     src={screenshot.imageData}
                     alt="Trade screenshot"
-                    className="w-full h-24 object-cover"
+                    className="w-full object-contain"
                   />
                   
-                  {/* Tag badge */}
+                  {/* Tag badge (always visible if tagged) */}
                   {tag && (
                     <div 
-                      className="absolute top-2 left-2 px-2 py-0.5 rounded text-xs font-medium text-white"
+                      className="absolute top-3 left-3 px-2 py-0.5 rounded text-xs font-medium text-white"
                       style={{ backgroundColor: tag.color }}
                     >
                       {tag.name}
                     </div>
                   )}
                   
-                  {/* Delete button */}
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      removeScreenshot(screenshot.id);
-                    }}
-                    className="absolute top-2 right-2 p-1.5 rounded-md bg-background/80 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-destructive hover:text-destructive-foreground"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </button>
+                  {/* Overlay controls (visible on hover) */}
+                  <div className="absolute top-3 right-3 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Select 
+                      value={screenshot.tagId || "none"} 
+                      onValueChange={(val) => updateScreenshotTag(screenshot.id, val === "none" ? "" : val)}
+                    >
+                      <SelectTrigger className="h-8 w-[140px] bg-background/90 backdrop-blur border-border text-xs">
+                        <SelectValue placeholder="Add tag" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">No tag</SelectItem>
+                        {screenshotTags.map((t) => (
+                          <SelectItem key={t.id} value={t.id}>
+                            <div className="flex items-center gap-2">
+                              <div 
+                                className="w-2.5 h-2.5 rounded-full" 
+                                style={{ backgroundColor: t.color }}
+                              />
+                              {t.name}
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    
+                    <button
+                      onClick={() => removeScreenshot(screenshot.id)}
+                      className="p-2 rounded-md bg-background/90 backdrop-blur hover:bg-destructive hover:text-destructive-foreground transition-colors"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
               );
             })}
-          </div>
-        </div>
-      )}
-
-      {/* Enlarged Screenshot Modal */}
-      {selectedScreenshot && (
-        <div 
-          className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-center justify-center p-4"
-          onClick={() => setSelectedScreenshot(null)}
-        >
-          <div 
-            className="relative max-w-4xl max-h-[90vh] bg-background rounded-xl border border-border shadow-2xl overflow-hidden"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="absolute top-3 right-3 z-10 flex items-center gap-2">
-              {/* Tag selector for this screenshot */}
-              <Select 
-                value={selectedScreenshot.tagId || "none"} 
-                onValueChange={(val) => {
-                  updateScreenshotTag(selectedScreenshot.id, val === "none" ? "" : val);
-                  setSelectedScreenshot({
-                    ...selectedScreenshot,
-                    tagId: val === "none" ? undefined : val
-                  });
-                }}
-              >
-                <SelectTrigger className="h-8 w-[140px] bg-background/90 backdrop-blur border-border text-xs">
-                  <SelectValue placeholder="Add tag" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">No tag</SelectItem>
-                  {screenshotTags.map((tag) => (
-                    <SelectItem key={tag.id} value={tag.id}>
-                      <div className="flex items-center gap-2">
-                        <div 
-                          className="w-2.5 h-2.5 rounded-full" 
-                          style={{ backgroundColor: tag.color }}
-                        />
-                        {tag.name}
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              
-              <button
-                onClick={() => removeScreenshot(selectedScreenshot.id)}
-                className="p-2 rounded-md bg-background/90 backdrop-blur hover:bg-destructive hover:text-destructive-foreground transition-colors"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
-              
-              <button
-                onClick={() => setSelectedScreenshot(null)}
-                className="p-2 rounded-md bg-background/90 backdrop-blur hover:bg-muted transition-colors"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-            
-            <img
-              src={selectedScreenshot.imageData}
-              alt="Trade screenshot"
-              className="max-w-full max-h-[85vh] object-contain"
-            />
           </div>
         </div>
       )}
