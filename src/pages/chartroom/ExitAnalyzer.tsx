@@ -66,6 +66,10 @@ const ManualExitTab = () => {
   const [treatMissingAsZero, setTreatMissingAsZero] = useState(true);
   const [minTradeCount, setMinTradeCount] = useState(1);
 
+  // Quick calculator
+  const [quickSL, setQuickSL] = useState(10);
+  const [quickTP, setQuickTP] = useState(20);
+
   // Draggable selection
   const [selectedSL, setSelectedSL] = useState<number | null>(null);
   const [selectedTP, setSelectedTP] = useState<number | null>(null);
