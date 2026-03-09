@@ -65,6 +65,7 @@ const CHART_CONFIGS: Record<string, Omit<ChartConfig, 'id'>> = {
   tradeDuration: { component: TradeDurationPerformanceChart, colSpan: 1, rowSpan: 1 },
   symbolAnalysis: { component: SymbolAnalysisChart, colSpan: 2, rowSpan: 1 },
   longShortAnalysis: { component: LongShortAnalysisChart, colSpan: 1, rowSpan: 1 },
+  externalLinks: { component: ExternalLinksWidget, colSpan: 1, rowSpan: 1 },
 };
 
 const STORAGE_KEY = 'dashboard-chart-order';
