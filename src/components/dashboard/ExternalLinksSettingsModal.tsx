@@ -40,21 +40,21 @@ export const ExternalLinksSettingsModal = ({
     }
   };
 
-  const isValidUrl = (url: string) => {
-    try {
-      new URL(url);
-      return true;
-    } catch {
-      return false;
+  const normalizeUrl = (url: string) => {
+    const trimmed = url.trim();
+    if (!trimmed) return trimmed;
+    if (!/^https?:\/\//i.test(trimmed)) {
+      return `https://${trimmed}`;
     }
+    return trimmed;
   };
 
   const handleAdd = () => {
-    if (!newUrl.trim() || !isValidUrl(newUrl)) return;
+    if (!newUrl.trim()) return;
 
     const newLink: ExternalLinkItem = {
       id: crypto.randomUUID(),
-      url: newUrl.trim(),
+      url: normalizeUrl(newUrl),
       title: newTitle.trim(),
     };
 
