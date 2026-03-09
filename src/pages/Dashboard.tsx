@@ -120,6 +120,10 @@ const Dashboard = () => {
     }
   };
 
+  const handleRemoveChart = (chartId: string) => {
+    setChartOrder((items) => items.filter((id) => id !== chartId));
+  };
+
   const renderChart = (chartId: string) => {
     const config = CHART_CONFIGS[chartId];
     if (!config) return null;
