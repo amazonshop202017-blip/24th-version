@@ -316,8 +316,8 @@ export const MonthlyPerformanceCalendar = () => {
                   let bgClass = 'bg-secondary/30';
                   if (hasData) {
                     bgClass = stats.pnl >= 0 
-                      ? 'bg-[hsl(142_76%_45%/0.15)] border-[hsl(142_76%_45%/0.3)]' 
-                      : 'bg-[hsl(0_84%_60%/0.15)] border-[hsl(0_84%_60%/0.3)]';
+                      ? 'bg-[hsl(142_76%_45%/0.15)]' 
+                      : 'bg-[hsl(0_84%_60%/0.15)]';
                   }
 
                   return (
@@ -325,15 +325,15 @@ export const MonthlyPerformanceCalendar = () => {
                       key={dayKey}
                       onClick={() => isCurrentMonth && handleDayClick(day)}
                       className={`
-                        min-h-[80px] p-2 rounded-lg border transition-colors
+                        min-h-[80px] p-2 rounded-lg border-transparent transition-colors
                         ${isCurrentMonth ? bgClass : 'bg-muted/20 opacity-40'}
-                        ${hasData ? 'border' : 'border-transparent'}
                         ${isCurrentMonth ? 'cursor-pointer hover:ring-1 hover:ring-primary/50' : ''}
                       `}
                     >
-                      <div className={`text-xs font-medium mb-1 ${isCurrentMonth ? 'text-primary' : 'text-muted-foreground'}`}>
+                      <div className={`text-xs font-medium ${isCurrentMonth ? 'text-foreground' : 'text-muted-foreground'}`}>
                         {format(day, 'd')}
                       </div>
+                      <div className="w-4 h-0.5 bg-background/80 rounded-full mb-1" />
                       
                       {hasData && (
                         <div className="space-y-0.5">
