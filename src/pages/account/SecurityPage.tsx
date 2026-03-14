@@ -41,9 +41,6 @@ const SecurityPage = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <h1 className="text-3xl font-bold text-foreground mb-1">Security</h1>
-        <p className="text-muted-foreground mb-8">Manage your password and security settings</p>
-
         <Card className="p-8 relative overflow-hidden">
           {/* Decorative */}
           <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-primary/10 to-transparent rounded-bl-full" />

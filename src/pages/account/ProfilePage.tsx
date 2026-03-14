@@ -88,9 +88,6 @@ const ProfilePage = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <h1 className="text-3xl font-bold text-foreground mb-1">Profile</h1>
-        <p className="text-muted-foreground mb-8">Manage your personal information</p>
-
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
           {/* Left Column - Avatar & Identity */}
           <Card className="lg:col-span-2 p-8 flex flex-col items-center text-center relative overflow-hidden">
