@@ -113,7 +113,7 @@ export const SidebarAccountMenu = ({ isCollapsed }: { isCollapsed: boolean }) =>
           Account
         </button>
 
-        <Separator className="my-1" />
+        
 
         {/* Logout */}
         <button
