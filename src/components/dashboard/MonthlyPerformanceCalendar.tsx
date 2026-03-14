@@ -241,11 +241,12 @@ export const MonthlyPerformanceCalendar = () => {
             <span className="text-muted-foreground bg-secondary px-2 py-0.5 rounded text-xs">
               {monthlyStats.tradingDays} days
             </span>
-            <span className="text-muted-foreground bg-secondary px-2 py-0.5 rounded text-xs">
-              {monthlyStats.totalTrades} trades
-            </span>
-            <span className={`px-2 py-0.5 rounded text-xs ${monthlyStats.monthlyWinRate >= 50 ? 'bg-profit/20 text-profit' : 'bg-loss/20 text-loss'}`}>
-              {monthlyStats.monthlyWinRate.toFixed(1)}% WR
+            <span className="bg-secondary px-2 py-0.5 rounded text-xs flex items-center gap-1.5">
+              <span className="text-muted-foreground">{monthlyStats.totalTrades} trades</span>
+              <span className="text-border">|</span>
+              <span className={monthlyStats.monthlyWinRate >= 50 ? 'text-profit' : 'text-loss'}>
+                {monthlyStats.monthlyWinRate.toFixed(1)}% WR
+              </span>
             </span>
           </div>
 
