@@ -42,6 +42,49 @@ const chartRoomItems = [
   { label: 'Trade Management', path: '/chart-room/trade-management' },
 ];
 
+const ThemeToggle = ({ isCollapsed }: { isCollapsed: boolean }) => {
+  const { theme, toggleTheme } = useTheme();
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <motion.button
+          onClick={toggleTheme}
+          className={cn(
+            "w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200",
+            "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+            isCollapsed ? "justify-center" : ""
+          )}
+          whileHover={{ x: isCollapsed ? 0 : 4 }}
+          whileTap={{ scale: 0.98 }}
+        >
+          {theme === 'dark' ? (
+            <Sun className="w-5 h-5 flex-shrink-0" />
+          ) : (
+            <Moon className="w-5 h-5 flex-shrink-0" />
+          )}
+          <AnimatePresence>
+            {!isCollapsed && (
+              <motion.span
+                initial={{ opacity: 0, width: 0 }}
+                animate={{ opacity: 1, width: 'auto' }}
+                exit={{ opacity: 0, width: 0 }}
+                className="font-medium overflow-hidden whitespace-nowrap"
+              >
+                {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+              </motion.span>
+            )}
+          </AnimatePresence>
+        </motion.button>
+      </TooltipTrigger>
+      {isCollapsed && (
+        <TooltipContent side="right">
+          <p>{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</p>
+        </TooltipContent>
+      )}
+    </Tooltip>
+  );
+};
+
 export const Sidebar = () => {
   const location = useLocation();
   const { openModal } = useTradeModal();
