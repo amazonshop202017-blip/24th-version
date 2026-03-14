@@ -376,53 +376,12 @@ export const Sidebar = () => {
         )}
       </nav>
 
-      {/* Bottom Section - Theme Toggle & Settings (Pinned) */}
+      {/* Bottom Section - Account Menu (Pinned) */}
       <div className="px-3 mt-auto">
-        {/* Divider above bottom section */}
         <div className="py-2">
           <Separator className="bg-sidebar-border/50" />
         </div>
-
-        {/* Theme Toggle */}
-        <ThemeToggle isCollapsed={isCollapsed} />
-        
-        {/* Settings */}
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <NavLink to="/settings" className="block">
-              <motion.div
-                className={cn(
-                  "flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200",
-                  isCollapsed ? "justify-center" : "",
-                  location.pathname === '/settings'
-                    ? "bg-primary text-primary-foreground shadow-lg"
-                    : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-                )}
-                whileHover={{ x: location.pathname === '/settings' || isCollapsed ? 0 : 4 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <Settings className="w-5 h-5 flex-shrink-0" />
-                <AnimatePresence>
-                  {!isCollapsed && (
-                    <motion.span
-                      initial={{ opacity: 0, width: 0 }}
-                      animate={{ opacity: 1, width: 'auto' }}
-                      exit={{ opacity: 0, width: 0 }}
-                      className="font-medium overflow-hidden whitespace-nowrap"
-                    >
-                      Settings
-                    </motion.span>
-                  )}
-                </AnimatePresence>
-              </motion.div>
-            </NavLink>
-          </TooltipTrigger>
-          {isCollapsed && (
-            <TooltipContent side="right">
-              <p>Settings</p>
-            </TooltipContent>
-          )}
-        </Tooltip>
+        <SidebarAccountMenu isCollapsed={isCollapsed} />
       </div>
 
       {/* Collapse Button */}
