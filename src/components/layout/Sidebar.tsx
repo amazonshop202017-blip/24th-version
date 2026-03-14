@@ -291,10 +291,9 @@ export const Sidebar = () => {
                 className={cn(
                   "w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200",
                   isChartRoomActive
-                    ? "text-primary-foreground shadow-lg"
+                    ? "bg-primary text-primary-foreground shadow-lg"
                     : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                 )}
-                style={isChartRoomActive ? { backgroundColor: 'hsl(var(--primary-active))' } : undefined}
                 whileHover={{ x: isChartRoomActive ? 0 : 4 }}
                 whileTap={{ scale: 0.98 }}
               >
