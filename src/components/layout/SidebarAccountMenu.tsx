@@ -57,10 +57,10 @@ export const SidebarAccountMenu = ({ isCollapsed }: { isCollapsed: boolean }) =>
       </Tooltip>
 
       <PopoverContent
-        side="right"
-        align="end"
+        side="top"
+        align="start"
         sideOffset={8}
-        className="w-56 p-2"
+        className="w-40 p-2"
       >
         {/* Theme Toggle - Switch style */}
         <div className="flex items-center justify-between px-3 py-2 rounded-lg">
