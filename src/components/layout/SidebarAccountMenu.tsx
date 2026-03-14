@@ -68,39 +68,36 @@ export const SidebarAccountMenu = ({ isCollapsed }: { isCollapsed: boolean }) =>
           <button
             onClick={toggleTheme}
             className={cn(
-              "relative inline-flex h-7 w-[52px] items-center rounded-full transition-all duration-300 mx-1.5",
+              "relative inline-flex h-7 w-[52px] items-center rounded-full mx-1.5 border overflow-hidden transition-colors duration-500",
               isDark
-                ? "bg-[hsl(222_47%_18%)] border border-[hsl(215_20%_30%)]"
-                : "bg-primary border border-primary"
+                ? "bg-[hsl(222_47%_18%)] border-[hsl(215_20%_30%)]"
+                : "bg-primary border-primary"
             )}
           >
-            {/* Sun icon - visible on knob in light mode */}
-            {!isDark && (
-              <span className="absolute left-[3px] z-10 flex h-[22px] w-[22px] items-center justify-center rounded-full bg-background shadow-md">
-                <Sun className="w-3.5 h-3.5 text-yellow-500" />
-              </span>
-            )}
-            {/* Moon icon - visible on knob in dark mode */}
-            {isDark && (
-              <span className="absolute right-[3px] z-10 flex h-[22px] w-[22px] items-center justify-center rounded-full bg-[hsl(215_20%_30%)] shadow-md">
-                <Moon className="w-3.5 h-3.5 text-white" />
-              </span>
-            )}
-            {/* Decorative dots/stars in dark mode */}
-            {isDark && (
-              <>
-                <span className="absolute left-2.5 top-1.5 h-1 w-1 rounded-full bg-white/60" />
-                <span className="absolute left-4 top-3 h-0.5 w-0.5 rounded-full bg-white/40" />
-                <span className="absolute left-2 bottom-1.5 h-0.5 w-0.5 rounded-full bg-white/50" />
-              </>
-            )}
-            {/* Decorative dots in light mode */}
-            {!isDark && (
-              <>
-                <span className="absolute right-3 top-1.5 h-1 w-1 rounded-full bg-primary-foreground/60" />
-                <span className="absolute right-2 bottom-2 h-0.5 w-0.5 rounded-full bg-primary-foreground/40" />
-              </>
-            )}
+            {/* Sliding knob */}
+            <span
+              className={cn(
+                "absolute z-10 flex h-[22px] w-[22px] items-center justify-center rounded-full shadow-md transition-all duration-500 ease-in-out",
+                isDark
+                  ? "translate-x-[27px] bg-[hsl(215_20%_30%)]"
+                  : "translate-x-[3px] bg-background"
+              )}
+            >
+              <Sun className={cn(
+                "absolute w-3.5 h-3.5 text-yellow-500 transition-all duration-500",
+                isDark ? "opacity-0 rotate-90 scale-0" : "opacity-100 rotate-0 scale-100"
+              )} />
+              <Moon className={cn(
+                "absolute w-3.5 h-3.5 text-white transition-all duration-500",
+                isDark ? "opacity-100 rotate-0 scale-100" : "opacity-0 -rotate-90 scale-0"
+              )} />
+            </span>
+            {/* Decorative dots - fade between states */}
+            <span className={cn("absolute left-2.5 top-1.5 h-1 w-1 rounded-full transition-opacity duration-500", isDark ? "bg-white/60 opacity-100" : "opacity-0")} />
+            <span className={cn("absolute left-4 top-3 h-0.5 w-0.5 rounded-full transition-opacity duration-500", isDark ? "bg-white/40 opacity-100" : "opacity-0")} />
+            <span className={cn("absolute left-2 bottom-1.5 h-0.5 w-0.5 rounded-full transition-opacity duration-500", isDark ? "bg-white/50 opacity-100" : "opacity-0")} />
+            <span className={cn("absolute right-3 top-1.5 h-1 w-1 rounded-full transition-opacity duration-500", !isDark ? "bg-primary-foreground/60 opacity-100" : "opacity-0")} />
+            <span className={cn("absolute right-2 bottom-2 h-0.5 w-0.5 rounded-full transition-opacity duration-500", !isDark ? "bg-primary-foreground/40 opacity-100" : "opacity-0")} />
           </button>
           <span className={cn("text-xs font-medium transition-colors", isDark ? "text-foreground" : "text-muted-foreground")}>Dark</span>
         </div>
