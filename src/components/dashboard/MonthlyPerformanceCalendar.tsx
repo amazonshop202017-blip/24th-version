@@ -156,6 +156,8 @@ export const MonthlyPerformanceCalendar = () => {
       end: endOfMonth(currentMonth),
     });
 
+    let winningDays = 0;
+
     monthDays.forEach(day => {
       const dayKey = format(day, 'yyyy-MM-dd');
       const stats = dayStatsMap[dayKey];
@@ -164,12 +166,14 @@ export const MonthlyPerformanceCalendar = () => {
         tradingDays += 1;
         totalTrades += stats.trades;
         winningTrades += Math.round(stats.trades * (stats.winRate / 100));
+        if (stats.pnl > 0) winningDays += 1;
       }
     });
 
     const monthlyWinRate = totalTrades > 0 ? (winningTrades / totalTrades) * 100 : 0;
+    const daysWinRate = tradingDays > 0 ? (winningDays / tradingDays) * 100 : 0;
 
-    return { pnl, tradingDays, totalTrades, monthlyWinRate };
+    return { pnl, tradingDays, totalTrades, monthlyWinRate, daysWinRate };
   }, [currentMonth, dayStatsMap]);
 
   const formatCurrency = (value: number) => {
