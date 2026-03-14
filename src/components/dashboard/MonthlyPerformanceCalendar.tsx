@@ -331,7 +331,7 @@ export const MonthlyPerformanceCalendar = () => {
                       `}
                     >
                       <div className="flex items-center justify-center w-5 h-5 rounded-full bg-white dark:bg-slate-800 mb-1">
-                        <span className={`text-[10px] font-semibold ${isCurrentMonth ? 'text-black' : 'text-muted-foreground'}`}>
+                        <span className={`text-[10px] font-semibold ${isCurrentMonth ? 'text-black dark:text-white' : 'text-muted-foreground'}`}>
                           {format(day, 'd')}
                         </span>
                       </div>
