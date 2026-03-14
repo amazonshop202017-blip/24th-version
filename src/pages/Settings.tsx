@@ -224,15 +224,6 @@ const Settings = () => {
           <DollarSign className="w-4 h-4" />
           Fees Settings
         </button>
-        <button
-          onClick={() => {
-            logout();
-          }}
-          className="flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors text-red-500 hover:bg-red-500/10 ml-auto"
-        >
-          <LogOut className="w-4 h-4" />
-          Logout
-        </button>
       </div>
 
       {/* Main Tab Content */}
