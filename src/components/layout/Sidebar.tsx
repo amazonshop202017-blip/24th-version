@@ -95,7 +95,7 @@ export const Sidebar = () => {
             <motion.button
               onClick={() => openModal()}
               className={cn(
-                "w-full bg-primary text-primary-foreground rounded-xl font-medium flex items-center justify-center gap-2 transition-all duration-200 hover:brightness-110 brightness-[0.65]",
+                "w-full bg-primary text-primary-foreground rounded-xl font-medium flex items-center justify-center gap-2 transition-all duration-200 hover:brightness-110 brightness-[0.83]",
                 isCollapsed ? "h-10 px-0" : "h-11 px-4"
               )}
               whileHover={{ scale: 1.02 }}
