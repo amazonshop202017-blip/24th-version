@@ -277,7 +277,6 @@ export const Sidebar = () => {
                       : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                   )}
                   style={isChartRoomActive ? { backgroundColor: 'hsl(var(--primary-active))' } : undefined}
-                  )}
                   whileTap={{ scale: 0.98 }}
                 >
                   <BarChart3 className="w-5 h-5 flex-shrink-0" />
