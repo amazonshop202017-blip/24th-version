@@ -131,7 +131,7 @@ export const SidebarAccountMenu = ({ isCollapsed }: { isCollapsed: boolean }) =>
         {/* Logout */}
         <button
           onClick={logout}
-          className="w-full flex items-center gap-4 px-3 py-2 rounded-lg text-sm text-destructive hover:bg-destructive/10 transition-colors"
+          className="w-full flex items-center gap-6 px-3 py-2 rounded-lg text-sm text-destructive hover:bg-destructive/10 transition-colors"
         >
           <LogOut className="w-4 h-4" />
           Log Out
