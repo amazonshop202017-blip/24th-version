@@ -138,7 +138,7 @@ export const Sidebar = () => {
                     ? "text-primary-foreground shadow-lg"
                     : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                 )}
-                style={location.pathname === dashboardItem.path ? { backgroundColor: 'hsl(var(--primary-active))' } : undefined
+                style={location.pathname === dashboardItem.path ? { backgroundColor: 'hsl(var(--primary-active))' } : undefined}
                 )}
                 whileHover={{ x: location.pathname === dashboardItem.path || isCollapsed ? 0 : 4 }}
                 whileTap={{ scale: 0.98 }}
