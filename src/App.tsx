@@ -82,32 +82,36 @@ const AuthenticatedApp = () => {
                     <SymbolTickSizeProvider>
                       <DiaryProvider>
                         <TradeModalProvider>
-                          <AppLayout>
-                            <Routes>
-                              <Route path="/" element={<Dashboard />} />
-                              <Route path="/trades" element={<Trades />} />
-                              <Route path="/day-view" element={<DayView />} />
-                              <Route path="/diary" element={<Diary />} />
-                              <Route path="/strategies" element={<Strategies />} />
-                              <Route path="/strategies/:id" element={<StrategyDetail />} />
-                              <Route path="/reports/*" element={<Reports />} />
-                              <Route path="/chart-room/drawdown" element={<Drawdown />} />
-                              <Route path="/chart-room/consecutive" element={<ConsecutiveWinnersLosers />} />
-                              <Route path="/chart-room/exit-analysis" element={<ExitAnalysis />} />
-                              <Route path="/chart-room/holding-time" element={<HoldingTime />} />
-                              <Route path="/chart-room/performance-by-symbol" element={<PerformanceBySymbol />} />
-                              <Route path="/chart-room/performance-by-setup" element={<PerformanceBySetup />} />
-                              <Route path="/chart-room/performance-by-time" element={<PerformanceByTime />} />
-                              <Route path="/chart-room/tags-analytics" element={<TagsAnalytics />} />
-                              <Route path="/chart-room/risk-distribution" element={<RiskDistribution />} />
-                              <Route path="/chart-room/trade-management" element={<TradeManagement />} />
-                              <Route path="/exit-analyzer" element={<ExitAnalyzer />} />
-                              <Route path="/settings" element={<Settings />} />
-                              <Route path="/account" element={<Account />} />
-                              <Route path="/entering" element={<Navigate to="/" replace />} />
-                              <Route path="*" element={<NotFound />} />
-                            </Routes>
-                          </AppLayout>
+                          <Routes>
+                            <Route path="/account/*" element={<Account />} />
+                            <Route path="*" element={
+                              <AppLayout>
+                                <Routes>
+                                  <Route path="/" element={<Dashboard />} />
+                                  <Route path="/trades" element={<Trades />} />
+                                  <Route path="/day-view" element={<DayView />} />
+                                  <Route path="/diary" element={<Diary />} />
+                                  <Route path="/strategies" element={<Strategies />} />
+                                  <Route path="/strategies/:id" element={<StrategyDetail />} />
+                                  <Route path="/reports/*" element={<Reports />} />
+                                  <Route path="/chart-room/drawdown" element={<Drawdown />} />
+                                  <Route path="/chart-room/consecutive" element={<ConsecutiveWinnersLosers />} />
+                                  <Route path="/chart-room/exit-analysis" element={<ExitAnalysis />} />
+                                  <Route path="/chart-room/holding-time" element={<HoldingTime />} />
+                                  <Route path="/chart-room/performance-by-symbol" element={<PerformanceBySymbol />} />
+                                  <Route path="/chart-room/performance-by-setup" element={<PerformanceBySetup />} />
+                                  <Route path="/chart-room/performance-by-time" element={<PerformanceByTime />} />
+                                  <Route path="/chart-room/tags-analytics" element={<TagsAnalytics />} />
+                                  <Route path="/chart-room/risk-distribution" element={<RiskDistribution />} />
+                                  <Route path="/chart-room/trade-management" element={<TradeManagement />} />
+                                  <Route path="/exit-analyzer" element={<ExitAnalyzer />} />
+                                  <Route path="/settings" element={<Settings />} />
+                                  <Route path="/entering" element={<Navigate to="/" replace />} />
+                                  <Route path="*" element={<NotFound />} />
+                                </Routes>
+                              </AppLayout>
+                            } />
+                          </Routes>
                           <TradeModal />
                         </TradeModalProvider>
                       </DiaryProvider>
