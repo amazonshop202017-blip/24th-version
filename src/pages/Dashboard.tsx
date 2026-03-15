@@ -51,7 +51,6 @@ const DEFAULT_CHART_ORDER = [
   'tradeDuration',
   'symbolAnalysis',
   'longShortAnalysis',
-  'externalLinks',
 ];
 
 const CHART_CONFIGS: Record<string, Omit<ChartConfig, 'id'>> = {
