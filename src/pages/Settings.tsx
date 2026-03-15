@@ -82,12 +82,10 @@ const Settings = () => {
   const [activeTagsSubTab, setActiveTagsSubTab] = useState<'categories' | 'tags' | 'screenshot-tags'>('categories');
 
   // Account state
-  const [newAccountName, setNewAccountName] = useState('');
-  const [newAccountBalance, setNewAccountBalance] = useState('');
   const [editingAccount, setEditingAccount] = useState<string | null>(null);
   const [editAccountName, setEditAccountName] = useState('');
   const [editAccountBalance, setEditAccountBalance] = useState('');
-  
+  const [showNewAccountModal, setShowNewAccountModal] = useState(false);
   // Deposit/Withdraw modal state
   const [depositWithdrawAccountId, setDepositWithdrawAccountId] = useState<string | null>(null);
 
