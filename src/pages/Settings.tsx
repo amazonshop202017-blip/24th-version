@@ -82,10 +82,8 @@ const Settings = () => {
   const [activeTagsSubTab, setActiveTagsSubTab] = useState<'categories' | 'tags' | 'screenshot-tags'>('categories');
 
   // Account state
-  const [editingAccount, setEditingAccount] = useState<string | null>(null);
-  const [editAccountName, setEditAccountName] = useState('');
-  const [editAccountBalance, setEditAccountBalance] = useState('');
   const [showNewAccountModal, setShowNewAccountModal] = useState(false);
+  const [editingAccountData, setEditingAccountData] = useState<import('@/contexts/AccountsContext').Account | null>(null);
   // Deposit/Withdraw modal state
   const [depositWithdrawAccountId, setDepositWithdrawAccountId] = useState<string | null>(null);
 
@@ -94,41 +92,6 @@ const Settings = () => {
 
   // Archived accounts toggle
   const [showArchivedAccounts, setShowArchivedAccounts] = useState(false);
-
-
-  const activeAccountsWithStats = getActiveAccountsWithStats();
-  const archivedAccountsWithStats = getArchivedAccountsWithStats();
-
-  // Account handlers - new modal-based creation
-  const handleCreateAccount = (data: {
-    name: string;
-    startingBalance: number;
-    accountMode: import('@/contexts/AccountsContext').AccountMode;
-    propFirmSettings?: import('@/contexts/AccountsContext').PropFirmSettings;
-  }) => {
-    addAccount(data.name, data.startingBalance, data.accountMode, data.propFirmSettings);
-    toast.success(`Account "${data.name}" created`);
-  };
-  const startEditingAccount = (account: { id: string; name: string; startingBalance: number }) => {
-    setEditingAccount(account.id);
-    setEditAccountName(account.name);
-    setEditAccountBalance(account.startingBalance.toString());
-  };
-
-  const saveAccountEdit = () => {
-    if (editingAccount && editAccountName.trim()) {
-      updateAccount(editingAccount, editAccountName.trim(), parseFloat(editAccountBalance) || 0);
-    }
-    setEditingAccount(null);
-    setEditAccountName('');
-    setEditAccountBalance('');
-  };
-
-  const cancelAccountEdit = () => {
-    setEditingAccount(null);
-    setEditAccountName('');
-    setEditAccountBalance('');
-  };
 
   return (
     <>
