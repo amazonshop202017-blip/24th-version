@@ -1,3 +1,4 @@
+/* Trade Modal Context - provides modal state for adding/editing trades */
 import { createContext, useContext, useState, ReactNode } from 'react';
 import { Trade } from '@/types/trade';
 
