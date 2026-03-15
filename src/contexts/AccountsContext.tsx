@@ -95,13 +95,15 @@ export const AccountsProvider = ({ children }: { children: ReactNode }) => {
     setTransactions(newTransactions);
   }, []);
 
-  const addAccount = useCallback((name: string, startingBalance: number) => {
+  const addAccount = useCallback((name: string, startingBalance: number, accountMode: AccountMode = 'normal', propFirmSettings?: PropFirmSettings) => {
     const newAccount: Account = {
       id: crypto.randomUUID(),
       name: name.trim(),
       startingBalance,
       createdAt: new Date().toISOString(),
       isArchived: false,
+      accountMode,
+      ...(propFirmSettings && { propFirmSettings }),
     };
     saveAccounts([...accounts, newAccount]);
     return newAccount;
