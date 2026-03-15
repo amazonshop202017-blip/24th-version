@@ -44,7 +44,7 @@ interface AccountsContextType {
   transactions: Transaction[];
   addAccount: (name: string, startingBalance: number, accountMode?: AccountMode, propFirmSettings?: PropFirmSettings) => Account;
   removeAccount: (id: string) => void;
-  updateAccount: (id: string, name: string, startingBalance: number) => void;
+  updateAccount: (id: string, name: string, startingBalance: number, accountMode?: AccountMode, propFirmSettings?: PropFirmSettings) => void;
   getAccountById: (id: string) => Account | undefined;
   getAccountWithStats: (id: string) => AccountWithStats | undefined;
   getAllAccountsWithStats: () => AccountWithStats[];
