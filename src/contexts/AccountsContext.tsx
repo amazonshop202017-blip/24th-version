@@ -42,7 +42,7 @@ export interface AccountWithStats extends Account {
 interface AccountsContextType {
   accounts: Account[];
   transactions: Transaction[];
-  addAccount: (name: string, startingBalance: number) => Account;
+  addAccount: (name: string, startingBalance: number, accountMode?: AccountMode, propFirmSettings?: PropFirmSettings) => Account;
   removeAccount: (id: string) => void;
   updateAccount: (id: string, name: string, startingBalance: number) => void;
   getAccountById: (id: string) => Account | undefined;
