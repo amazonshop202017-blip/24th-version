@@ -41,7 +41,7 @@ const defaultEntry = (): TradeEntry => ({
 });
 
 export const TradeModal = () => {
-  const { isOpen, editingTrade, closeModal } = useTradeModal();
+  const { isOpen, editingTrade, initialEntryDate, closeModal } = useTradeModal();
   const { trades, addTrade, updateTrade } = useTradesContext();
   const { strategies, getStrategyById } = useStrategiesContext();
   const { accounts, getAccountWithStats, getAccountBalanceBeforeTrades } = useAccountsContext();
