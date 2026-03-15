@@ -306,7 +306,7 @@ export const NewAccountModal = ({ open, onOpenChange, onCreateAccount, currencyS
                 className={cn(
                   "py-2.5 text-sm font-medium transition-colors",
                   mode === 'propfirm'
-                    ? "bg-primary text-primary-foreground"
+                    ? "bg-propfirm text-propfirm-foreground"
                     : "bg-input text-muted-foreground hover:text-foreground"
                 )}
               >
