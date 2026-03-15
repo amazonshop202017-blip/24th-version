@@ -93,6 +93,35 @@ const Settings = () => {
   // Archived accounts toggle
   const [showArchivedAccounts, setShowArchivedAccounts] = useState(false);
 
+  const activeAccountsWithStats = getActiveAccountsWithStats();
+  const archivedAccountsWithStats = getArchivedAccountsWithStats();
+
+  const handleCreateAccount = (data: {
+    name: string;
+    startingBalance: number;
+    accountMode: import('@/contexts/AccountsContext').AccountMode;
+    propFirmSettings?: import('@/contexts/AccountsContext').PropFirmSettings;
+  }) => {
+    addAccount(data.name, data.startingBalance, data.accountMode, data.propFirmSettings);
+    toast.success(`Account "${data.name}" created`);
+  };
+
+  const handleUpdateAccount = (data: {
+    id: string;
+    name: string;
+    startingBalance: number;
+    accountMode: import('@/contexts/AccountsContext').AccountMode;
+    propFirmSettings?: import('@/contexts/AccountsContext').PropFirmSettings;
+  }) => {
+    updateAccount(data.id, data.name, data.startingBalance, data.accountMode, data.propFirmSettings);
+    toast.success(`Account "${data.name}" updated`);
+  };
+
+  const startEditingAccount = (account: import('@/contexts/AccountsContext').Account) => {
+    setEditingAccountData(account);
+    setShowNewAccountModal(true);
+  };
+
   return (
     <>
     <SettingsLayout activeTab={activeSettingsTab} onTabChange={setActiveSettingsTab}>
