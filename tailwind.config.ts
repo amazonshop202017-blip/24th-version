@@ -60,6 +60,10 @@ export default {
           DEFAULT: "hsl(var(--loss))",
           foreground: "hsl(var(--loss-foreground))",
         },
+        propfirm: {
+          DEFAULT: "hsl(var(--propfirm))",
+          foreground: "hsl(var(--propfirm-foreground))",
+        },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
