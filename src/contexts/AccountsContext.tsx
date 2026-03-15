@@ -115,9 +115,9 @@ export const AccountsProvider = ({ children }: { children: ReactNode }) => {
     saveTransactions(transactions.filter(t => t.accountId !== id));
   }, [accounts, transactions, saveAccounts, saveTransactions]);
 
-  const updateAccount = useCallback((id: string, name: string, startingBalance: number) => {
+  const updateAccount = useCallback((id: string, name: string, startingBalance: number, accountMode?: AccountMode, propFirmSettings?: PropFirmSettings) => {
     saveAccounts(accounts.map(a => 
-      a.id === id ? { ...a, name: name.trim(), startingBalance } : a
+      a.id === id ? { ...a, name: name.trim(), startingBalance, ...(accountMode !== undefined && { accountMode }), propFirmSettings: accountMode === 'propfirm' ? propFirmSettings : undefined } : a
     ));
   }, [accounts, saveAccounts]);
 
