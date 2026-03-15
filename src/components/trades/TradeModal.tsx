@@ -269,6 +269,10 @@ export const TradeModal = () => {
       
     } else {
       resetForm();
+      // If an initial entry date was provided (e.g. from calendar), use it
+      if (initialEntryDate) {
+        setEntryDate(initialEntryDate);
+      }
       // Auto-select account when exactly one account is selected in global filter (Add Trade only)
       // globalSelectedAccounts contains account NAMES, so we need to find the matching account ID
       if (!isAllAccountsSelected && globalSelectedAccounts.length === 1) {
@@ -278,7 +282,7 @@ export const TradeModal = () => {
         }
       }
     }
-  }, [editingTrade, isOpen]);
+  }, [editingTrade, isOpen, initialEntryDate]);
 
   const resetForm = () => {
     setActiveTab('regular');

@@ -1,11 +1,12 @@
 import { useMemo } from 'react';
 import { format, startOfDay, endOfDay } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
-import { FileText } from 'lucide-react';
+import { FileText, Plus } from 'lucide-react';
 import { Trade, calculateTradeMetrics } from '@/types/trade';
 import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
 import { usePrivacyMode } from '@/hooks/usePrivacyMode';
 import { useDiaryContext } from '@/contexts/DiaryContext';
+import { useTradeModal } from '@/contexts/TradeModalContext';
 import { IntradayPnLChart } from './IntradayPnLChart';
 import { DayTradesTable } from './DayTradesTable';
 import { Button } from '@/components/ui/button';
@@ -29,6 +30,7 @@ export const DayDetailsModal = ({ isOpen, onClose, date, trades }: DayDetailsMod
   const { formatCurrency, setDateRange, setDatePreset } = useGlobalFilters();
   const { isPrivacyMode, maskCurrency, maskProfitFactor } = usePrivacyMode();
   const { createNote, setSelectedFolderId, setSelectedNoteId } = useDiaryContext();
+  const { openModalWithDate } = useTradeModal();
 
   // Calculate day stats
   const dayStats = useMemo(() => {
@@ -41,6 +43,7 @@ export const DayDetailsModal = ({ isOpen, onClose, date, trades }: DayDetailsMod
         acc.totalTrades += 1;
         acc.totalQuantity += metrics.totalQuantity;
         acc.totalCommissions += metrics.totalCharges;
+        acc.totalDurationMinutes += metrics.durationMinutes;
         
         if (metrics.netPnl > 0) {
           acc.winners += 1;
@@ -65,6 +68,7 @@ export const DayDetailsModal = ({ isOpen, onClose, date, trades }: DayDetailsMod
         totalCommissions: 0,
         totalWins: 0,
         totalLosses: 0,
+        totalDurationMinutes: 0,
       }
     );
   }, [trades]);
@@ -73,16 +77,36 @@ export const DayDetailsModal = ({ isOpen, onClose, date, trades }: DayDetailsMod
   const winsAndLosses = dayStats.winners + dayStats.losers;
   const winRate = winsAndLosses > 0 ? (dayStats.winners / winsAndLosses) * 100 : 0;
 
-  // Profit Factor calculation
-  const profitFactor = dayStats.totalLosses > 0
-    ? dayStats.totalWins / dayStats.totalLosses
-    : dayStats.totalWins > 0 ? Infinity : 0;
+  // Avg Duration calculation
+  const avgDurationMinutes = dayStats.totalTrades > 0
+    ? dayStats.totalDurationMinutes / dayStats.totalTrades
+    : 0;
+
+  const formatDuration = (minutes: number) => {
+    if (minutes < 1) return '< 1m';
+    if (minutes < 60) return `${Math.round(minutes)}m`;
+    const hours = Math.floor(minutes / 60);
+    const mins = Math.round(minutes % 60);
+    if (hours < 24) return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
+    const days = Math.floor(hours / 24);
+    const remHours = hours % 24;
+    return remHours > 0 ? `${days}d ${remHours}h` : `${days}d`;
+  };
 
   const isProfit = dayStats.netPnl >= 0;
   const formattedDate = format(date, 'EEE, MMM dd, yyyy');
 
+  const handleAddTrade = () => {
+    // Build a datetime string for the clicked date with current time
+    const now = new Date();
+    const entryDate = new Date(date);
+    entryDate.setHours(now.getHours(), now.getMinutes(), 0, 0);
+    const entryDateStr = entryDate.toISOString().slice(0, 16);
+    onClose();
+    openModalWithDate(entryDateStr);
+  };
+
   const handleAddNote = () => {
-    // Create a new note linked to this day and navigate to diary
     const dayTitle = format(date, 'MMM dd, yyyy');
     const dayDateStr = format(date, 'yyyy-MM-dd');
     const newNote = createNote({
@@ -90,7 +114,6 @@ export const DayDetailsModal = ({ isOpen, onClose, date, trades }: DayDetailsMod
       linkedDate: dayDateStr,
     });
     
-    // Navigate to diary with day folder selected and the new note
     setSelectedFolderId('day-notes');
     setSelectedNoteId(newNote.id);
     onClose();
@@ -98,7 +121,6 @@ export const DayDetailsModal = ({ isOpen, onClose, date, trades }: DayDetailsMod
   };
 
   const handleViewDetails = () => {
-    // Set global date filter to the selected date
     setDatePreset('custom');
     setDateRange({
       from: startOfDay(date),
@@ -119,22 +141,42 @@ export const DayDetailsModal = ({ isOpen, onClose, date, trades }: DayDetailsMod
               Net P&L {maskCurrency(dayStats.netPnl, formatCurrency)}
             </span>
           </div>
-          <Button
-            variant="default"
-            size="sm"
-            className="gap-2"
-            onClick={handleAddNote}
-          >
-            <FileText className="w-4 h-4" />
-            Add note
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-2"
+              onClick={handleAddTrade}
+            >
+              <Plus className="w-4 h-4" />
+              Add Trade
+            </Button>
+            <Button
+              variant="default"
+              size="sm"
+              className="gap-2"
+              onClick={handleAddNote}
+            >
+              <FileText className="w-4 h-4" />
+              Add note
+            </Button>
+          </div>
         </DialogHeader>
 
         {/* Main Content - Day Card Style */}
         <div className="space-y-5">
           {trades.length === 0 ? (
-            <div className="flex items-center justify-center h-40 border border-dashed border-border rounded-xl">
+            <div className="flex flex-col items-center justify-center h-40 border border-dashed border-border rounded-xl gap-3">
               <p className="text-muted-foreground">No trades on this day</p>
+              <Button
+                variant="default"
+                size="sm"
+                className="gap-2"
+                onClick={handleAddTrade}
+              >
+                <Plus className="w-4 h-4" />
+                Add Trade
+              </Button>
             </div>
           ) : (
             <>
@@ -183,9 +225,9 @@ export const DayDetailsModal = ({ isOpen, onClose, date, trades }: DayDetailsMod
                     <p className="text-lg font-semibold text-foreground">{dayStats.totalQuantity.toFixed(2)}</p>
                   </div>
                   <div>
-                    <p className="text-xs text-muted-foreground mb-1">Profit Factor</p>
+                    <p className="text-xs text-muted-foreground mb-1">Avg Duration</p>
                     <p className="text-lg font-semibold text-foreground">
-                      {maskProfitFactor(profitFactor)}
+                      {formatDuration(avgDurationMinutes)}
                     </p>
                   </div>
                 </div>
