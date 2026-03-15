@@ -213,7 +213,7 @@ export const NewAccountModal = ({ open, onOpenChange, onCreateAccount, currencyS
                 className={cn(
                   "py-2 rounded-lg text-sm font-medium border transition-colors",
                   data.drawdownType === opt.value
-                    ? "bg-primary text-primary-foreground border-primary"
+                    ? "bg-propfirm text-propfirm-foreground border-propfirm"
                     : "bg-input border-border text-muted-foreground hover:text-foreground hover:border-foreground/20"
                 )}
               >
