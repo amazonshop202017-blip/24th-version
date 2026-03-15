@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Trash2, Edit2, Check, X, Tag, Wallet, TrendingUp, TrendingDown, Settings as SettingsIcon, Download, DollarSign, FolderOpen, Archive, ArchiveRestore, ChevronDown, ChevronUp, Target, MessageSquare, Ruler, MoreVertical, ArrowRightLeft, Eraser, LogOut, Image } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
@@ -17,6 +18,8 @@ import { AccountImportModal } from '@/components/settings/AccountImportModal';
 import { SymbolTickSizeManagement } from '@/components/settings/SymbolTickSizeManagement';
 import { TpSlSettings } from '@/components/settings/TpSlSettings';
 import { FeesSettings } from '@/components/settings/FeesSettings';
+import { SettingsLayout } from '@/components/settings/SettingsLayout';
+import { SettingsTab } from '@/components/settings/SettingsSidebar';
 import { toast } from 'sonner';
 import {
   DropdownMenu,
