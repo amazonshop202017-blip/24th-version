@@ -292,12 +292,12 @@ export const NewAccountModal = ({ open, onOpenChange, onCreateAccount, onUpdateA
       <DialogContent className="sm:max-w-md max-h-[85vh] flex flex-col">
         <DialogHeader className="gap-3">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-              <Plus className="h-5 w-5 text-primary" />
+            <div className={cn("flex h-10 w-10 items-center justify-center rounded-full", isEditing ? "bg-accent/10" : "bg-primary/10")}>
+              {isEditing ? <Save className="h-5 w-5 text-accent" /> : <Plus className="h-5 w-5 text-primary" />}
             </div>
             <div>
-              <DialogTitle>Add New Account</DialogTitle>
-              <DialogDescription>Set up your trading account</DialogDescription>
+              <DialogTitle>{isEditing ? 'Edit Account' : 'Add New Account'}</DialogTitle>
+              <DialogDescription>{isEditing ? 'Update your trading account details' : 'Set up your trading account'}</DialogDescription>
             </div>
           </div>
         </DialogHeader>
