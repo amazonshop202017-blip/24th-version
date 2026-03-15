@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
-import type { AccountMode, PropFirmStep, DrawdownType } from '@/contexts/AccountsContext';
+import type { Account, AccountMode, PropFirmStep, DrawdownType } from '@/contexts/AccountsContext';
 
 interface PhaseData {
   targetPercent: string;
