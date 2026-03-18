@@ -1137,7 +1137,7 @@ export const GlobalHeader = () => {
       </Popover>
 
       {/* Display Mode Selector */}
-      <div className="hidden md:block">
+      <div className="hidden lg:block">
         <DisplayModeSelector />
       </div>
 
