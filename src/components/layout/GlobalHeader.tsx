@@ -499,10 +499,6 @@ export const GlobalHeader = () => {
           </div>
         </SheetContent>
       </Sheet>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
 
       {/* Desktop: All filter buttons inline */}
       {/* Basic Filters Dropdown */}
