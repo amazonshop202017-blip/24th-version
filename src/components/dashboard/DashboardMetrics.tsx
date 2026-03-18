@@ -243,27 +243,51 @@ export const DashboardMetrics = ({ isEditMode }: DashboardMetricsProps) => {
     }
   };
 
-  // Dynamic grid columns based on metric count
-  const count = metricsOrder.length + (isEditMode && metricsOrder.length < MAX_METRICS ? 1 : 0);
-  const gridColsClass =
-    count <= 1 ? 'grid-cols-1' :
-    count === 2 ? 'grid-cols-2' :
-    count === 3 ? 'grid-cols-3' :
-    count === 4 ? 'grid-cols-2 md:grid-cols-4' :
-    'grid-cols-2 md:grid-cols-3 lg:grid-cols-5';
+  // Clean responsive grid: last partial row cards stretch to fill
+  // Mobile (2 cols): 5 items → 2+2+1, last one spans full width
+  // Tablet (md 3 cols via 6-col subgrid): 5 → 3+2, last 2 each get col-span-3
+  // Desktop (lg): all 5 in 1 row
+  const totalItems = metricsOrder.length + (isEditMode && metricsOrder.length < MAX_METRICS ? 1 : 0);
+
+  const getItemClasses = (index: number) => {
+    // --- Mobile: 2-column grid ---
+    const mobileRemainder = totalItems % 2;
+    const isLastMobileItem = mobileRemainder === 1 && index === totalItems - 1;
+    const mobileClass = isLastMobileItem ? 'col-span-2' : 'col-span-1';
+
+    // --- Tablet (md): 6-column subgrid, normally span-2 = 3 per row ---
+    const tabletItemsPerRow = 3;
+    const tabletRemainder = totalItems % tabletItemsPerRow;
+    let mdClass = 'md:col-span-2';
+    if (tabletRemainder !== 0 && index >= totalItems - tabletRemainder) {
+      if (tabletRemainder === 1) mdClass = 'md:col-span-6';
+      else if (tabletRemainder === 2) mdClass = 'md:col-span-3';
+    }
+
+    return `${mobileClass} ${mdClass} lg:col-span-1`;
+  };
+
+  const lgGridCols = totalItems <= 1 ? 'lg:grid-cols-1' :
+    totalItems === 2 ? 'lg:grid-cols-2' :
+    totalItems === 3 ? 'lg:grid-cols-3' :
+    totalItems === 4 ? 'lg:grid-cols-4' : 'lg:grid-cols-5';
 
   return (
     <>
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleMetricDragEnd}>
         <SortableContext items={metricsOrder} strategy={horizontalListSortingStrategy}>
-          <div className={`grid ${gridColsClass} gap-3`}>
+          <div className={`grid grid-cols-2 md:grid-cols-6 ${lgGridCols} gap-3`}>
             {metricsOrder.map((metricId, index) => (
               <SortableMetric key={metricId} id={metricId} isEditMode={isEditMode} onRemove={handleRemoveMetric}>
-                {renderMetric(metricId, index)}
+                <div className={getItemClasses(index)}>
+                  {renderMetric(metricId, index)}
+                </div>
               </SortableMetric>
             ))}
             {isEditMode && metricsOrder.length < MAX_METRICS && (
-              <AddWidgetPlaceholder onClick={() => setIsMetricsLibraryOpen(true)} />
+              <div className={getItemClasses(metricsOrder.length)}>
+                <AddWidgetPlaceholder onClick={() => setIsMetricsLibraryOpen(true)} />
+              </div>
             )}
           </div>
         </SortableContext>
