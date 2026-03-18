@@ -1144,7 +1144,7 @@ export const GlobalHeader = () => {
       <div className="flex-1" />
 
       {/* Date Range Selector - hidden on mobile */}
-      <div className="hidden md:flex items-center">
+      <div className="hidden lg:flex items-center">
         <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
           <PopoverTrigger asChild>
             <Button variant="outline" className={`gap-2 bg-background border-border min-w-[200px] justify-start ${datePreset !== 'all' ? 'rounded-r-none border-r-0' : ''}`}>
