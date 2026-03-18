@@ -518,7 +518,7 @@ export const GlobalHeader = () => {
         <DropdownMenuContent align="start" className="w-[calc(100vw-2rem)] lg:w-[900px] p-4 bg-popover border-border z-50 max-h-[80vh] overflow-auto">
           <div className="space-y-4">
             {/* Row 1: Core Trade Context - Symbol, Setup, Checklist of Setup, Outcome, Direction, Starred */}
-            <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
+            <div className="grid grid-cols-2 lg:grid-cols-6 gap-3">
               {/* Symbol - Multi-select from trades */}
               <div className="space-y-1.5">
                 <label className="text-xs text-muted-foreground flex items-center gap-1.5">
