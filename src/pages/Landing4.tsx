@@ -254,7 +254,7 @@ const Landing4 = () => {
               </motion.p>
 
               {/* CTA block */}
-              <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={3} className="mt-10 flex flex-col items-start gap-3">
+              <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={3} className="mt-10 flex items-center gap-4">
                 <Link
                   to="/entering"
                   className="inline-flex items-center gap-2 text-sm font-semibold px-7 py-3.5 transition-colors"

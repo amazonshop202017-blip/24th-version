@@ -179,7 +179,7 @@ export const SharedNavbar = () => {
                   }}
                   onClick={() => setMobileOpen(false)}
                 >
-                  Create account
+                  Get Started
                 </Link>
               </div>
             </motion.div>
