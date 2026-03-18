@@ -80,10 +80,14 @@ const NavItem = ({ icon: Icon, label, path, isCollapsed, isActive }: {
   </Tooltip>
 );
 
-export const Sidebar = () => {
+interface SidebarProps {
+  isCollapsed: boolean;
+  setIsCollapsed: (collapsed: boolean) => void;
+}
+
+export const Sidebar = ({ isCollapsed, setIsCollapsed }: SidebarProps) => {
   const location = useLocation();
   const { openModal } = useTradeModal();
-  const [isCollapsed, setIsCollapsed] = useState(false);
   const [chartRoomOpen, setChartRoomOpen] = useState(
     location.pathname.startsWith('/chart-room')
   );
