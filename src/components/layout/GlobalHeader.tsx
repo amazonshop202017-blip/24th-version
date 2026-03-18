@@ -350,9 +350,9 @@ export const GlobalHeader = () => {
   const totalActiveFilters = activeBasicFiltersCount + (hasActiveTagFilters ? 1 : 0) + (datePreset !== 'all' ? 1 : 0) + (!isAllAccountsSelected ? 1 : 0);
 
   return (
-    <div className="flex items-center gap-2 md:gap-3 px-4 md:px-8 py-3 md:py-4 border-b border-border bg-card/50 backdrop-blur-sm pl-14 md:pl-4 overflow-hidden">
-      {/* Mobile: Single "Filters" menu button */}
-      <div className="md:hidden">
+    <div className="flex items-center gap-2 lg:gap-3 px-4 lg:px-8 py-3 lg:py-4 border-b border-border bg-card/50 backdrop-blur-sm pl-14 lg:pl-4 overflow-hidden">
+      {/* Mobile/Tablet: Single "Filters" menu button */}
+      <div className="lg:hidden">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" className="gap-2 bg-background border-border">
@@ -376,7 +376,7 @@ export const GlobalHeader = () => {
                 </span>
               )}
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setAdvancedFiltersOpen(true)} className="cursor-pointer gap-2">
+            <DropdownMenuItem onClick={() => setMobileAdvancedSheetOpen(true)} className="cursor-pointer gap-2">
               <SlidersHorizontal className="w-4 h-4" />
               Advanced Filters
               {hasActiveTagFilters && (
@@ -386,15 +386,119 @@ export const GlobalHeader = () => {
               )}
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => setDatePickerOpen(true)} className="cursor-pointer gap-2">
+            <DropdownMenuItem onClick={() => setMobileDateSheetOpen(true)} className="cursor-pointer gap-2">
               <CalendarIcon className="w-4 h-4" />
               {getDateRangeLabel()}
             </DropdownMenuItem>
-            <DropdownMenuItem className="cursor-pointer gap-2" asChild>
-              <div onClick={(e) => e.preventDefault()}>
-                <Wallet className="w-4 h-4" />
-                {getAccountsLabel()}
-              </div>
+            <DropdownMenuItem onClick={() => setMobileAccountsSheetOpen(true)} className="cursor-pointer gap-2">
+              <Wallet className="w-4 h-4" />
+              {getAccountsLabel()}
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+
+      {/* Mobile/Tablet Sheets for filter panels */}
+      {/* Basic Filters Sheet - reuses the same DropdownMenu with open state */}
+
+      {/* Advanced Filters Sheet */}
+      <Sheet open={mobileAdvancedSheetOpen} onOpenChange={setMobileAdvancedSheetOpen}>
+        <SheetContent side="bottom" className="max-h-[85vh] overflow-auto p-0">
+          <SheetHeader className="flex flex-row items-center justify-between px-4 py-3 border-b border-border sticky top-0 bg-background z-10">
+            <SheetTitle className="text-base font-semibold">Advanced Filters</SheetTitle>
+            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setMobileAdvancedSheetOpen(false)}>
+              <X className="w-4 h-4" />
+            </Button>
+          </SheetHeader>
+          <div className="p-0">
+            <AdvancedFiltersPanel />
+          </div>
+        </SheetContent>
+      </Sheet>
+
+      {/* Date Range Sheet */}
+      <Sheet open={mobileDateSheetOpen} onOpenChange={setMobileDateSheetOpen}>
+        <SheetContent side="bottom" className="max-h-[85vh] overflow-auto">
+          <SheetHeader className="flex flex-row items-center justify-between pb-3 border-b border-border sticky top-0 bg-background z-10">
+            <SheetTitle className="text-base font-semibold">Date Range</SheetTitle>
+            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setMobileDateSheetOpen(false)}>
+              <X className="w-4 h-4" />
+            </Button>
+          </SheetHeader>
+          <div className="space-y-3 pt-3">
+            {/* Presets */}
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={() => { applyDatePreset('all'); setMobileDateSheetOpen(false); }}
+                className={cn("px-3 py-1.5 text-sm rounded-md border border-border transition-colors", datePreset === 'all' && "bg-primary text-primary-foreground border-primary")}
+              >
+                All time
+              </button>
+              {DATE_PRESETS.map((preset) => (
+                <button
+                  key={preset.value}
+                  onClick={() => { handlePresetClick(preset.value); setMobileDateSheetOpen(false); }}
+                  className={cn("px-3 py-1.5 text-sm rounded-md border border-border transition-colors", datePreset === preset.value && "bg-primary text-primary-foreground border-primary")}
+                >
+                  {preset.label}
+                </button>
+              ))}
+            </div>
+            {/* Calendar */}
+            <div className="flex justify-center">
+              <Calendar
+                mode="range"
+                selected={{ from: dateRange.from, to: dateRange.to }}
+                onSelect={handleCustomDateChange}
+                numberOfMonths={1}
+                className="pointer-events-auto"
+              />
+            </div>
+          </div>
+        </SheetContent>
+      </Sheet>
+
+      {/* Accounts Sheet */}
+      <Sheet open={mobileAccountsSheetOpen} onOpenChange={setMobileAccountsSheetOpen}>
+        <SheetContent side="bottom" className="max-h-[85vh] overflow-auto">
+          <SheetHeader className="flex flex-row items-center justify-between pb-3 border-b border-border sticky top-0 bg-background z-10">
+            <SheetTitle className="text-base font-semibold">Accounts</SheetTitle>
+            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setMobileAccountsSheetOpen(false)}>
+              <X className="w-4 h-4" />
+            </Button>
+          </SheetHeader>
+          <div className="space-y-2 pt-3">
+            <div
+              className={cn("flex items-center gap-3 px-3 py-2.5 rounded-md cursor-pointer transition-colors", isAllAccountsSelected && "bg-accent")}
+              onClick={handleAllAccountsToggle}
+            >
+              <Checkbox checked={isAllAccountsSelected} />
+              <span className="text-sm font-medium">All accounts</span>
+            </div>
+            {activeAccounts.length > 0 && (
+              <>
+                <div className="text-xs text-muted-foreground px-3 pt-2">My accounts</div>
+                {activeAccounts.map((account) => (
+                  <div
+                    key={account.id}
+                    className={cn("flex items-center gap-3 px-3 py-2.5 rounded-md cursor-pointer transition-colors", selectedAccounts.includes(account.name) && "bg-accent")}
+                    onClick={() => handleAccountToggle(account.name)}
+                  >
+                    <Checkbox checked={selectedAccounts.includes(account.name)} />
+                    <span className="text-sm">{account.name}</span>
+                  </div>
+                ))}
+              </>
+            )}
+            <div className="border-t border-border pt-2 mt-2">
+              <Button variant="ghost" className="w-full justify-start gap-2 text-sm" onClick={() => { navigate('/settings?tab=accounts'); setMobileAccountsSheetOpen(false); }}>
+                <Settings className="w-4 h-4" />
+                Manage accounts
+              </Button>
+            </div>
+          </div>
+        </SheetContent>
+      </Sheet>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
