@@ -150,6 +150,11 @@ export const GlobalHeader = () => {
   const [advancedFiltersOpen, setAdvancedFiltersOpen] = useState(false);
   const [yearPickerOpen, setYearPickerOpen] = useState(false);
   const [checklistOpen, setChecklistOpen] = useState(false);
+  
+  // Mobile/tablet sheet states
+  const [mobileDateSheetOpen, setMobileDateSheetOpen] = useState(false);
+  const [mobileAdvancedSheetOpen, setMobileAdvancedSheetOpen] = useState(false);
+  const [mobileAccountsSheetOpen, setMobileAccountsSheetOpen] = useState(false);
 
   // Get active accounts (excluding archived)
   const activeAccounts = useMemo(() => getActiveAccountsWithStats(), [getActiveAccountsWithStats]);
