@@ -504,7 +504,7 @@ export const GlobalHeader = () => {
       {/* Basic Filters Dropdown */}
       <DropdownMenu open={basicFiltersOpen} onOpenChange={setBasicFiltersOpen}>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" className="gap-2 bg-background border-border hidden md:flex">
+          <Button variant="outline" className="gap-2 bg-background border-border hidden lg:flex">
             <Filter className="w-4 h-4 text-muted-foreground" />
             <span>Basic Filters</span>
             {activeBasicFiltersCount > 0 && (
