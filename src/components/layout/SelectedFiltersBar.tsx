@@ -1,6 +1,5 @@
 import { useMemo } from 'react';
-import { X, Trash2 } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
+import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useGlobalFilters, DayFilter, OutcomeFilter, DirectionFilter, ReturnPercentRange, RMultipleRange } from '@/contexts/GlobalFiltersContext';
 import { useStrategiesContext } from '@/contexts/StrategiesContext';
@@ -61,7 +60,6 @@ export const SelectedFiltersBar = () => {
   const chips = useMemo<FilterChip[]>(() => {
     const result: FilterChip[] = [];
 
-    // Date preset
     if (datePreset !== 'all') {
       const presetLabels: Record<string, string> = {
         today: 'Today', this_week: 'This Week', this_month: 'This Month',
@@ -74,7 +72,6 @@ export const SelectedFiltersBar = () => {
       });
     }
 
-    // Accounts
     selectedAccounts.forEach(acc => {
       result.push({
         id: `account-${acc}`, label: 'Account', value: acc,
@@ -82,7 +79,6 @@ export const SelectedFiltersBar = () => {
       });
     });
 
-    // Symbols
     selectedSymbols.forEach(sym => {
       result.push({
         id: `symbol-${sym}`, label: 'Symbol', value: sym,
@@ -90,7 +86,6 @@ export const SelectedFiltersBar = () => {
       });
     });
 
-    // Setups
     selectedSetups.forEach(setupId => {
       const name = strategies.find(s => s.id === setupId)?.name || setupId;
       result.push({
@@ -99,7 +94,6 @@ export const SelectedFiltersBar = () => {
       });
     });
 
-    // Checklist items
     selectedChecklistItems.forEach(item => {
       result.push({
         id: `checklist-${item}`, label: 'Checklist', value: item,
@@ -107,7 +101,6 @@ export const SelectedFiltersBar = () => {
       });
     });
 
-    // Outcomes
     selectedOutcomes.forEach(o => {
       result.push({
         id: `outcome-${o}`, label: 'Outcome', value: OUTCOME_LABELS[o],
@@ -115,7 +108,6 @@ export const SelectedFiltersBar = () => {
       });
     });
 
-    // Directions
     selectedDirections.forEach(d => {
       result.push({
         id: `direction-${d}`, label: 'Direction', value: DIRECTION_LABELS[d],
@@ -123,7 +115,6 @@ export const SelectedFiltersBar = () => {
       });
     });
 
-    // Year
     if (selectedYear !== null) {
       result.push({
         id: 'year', label: 'Year', value: selectedYear.toString(),
@@ -131,7 +122,6 @@ export const SelectedFiltersBar = () => {
       });
     }
 
-    // Days
     selectedDays.forEach(d => {
       result.push({
         id: `day-${d}`, label: 'Day', value: DAY_LABELS[d],
@@ -139,7 +129,6 @@ export const SelectedFiltersBar = () => {
       });
     });
 
-    // Hours
     selectedHours.forEach(h => {
       result.push({
         id: `hour-${h}`, label: 'Hour', value: `${h.toString().padStart(2, '0')}:00`,
@@ -147,7 +136,6 @@ export const SelectedFiltersBar = () => {
       });
     });
 
-    // Last trades
     if (lastTradesFilter !== null) {
       result.push({
         id: 'last-trades', label: 'Last Trades', value: lastTradesFilter.toString(),
@@ -155,7 +143,6 @@ export const SelectedFiltersBar = () => {
       });
     }
 
-    // Return %
     selectedReturnRanges.forEach(r => {
       result.push({
         id: `return-${r}`, label: 'Return %', value: RETURN_LABELS[r],
@@ -163,7 +150,6 @@ export const SelectedFiltersBar = () => {
       });
     });
 
-    // R-Multiple
     selectedRMultipleRanges.forEach(r => {
       result.push({
         id: `rmultiple-${r}`, label: 'R-Multiple', value: R_MULTIPLE_LABELS[r],
@@ -171,7 +157,6 @@ export const SelectedFiltersBar = () => {
       });
     });
 
-    // Tags by category
     Object.entries(selectedTagsByCategory).forEach(([categoryId, tagIds]) => {
       const categoryName = categories.find(c => c.id === categoryId)?.name || 'Tag';
       tagIds.forEach(tagId => {
@@ -191,7 +176,6 @@ export const SelectedFiltersBar = () => {
       });
     });
 
-    // Trade comments
     (['entryComments', 'tradeManagements', 'exitComments'] as const).forEach(category => {
       const labelMap = { entryComments: 'Entry Comment', tradeManagements: 'Trade Mgmt', exitComments: 'Exit Comment' };
       selectedTradeComments[category].forEach(comment => {
@@ -236,32 +220,31 @@ export const SelectedFiltersBar = () => {
   if (chips.length === 0) return null;
 
   return (
-    <div className="flex items-center gap-2 px-8 py-2 border-b border-border bg-card/30 flex-wrap">
-      <span className="text-xs font-medium text-muted-foreground shrink-0">Selected Filters:</span>
+    <div className="flex items-center gap-2 px-6 py-1.5 border-b border-border/50 bg-muted/20 flex-wrap">
+      <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider shrink-0">Filters</span>
       {chips.map((chip) => (
-        <Badge
+        <div
           key={chip.id}
-          variant="secondary"
-          className="gap-1 pl-2 pr-1 py-0.5 text-xs font-normal cursor-default"
+          className="inline-flex items-center gap-1.5 bg-muted/70 text-foreground rounded-md px-2.5 py-1 text-xs"
         >
-          <span className="text-muted-foreground">{chip.label}:</span>
-          <span>{chip.value}</span>
+          <span className="text-[10px] uppercase tracking-wider text-muted-foreground">{chip.label}</span>
+          <span className="font-medium">{chip.value}</span>
           <button
             onClick={chip.onRemove}
-            className="ml-0.5 rounded-full p-0.5 hover:bg-muted-foreground/20 transition-colors"
+            className="ml-0.5 rounded-full p-0.5 hover:bg-foreground/10 transition-colors"
           >
-            <X className="w-3 h-3" />
+            <X className="w-2.5 h-2.5" />
           </button>
-        </Badge>
+        </div>
       ))}
       <Button
         variant="ghost"
         size="sm"
-        className="h-6 px-2 text-xs text-destructive hover:text-destructive gap-1 shrink-0"
+        className="h-6 px-2 text-[11px] text-muted-foreground hover:text-foreground gap-1 shrink-0"
         onClick={clearAll}
       >
-        <Trash2 className="w-3 h-3" />
-        Clear all
+        <X className="w-3 h-3" />
+        Clear
       </Button>
     </div>
   );

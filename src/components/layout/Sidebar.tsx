@@ -3,13 +3,12 @@ import { NavLink, useLocation } from 'react-router-dom';
 import { LayoutDashboard, ListOrdered, FileText, Target, Plus, ChevronLeft, ChevronRight, BarChart3, ChevronDown, Crosshair } from 'lucide-react';
 import logo from '@/assets/logo.svg';
 import { cn } from '@/lib/utils';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import { useTradeModal } from '@/contexts/TradeModalContext';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 import { Calendar, BookOpen } from 'lucide-react';
-import { Separator } from '@/components/ui/separator';
 import { SidebarAccountMenu } from './SidebarAccountMenu';
 
 // Section 1: Dashboard (standalone)
@@ -42,6 +41,55 @@ const chartRoomItems = [
   { label: 'Trade Management', path: '/chart-room/trade-management' },
 ];
 
+const NavItem = ({ icon: Icon, label, path, isCollapsed }: { icon: any; label: string; path: string; isCollapsed: boolean }) => {
+  const location = useLocation();
+  const isActive = path === '/' 
+    ? location.pathname === path 
+    : location.pathname === path || (path === '/reports' && location.pathname.startsWith('/reports'));
+
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <NavLink to={path} className="block">
+          <div
+            className={cn(
+              "relative flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200",
+              isCollapsed ? "justify-center" : "",
+              isActive
+                ? "bg-primary/10 text-primary"
+                : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+            )}
+          >
+            {isActive && (
+              <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 bg-primary rounded-r-full" />
+            )}
+            <Icon className="w-[18px] h-[18px] flex-shrink-0" />
+            <AnimatePresence>
+              {!isCollapsed && (
+                <motion.span
+                  initial={{ opacity: 0, width: 0 }}
+                  animate={{ opacity: 1, width: 'auto' }}
+                  exit={{ opacity: 0, width: 0 }}
+                  className={cn(
+                    "text-sm overflow-hidden whitespace-nowrap",
+                    isActive ? "font-semibold" : "font-medium"
+                  )}
+                >
+                  {label}
+                </motion.span>
+              )}
+            </AnimatePresence>
+          </div>
+        </NavLink>
+      </TooltipTrigger>
+      {isCollapsed && (
+        <TooltipContent side="right">
+          <p>{label}</p>
+        </TooltipContent>
+      )}
+    </Tooltip>
+  );
+};
 
 export const Sidebar = () => {
   const location = useLocation();
@@ -56,26 +104,24 @@ export const Sidebar = () => {
   return (
     <aside 
       className={cn(
-        "fixed left-0 top-0 h-screen bg-sidebar border-r border-sidebar-border flex flex-col z-40 transition-all duration-300 rounded-r-2xl",
+        "fixed left-0 top-0 h-screen bg-sidebar border-r border-sidebar-border flex flex-col z-40 transition-all duration-300",
         isCollapsed ? "w-16" : "w-52"
       )}
     >
-      {/* Collapse/Expand toggle on the right edge */}
-      <motion.button
+      {/* Collapse/Expand toggle */}
+      <button
         onClick={() => setIsCollapsed(!isCollapsed)}
-        className="absolute -right-3.5 top-8 z-50 w-7 h-7 rounded-full bg-sidebar border border-sidebar-border shadow-md flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-sidebar-accent transition-colors duration-200"
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.9 }}
+        className="absolute -right-3 top-8 z-50 w-6 h-6 rounded-full bg-sidebar border border-sidebar-border shadow-sm flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors duration-200"
       >
         {isCollapsed ? (
-          <ChevronRight className="w-4 h-4" />
+          <ChevronRight className="w-3.5 h-3.5" />
         ) : (
-          <ChevronLeft className="w-4 h-4" />
+          <ChevronLeft className="w-3.5 h-3.5" />
         )}
-      </motion.button>
+      </button>
 
       {/* Logo Section */}
-      <div className="p-4 border-b border-sidebar-border">
+      <div className="px-4 py-4 border-b border-sidebar-border/50">
         <div className="flex flex-col items-center justify-center">
           <AnimatePresence>
             {!isCollapsed ? (
@@ -94,8 +140,8 @@ export const Sidebar = () => {
                 </span>
               </motion.div>
             ) : (
-              <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center flex-shrink-0">
-                <span className="text-sm font-bold text-primary-foreground" style={{ fontFamily: "'DM Sans', 'Inter', sans-serif" }}>TV</span>
+              <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center flex-shrink-0">
+                <span className="text-xs font-bold text-primary-foreground" style={{ fontFamily: "'DM Sans', 'Inter', sans-serif" }}>TV</span>
               </div>
             )}
           </AnimatePresence>
@@ -103,33 +149,31 @@ export const Sidebar = () => {
       </div>
 
       {/* Add Trade Button */}
-      <div className="p-4">
+      <div className="px-3 pt-4 pb-2">
         <Tooltip>
           <TooltipTrigger asChild>
-            <motion.button
+            <button
               onClick={() => openModal()}
               className={cn(
-                "w-full text-primary-foreground rounded-xl font-medium flex items-center justify-center gap-2 transition-all duration-200 hover:opacity-90",
-                isCollapsed ? "h-10 px-0" : "h-11 px-4"
+                "w-full text-primary-foreground rounded-lg font-medium flex items-center justify-center gap-2 transition-all duration-200 hover:opacity-90 active:scale-[0.98]",
+                isCollapsed ? "h-9 px-0" : "h-10 px-4"
               )}
               style={{ backgroundColor: 'hsl(var(--primary-active))' }}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
             >
-              <Plus className="w-5 h-5" />
+              <Plus className="w-[18px] h-[18px]" />
               <AnimatePresence>
                 {!isCollapsed && (
                   <motion.span
                     initial={{ opacity: 0, width: 0 }}
                     animate={{ opacity: 1, width: 'auto' }}
                     exit={{ opacity: 0, width: 0 }}
-                    className="overflow-hidden whitespace-nowrap"
+                    className="overflow-hidden whitespace-nowrap text-sm"
                   >
                     Add Trade
                   </motion.span>
                 )}
               </AnimatePresence>
-            </motion.button>
+            </button>
           </TooltipTrigger>
           {isCollapsed && (
             <TooltipContent side="right">
@@ -140,158 +184,48 @@ export const Sidebar = () => {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 px-3 space-y-1 overflow-y-auto">
-        {/* Section 1: Dashboard */}
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <NavLink to={dashboardItem.path} className="block">
-              <motion.div
-                className={cn(
-                  "flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200",
-                  isCollapsed ? "justify-center" : "",
-                  location.pathname === dashboardItem.path
-                    ? "bg-primary text-primary-foreground shadow-lg"
-                    : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-                )}
-                whileHover={{ x: location.pathname === dashboardItem.path || isCollapsed ? 0 : 4 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <dashboardItem.icon className="w-5 h-5 flex-shrink-0" />
-                <AnimatePresence>
-                  {!isCollapsed && (
-                    <motion.span
-                      initial={{ opacity: 0, width: 0 }}
-                      animate={{ opacity: 1, width: 'auto' }}
-                      exit={{ opacity: 0, width: 0 }}
-                      className="font-medium overflow-hidden whitespace-nowrap"
-                    >
-                      {dashboardItem.label}
-                    </motion.span>
-                  )}
-                </AnimatePresence>
-              </motion.div>
-            </NavLink>
-          </TooltipTrigger>
-          {isCollapsed && (
-            <TooltipContent side="right">
-              <p>{dashboardItem.label}</p>
-            </TooltipContent>
-          )}
-        </Tooltip>
+      <nav className="flex-1 px-3 space-y-0.5 overflow-y-auto pt-1">
+        {/* Dashboard */}
+        <NavItem {...dashboardItem} isCollapsed={isCollapsed} />
 
-        {/* Divider after Dashboard */}
-        <div className="py-2">
-          <Separator className="bg-sidebar-border/50" />
+        {/* Divider */}
+        <div className="py-1.5">
+          <div className="h-px bg-sidebar-border/40" />
         </div>
 
-        {/* Section 2: Trading Views */}
-        {tradingViewItems.map((item) => {
-          const isActive = location.pathname === item.path;
-          return (
-            <Tooltip key={item.path}>
-              <TooltipTrigger asChild>
-                <NavLink to={item.path} className="block">
-                  <motion.div
-                    className={cn(
-                      "flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200",
-                      isCollapsed ? "justify-center" : "",
-                      isActive
-                        ? "bg-primary text-primary-foreground shadow-lg"
-                        : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-                    )}
-                    whileHover={{ x: isActive || isCollapsed ? 0 : 4 }}
-                    whileTap={{ scale: 0.98 }}
-                  >
-                    <item.icon className="w-5 h-5 flex-shrink-0" />
-                    <AnimatePresence>
-                      {!isCollapsed && (
-                        <motion.span
-                          initial={{ opacity: 0, width: 0 }}
-                          animate={{ opacity: 1, width: 'auto' }}
-                          exit={{ opacity: 0, width: 0 }}
-                          className="font-medium overflow-hidden whitespace-nowrap"
-                        >
-                          {item.label}
-                        </motion.span>
-                      )}
-                    </AnimatePresence>
-                  </motion.div>
-                </NavLink>
-              </TooltipTrigger>
-              {isCollapsed && (
-                <TooltipContent side="right">
-                  <p>{item.label}</p>
-                </TooltipContent>
-              )}
-            </Tooltip>
-          );
-        })}
+        {/* Trading Views */}
+        {tradingViewItems.map((item) => (
+          <NavItem key={item.path} {...item} isCollapsed={isCollapsed} />
+        ))}
 
-        {/* Divider after Trading Views */}
-        <div className="py-2">
-          <Separator className="bg-sidebar-border/50" />
+        {/* Divider */}
+        <div className="py-1.5">
+          <div className="h-px bg-sidebar-border/40" />
         </div>
 
-        {/* Section 3: Analysis & Planning */}
-        {analysisItems.map((item) => {
-          const isActive = location.pathname === item.path || 
-            (item.path === '/reports' && location.pathname.startsWith('/reports'));
-          return (
-            <Tooltip key={item.path}>
-              <TooltipTrigger asChild>
-                <NavLink to={item.path} className="block">
-                  <motion.div
-                    className={cn(
-                      "flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200",
-                      isCollapsed ? "justify-center" : "",
-                      isActive
-                        ? "bg-primary text-primary-foreground shadow-lg"
-                        : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-                    )}
-                    whileHover={{ x: isActive || isCollapsed ? 0 : 4 }}
-                    whileTap={{ scale: 0.98 }}
-                  >
-                    <item.icon className="w-5 h-5 flex-shrink-0" />
-                    <AnimatePresence>
-                      {!isCollapsed && (
-                        <motion.span
-                          initial={{ opacity: 0, width: 0 }}
-                          animate={{ opacity: 1, width: 'auto' }}
-                          exit={{ opacity: 0, width: 0 }}
-                          className="font-medium overflow-hidden whitespace-nowrap"
-                        >
-                          {item.label}
-                        </motion.span>
-                      )}
-                    </AnimatePresence>
-                  </motion.div>
-                </NavLink>
-              </TooltipTrigger>
-              {isCollapsed && (
-                <TooltipContent side="right">
-                  <p>{item.label}</p>
-                </TooltipContent>
-              )}
-            </Tooltip>
-          );
-        })}
+        {/* Analysis & Planning */}
+        {analysisItems.map((item) => (
+          <NavItem key={item.path} {...item} isCollapsed={isCollapsed} />
+        ))}
         
-        {/* Chart Room Dropdown */}
+        {/* Chart Room */}
         {isCollapsed ? (
           <Tooltip>
             <TooltipTrigger asChild>
               <NavLink to="/chart-room/drawdown" className="block">
-                <motion.div
+                <div
                   className={cn(
-                    "flex items-center justify-center px-3 py-3 rounded-xl transition-all duration-200",
+                    "relative flex items-center justify-center px-3 py-2.5 rounded-lg transition-all duration-200",
                     isChartRoomActive
-                      ? "bg-primary text-primary-foreground shadow-lg"
-                      : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                      ? "bg-primary/10 text-primary"
+                      : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
                   )}
-                  whileTap={{ scale: 0.98 }}
                 >
-                  <BarChart3 className="w-5 h-5 flex-shrink-0" />
-                </motion.div>
+                  {isChartRoomActive && (
+                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 bg-primary rounded-r-full" />
+                  )}
+                  <BarChart3 className="w-[18px] h-[18px] flex-shrink-0" />
+                </div>
               </NavLink>
             </TooltipTrigger>
             <TooltipContent side="right">
@@ -301,44 +235,46 @@ export const Sidebar = () => {
         ) : (
           <Collapsible open={chartRoomOpen} onOpenChange={setChartRoomOpen}>
             <CollapsibleTrigger asChild>
-              <motion.button
+              <button
                 className={cn(
-                  "w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200",
+                  "relative w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200",
                   isChartRoomActive
-                    ? "bg-primary text-primary-foreground shadow-lg"
-                    : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                    ? "bg-primary/10 text-primary"
+                    : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
                 )}
-                whileHover={{ x: isChartRoomActive ? 0 : 4 }}
-                whileTap={{ scale: 0.98 }}
               >
-                <BarChart3 className="w-5 h-5 flex-shrink-0" />
-                <span className="font-medium flex-1 text-left">Chart Room</span>
+                {isChartRoomActive && (
+                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 bg-primary rounded-r-full" />
+                )}
+                <BarChart3 className="w-[18px] h-[18px] flex-shrink-0" />
+                <span className={cn("text-sm flex-1 text-left", isChartRoomActive ? "font-semibold" : "font-medium")}>Chart Room</span>
                 <ChevronDown 
                   className={cn(
-                    "w-4 h-4 transition-transform duration-200",
+                    "w-3.5 h-3.5 transition-transform duration-200",
                     chartRoomOpen ? "rotate-180" : ""
                   )} 
                 />
-              </motion.button>
+              </button>
             </CollapsibleTrigger>
             <CollapsibleContent>
-              <div className="ml-4 mt-1 space-y-1 border-l border-sidebar-border pl-4">
+              <div className="ml-5 mt-0.5 space-y-0.5 border-l border-sidebar-border/40 pl-3">
                 {chartRoomItems.map((item) => {
                   const isSubActive = location.pathname === item.path;
                   return (
                     <NavLink key={item.path} to={item.path} className="block">
-                      <motion.div
+                      <div
                         className={cn(
-                          "flex items-center px-3 py-2 rounded-lg text-sm transition-all duration-200",
+                          "relative flex items-center gap-2 px-2.5 py-1.5 rounded-md text-[13px] transition-all duration-200",
                           isSubActive
-                            ? "bg-primary/10 text-primary font-medium"
-                            : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                            ? "text-primary font-medium"
+                            : "text-muted-foreground hover:text-foreground hover:bg-muted/30"
                         )}
-                        whileHover={{ x: isSubActive ? 0 : 4 }}
-                        whileTap={{ scale: 0.98 }}
                       >
-                        {item.label}
-                      </motion.div>
+                        {isSubActive && (
+                          <div className="w-1 h-1 rounded-full bg-primary flex-shrink-0" />
+                        )}
+                        <span>{item.label}</span>
+                      </div>
                     </NavLink>
                   );
                 })}
@@ -348,10 +284,10 @@ export const Sidebar = () => {
         )}
       </nav>
 
-      {/* Bottom Section - Account Menu (Pinned) */}
+      {/* Bottom Section - Account Menu */}
       <div className="px-3 mt-auto">
-        <div className="py-2">
-          <Separator className="bg-sidebar-border/50" />
+        <div className="py-1.5">
+          <div className="h-px bg-sidebar-border/40" />
         </div>
         <SidebarAccountMenu isCollapsed={isCollapsed} />
       </div>

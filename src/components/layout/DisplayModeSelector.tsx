@@ -64,8 +64,8 @@ export const DisplayModeSelector = () => {
       <PopoverTrigger asChild>
         <button
           className={cn(
-            "w-9 h-9 rounded-full flex items-center justify-center",
-            "border border-border bg-background hover:bg-accent transition-colors",
+            "w-8 h-8 rounded-full flex items-center justify-center",
+            "bg-muted/60 hover:bg-muted transition-colors",
             "text-muted-foreground hover:text-foreground"
           )}
         >
@@ -84,8 +84,8 @@ export const DisplayModeSelector = () => {
               className={cn(
                 "flex items-start gap-3 px-3 py-2.5 rounded-md cursor-pointer transition-colors",
                 displayMode === option.value 
-                  ? "bg-accent" 
-                  : "hover:bg-accent/50"
+                  ? "bg-muted" 
+                  : "hover:bg-muted/50"
               )}
             >
               {/* Icon Circle */}

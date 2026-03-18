@@ -5,8 +5,7 @@ import { useTheme } from '@/hooks/useTheme';
 import { cn } from '@/lib/utils';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { Separator } from '@/components/ui/separator';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 
 export const SidebarAccountMenu = ({ isCollapsed }: { isCollapsed: boolean }) => {
   const { user, logout } = useAuth();
@@ -15,9 +14,6 @@ export const SidebarAccountMenu = ({ isCollapsed }: { isCollapsed: boolean }) =>
   const location = useLocation();
   const isDark = theme === 'dark';
 
-  const isAccountActive = location.pathname === '/settings' || location.pathname === '/account';
-
-  // Get display name from email
   const displayName = user?.email?.split('@')[0] || 'Account';
 
   return (
@@ -25,21 +21,18 @@ export const SidebarAccountMenu = ({ isCollapsed }: { isCollapsed: boolean }) =>
       <Tooltip>
         <TooltipTrigger asChild>
           <PopoverTrigger asChild>
-            <motion.button
+            <button
               className={cn(
-                "w-full flex items-center gap-3 rounded-2xl transition-all duration-200",
-                isCollapsed ? "justify-center p-2" : "px-3 py-3",
-                "bg-sidebar-accent/60 border border-sidebar-border/50 backdrop-blur-sm",
-                "hover:bg-sidebar-accent hover:border-sidebar-border"
+                "w-full flex items-center gap-3 rounded-lg transition-all duration-200 mb-2",
+                isCollapsed ? "justify-center p-2" : "px-3 py-2.5",
+                "bg-muted/40 hover:bg-muted/70"
               )}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
             >
               <div className={cn(
                 "rounded-full bg-primary flex items-center justify-center flex-shrink-0",
-                isCollapsed ? "w-8 h-8" : "w-9 h-9"
+                isCollapsed ? "w-7 h-7" : "w-8 h-8"
               )}>
-                <span className="text-xs font-bold text-primary-foreground uppercase">
+                <span className="text-[10px] font-bold text-primary-foreground uppercase">
                   {displayName.slice(0, 2)}
                 </span>
               </div>
@@ -49,13 +42,13 @@ export const SidebarAccountMenu = ({ isCollapsed }: { isCollapsed: boolean }) =>
                     initial={{ opacity: 0, width: 0 }}
                     animate={{ opacity: 1, width: 'auto' }}
                     exit={{ opacity: 0, width: 0 }}
-                    className="font-semibold overflow-hidden whitespace-nowrap text-sm truncate text-sidebar-foreground"
+                    className="font-medium overflow-hidden whitespace-nowrap text-sm truncate text-foreground"
                   >
                     {displayName}
                   </motion.span>
                 )}
               </AnimatePresence>
-            </motion.button>
+            </button>
           </PopoverTrigger>
         </TooltipTrigger>
         {isCollapsed && (
@@ -79,16 +72,15 @@ export const SidebarAccountMenu = ({ isCollapsed }: { isCollapsed: boolean }) =>
             className={cn(
               "relative inline-flex h-7 w-[52px] items-center rounded-full mx-1.5 border overflow-hidden transition-colors duration-500",
               isDark
-                ? "bg-[hsl(222_47%_18%)] border-[hsl(215_20%_30%)]"
+                ? "bg-muted border-border"
                 : "bg-primary border-primary"
             )}
           >
-            {/* Sliding knob */}
             <span
               className={cn(
                 "absolute z-10 flex h-[22px] w-[22px] items-center justify-center rounded-full shadow-md transition-all duration-500 ease-in-out",
                 isDark
-                  ? "translate-x-[27px] bg-[hsl(215_20%_30%)]"
+                  ? "translate-x-[27px] bg-muted-foreground/30"
                   : "translate-x-[3px] bg-background"
               )}
             >
@@ -97,25 +89,18 @@ export const SidebarAccountMenu = ({ isCollapsed }: { isCollapsed: boolean }) =>
                 isDark ? "opacity-0 rotate-90 scale-0" : "opacity-100 rotate-0 scale-100"
               )} />
               <Moon className={cn(
-                "absolute w-3.5 h-3.5 text-white transition-all duration-500",
+                "absolute w-3.5 h-3.5 text-foreground transition-all duration-500",
                 isDark ? "opacity-100 rotate-0 scale-100" : "opacity-0 -rotate-90 scale-0"
               )} />
             </span>
-            {/* Decorative dots - fade between states */}
-            <span className={cn("absolute left-2.5 top-1.5 h-1 w-1 rounded-full transition-opacity duration-500", isDark ? "bg-white/60 opacity-100" : "opacity-0")} />
-            <span className={cn("absolute left-4 top-3 h-0.5 w-0.5 rounded-full transition-opacity duration-500", isDark ? "bg-white/40 opacity-100" : "opacity-0")} />
-            <span className={cn("absolute left-2 bottom-1.5 h-0.5 w-0.5 rounded-full transition-opacity duration-500", isDark ? "bg-white/50 opacity-100" : "opacity-0")} />
-            <span className={cn("absolute right-3 top-1.5 h-1 w-1 rounded-full transition-opacity duration-500", !isDark ? "bg-primary-foreground/60 opacity-100" : "opacity-0")} />
-            <span className={cn("absolute right-2 bottom-2 h-0.5 w-0.5 rounded-full transition-opacity duration-500", !isDark ? "bg-primary-foreground/40 opacity-100" : "opacity-0")} />
           </button>
           <span className={cn("text-xs font-medium transition-colors", isDark ? "text-foreground" : "text-muted-foreground")}>Dark</span>
         </div>
 
-
         {/* Settings */}
         <button
           onClick={() => navigate('/settings')}
-          className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
+          className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-foreground hover:bg-muted/60 transition-colors"
         >
           <Settings className="w-4 h-4" />
           Settings
@@ -127,15 +112,13 @@ export const SidebarAccountMenu = ({ isCollapsed }: { isCollapsed: boolean }) =>
           className={cn(
             "w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors",
             location.pathname === '/account'
-              ? "bg-accent text-accent-foreground font-medium"
-              : "text-foreground hover:bg-accent hover:text-accent-foreground"
+              ? "bg-muted text-foreground font-medium"
+              : "text-foreground hover:bg-muted/60"
           )}
         >
           <CircleUser className="w-4 h-4" />
           Account
         </button>
-
-        
 
         {/* Logout */}
         <button
