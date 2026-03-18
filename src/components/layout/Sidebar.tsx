@@ -183,6 +183,11 @@ export const Sidebar = () => {
           isActive={location.pathname === dashboardItem.path}
         />
 
+        {/* Separator after Dashboard */}
+        <div className="py-2">
+          <Separator className="bg-sidebar-border/50" />
+        </div>
+
         {/* Trading Views */}
         {tradingViewItems.map((item) => (
           <NavItem
