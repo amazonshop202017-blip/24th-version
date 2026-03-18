@@ -352,7 +352,7 @@ export const GlobalHeader = () => {
             <ChevronDown className="w-4 h-4 text-muted-foreground" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" className="w-[900px] p-4 bg-popover border-border z-50">
+        <DropdownMenuContent align="start" className="w-[calc(100vw-2rem)] md:w-[900px] p-4 bg-popover border-border z-50 max-h-[80vh] overflow-auto">
           <div className="space-y-4">
             {/* Row 1: Core Trade Context - Symbol, Setup, Checklist of Setup, Outcome, Direction, Starred */}
             <div className="grid grid-cols-6 gap-3">
