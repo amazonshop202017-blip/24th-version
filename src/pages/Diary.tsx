@@ -101,15 +101,21 @@ const Diary = () => {
         className={activeMainTab === 'diary' ? "h-[calc(100%-8rem)]" : ""}
       >
         {activeMainTab === 'diary' ? (
-          <div className="glass-card rounded-2xl overflow-hidden h-full">
-            <div className="grid grid-cols-[220px_280px_1fr] h-full">
+          <div className="glass-card rounded-2xl overflow-hidden h-full flex flex-col">
+            <div className="grid grid-cols-1 md:grid-cols-[200px_260px] lg:grid-cols-[220px_280px_1fr] h-full md:h-auto lg:h-full">
               {/* Left Column - Folder Navigation */}
               <DiaryFolderSidebar />
               
               {/* Middle Column - Notes List */}
               <DiaryNotesList />
               
-              {/* Right Column - Note Editor */}
+              {/* Right Column - Note Editor (hidden on mobile/tablet, shown below) */}
+              <div className="hidden lg:block h-full">
+                <DiaryNoteEditor />
+              </div>
+            </div>
+            {/* Editor below on mobile/tablet */}
+            <div className="lg:hidden flex-1 min-h-[300px] border-t border-border">
               <DiaryNoteEditor />
             </div>
           </div>
