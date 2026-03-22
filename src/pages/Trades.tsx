@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef, useEffect, useCallback } from 'react';
+import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { 
   Trash2, 
@@ -86,38 +86,6 @@ const TableWithStickyHorizontalScroll = ({
   maskCurrency,
   formatCurrency,
 }: TableWithStickyHorizontalScrollProps) => {
-  const tableContainerRef = useRef<HTMLDivElement>(null);
-  const tableContentRef = useRef<HTMLDivElement>(null);
-  const scrollbarRef = useRef<HTMLDivElement>(null);
-  const scrollbarThumbRef = useRef<HTMLDivElement>(null);
-  const [scrollbarWidth, setScrollbarWidth] = useState(0);
-
-  // Update scrollbar width when content changes
-  useEffect(() => {
-    const updateScrollbarWidth = () => {
-      if (tableContentRef.current) {
-        setScrollbarWidth(tableContentRef.current.scrollWidth);
-      }
-    };
-    
-    updateScrollbarWidth();
-    
-    // Use ResizeObserver for dynamic updates
-    const resizeObserver = new ResizeObserver(updateScrollbarWidth);
-    if (tableContentRef.current) {
-      resizeObserver.observe(tableContentRef.current);
-    }
-    
-    return () => resizeObserver.disconnect();
-  }, [paginatedTrades, isColumnVisible]);
-
-  // Sync scrollbar with table content
-  const handleScrollbarScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
-    if (tableContentRef.current) {
-      tableContentRef.current.style.transform = `translateX(-${e.currentTarget.scrollLeft}px)`;
-    }
-  }, []);
-
   if (paginatedTrades.length === 0) {
     return (
       <div className="flex-1 min-h-0 overflow-hidden flex flex-col">
@@ -131,226 +99,204 @@ const TableWithStickyHorizontalScroll = ({
 
   return (
     <div className="flex-1 min-h-0 overflow-hidden flex flex-col">
-      {/* Vertical scroll container */}
-      <div 
-        ref={tableContainerRef}
-        className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent"
+      <div
+        className="flex-1 min-h-0 overflow-auto scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent"
+        style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-x pan-y' }}
       >
-        <div 
-          ref={tableContentRef}
-          className="min-w-max"
-        >
-          <Table className="min-w-max" wrapperClassName="overflow-visible">
-            <TableHeader className="sticky top-0 bg-card z-10">
-              <TableRow className="border-border hover:bg-transparent">
-                <TableHead className="w-8 px-2">
-                  <Checkbox
-                    checked={allSelected}
-                    onCheckedChange={handleSelectAll}
-                    aria-label="Select all trades on this page"
-                  />
-                </TableHead>
-                {isColumnVisible('symbol') && <TableHead className="px-2">Symbol</TableHead>}
-                {isColumnVisible('side') && <TableHead className="px-2">Side</TableHead>}
-                {isColumnVisible('volume') && <TableHead className="px-2">Volume</TableHead>}
-                {isColumnVisible('ticksPips') && <TableHead className="px-2">Ticks/Pips</TableHead>}
-                {isColumnVisible('accountName') && <TableHead className="px-2">Account</TableHead>}
-                {isColumnVisible('openDateTime') && <TableHead className="px-2">Open Date / Time</TableHead>}
-                {isColumnVisible('closeDateTime') && <TableHead className="px-2">Close Date / Time</TableHead>}
-                {isColumnVisible('duration') && <TableHead className="px-2">Duration</TableHead>}
-                {isColumnVisible('avgEntry') && <TableHead className="px-2">Avg Entry</TableHead>}
-                {isColumnVisible('avgExit') && <TableHead className="px-2">Avg Exit</TableHead>}
-                {isColumnVisible('initialRisk') && <TableHead className="px-2">Stop Loss</TableHead>}
-                {isColumnVisible('initialTarget') && <TableHead className="px-2">Take Profit</TableHead>}
-                {isColumnVisible('grossPnl') && <TableHead className="px-2">Gross P&L</TableHead>}
-                {isColumnVisible('netPnl') && <TableHead className="px-2">Net P&L</TableHead>}
-                {isColumnVisible('realizedRMultiple') && <TableHead className="px-2">R Multiple</TableHead>}
-                {isColumnVisible('plannedRRR') && <TableHead className="px-2">Planned RR</TableHead>}
-                {isColumnVisible('farthestProfitTicks') && <TableHead className="px-2 text-right">Farthest Profit (Ticks)</TableHead>}
-                {isColumnVisible('farthestLossTicks') && <TableHead className="px-2 text-right">Farthest Loss (Ticks)</TableHead>}
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {paginatedTrades.map((trade) => {
-                const metrics = calculateTradeMetrics(trade);
-                const isSelected = selectedTrades.has(trade.id);
-                
-                return (
-                  <TableRow
-                    key={trade.id}
-                    onClick={() => handleRowClick(trade.id)}
-                    className={cn(
-                      "border-border hover:bg-secondary/30 cursor-pointer h-10",
-                      isSelected && "bg-secondary/50"
-                    )}
-                  >
-                    <TableCell className="w-8 px-2 py-1" onClick={(e) => e.stopPropagation()}>
-                      <Checkbox
-                        checked={isSelected}
-                        onCheckedChange={(checked) => {
-                          setSelectedTrades(prev => {
-                            const next = new Set(prev);
-                            if (checked) {
-                              next.add(trade.id);
-                            } else {
-                              next.delete(trade.id);
-                            }
-                            return next;
-                          });
-                        }}
-                        aria-label={`Select trade ${trade.symbol}`}
-                      />
+        <Table className="min-w-max" wrapperClassName="w-max min-w-max overflow-visible">
+          <TableHeader className="sticky top-0 bg-card z-10">
+            <TableRow className="border-border hover:bg-transparent">
+              <TableHead className="w-8 px-2">
+                <Checkbox
+                  checked={allSelected}
+                  onCheckedChange={handleSelectAll}
+                  aria-label="Select all trades on this page"
+                />
+              </TableHead>
+              {isColumnVisible('symbol') && <TableHead className="px-2">Symbol</TableHead>}
+              {isColumnVisible('side') && <TableHead className="px-2">Side</TableHead>}
+              {isColumnVisible('volume') && <TableHead className="px-2">Volume</TableHead>}
+              {isColumnVisible('ticksPips') && <TableHead className="px-2">Ticks/Pips</TableHead>}
+              {isColumnVisible('accountName') && <TableHead className="px-2">Account</TableHead>}
+              {isColumnVisible('openDateTime') && <TableHead className="px-2">Open Date / Time</TableHead>}
+              {isColumnVisible('closeDateTime') && <TableHead className="px-2">Close Date / Time</TableHead>}
+              {isColumnVisible('duration') && <TableHead className="px-2">Duration</TableHead>}
+              {isColumnVisible('avgEntry') && <TableHead className="px-2">Avg Entry</TableHead>}
+              {isColumnVisible('avgExit') && <TableHead className="px-2">Avg Exit</TableHead>}
+              {isColumnVisible('initialRisk') && <TableHead className="px-2">Stop Loss</TableHead>}
+              {isColumnVisible('initialTarget') && <TableHead className="px-2">Take Profit</TableHead>}
+              {isColumnVisible('grossPnl') && <TableHead className="px-2">Gross P&L</TableHead>}
+              {isColumnVisible('netPnl') && <TableHead className="px-2">Net P&L</TableHead>}
+              {isColumnVisible('realizedRMultiple') && <TableHead className="px-2">R Multiple</TableHead>}
+              {isColumnVisible('plannedRRR') && <TableHead className="px-2">Planned RR</TableHead>}
+              {isColumnVisible('farthestProfitTicks') && <TableHead className="px-2 text-right">Farthest Profit (Ticks)</TableHead>}
+              {isColumnVisible('farthestLossTicks') && <TableHead className="px-2 text-right">Farthest Loss (Ticks)</TableHead>}
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {paginatedTrades.map((trade) => {
+              const metrics = calculateTradeMetrics(trade);
+              const isSelected = selectedTrades.has(trade.id);
+
+              return (
+                <TableRow
+                  key={trade.id}
+                  onClick={() => handleRowClick(trade.id)}
+                  className={cn(
+                    "border-border hover:bg-secondary/30 cursor-pointer h-10",
+                    isSelected && "bg-secondary/50"
+                  )}
+                >
+                  <TableCell className="w-8 px-2 py-1" onClick={(e) => e.stopPropagation()}>
+                    <Checkbox
+                      checked={isSelected}
+                      onCheckedChange={(checked) => {
+                        setSelectedTrades(prev => {
+                          const next = new Set(prev);
+                          if (checked) {
+                            next.add(trade.id);
+                          } else {
+                            next.delete(trade.id);
+                          }
+                          return next;
+                        });
+                      }}
+                      aria-label={`Select trade ${trade.symbol}`}
+                    />
+                  </TableCell>
+
+                  {isColumnVisible('symbol') && (
+                    <TableCell className="font-semibold px-2 py-1">{trade.symbol}</TableCell>
+                  )}
+
+                  {isColumnVisible('side') && (
+                    <TableCell className="px-2 py-1">
+                      <div className={cn(
+                        "inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-xs font-medium",
+                        trade.side === 'LONG' ? "bg-profit/20 text-profit" : "bg-loss/20 text-loss"
+                      )}>
+                        {trade.side === 'LONG' ? (
+                          <ArrowUpRight className="w-3 h-3" />
+                        ) : (
+                          <ArrowDownRight className="w-3 h-3" />
+                        )}
+                        {trade.side}
+                      </div>
                     </TableCell>
-                    
-                    {isColumnVisible('symbol') && (
-                      <TableCell className="font-semibold px-2 py-1">{trade.symbol}</TableCell>
-                    )}
-                    
-                    {isColumnVisible('side') && (
-                      <TableCell className="px-2 py-1">
-                        <div className={cn(
-                          "inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-xs font-medium",
-                          trade.side === 'LONG' ? "bg-profit/20 text-profit" : "bg-loss/20 text-loss"
-                        )}>
-                          {trade.side === 'LONG' ? (
-                            <ArrowUpRight className="w-3 h-3" />
-                          ) : (
-                            <ArrowDownRight className="w-3 h-3" />
-                          )}
-                          {trade.side}
-                        </div>
-                      </TableCell>
-                    )}
-                    
-                    {isColumnVisible('volume') && (
-                      <TableCell className="font-mono px-2 py-1">{metrics.totalQuantity}</TableCell>
-                    )}
-                    
-                    {isColumnVisible('ticksPips') && (
-                      <TableCell className="text-muted-foreground px-2 py-1">—</TableCell>
-                    )}
-                    
-                    {isColumnVisible('accountName') && (
-                      <TableCell className="text-muted-foreground px-2 py-1">{trade.accountName || '—'}</TableCell>
-                    )}
-                    
-                    {isColumnVisible('openDateTime') && (
-                      <TableCell className="text-muted-foreground text-xs px-2 py-1">
-                        {metrics.openDate ? format(new Date(metrics.openDate), 'MMM dd, yyyy HH:mm') : '—'}
-                      </TableCell>
-                    )}
-                    
-                    {isColumnVisible('closeDateTime') && (
-                      <TableCell className="text-muted-foreground text-xs px-2 py-1">
-                        {metrics.closeDate ? format(new Date(metrics.closeDate), 'MMM dd, yyyy HH:mm') : '—'}
-                      </TableCell>
-                    )}
-                    
-                    {isColumnVisible('duration') && (
-                      <TableCell className="text-muted-foreground text-xs px-2 py-1">
-                        {formatDurationMinutes(metrics.duration)}
-                      </TableCell>
-                    )}
-                    
-                    {isColumnVisible('avgEntry') && (
-                      <TableCell className="font-mono px-2 py-1">
-                        {metrics.avgEntryPrice > 0 ? metrics.avgEntryPrice.toFixed(2) : '—'}
-                      </TableCell>
-                    )}
-                    
-                    {isColumnVisible('avgExit') && (
-                      <TableCell className="font-mono px-2 py-1">
-                        {metrics.avgExitPrice > 0 ? metrics.avgExitPrice.toFixed(2) : '—'}
-                      </TableCell>
-                    )}
-                    
-                    {isColumnVisible('initialRisk') && (
-                      <TableCell className="font-mono px-2 py-1">
-                        {trade.stopLoss !== undefined && trade.stopLoss !== null ? trade.stopLoss.toFixed(2) : '—'}
-                      </TableCell>
-                    )}
-                    
-                    {isColumnVisible('initialTarget') && (
-                      <TableCell className="font-mono px-2 py-1">
-                        {trade.takeProfit !== undefined && trade.takeProfit !== null ? trade.takeProfit.toFixed(2) : '—'}
-                      </TableCell>
-                    )}
-                    
-                    {isColumnVisible('grossPnl') && (
-                      <TableCell className={cn(
-                        "font-mono font-semibold px-2 py-1",
-                        isPrivacyMode ? "text-foreground" : metrics.grossPnl >= 0 ? "text-profit" : "text-loss"
-                      )}>
-                        {maskCurrency(metrics.grossPnl, formatCurrency)}
-                      </TableCell>
-                    )}
-                    
-                    {isColumnVisible('netPnl') && (
-                      <TableCell className={cn(
-                        "font-mono font-semibold px-2 py-1",
-                        isPrivacyMode ? "text-foreground" : metrics.netPnl >= 0 ? "text-profit" : "text-loss"
-                      )}>
-                        {maskCurrency(metrics.netPnl, formatCurrency)}
-                      </TableCell>
-                    )}
-                    
-                    {isColumnVisible('realizedRMultiple') && (() => {
-                      // Use savedRMultiple if meaningfully stored, otherwise compute from trade data
-                      let rMultiple: number | null = null;
-                      if (typeof trade.savedRMultiple === 'number' && trade.savedRMultiple !== 0) {
-                        rMultiple = trade.savedRMultiple;
-                      } else if (metrics.avgEntryPrice > 0 && metrics.avgExitPrice > 0 && trade.stopLoss && trade.stopLoss > 0) {
-                        const entry = metrics.avgEntryPrice;
-                        const exit = metrics.avgExitPrice;
-                        const sl = trade.stopLoss;
-                        const risk = trade.side === 'LONG' ? entry - sl : sl - entry;
-                        const realizedPnl = trade.side === 'LONG' ? exit - entry : entry - exit;
-                        if (risk > 0) rMultiple = realizedPnl / risk;
-                      }
-                      return (
+                  )}
+
+                  {isColumnVisible('volume') && (
+                    <TableCell className="font-mono px-2 py-1">{metrics.totalQuantity}</TableCell>
+                  )}
+
+                  {isColumnVisible('ticksPips') && (
+                    <TableCell className="text-muted-foreground px-2 py-1">—</TableCell>
+                  )}
+
+                  {isColumnVisible('accountName') && (
+                    <TableCell className="text-muted-foreground px-2 py-1">{trade.accountName || '—'}</TableCell>
+                  )}
+
+                  {isColumnVisible('openDateTime') && (
+                    <TableCell className="text-muted-foreground text-xs px-2 py-1">
+                      {metrics.openDate ? format(new Date(metrics.openDate), 'MMM dd, yyyy HH:mm') : '—'}
+                    </TableCell>
+                  )}
+
+                  {isColumnVisible('closeDateTime') && (
+                    <TableCell className="text-muted-foreground text-xs px-2 py-1">
+                      {metrics.closeDate ? format(new Date(metrics.closeDate), 'MMM dd, yyyy HH:mm') : '—'}
+                    </TableCell>
+                  )}
+
+                  {isColumnVisible('duration') && (
+                    <TableCell className="text-muted-foreground text-xs px-2 py-1">
+                      {formatDurationMinutes(metrics.duration)}
+                    </TableCell>
+                  )}
+
+                  {isColumnVisible('avgEntry') && (
+                    <TableCell className="font-mono px-2 py-1">
+                      {metrics.avgEntryPrice > 0 ? metrics.avgEntryPrice.toFixed(2) : '—'}
+                    </TableCell>
+                  )}
+
+                  {isColumnVisible('avgExit') && (
+                    <TableCell className="font-mono px-2 py-1">
+                      {metrics.avgExitPrice > 0 ? metrics.avgExitPrice.toFixed(2) : '—'}
+                    </TableCell>
+                  )}
+
+                  {isColumnVisible('initialRisk') && (
+                    <TableCell className="font-mono px-2 py-1">
+                      {trade.stopLoss !== undefined && trade.stopLoss !== null ? trade.stopLoss.toFixed(2) : '—'}
+                    </TableCell>
+                  )}
+
+                  {isColumnVisible('initialTarget') && (
+                    <TableCell className="font-mono px-2 py-1">
+                      {trade.takeProfit !== undefined && trade.takeProfit !== null ? trade.takeProfit.toFixed(2) : '—'}
+                    </TableCell>
+                  )}
+
+                  {isColumnVisible('grossPnl') && (
+                    <TableCell className={cn(
+                      "font-mono font-semibold px-2 py-1",
+                      isPrivacyMode ? "text-foreground" : metrics.grossPnl >= 0 ? "text-profit" : "text-loss"
+                    )}>
+                      {maskCurrency(metrics.grossPnl, formatCurrency)}
+                    </TableCell>
+                  )}
+
+                  {isColumnVisible('netPnl') && (
+                    <TableCell className={cn(
+                      "font-mono font-semibold px-2 py-1",
+                      isPrivacyMode ? "text-foreground" : metrics.netPnl >= 0 ? "text-profit" : "text-loss"
+                    )}>
+                      {maskCurrency(metrics.netPnl, formatCurrency)}
+                    </TableCell>
+                  )}
+
+                  {isColumnVisible('realizedRMultiple') && (() => {
+                    let rMultiple: number | null = null;
+                    if (typeof trade.savedRMultiple === 'number' && trade.savedRMultiple !== 0) {
+                      rMultiple = trade.savedRMultiple;
+                    } else if (metrics.avgEntryPrice > 0 && metrics.avgExitPrice > 0 && trade.stopLoss && trade.stopLoss > 0) {
+                      const entry = metrics.avgEntryPrice;
+                      const exit = metrics.avgExitPrice;
+                      const sl = trade.stopLoss;
+                      const risk = trade.side === 'LONG' ? entry - sl : sl - entry;
+                      const realizedPnl = trade.side === 'LONG' ? exit - entry : entry - exit;
+                      if (risk > 0) rMultiple = realizedPnl / risk;
+                    }
+
+                    return (
                       <TableCell className="font-mono px-2 py-1 text-foreground">
-                        {rMultiple !== null
-                          ? rMultiple.toFixed(2) 
-                          : '—'}
+                        {rMultiple !== null ? rMultiple.toFixed(2) : '—'}
                       </TableCell>
-                      );
-                    })()}
-                    
-                    {isColumnVisible('plannedRRR') && (
-                      <TableCell className="font-mono px-2 py-1 text-foreground">
-                        {typeof trade.savedRRR === 'number'
-                          ? trade.savedRRR.toFixed(2) 
-                          : '—'}
-                      </TableCell>
-                    )}
-                    {isColumnVisible('farthestProfitTicks') && (
-                      <TableCell className="font-mono text-right px-2 py-1">
-                        {typeof trade.mfeTickPip === 'number' ? trade.mfeTickPip : ''}
-                      </TableCell>
-                    )}
-                    {isColumnVisible('farthestLossTicks') && (
-                      <TableCell className="font-mono text-right px-2 py-1">
-                        {typeof trade.maeTickPip === 'number' ? trade.maeTickPip : ''}
-                      </TableCell>
-                    )}
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
-        </div>
-      </div>
-      {/* Sticky horizontal scrollbar at bottom */}
-      <div 
-        ref={scrollbarRef}
-        className="overflow-x-auto overflow-y-hidden scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent flex-shrink-0"
-        style={{ height: '12px' }}
-        onScroll={handleScrollbarScroll}
-      >
-        <div 
-          ref={scrollbarThumbRef}
-          style={{ height: '1px', width: scrollbarWidth > 0 ? `${scrollbarWidth}px` : '100%' }}
-        />
+                    );
+                  })()}
+
+                  {isColumnVisible('plannedRRR') && (
+                    <TableCell className="font-mono px-2 py-1 text-foreground">
+                      {typeof trade.savedRRR === 'number' ? trade.savedRRR.toFixed(2) : '—'}
+                    </TableCell>
+                  )}
+                  {isColumnVisible('farthestProfitTicks') && (
+                    <TableCell className="font-mono text-right px-2 py-1">
+                      {typeof trade.mfeTickPip === 'number' ? trade.mfeTickPip : ''}
+                    </TableCell>
+                  )}
+                  {isColumnVisible('farthestLossTicks') && (
+                    <TableCell className="font-mono text-right px-2 py-1">
+                      {typeof trade.maeTickPip === 'number' ? trade.maeTickPip : ''}
+                    </TableCell>
+                  )}
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
       </div>
     </div>
   );
