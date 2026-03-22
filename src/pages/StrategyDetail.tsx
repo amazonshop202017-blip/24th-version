@@ -97,16 +97,10 @@ const StrategyDetail = () => {
         <Button variant="ghost" size="icon" onClick={() => navigate('/strategies')}>
           <ArrowLeft className="w-5 h-5" />
         </Button>
-        <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center">
-            <Target className="w-6 h-6 text-primary" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">{strategy.name}</h1>
-            {strategy.description && (
-              <p className="text-muted-foreground text-sm">{strategy.description}</p>
-            )}
-          </div>
+        <div className="flex items-center gap-3"> 
+          {strategy.description && (
+            <p className="text-muted-foreground text-sm">{strategy.description}</p>
+          )}
         </div>
       </div>
 
