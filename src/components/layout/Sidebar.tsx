@@ -299,7 +299,13 @@ export const Sidebar = ({ isCollapsed, setIsCollapsed, isMobileOpen = false, onM
       {/* Bottom Account */}
       <div className="px-3 pb-3 mt-auto">
         <Separator className="bg-sidebar-border/50 mb-2" />
-        <SidebarAccountMenu isCollapsed={isCollapsed} />
+        <div className="relative rounded-xl overflow-hidden">
+          {/* Liquid glass effect background */}
+          <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-white/[0.08] to-white/[0.02] dark:from-white/[0.06] dark:to-white/[0.01] backdrop-blur-[2px] border border-white/[0.08] dark:border-white/[0.05] pointer-events-none" />
+          <div className="relative z-10">
+            <SidebarAccountMenu isCollapsed={isCollapsed} />
+          </div>
+        </div>
       </div>
     </aside>
   );
