@@ -43,6 +43,7 @@ interface SortableMetricProps {
   isEditMode: boolean;
   onRemove: (id: string) => void;
   children: ReactNode;
+  className?: string;
 }
 
 const SortableMetric = ({ id, isEditMode, onRemove, children }: SortableMetricProps) => {
