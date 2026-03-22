@@ -742,11 +742,11 @@ export const TradeModal = () => {
     <Sheet open={isOpen} onOpenChange={(open) => !open && handleDiscard()}>
       <SheetContent 
         side="right" 
-        className="w-full sm:max-w-[520px] p-0 flex flex-col bg-background border-l border-border overflow-hidden"
+          className="w-full sm:max-w-[520px] p-0 flex flex-col bg-background border-l border-border overflow-hidden overflow-x-hidden"
       >
         <TradeModalErrorBoundary>
         {/* Header */}
-        <SheetHeader className="px-6 py-4 border-b border-border flex-shrink-0">
+        <SheetHeader className="px-4 sm:px-6 py-4 border-b border-border flex-shrink-0">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Star className="w-5 h-5 text-muted-foreground" />
@@ -759,18 +759,18 @@ export const TradeModal = () => {
         </SheetHeader>
 
         {/* Tabs */}
-        <div className="px-6 pt-4 flex-shrink-0">
+        <div className="px-4 sm:px-6 pt-4 flex-shrink-0">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="w-full grid grid-cols-3 h-10 bg-muted/50">
               <TabsTrigger value="regular" className="text-sm">Regular Data</TabsTrigger>
-              <TabsTrigger value="advanced" className="text-sm">Advanced Data</TabsTrigger>
+              <TabsTrigger value="advanced" className="text-sm">Advanced</TabsTrigger>
               <TabsTrigger value="screenshots" className="text-sm">Screenshots</TabsTrigger>
             </TabsList>
           </Tabs>
         </div>
 
         {/* Scrollable Content */}
-        <div ref={scrollContainerRef} className="flex-1 overflow-y-auto px-6 py-4">
+        <div ref={scrollContainerRef} className="flex-1 overflow-y-auto overflow-x-hidden px-4 sm:px-6 py-4">
           {activeTab === 'regular' && (
             <div className="space-y-6">
               {/* General Trade Data Section */}
@@ -931,7 +931,7 @@ export const TradeModal = () => {
               </div>
 
               {/* Trade Entry & Exit Side by Side */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {/* Trade Entry */}
                 <div className="space-y-3">
                   <h4 className="text-sm font-medium text-foreground">Trade Entry</h4>
@@ -1133,7 +1133,7 @@ export const TradeModal = () => {
               {/* Trade Comments Section */}
               <div className="space-y-3">
                 <h4 className="text-sm font-medium text-foreground">Trade Comments</h4>
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <div className="space-y-1.5">
                     <Label className="text-xs text-muted-foreground">Entry Comments</Label>
                     <TypeableCombobox
@@ -1217,7 +1217,7 @@ export const TradeModal = () => {
               </div>
 
               {/* Price Level & Break Even Row */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {/* Price Reached First */}
                 <div className="space-y-1.5">
                   <div className="flex items-center gap-1">
@@ -1322,8 +1322,8 @@ export const TradeModal = () => {
         </div>
 
         {/* Sticky Footer */}
-        <div className="flex-shrink-0 border-t border-border px-6 py-4 bg-background">
-          <div className="flex items-center justify-between">
+        <div className="flex-shrink-0 border-t border-border px-4 sm:px-6 py-3 sm:py-4 bg-background">
+          <div className="flex items-center justify-between gap-2">
             {/* Left - Action Buttons */}
             <div className="flex items-center gap-2">
               <Button 
@@ -1343,7 +1343,7 @@ export const TradeModal = () => {
             </div>
 
             {/* Right - Summary Metrics */}
-            <div className="flex items-center gap-4 text-sm">
+            <div className="hidden sm:flex items-center gap-4 text-sm">
               <div className="text-center">
                 <p className="text-xs text-muted-foreground flex items-center gap-1">
                   <Clock className="w-3 h-3" /> Duration
