@@ -755,12 +755,6 @@ export const TradeModal = () => {
               </SheetTitle>
               <Settings2 className="w-4 h-4 text-muted-foreground" />
             </div>
-            <button
-              onClick={handleDiscard}
-              className="p-1.5 rounded-md hover:bg-muted/50 transition-colors"
-            >
-              <X className="w-5 h-5 text-muted-foreground" />
-            </button>
           </div>
         </SheetHeader>
 
