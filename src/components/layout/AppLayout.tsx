@@ -23,12 +23,16 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
         />
       )}
 
-      {/* Mobile hamburger */}
+      {/* Mobile hamburger / close toggle */}
       <button
         className="fixed top-3 left-3 z-50 md:hidden p-2 rounded-lg bg-card border border-border shadow-sm"
         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
       >
-        <Menu className="w-5 h-5 text-foreground" />
+        {isMobileMenuOpen ? (
+          <X className="w-5 h-5 text-foreground" />
+        ) : (
+          <Menu className="w-5 h-5 text-foreground" />
+        )}
       </button>
 
       <Sidebar

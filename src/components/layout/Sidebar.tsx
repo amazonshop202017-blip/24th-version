@@ -297,7 +297,7 @@ export const Sidebar = ({ isCollapsed, setIsCollapsed, isMobileOpen = false, onM
       </nav>
 
       {/* Bottom Account */}
-      <div className="px-3 pb-3 mt-auto">
+      <div className="px-3 pb-3 max-md:pb-8 mt-auto">
         <Separator className="bg-sidebar-border/50 mb-2" />
         <div className="relative rounded-xl overflow-hidden">
           {/* Liquid glass effect background */}
