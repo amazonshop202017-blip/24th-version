@@ -43,9 +43,10 @@ interface SortableMetricProps {
   isEditMode: boolean;
   onRemove: (id: string) => void;
   children: ReactNode;
+  className?: string;
 }
 
-const SortableMetric = ({ id, isEditMode, onRemove, children }: SortableMetricProps) => {
+const SortableMetric = ({ id, isEditMode, onRemove, children, className }: SortableMetricProps) => {
   const {
     attributes,
     listeners,
@@ -64,7 +65,7 @@ const SortableMetric = ({ id, isEditMode, onRemove, children }: SortableMetricPr
     <div
       ref={setNodeRef}
       style={style}
-      className={`relative ${isDragging ? 'z-50 opacity-90' : ''} ${isEditMode ? 'ring-2 ring-primary/20 ring-dashed rounded-xl' : ''}`}
+      className={`relative ${isDragging ? 'z-50 opacity-90' : ''} ${isEditMode ? 'ring-2 ring-primary/20 ring-dashed rounded-xl' : ''} ${className || ''}`}
     >
       {isEditMode && (
         <>
@@ -267,18 +268,16 @@ export const DashboardMetrics = ({ isEditMode }: DashboardMetricsProps) => {
     <>
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleMetricDragEnd}>
         <SortableContext items={metricsOrder} strategy={horizontalListSortingStrategy}>
-          <div className={`grid ${gridColsClass} gap-3`}>
+          <div className={`grid ${gridColsClass} gap-3 auto-rows-fr`}>
             {allItems.map((item, i) => {
               const isLast = i === allItems.length - 1;
-              const spanClass = isLast ? `${needsMdSpan ? 'md:col-span-2' : ''} ${needsLgSpan ? 'lg:col-span-2' : ''}` : '';
+              const spanClass = isLast ? `${needsMdSpan ? 'md:col-span-2' : ''} ${needsLgSpan ? 'lg:col-span-2' : ''}`.trim() : '';
               if (item.type === 'add') {
                 return <div key="__add__" className={spanClass}><AddWidgetPlaceholder onClick={() => setIsMetricsLibraryOpen(true)} /></div>;
               }
               return (
-                <SortableMetric key={item.metricId} id={item.metricId} isEditMode={isEditMode} onRemove={handleRemoveMetric}>
-                  <div className={spanClass}>
-                    {renderMetric(item.metricId, item.index)}
-                  </div>
+                <SortableMetric key={item.metricId} id={item.metricId} isEditMode={isEditMode} onRemove={handleRemoveMetric} className={spanClass}>
+                  {renderMetric(item.metricId, item.index)}
                 </SortableMetric>
               );
             })}
