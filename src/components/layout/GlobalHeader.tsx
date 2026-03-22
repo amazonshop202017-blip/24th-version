@@ -1198,19 +1198,19 @@ export const GlobalHeader = () => {
             </Button>
           </PopoverTrigger>
         <PopoverContent className="w-[800px] p-0 bg-popover border-border z-50" align="start">
+          {/* Selected range display */}
+          <div className="flex items-center justify-center gap-3 text-sm py-3 border-b border-border">
+            <span className="text-foreground font-medium">
+              {dateRange.from ? format(dateRange.from, 'MMMM dd, yyyy') : '—'}
+            </span>
+            <span className="text-muted-foreground">→</span>
+            <span className="text-foreground font-medium px-2 py-0.5 border border-primary rounded">
+              {dateRange.to ? format(dateRange.to, 'MMMM dd, yyyy') : '—'}
+            </span>
+          </div>
           <div className="flex">
-            {/* Selected range display */}
-            <div className="flex items-center justify-center gap-2 text-sm pb-2">
-              <span className="text-foreground font-medium">
-                {dateRange.from ? format(dateRange.from, 'MMMM dd, yyyy') : '—'}
-              </span>
-              <span className="text-muted-foreground">→</span>
-              <span className="text-foreground font-medium px-2 py-0.5 border border-primary rounded">
-                {dateRange.to ? format(dateRange.to, 'MMMM dd, yyyy') : '—'}
-              </span>
-            </div>
             {/* Calendar */}
-            <div className="border-r border-border">
+            <div className="p-3 border-r border-border">
               <Calendar
                 mode="range"
                 selected={{ from: dateRange.from, to: dateRange.to }}
