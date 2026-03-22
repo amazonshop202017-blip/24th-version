@@ -243,30 +243,45 @@ export const DashboardMetrics = ({ isEditMode }: DashboardMetricsProps) => {
     }
   };
 
-  // Dynamic grid: mobile 1 col (or 2 if even). md fits up to 3, lg fits up to 5.
-  // If count exceeds single-row capacity: use 2 cols if even, else 1 col.
+  // Dynamic grid logic:
+  // Mobile (<md): always 1 col
+  // md: fits up to 3 in one row. If more, use 2-col grid (last spans full if odd)
+  // lg: fits up to 5 in one row. If more, use 2-col grid (last spans full if odd)
   const count = metricsOrder.length + (isEditMode && metricsOrder.length < MAX_METRICS ? 1 : 0);
-  const isEven = count % 2 === 0;
-  const mobileClass = isEven && count > 1 ? 'grid-cols-2' : 'grid-cols-1';
   const mdColsMap: Record<number, string> = { 1: 'md:grid-cols-1', 2: 'md:grid-cols-2', 3: 'md:grid-cols-3' };
   const lgColsMap: Record<number, string> = { 1: 'lg:grid-cols-1', 2: 'lg:grid-cols-2', 3: 'lg:grid-cols-3', 4: 'lg:grid-cols-4', 5: 'lg:grid-cols-5' };
-  const mdClass = count <= 3 ? (mdColsMap[count] || 'md:grid-cols-1') : (isEven ? 'md:grid-cols-2' : 'md:grid-cols-1');
-  const lgClass = count <= 5 ? (lgColsMap[count] || 'lg:grid-cols-1') : 'lg:grid-cols-1';
-  const gridColsClass = `${mobileClass} ${mdClass} ${lgClass}`;
+  const mdClass = count <= 3 ? (mdColsMap[count] || 'md:grid-cols-1') : 'md:grid-cols-2';
+  const lgClass = count <= 5 ? (lgColsMap[count] || 'lg:grid-cols-1') : 'lg:grid-cols-2';
+  const gridColsClass = `grid-cols-1 ${mdClass} ${lgClass}`;
+
+  // For odd counts that exceed single-row capacity, last item spans full width
+  const needsMdSpan = count > 3 && count % 2 !== 0;
+  const needsLgSpan = count > 5 && count % 2 !== 0;
+
+  const allItems = [
+    ...metricsOrder.map((metricId, index) => ({ type: 'metric' as const, metricId, index })),
+    ...(isEditMode && metricsOrder.length < MAX_METRICS ? [{ type: 'add' as const, metricId: '__add__', index: metricsOrder.length }] : []),
+  ];
 
   return (
     <>
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleMetricDragEnd}>
         <SortableContext items={metricsOrder} strategy={horizontalListSortingStrategy}>
           <div className={`grid ${gridColsClass} gap-3`}>
-            {metricsOrder.map((metricId, index) => (
-              <SortableMetric key={metricId} id={metricId} isEditMode={isEditMode} onRemove={handleRemoveMetric}>
-                {renderMetric(metricId, index)}
-              </SortableMetric>
-            ))}
-            {isEditMode && metricsOrder.length < MAX_METRICS && (
-              <AddWidgetPlaceholder onClick={() => setIsMetricsLibraryOpen(true)} />
-            )}
+            {allItems.map((item, i) => {
+              const isLast = i === allItems.length - 1;
+              const spanClass = isLast ? `${needsMdSpan ? 'md:col-span-2' : ''} ${needsLgSpan ? 'lg:col-span-2' : ''}` : '';
+              if (item.type === 'add') {
+                return <div key="__add__" className={spanClass}><AddWidgetPlaceholder onClick={() => setIsMetricsLibraryOpen(true)} /></div>;
+              }
+              return (
+                <SortableMetric key={item.metricId} id={item.metricId} isEditMode={isEditMode} onRemove={handleRemoveMetric}>
+                  <div className={spanClass}>
+                    {renderMetric(item.metricId, item.index)}
+                  </div>
+                </SortableMetric>
+              );
+            })}
           </div>
         </SortableContext>
       </DndContext>
