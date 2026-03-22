@@ -46,7 +46,7 @@ interface SortableMetricProps {
   className?: string;
 }
 
-const SortableMetric = ({ id, isEditMode, onRemove, children }: SortableMetricProps) => {
+const SortableMetric = ({ id, isEditMode, onRemove, children, className }: SortableMetricProps) => {
   const {
     attributes,
     listeners,
@@ -65,7 +65,7 @@ const SortableMetric = ({ id, isEditMode, onRemove, children }: SortableMetricPr
     <div
       ref={setNodeRef}
       style={style}
-      className={`relative ${isDragging ? 'z-50 opacity-90' : ''} ${isEditMode ? 'ring-2 ring-primary/20 ring-dashed rounded-xl' : ''}`}
+      className={`relative ${isDragging ? 'z-50 opacity-90' : ''} ${isEditMode ? 'ring-2 ring-primary/20 ring-dashed rounded-xl' : ''} ${className || ''}`}
     >
       {isEditMode && (
         <>
