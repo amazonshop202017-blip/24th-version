@@ -113,7 +113,7 @@ export const CurrentStreakMetric = () => {
     const textColor = type === 'win' ? 'text-profit' : type === 'loss' ? 'text-loss' : 'text-muted-foreground';
     
     return (
-      <div className="relative w-10 h-10">
+      <div className="relative w-8 h-8 sm:w-10 sm:h-10 flex-shrink-0">
         <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
           <circle
             cx="18"
@@ -134,7 +134,7 @@ export const CurrentStreakMetric = () => {
             strokeLinecap="round"
           />
         </svg>
-        <span className={`absolute inset-0 flex items-center justify-center text-sm font-bold ${textColor}`}>
+        <span className={`absolute inset-0 flex items-center justify-center text-xs sm:text-sm font-bold ${textColor}`}>
           {value}
         </span>
       </div>
@@ -143,24 +143,24 @@ export const CurrentStreakMetric = () => {
 
   return (
     <div className="h-full flex flex-col">
-      <div className="flex items-center gap-1.5 mb-3">
+      <div className="flex items-center gap-1.5 mb-2 sm:mb-3">
         <span className="text-xs text-muted-foreground">Current streak</span>
         <span className="text-muted-foreground/50 cursor-help" title="Shows current, best, and worst streaks">
           <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" strokeWidth="1.5"/><text x="8" y="12" textAnchor="middle" fontSize="10" fill="currentColor">i</text></svg>
         </span>
       </div>
       
-      <div className="flex-1 grid grid-cols-2 gap-4">
+      <div className="flex-1 grid grid-cols-2 gap-2 sm:gap-4">
         {/* Days Column */}
-        <div className="flex flex-col items-center gap-1">
-          <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Days</span>
-          <div className="flex items-center gap-2 mt-1">
+        <div className="flex flex-col items-center gap-0.5 sm:gap-1 min-w-0">
+          <span className="text-[9px] sm:text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Days</span>
+          <div className="flex items-center gap-1.5 sm:gap-2 mt-0.5 sm:mt-1">
             <StreakCircle value={dayStreaks.currentStreak} type={dayStreaks.currentStreakType} />
-            <div className="flex flex-col gap-1">
-              <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-profit/15 text-profit font-medium whitespace-nowrap">
+            <div className="flex flex-col gap-0.5 sm:gap-1 min-w-0">
+              <span className="text-[8px] sm:text-[9px] px-1 sm:px-1.5 py-0.5 rounded-full bg-profit/15 text-profit font-medium whitespace-nowrap truncate">
                 {dayStreaks.bestWinStreak} {dayStreaks.bestWinStreak === 1 ? 'day' : 'days'}
               </span>
-              <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-loss/15 text-loss font-medium whitespace-nowrap">
+              <span className="text-[8px] sm:text-[9px] px-1 sm:px-1.5 py-0.5 rounded-full bg-loss/15 text-loss font-medium whitespace-nowrap truncate">
                 {dayStreaks.worstLossStreak} {dayStreaks.worstLossStreak === 1 ? 'day' : 'days'}
               </span>
             </div>
@@ -168,15 +168,15 @@ export const CurrentStreakMetric = () => {
         </div>
 
         {/* Trades Column */}
-        <div className="flex flex-col items-center gap-1">
-          <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Trades</span>
-          <div className="flex items-center gap-2 mt-1">
+        <div className="flex flex-col items-center gap-0.5 sm:gap-1 min-w-0">
+          <span className="text-[9px] sm:text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Trades</span>
+          <div className="flex items-center gap-1.5 sm:gap-2 mt-0.5 sm:mt-1">
             <StreakCircle value={tradeStreaks.currentStreak} type={tradeStreaks.currentStreakType} />
-            <div className="flex flex-col gap-1">
-              <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-profit/15 text-profit font-medium whitespace-nowrap">
+            <div className="flex flex-col gap-0.5 sm:gap-1 min-w-0">
+              <span className="text-[8px] sm:text-[9px] px-1 sm:px-1.5 py-0.5 rounded-full bg-profit/15 text-profit font-medium whitespace-nowrap truncate">
                 {tradeStreaks.bestWinStreak} {tradeStreaks.bestWinStreak === 1 ? 'trade' : 'trades'}
               </span>
-              <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-loss/15 text-loss font-medium whitespace-nowrap">
+              <span className="text-[8px] sm:text-[9px] px-1 sm:px-1.5 py-0.5 rounded-full bg-loss/15 text-loss font-medium whitespace-nowrap truncate">
                 {tradeStreaks.worstLossStreak} {tradeStreaks.worstLossStreak === 1 ? 'trade' : 'trades'}
               </span>
             </div>
