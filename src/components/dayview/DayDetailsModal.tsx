@@ -132,42 +132,44 @@ export const DayDetailsModal = ({ isOpen, onClose, date, trades }: DayDetailsMod
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-          <div className="flex items-center gap-3">
-            <DialogTitle className="text-lg font-semibold">{formattedDate}</DialogTitle>
-            <span className="text-muted-foreground">•</span>
-            <span className={cn('font-semibold', isPrivacyMode ? 'text-foreground' : isProfit ? 'text-profit' : 'text-loss')}>
-              Net P&L {maskCurrency(dayStats.netPnl, formatCurrency)}
-            </span>
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto w-[95vw] sm:w-auto p-4 sm:p-6">
+        <DialogHeader className="flex flex-col sm:flex-row sm:items-center justify-between space-y-2 sm:space-y-0 pb-3 sm:pb-4">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3">
+            <DialogTitle className="text-base sm:text-lg font-semibold">{formattedDate}</DialogTitle>
+            <div className="flex items-center gap-2">
+              <span className="hidden sm:inline text-muted-foreground">•</span>
+              <span className={cn('text-sm sm:text-base font-semibold', isPrivacyMode ? 'text-foreground' : isProfit ? 'text-profit' : 'text-loss')}>
+                Net P&L {maskCurrency(dayStats.netPnl, formatCurrency)}
+              </span>
+            </div>
           </div>
           <div className="flex items-center gap-2">
             <Button
               variant="outline"
               size="sm"
-              className="gap-2"
+              className="gap-1.5 text-xs sm:text-sm"
               onClick={handleAddTrade}
             >
-              <Plus className="w-4 h-4" />
+              <Plus className="w-3.5 h-3.5" />
               Add Trade
             </Button>
             <Button
               variant="default"
               size="sm"
-              className="gap-2"
+              className="gap-1.5 text-xs sm:text-sm"
               onClick={handleAddNote}
             >
-              <FileText className="w-4 h-4" />
+              <FileText className="w-3.5 h-3.5" />
               Add note
             </Button>
           </div>
         </DialogHeader>
 
-        {/* Main Content - Day Card Style */}
-        <div className="space-y-5">
+        {/* Main Content */}
+        <div className="space-y-4 sm:space-y-5">
           {trades.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-40 border border-dashed border-border rounded-xl gap-3">
-              <p className="text-muted-foreground">No trades on this day</p>
+            <div className="flex flex-col items-center justify-center h-32 sm:h-40 border border-dashed border-border rounded-xl gap-3">
+              <p className="text-muted-foreground text-sm">No trades on this day</p>
               <Button
                 variant="default"
                 size="sm"
@@ -180,53 +182,50 @@ export const DayDetailsModal = ({ isOpen, onClose, date, trades }: DayDetailsMod
             </div>
           ) : (
             <>
-              {/* Chart and Metrics */}
-              <div className="flex gap-6">
+              {/* Chart and Metrics - stack on mobile */}
+              <div className="flex flex-col md:flex-row gap-4 md:gap-6">
                 {/* Chart Section */}
-                <div className="w-[300px] h-[140px] flex-shrink-0">
+                <div className="w-full md:w-[300px] h-[120px] md:h-[140px] flex-shrink-0">
                   <IntradayPnLChart trades={trades} />
                 </div>
 
                 {/* Metrics Section */}
-                <div className="flex-1 grid grid-cols-4 gap-x-6 gap-y-4">
-                  {/* Row 1 */}
+                <div className="flex-1 grid grid-cols-2 sm:grid-cols-4 gap-x-4 sm:gap-x-6 gap-y-3 sm:gap-y-4">
                   <div>
-                    <p className="text-xs text-muted-foreground mb-1">Total Trades</p>
-                    <p className="text-lg font-semibold text-foreground">{dayStats.totalTrades}</p>
+                    <p className="text-[11px] sm:text-xs text-muted-foreground mb-0.5">Total Trades</p>
+                    <p className="text-base sm:text-lg font-semibold text-foreground">{dayStats.totalTrades}</p>
                   </div>
                   <div>
-                    <p className="text-xs text-muted-foreground mb-1">Winners</p>
-                    <p className="text-lg font-semibold text-foreground">{dayStats.winners}</p>
+                    <p className="text-[11px] sm:text-xs text-muted-foreground mb-0.5">Winners</p>
+                    <p className="text-base sm:text-lg font-semibold text-foreground">{dayStats.winners}</p>
                   </div>
                   <div>
-                    <p className="text-xs text-muted-foreground mb-1">Gross P&L</p>
-                    <p className={cn('text-lg font-semibold', isPrivacyMode ? 'text-foreground' : isProfit ? 'text-profit' : 'text-loss')}>
+                    <p className="text-[11px] sm:text-xs text-muted-foreground mb-0.5">Gross P&L</p>
+                    <p className={cn('text-base sm:text-lg font-semibold', isPrivacyMode ? 'text-foreground' : isProfit ? 'text-profit' : 'text-loss')}>
                       {maskCurrency(dayStats.grossPnl, formatCurrency)}
                     </p>
                   </div>
                   <div>
-                    <p className="text-xs text-muted-foreground mb-1">Commissions</p>
-                    <p className="text-lg font-semibold text-foreground">
+                    <p className="text-[11px] sm:text-xs text-muted-foreground mb-0.5">Commissions</p>
+                    <p className="text-base sm:text-lg font-semibold text-foreground">
                       {maskCurrency(dayStats.totalCommissions, (v) => formatCurrency(v, false))}
                     </p>
                   </div>
-
-                  {/* Row 2 */}
                   <div>
-                    <p className="text-xs text-muted-foreground mb-1">Winrate</p>
-                    <p className="text-lg font-semibold text-foreground">{winRate.toFixed(0)}%</p>
+                    <p className="text-[11px] sm:text-xs text-muted-foreground mb-0.5">Winrate</p>
+                    <p className="text-base sm:text-lg font-semibold text-foreground">{winRate.toFixed(0)}%</p>
                   </div>
                   <div>
-                    <p className="text-xs text-muted-foreground mb-1">Losers</p>
-                    <p className="text-lg font-semibold text-foreground">{dayStats.losers}</p>
+                    <p className="text-[11px] sm:text-xs text-muted-foreground mb-0.5">Losers</p>
+                    <p className="text-base sm:text-lg font-semibold text-foreground">{dayStats.losers}</p>
                   </div>
                   <div>
-                    <p className="text-xs text-muted-foreground mb-1">Volume</p>
-                    <p className="text-lg font-semibold text-foreground">{dayStats.totalQuantity.toFixed(2)}</p>
+                    <p className="text-[11px] sm:text-xs text-muted-foreground mb-0.5">Volume</p>
+                    <p className="text-base sm:text-lg font-semibold text-foreground">{dayStats.totalQuantity.toFixed(2)}</p>
                   </div>
                   <div>
-                    <p className="text-xs text-muted-foreground mb-1">Avg Duration</p>
-                    <p className="text-lg font-semibold text-foreground">
+                    <p className="text-[11px] sm:text-xs text-muted-foreground mb-0.5">Avg Duration</p>
+                    <p className="text-base sm:text-lg font-semibold text-foreground">
                       {formatDuration(avgDurationMinutes)}
                     </p>
                   </div>
@@ -234,7 +233,7 @@ export const DayDetailsModal = ({ isOpen, onClose, date, trades }: DayDetailsMod
               </div>
 
               {/* Trades Table */}
-              <div className="pt-4 border-t border-border">
+              <div className="pt-3 sm:pt-4 border-t border-border overflow-x-auto">
                 <DayTradesTable trades={trades} />
               </div>
             </>
@@ -242,11 +241,11 @@ export const DayDetailsModal = ({ isOpen, onClose, date, trades }: DayDetailsMod
         </div>
 
         {/* Footer Actions */}
-        <div className="flex justify-end gap-3 pt-4 border-t border-border">
-          <Button variant="outline" onClick={onClose}>
+        <div className="flex justify-end gap-2 sm:gap-3 pt-3 sm:pt-4 border-t border-border">
+          <Button variant="outline" size="sm" className="sm:size-default" onClick={onClose}>
             Cancel
           </Button>
-          <Button onClick={handleViewDetails}>
+          <Button size="sm" className="sm:size-default" onClick={handleViewDetails}>
             View Details
           </Button>
         </div>
