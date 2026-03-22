@@ -491,12 +491,9 @@ export const GlobalHeader = () => {
           </div>
           {/* Calendar - scrollable */}
           <div className="flex-1 overflow-y-auto flex justify-center pt-1">
-            <Calendar
-              mode="range"
+            <DateRangeCalendar
               selected={{ from: dateRange.from, to: dateRange.to }}
               onSelect={handleCustomDateChange}
-              numberOfMonths={2}
-              className="pointer-events-auto"
             />
           </div>
         </SheetContent>
