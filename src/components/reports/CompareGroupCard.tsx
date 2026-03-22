@@ -111,12 +111,12 @@ export const CompareGroupCard = ({ groupNumber, filters, onFiltersChange }: Comp
   );
 
   return (
-    <div className="bg-card border border-border rounded-xl p-6 flex-1">
-      <h3 className="text-lg font-semibold mb-6">
+    <div className="bg-card border border-border rounded-xl p-4 sm:p-6">
+      <h3 className="text-base sm:text-lg font-semibold mb-4 sm:mb-6">
         Group #{groupNumber} ({matchedCount} Trades Matched)
       </h3>
       
-      <div className="grid grid-cols-2 gap-x-8 gap-y-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 sm:gap-x-8 gap-y-4">
         {/* Left Column */}
         <div className="space-y-4">
           {/* Symbol */}

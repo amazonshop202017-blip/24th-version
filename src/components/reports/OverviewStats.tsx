@@ -438,24 +438,24 @@ const OverviewStats = () => {
         </div>
         <p className="text-xs text-muted-foreground mb-6">{getDateLabel()}</p>
 
-        <div className="flex gap-12">
+        <div className="flex flex-col sm:flex-row gap-6 sm:gap-12">
           <div>
             <p className="text-xs text-muted-foreground mb-1">Best month</p>
-            <p className="text-xl font-semibold">{stats.bestMonth ? privacyFormatCurrency(stats.bestMonth.pnl) : 'N/A'}</p>
+            <p className="text-lg sm:text-xl font-semibold">{stats.bestMonth ? privacyFormatCurrency(stats.bestMonth.pnl) : 'N/A'}</p>
             <p className="text-xs text-muted-foreground">
               {stats.bestMonth ? `in ${formatMonth(stats.bestMonth.month)}` : ''}
             </p>
           </div>
           <div>
             <p className="text-xs text-muted-foreground mb-1">Lowest month</p>
-            <p className="text-xl font-semibold">{stats.lowestMonth ? privacyFormatCurrency(stats.lowestMonth.pnl) : 'N/A'}</p>
+            <p className="text-lg sm:text-xl font-semibold">{stats.lowestMonth ? privacyFormatCurrency(stats.lowestMonth.pnl) : 'N/A'}</p>
             <p className="text-xs text-muted-foreground">
               {stats.lowestMonth ? `in ${formatMonth(stats.lowestMonth.month)}` : ''}
             </p>
           </div>
           <div>
             <p className="text-xs text-muted-foreground mb-1">Average</p>
-            <p className="text-xl font-semibold">{privacyFormatCurrency(stats.avgPerMonth)}</p>
+            <p className="text-lg sm:text-xl font-semibold">{privacyFormatCurrency(stats.avgPerMonth)}</p>
             <p className="text-xs text-muted-foreground">per Month</p>
           </div>
         </div>
@@ -463,7 +463,7 @@ const OverviewStats = () => {
 
       {/* Stats Table */}
       <div className="glass-card rounded-xl overflow-hidden">
-        <div className="grid grid-cols-2 divide-x divide-border">
+        <div className="grid grid-cols-1 md:grid-cols-2 md:divide-x divide-border">
           {/* Left Column */}
           <div className="divide-y divide-border">
             {leftColumnStats.map((stat, index) => (
@@ -473,21 +473,21 @@ const OverviewStats = () => {
                   stat.highlight ? 'border-l-2 border-l-primary' : ''
                 }`}
               >
-                <span className="text-sm text-muted-foreground">{stat.label}</span>
-                <span className="text-sm font-medium">{stat.value}</span>
+                <span className="text-xs sm:text-sm text-muted-foreground">{stat.label}</span>
+                <span className="text-xs sm:text-sm font-medium">{stat.value}</span>
               </div>
             ))}
           </div>
 
           {/* Right Column */}
-          <div className="divide-y divide-border">
+          <div className="divide-y divide-border border-t md:border-t-0 border-border">
             {rightColumnStats.map((stat) => (
               <div
                 key={stat.label}
                 className="flex items-center justify-between px-4 py-3"
               >
-                <span className="text-sm text-muted-foreground">{stat.label}</span>
-                <span className="text-sm font-medium">{stat.value}</span>
+                <span className="text-xs sm:text-sm text-muted-foreground">{stat.label}</span>
+                <span className="text-xs sm:text-sm font-medium">{stat.value}</span>
               </div>
             ))}
           </div>

@@ -39,7 +39,7 @@ export const CompareView = ({ onGenerateReport }: CompareViewProps) => {
   return (
     <div className="space-y-6">
       {/* Two Group Cards Side by Side */}
-      <div className="flex gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
         <CompareGroupCard
           groupNumber={1}
           filters={group1Filters}

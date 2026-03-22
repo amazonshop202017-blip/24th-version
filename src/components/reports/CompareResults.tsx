@@ -38,42 +38,30 @@ export const CompareResults = ({ group1Filters, group2Filters }: CompareResultsP
 
   return (
     <div className="space-y-6">
-      {/* Statistics Tables - Side by Side */}
-      <div className="flex gap-6">
-        <div className="flex-1">
-          <CompareStatisticsTable groupNumber={1} stats={group1Stats} />
-        </div>
-        <div className="flex-1">
-          <CompareStatisticsTable groupNumber={2} stats={group2Stats} />
-        </div>
+      {/* Statistics Tables */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
+        <CompareStatisticsTable groupNumber={1} stats={group1Stats} />
+        <CompareStatisticsTable groupNumber={2} stats={group2Stats} />
       </div>
 
-      {/* Overall Evaluation - Side by Side */}
-      <div className="flex gap-6">
-        <div className="flex-1">
-          <CompareOverallEvaluation groupNumber={1} stats={group1Stats} />
-        </div>
-        <div className="flex-1">
-          <CompareOverallEvaluation groupNumber={2} stats={group2Stats} />
-        </div>
+      {/* Overall Evaluation */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
+        <CompareOverallEvaluation groupNumber={1} stats={group1Stats} />
+        <CompareOverallEvaluation groupNumber={2} stats={group2Stats} />
       </div>
 
-      {/* Daily Cumulative P&L Charts - Side by Side */}
-      <div className="flex gap-6">
-        <div className="flex-1">
-          <CompareCumulativePnLChart 
-            groupNumber={1} 
-            data={group1PnLData} 
-            dateRangeLabel={group1Stats.dateRangeLabel}
-          />
-        </div>
-        <div className="flex-1">
-          <CompareCumulativePnLChart 
-            groupNumber={2} 
-            data={group2PnLData} 
-            dateRangeLabel={group2Stats.dateRangeLabel}
-          />
-        </div>
+      {/* Daily Cumulative P&L Charts */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
+        <CompareCumulativePnLChart 
+          groupNumber={1} 
+          data={group1PnLData} 
+          dateRangeLabel={group1Stats.dateRangeLabel}
+        />
+        <CompareCumulativePnLChart 
+          groupNumber={2} 
+          data={group2PnLData} 
+          dateRangeLabel={group2Stats.dateRangeLabel}
+        />
       </div>
     </div>
   );
