@@ -349,8 +349,8 @@ export const MonthlyPerformanceCalendar = () => {
                             </div>
                           )}
                           {displaySettings.winRate && (
-                            <div className="text-[8px] md:text-[10px] text-muted-foreground hidden sm:block">
-                              {stats.winRate.toFixed(1)}%
+                            <div className="text-[8px] md:text-[10px] text-muted-foreground">
+                              {stats.winRate.toFixed(0)}%
                             </div>
                           )}
                           {displaySettings.rMultiple && (
