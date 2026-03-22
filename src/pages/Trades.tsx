@@ -140,7 +140,7 @@ const TableWithStickyHorizontalScroll = ({
           ref={tableContentRef}
           className="min-w-max"
         >
-          <Table className="min-w-max">
+          <Table className="min-w-max" wrapperClassName="overflow-visible">
             <TableHeader className="sticky top-0 bg-card z-10">
               <TableRow className="border-border hover:bg-transparent">
                 <TableHead className="w-8 px-2">
