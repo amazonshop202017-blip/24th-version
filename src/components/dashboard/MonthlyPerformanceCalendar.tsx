@@ -231,15 +231,13 @@ export const MonthlyPerformanceCalendar = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4 md:mb-6">
         <div className="flex items-center gap-2 md:gap-3">
-          <Button variant="ghost" size="icon" onClick={handlePrevMonth} className="h-7 w-7 md:h-8 md:w-8">
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          <h2 className="text-sm md:text-lg font-semibold min-w-[120px] md:min-w-[140px] text-center">
-            {format(currentMonth, 'MMMM yyyy')}
-          </h2>
-          <Button variant="ghost" size="icon" onClick={handleNextMonth} className="h-7 w-7 md:h-8 md:w-8">
-            <ChevronRight className="h-4 w-4" />
-          </Button>
+           <Button variant="ghost" size="icon" onClick={handlePrevMonth} className="h-7 w-7 md:h-8 md:w-8">
+             <ChevronLeft className="h-4 w-4" />
+           </Button>
+           <MonthYearDropdowns month={currentMonth} onChange={setCurrentMonth} />
+           <Button variant="ghost" size="icon" onClick={handleNextMonth} className="h-7 w-7 md:h-8 md:w-8">
+             <ChevronRight className="h-4 w-4" />
+           </Button>
           <Button variant="outline" size="sm" onClick={handleThisMonth} className="text-xs h-7">
             This month
           </Button>
