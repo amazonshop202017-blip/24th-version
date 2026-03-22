@@ -458,52 +458,46 @@ export const GlobalHeader = () => {
 
       {/* Date Range Sheet */}
       <Sheet open={mobileDateSheetOpen} onOpenChange={setMobileDateSheetOpen}>
-        <SheetContent side="bottom" className="max-h-[85vh] overflow-auto">
-          <SheetHeader className="flex flex-row items-center justify-between pb-3 border-b border-border sticky top-0 bg-background z-10">
+        <SheetContent side="bottom" className="max-h-[85vh] flex flex-col overflow-hidden">
+          <SheetHeader className="pb-3 border-b border-border flex-shrink-0">
             <SheetTitle className="text-base font-semibold">Date Range</SheetTitle>
-            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setMobileDateSheetOpen(false)}>
-              <X className="w-4 h-4" />
-            </Button>
           </SheetHeader>
-          <div className="space-y-3 pt-3">
-            {/* Presets */}
-            <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2 pt-3 flex-shrink-0">
+            <button
+              onClick={() => { applyDatePreset('all'); setMobileDateSheetOpen(false); }}
+              className={cn("px-3 py-1.5 text-sm rounded-md border border-border transition-colors", datePreset === 'all' && "bg-primary text-primary-foreground border-primary")}
+            >
+              All time
+            </button>
+            {DATE_PRESETS.map((preset) => (
               <button
-                onClick={() => { applyDatePreset('all'); setMobileDateSheetOpen(false); }}
-                className={cn("px-3 py-1.5 text-sm rounded-md border border-border transition-colors", datePreset === 'all' && "bg-primary text-primary-foreground border-primary")}
+                key={preset.value}
+                onClick={() => { handlePresetClick(preset.value); setMobileDateSheetOpen(false); }}
+                className={cn("px-3 py-1.5 text-sm rounded-md border border-border transition-colors", datePreset === preset.value && "bg-primary text-primary-foreground border-primary")}
               >
-                All time
+                {preset.label}
               </button>
-              {DATE_PRESETS.map((preset) => (
-                <button
-                  key={preset.value}
-                  onClick={() => { handlePresetClick(preset.value); setMobileDateSheetOpen(false); }}
-                  className={cn("px-3 py-1.5 text-sm rounded-md border border-border transition-colors", datePreset === preset.value && "bg-primary text-primary-foreground border-primary")}
-                >
-                  {preset.label}
-                </button>
-              ))}
-            </div>
-            {/* Selected range display */}
-            <div className="flex items-center justify-center gap-2 text-sm py-2">
-              <span className="text-foreground font-medium">
-                {dateRange.from ? format(dateRange.from, 'MMMM dd, yyyy') : '—'}
-              </span>
-              <span className="text-muted-foreground">→</span>
-              <span className="text-foreground font-medium px-2 py-0.5 border border-primary rounded">
-                {dateRange.to ? format(dateRange.to, 'MMMM dd, yyyy') : '—'}
-              </span>
-            </div>
-            {/* Calendar */}
-            <div className="flex justify-center">
-              <Calendar
-                mode="range"
-                selected={{ from: dateRange.from, to: dateRange.to }}
-                onSelect={handleCustomDateChange}
-                numberOfMonths={2}
-                className="pointer-events-auto"
-              />
-            </div>
+            ))}
+          </div>
+          {/* Selected range display */}
+          <div className="flex items-center justify-center gap-2 text-sm py-2 flex-shrink-0">
+            <span className="text-foreground font-medium">
+              {dateRange.from ? format(dateRange.from, 'MMMM dd, yyyy') : '—'}
+            </span>
+            <span className="text-muted-foreground">→</span>
+            <span className="text-foreground font-medium px-2 py-0.5 border border-primary rounded">
+              {dateRange.to ? format(dateRange.to, 'MMMM dd, yyyy') : '—'}
+            </span>
+          </div>
+          {/* Calendar - scrollable */}
+          <div className="flex-1 overflow-y-auto flex justify-center pt-1">
+            <Calendar
+              mode="range"
+              selected={{ from: dateRange.from, to: dateRange.to }}
+              onSelect={handleCustomDateChange}
+              numberOfMonths={2}
+              className="pointer-events-auto"
+            />
           </div>
         </SheetContent>
       </Sheet>
