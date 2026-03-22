@@ -7,7 +7,6 @@ import { useChartDisplayMode, ChartDisplayType, getDisplayLabel } from '@/hooks/
 import { calculateTradeMetrics, Trade } from '@/types/trade';
 import { parseISO } from 'date-fns';
 import { motion } from 'framer-motion';
-import { PageHeader } from '@/components/layout/PageHeader';
 import {
   ComposedChart,
   Bar,
@@ -312,11 +311,7 @@ const ConsecutiveWinnersLosers = () => {
 
   if (!stats || filteredTrades.length === 0) {
     return (
-      <div className="space-y-6">
-        <div className="flex items-center gap-3">
-          <PageHeader title="Consecutive Winners/Losers" tooltip="Track your winning and losing streaks to understand momentum patterns." />
-        </div>
-        <div className="flex items-center justify-center h-64 border border-dashed border-border rounded-xl">
+      <div className="space-y-6">        <div className="flex items-center justify-center h-64 border border-dashed border-border rounded-xl">
           <p className="text-muted-foreground">No trades found for the selected filters</p>
         </div>
       </div>
@@ -325,11 +320,6 @@ const ConsecutiveWinnersLosers = () => {
 
   return (
     <div className="space-y-6">
-      {/* Page Header */}
-      <div className="flex items-center gap-3">
-        <PageHeader title="Consecutive Winners/Losers" tooltip="Track your winning and losing streaks to understand momentum patterns." />
-      </div>
-
       {/* Stats Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <motion.div

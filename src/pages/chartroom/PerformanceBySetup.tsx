@@ -5,7 +5,6 @@ import { useAccountsContext } from '@/contexts/AccountsContext';
 import { usePrivacyMode, PRIVACY_MASK } from '@/hooks/usePrivacyMode';
 import { calculateTradeMetrics, Trade } from '@/types/trade';
 import { useStrategiesContext } from '@/contexts/StrategiesContext';
-import { PageHeader } from '@/components/layout/PageHeader';
 import {
   BarChart,
   Bar,
@@ -287,7 +286,6 @@ const PerformanceBySetup = () => {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Performance by Setup" tooltip="See which setups are profitable and which are costing you money." />
 
       {/* Side-by-side Comparison Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">

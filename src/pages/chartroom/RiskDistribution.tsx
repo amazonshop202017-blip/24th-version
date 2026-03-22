@@ -2,7 +2,6 @@ import { useMemo, useState } from 'react';
 import { useFilteredTrades } from '@/hooks/useFilteredTrades';
 import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
 import { calculateTradeMetrics } from '@/types/trade';
-import { PageHeader } from '@/components/layout/PageHeader';
 import {
   BarChart,
   Bar,
@@ -329,7 +328,6 @@ const RiskDistribution = () => {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Risk Distribution" tooltip="Understand how your trade outcomes spread across risk ranges to spot outliers." />
 
       {/* Controls */}
       <div className="flex flex-wrap items-center gap-4">

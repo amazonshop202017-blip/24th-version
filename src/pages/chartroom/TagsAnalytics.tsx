@@ -6,7 +6,6 @@ import { useTagsContext } from '@/contexts/TagsContext';
 import { useCategoriesContext } from '@/contexts/CategoriesContext';
 import { usePrivacyMode, PRIVACY_MASK } from '@/hooks/usePrivacyMode';
 import { calculateTradeMetrics, Trade } from '@/types/trade';
-import { PageHeader } from '@/components/layout/PageHeader';
 import { Card, CardContent } from '@/components/ui/card';
 import {
   Table,
@@ -336,7 +335,6 @@ const PerformanceRatio = () => {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Tags / Comments Analysis" tooltip="See how your tagged patterns and comments correlate with performance." />
 
       {/* Selection Panel (shared across both charts) */}
       <div className="flex flex-wrap items-center gap-4">

@@ -2,7 +2,6 @@ import { useMemo, useState } from 'react';
 import { useFilteredTrades } from '@/hooks/useFilteredTrades';
 import { calculateTradeMetrics, Trade } from '@/types/trade';
 import { parseISO } from 'date-fns';
-import { PageHeader } from '@/components/layout/PageHeader';
 import {
   ComposedChart,
   Bar,
@@ -300,7 +299,6 @@ const ExitAnalysis = () => {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Exit Analysis" tooltip="Evaluate how well you're timing exits and capturing available moves." />
 
       {/* Chart Container */}
       <Card className="bg-card border-border">

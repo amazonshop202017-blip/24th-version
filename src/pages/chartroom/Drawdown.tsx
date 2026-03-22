@@ -4,7 +4,6 @@ import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
 import { usePrivacyMode, PRIVACY_MASK } from '@/hooks/usePrivacyMode';
 import { useAccountsContext } from '@/contexts/AccountsContext';
 import { calculateTradeMetrics } from '@/types/trade';
-import { PageHeader } from '@/components/layout/PageHeader';
 import { parseISO } from 'date-fns';
 import { ChartDisplayType, mapGlobalToChartDisplay } from '@/hooks/useChartDisplayMode';
 import {
@@ -278,7 +277,6 @@ const Drawdown = () => {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Drawdown" tooltip="Visualize your drawdown depth and recovery periods to understand risk exposure." />
       
       {/* Chart Container */}
       <Card className="bg-card border-border">

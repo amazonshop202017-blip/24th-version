@@ -4,7 +4,6 @@ import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
 import { usePrivacyMode, PRIVACY_MASK } from '@/hooks/usePrivacyMode';
 import { calculateTradeMetrics, Trade } from '@/types/trade';
 import { mapGlobalToChartDisplay } from '@/hooks/useChartDisplayMode';
-import { PageHeader } from '@/components/layout/PageHeader';
 import {
   ScatterChart,
   Scatter,
@@ -203,7 +202,6 @@ const HoldingTime = () => {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Holding Time" tooltip="See how trade duration impacts your P&L — are you holding too long or cutting too short?" />
 
       {/* Chart Container */}
       <Card className="bg-card border-border">

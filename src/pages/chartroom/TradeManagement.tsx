@@ -2,7 +2,6 @@ import { useMemo } from 'react';
 import { useFilteredTrades } from '@/hooks/useFilteredTrades';
 import { calculateTradeMetrics, Trade } from '@/types/trade';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { PageHeader } from '@/components/layout/PageHeader';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 
 interface ChartDataPoint {
@@ -190,7 +189,6 @@ const TradeManagement = () => {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Trade Management" tooltip="Compare your actual exits vs set-and-forget and full market potential to find management edge." />
 
       <Card>
         <CardHeader>

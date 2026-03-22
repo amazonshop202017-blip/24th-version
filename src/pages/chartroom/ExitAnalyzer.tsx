@@ -4,7 +4,6 @@ import { useFilteredTrades } from '@/hooks/useFilteredTrades';
 import { prepareExitTrades, computeHeatmap, computeSLSweep, computeTPSweep, HeatmapCell, SweepPoint } from '@/lib/exitAnalyzerCalc';
 import { Info, X, Zap, PenLine } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { PageHeader } from '@/components/layout/PageHeader';
 import { cn } from '@/lib/utils';
 import {
   ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip,
@@ -443,7 +442,6 @@ const ExitAnalyzer = () => {
   return (
     <div className="space-y-6">
       <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}>
-        <PageHeader title="Exit Analyzer" tooltip="Discover optimal SL/TP levels based on your historical MFE/MAE data." />
       </motion.div>
 
       {/* Sub-Navigation Menu */}
