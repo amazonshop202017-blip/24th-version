@@ -395,15 +395,15 @@ export const GlobalHeader = () => {
       <div className="lg:hidden">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="gap-2 bg-background border-border">
-              <Filter className="w-4 h-4 text-muted-foreground" />
+            <Button variant="outline" size="sm" className="gap-1.5 bg-background border-border h-8 px-2.5 text-xs">
+              <Filter className="w-3.5 h-3.5 text-muted-foreground" />
               <span>Filters</span>
               {totalActiveFilters > 0 && (
-                <span className="ml-1 px-1.5 py-0.5 text-xs rounded-full bg-primary text-primary-foreground">
+                <span className="ml-0.5 px-1 py-0 text-[10px] rounded-full bg-primary text-primary-foreground leading-4">
                   {totalActiveFilters}
                 </span>
               )}
-              <ChevronDown className="w-4 h-4 text-muted-foreground" />
+              <ChevronDown className="w-3 h-3 text-muted-foreground" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" className="w-56 bg-popover border-border z-50">
