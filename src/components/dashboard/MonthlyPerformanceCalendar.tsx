@@ -325,7 +325,7 @@ export const MonthlyPerformanceCalendar = () => {
                       key={dayKey}
                       onClick={() => isCurrentMonth && handleDayClick(day)}
                       className={`
-                        min-h-[48px] md:min-h-[80px] p-1 md:p-2 rounded-md md:rounded-lg border-transparent transition-colors
+                        min-h-[68px] md:min-h-[80px] p-1 md:p-2 rounded-md md:rounded-lg border-transparent transition-colors
                         ${isCurrentMonth ? bgClass : 'bg-muted/20 opacity-40'}
                         ${isCurrentMonth ? 'cursor-pointer hover:ring-1 hover:ring-primary/50' : ''}
                       `}
