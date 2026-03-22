@@ -226,7 +226,7 @@ export const TradeTimePerformanceChart = () => {
       
       <div className="flex-1 min-h-[250px]">
         <ResponsiveContainer width="100%" height="100%">
-          <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
+          <ScatterChart margin={{ top: 10, right: 10, bottom: 5, left: 0 }}>
             <CartesianGrid 
               strokeDasharray="3 3" 
               stroke="hsl(var(--border))" 
