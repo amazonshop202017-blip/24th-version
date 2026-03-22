@@ -491,9 +491,9 @@ const Trades = () => {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-120px)] space-y-4">
-      {/* Metrics Cards - synced with Dashboard */}
-      <div className="flex-shrink-0">
+    <div className="flex flex-col h-[calc(100vh-10vh)] md:h-[calc(100vh-120px)] space-y-4">
+      {/* Metrics Cards - synced with Dashboard, hidden on mobile to maximize table space */}
+      <div className="flex-shrink-0 hidden md:block">
         <DashboardMetrics isEditMode={false} />
       </div>
 
