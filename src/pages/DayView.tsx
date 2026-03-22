@@ -1,5 +1,4 @@
 import { useState, useMemo } from 'react';
-import { Calendar } from 'lucide-react';
 import { useFilteredTrades } from '@/hooks/useFilteredTrades';
 import { useTradesContext } from '@/contexts/TradesContext';
 import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
@@ -77,15 +76,6 @@ const DayView = () => {
 
   return (
     <div className="space-y-6">
-      {/* Page Header */}
-      <div className="flex items-center gap-3">
-        <Calendar className="w-8 h-8 text-primary" />
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Day View</h1>
-          <p className="text-muted-foreground">Daily trading analysis and breakdown</p>
-        </div>
-      </div>
-
       {/* Main Content */}
       <div className="flex gap-6">
         {/* Day Cards List */}

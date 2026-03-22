@@ -2,7 +2,6 @@ import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { BookOpen, Image, Check, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import { format } from 'date-fns';
-import { PageHeader } from '@/components/layout/PageHeader';
 import { DiaryFolderSidebar } from '@/components/diary/DiaryFolderSidebar';
 import { DiaryNotesList } from '@/components/diary/DiaryNotesList';
 import { DiaryNoteEditor } from '@/components/diary/DiaryNoteEditor';
@@ -65,14 +64,6 @@ const Diary = () => {
 
   return (
     <div className="h-[calc(100vh-8rem)]">
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="mb-4"
-      >
-        <PageHeader title="Diary" tooltip="Record your thoughts, emotions, and lessons to build self-awareness over time." />
-      </motion.div>
-
       {/* Sub-Navigation Menu */}
       <div className="flex items-center gap-1 border-b border-border pb-2 mb-4">
         {mainTabs.map((tab) => (

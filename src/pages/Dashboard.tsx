@@ -32,7 +32,6 @@ import { DraggableChartWrapper } from '@/components/dashboard/DraggableChartWrap
 import { useFilteredTrades } from '@/hooks/useFilteredTrades';
 import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
 import { usePrivacyMode } from '@/hooks/usePrivacyMode';
-import { PageHeader } from '@/components/layout/PageHeader';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 
@@ -145,14 +144,12 @@ const Dashboard = () => {
         animate={{ opacity: 1, y: 0 }}
         className="flex items-center justify-between gap-2"
       >
-        <div className="flex items-center gap-2 md:gap-3 min-w-0">
-          <PageHeader title="Dashboard" tooltip="Your trading overview — track net P&L, win rates, and key metrics at a glance." />
-          {isEditMode && (
-            <span className="text-xs text-muted-foreground bg-secondary px-2 py-1 rounded hidden sm:inline">
-              Drag charts to reorder
-            </span>
-          )}
-        </div>
+        {isEditMode && (
+          <span className="text-xs text-muted-foreground bg-secondary px-2 py-1 rounded hidden sm:inline">
+            Drag charts to reorder
+          </span>
+        )}
+        <div className="flex-1" />
         <Button
           variant={isEditMode ? "default" : "ghost"}
           size="sm"

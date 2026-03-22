@@ -40,6 +40,27 @@ import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { AdvancedFiltersPanel } from './AdvancedFiltersPanel';
 import { DisplayModeSelector } from './DisplayModeSelector';
+import { useLocation } from 'react-router-dom';
+
+const PAGE_TITLES: Record<string, string> = {
+  '/': 'Dashboard',
+  '/trades': 'Trades',
+  '/day-view': 'Day View',
+  '/diary': 'Diary',
+  '/strategies': 'Setups',
+  '/reports': 'Reports',
+  '/chart-room/drawdown': 'Drawdown',
+  '/chart-room/consecutive': 'Consecutive W/L',
+  '/chart-room/exit-analysis': 'Exit Analysis',
+  '/chart-room/holding-time': 'Holding Time',
+  '/chart-room/performance-by-symbol': 'Performance by Symbol',
+  '/chart-room/performance-by-setup': 'Performance by Setup',
+  '/chart-room/performance-by-time': 'Performance by Time',
+  '/chart-room/tags-analytics': 'Tags Analytics',
+  '/chart-room/risk-distribution': 'Risk Distribution',
+  '/chart-room/trade-management': 'Trade Management',
+  '/exit-analyzer': 'Exit Analyzer',
+};
 
 const DATE_PRESETS: { value: DatePreset; label: string }[] = [
   { value: 'today', label: 'Today' },
@@ -105,6 +126,18 @@ const R_MULTIPLE_OPTIONS: { value: RMultipleRange; label: string }[] = [
 
 export const GlobalHeader = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Resolve page title from route
+  const pageTitle = useMemo(() => {
+    const path = location.pathname;
+    if (PAGE_TITLES[path]) return PAGE_TITLES[path];
+    // Handle sub-routes like /strategies/:id or /reports/*
+    if (path.startsWith('/strategies/')) return 'Setup Detail';
+    if (path.startsWith('/reports')) return 'Reports';
+    return '';
+  }, [location.pathname]);
+
   const { 
     dateRange, 
     setDateRange,
@@ -351,6 +384,13 @@ export const GlobalHeader = () => {
 
   return (
     <div className="flex items-center gap-2 lg:gap-3 px-4 lg:px-8 py-3 lg:py-4 border-b border-border bg-card/50 backdrop-blur-sm pl-14 lg:pl-4 overflow-hidden">
+      {/* Page Title */}
+      {pageTitle && (
+        <h1 className="text-base md:text-lg lg:text-xl font-semibold text-foreground whitespace-nowrap mr-1 lg:mr-3">
+          {pageTitle}
+        </h1>
+      )}
+
       {/* Mobile/Tablet: Single "Filters" menu button */}
       <div className="lg:hidden">
         <DropdownMenu>
