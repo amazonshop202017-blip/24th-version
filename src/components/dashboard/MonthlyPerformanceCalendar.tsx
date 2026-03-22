@@ -249,7 +249,7 @@ export const MonthlyPerformanceCalendar = () => {
               </span>
             </span>
             <span className="bg-secondary px-1.5 md:px-2 py-0.5 rounded text-[10px] md:text-xs flex items-center gap-1 md:gap-1.5">
-              <span className="text-muted-foreground">{monthlyStats.totalTrades}t</span>
+              <span className="text-muted-foreground">{monthlyStats.totalTrades} trades</span>
               <span className="text-border">|</span>
               <span className={monthlyStats.monthlyWinRate >= 50 ? 'text-profit' : 'text-loss'}>
                 {monthlyStats.monthlyWinRate.toFixed(0)}%
