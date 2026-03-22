@@ -87,10 +87,7 @@ const Strategies = () => {
   return (
     <div className="space-y-8 animate-fade-in">
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground mb-2">Setups</h1>
-          <p className="text-muted-foreground">Define and track your trading setups</p>
-        </div>
+        <div className="flex-1" />
         <Button onClick={() => setShowAddForm(true)} className="gap-2">
           <Plus className="w-4 h-4" />
           Add Setup
