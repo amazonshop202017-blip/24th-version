@@ -76,10 +76,21 @@ const DayView = () => {
 
   return (
     <div className="space-y-6">
+      {/* Mobile Calendar (above cards) */}
+      <div className="block lg:hidden">
+        <DaySidebarCalendar
+          trades={accountFilteredTrades}
+          currentMonth={currentMonth}
+          onMonthChange={setCurrentMonth}
+          selectedDate={selectedDate}
+          onDateSelect={handleDateSelect}
+        />
+      </div>
+
       {/* Main Content */}
       <div className="flex gap-6">
         {/* Day Cards List */}
-        <div className="flex-1 space-y-4">
+        <div className="flex-1 space-y-4 min-w-0">
           {dayGroups.length === 0 ? (
             <div className="flex items-center justify-center h-64 border border-dashed border-border rounded-xl">
               <p className="text-muted-foreground">No trades found for the selected filters</p>
@@ -95,8 +106,8 @@ const DayView = () => {
           )}
         </div>
 
-        {/* Sticky Calendar Sidebar */}
-        <div className="w-[280px] flex-shrink-0">
+        {/* Sticky Calendar Sidebar - Desktop only */}
+        <div className="w-[280px] flex-shrink-0 hidden lg:block">
           <DaySidebarCalendar
             trades={accountFilteredTrades}
             currentMonth={currentMonth}

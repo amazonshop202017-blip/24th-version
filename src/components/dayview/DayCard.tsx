@@ -74,19 +74,19 @@ export const DayCard = ({ date, trades }: DayCardProps) => {
       {/* Card Header */}
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full flex items-center gap-4 px-5 py-4 hover:bg-muted/30 transition-colors"
+        className="w-full flex items-center gap-2 sm:gap-4 px-3 sm:px-5 py-3 sm:py-4 hover:bg-muted/30 transition-colors"
       >
         <div className="text-muted-foreground">
           {isExpanded ? (
-            <ChevronUp className="w-5 h-5" />
+            <ChevronUp className="w-4 h-4 sm:w-5 sm:h-5" />
           ) : (
-            <ChevronDown className="w-5 h-5" />
+            <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5" />
           )}
         </div>
-        <div className="flex items-center gap-3">
-          <span className="font-semibold text-foreground">{formattedDate}</span>
-          <span className="text-muted-foreground">•</span>
-          <span className={cn('font-semibold', isPrivacyMode ? 'text-foreground' : isProfit ? 'text-profit' : 'text-loss')}>
+        <div className="flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-3 text-left">
+          <span className="font-semibold text-sm sm:text-base text-foreground">{formattedDate}</span>
+          <span className="hidden sm:inline text-muted-foreground">•</span>
+          <span className={cn('font-semibold text-sm sm:text-base', isPrivacyMode ? 'text-foreground' : isProfit ? 'text-profit' : 'text-loss')}>
             Net P&L {maskCurrency(dayStats.netPnl, formatCurrency)}
           </span>
         </div>
