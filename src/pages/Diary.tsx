@@ -101,21 +101,25 @@ const Diary = () => {
         className={activeMainTab === 'diary' ? "flex-1 min-h-0" : ""}
       >
         {activeMainTab === 'diary' ? (
-          <div className="glass-card rounded-2xl overflow-hidden h-full flex flex-col">
-            <div className="grid grid-cols-[1fr_1fr] md:grid-cols-[200px_260px] lg:grid-cols-[220px_280px_1fr] max-h-[40vh] lg:max-h-none lg:h-full overflow-auto">
+          <div className="flex flex-col h-full overflow-hidden">
+            <div className="glass-card rounded-2xl overflow-hidden flex-shrink-0 grid grid-cols-[1fr_1fr] md:grid-cols-[200px_260px] lg:grid-cols-[220px_280px_1fr] lg:flex-1 lg:min-h-0">
               {/* Left Column - Folder Navigation */}
-              <DiaryFolderSidebar />
+              <div className="overflow-hidden border-r border-border/50">
+                <DiaryFolderSidebar />
+              </div>
               
               {/* Middle Column - Notes List */}
-              <DiaryNotesList />
+              <div className="overflow-y-auto max-h-[16.5rem] md:max-h-[33rem] lg:max-h-none lg:h-full">
+                <DiaryNotesList />
+              </div>
               
               {/* Right Column - Note Editor (hidden on mobile/tablet, shown below) */}
               <div className="hidden lg:block h-full">
                 <DiaryNoteEditor />
               </div>
             </div>
-            {/* Editor below on mobile/tablet */}
-            <div className="lg:hidden flex-1 min-h-[300px] border-t border-border">
+            {/* Editor below on mobile/tablet with visual separation */}
+            <div className="lg:hidden flex-1 min-h-[250px] mt-3 glass-card rounded-2xl overflow-hidden">
               <DiaryNoteEditor />
             </div>
           </div>
