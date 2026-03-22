@@ -137,15 +137,15 @@ const Strategies = () => {
         )}
       </AnimatePresence>
 
-      {/* Strategies Table */}
+      {/* Strategies Table / Cards */}
       <div className="glass-card rounded-2xl overflow-hidden">
-        <div className="flex items-center gap-3 p-6 border-b border-border">
-          <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center">
-            <Target className="w-5 h-5 text-primary" />
+        <div className="flex items-center gap-3 p-4 sm:p-6 border-b border-border">
+          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-primary/20 flex items-center justify-center">
+            <Target className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
           </div>
           <div>
-            <h2 className="text-xl font-semibold">Your Setups</h2>
-            <p className="text-sm text-muted-foreground">Click a setup to view its performance</p>
+            <h2 className="text-lg sm:text-xl font-semibold">Your Setups</h2>
+            <p className="text-xs sm:text-sm text-muted-foreground">Click a setup to view its performance</p>
           </div>
         </div>
 
@@ -156,173 +156,229 @@ const Strategies = () => {
             <p className="text-sm">Add your first setup to start organizing trades</p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            {/* Table Header */}
-            <div className="grid grid-cols-[2fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr_auto] gap-4 px-6 py-3 bg-muted/30 border-b border-border text-xs font-medium text-muted-foreground uppercase tracking-wider">
-              <div>Title</div>
-              <div className="text-right">Average Loser</div>
-              <div className="text-right">Average Winner</div>
-              <div className="text-right">Total Net P&L</div>
-              <div className="text-right">Profit Factor</div>
-              <div className="text-right">Trades</div>
-              <div className="text-right">Expectancy</div>
-              <div className="text-right">Win Rate</div>
-              <div className="w-8"></div>
+          <>
+            {/* Desktop Table */}
+            <div className="hidden lg:block overflow-x-auto">
+              {/* Table Header */}
+              <div className="grid grid-cols-[2fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr_auto] gap-4 px-6 py-3 bg-muted/30 border-b border-border text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                <div>Title</div>
+                <div className="text-right">Average Loser</div>
+                <div className="text-right">Average Winner</div>
+                <div className="text-right">Total Net P&L</div>
+                <div className="text-right">Profit Factor</div>
+                <div className="text-right">Trades</div>
+                <div className="text-right">Expectancy</div>
+                <div className="text-right">Win Rate</div>
+                <div className="w-8"></div>
+              </div>
+
+              {/* Table Body */}
+              <AnimatePresence>
+                {strategiesWithStats.map((strategy) => (
+                  <motion.div
+                    key={strategy.id}
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    className="grid grid-cols-[2fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr_auto] gap-4 px-6 py-4 border-b border-border hover:bg-muted/20 transition-colors group"
+                  >
+                    {editingId === strategy.id ? (
+                      <div className="col-span-11 space-y-3">
+                        <Input
+                          value={editName}
+                          onChange={(e) => setEditName(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') saveEdit();
+                            if (e.key === 'Escape') cancelEdit();
+                          }}
+                          className="bg-background border-border h-8"
+                          autoFocus
+                        />
+                        <Textarea
+                          value={editDescription}
+                          onChange={(e) => setEditDescription(e.target.value)}
+                          className="bg-background border-border resize-none"
+                          rows={2}
+                        />
+                        <div className="flex gap-2">
+                          <Button size="sm" variant="default" onClick={saveEdit}>
+                            <Check className="w-4 h-4 mr-1" /> Save
+                          </Button>
+                          <Button size="sm" variant="ghost" onClick={cancelEdit}>
+                            <X className="w-4 h-4 mr-1" /> Cancel
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        <div 
+                          className="flex items-center gap-3 cursor-pointer"
+                          onClick={() => navigate(`/strategies/${strategy.id}`)}
+                        >
+                          <span className="font-medium text-foreground hover:text-primary transition-colors">
+                            {strategy.name.toUpperCase()}
+                          </span>
+                        </div>
+                        <div className="text-right text-sm flex items-center justify-end">
+                          <span className={strategy.stats.avgLoser < 0 ? 'text-loss' : 'text-muted-foreground'}>
+                            {formatCurrency(strategy.stats.avgLoser)}
+                          </span>
+                        </div>
+                        <div className="text-right text-sm flex items-center justify-end">
+                          <span className={strategy.stats.avgWinner > 0 ? 'text-profit' : 'text-muted-foreground'}>
+                            {formatCurrency(strategy.stats.avgWinner)}
+                          </span>
+                        </div>
+                        <div className="text-right text-sm flex items-center justify-end">
+                          <span className={strategy.stats.totalNetPnL >= 0 ? 'text-profit' : 'text-loss'}>
+                            {formatCurrency(strategy.stats.totalNetPnL)}
+                          </span>
+                        </div>
+                        <div className="text-right text-sm text-muted-foreground flex items-center justify-end">
+                          {strategy.stats.profitFactor.toFixed(2)}
+                        </div>
+                        <div className="text-right text-sm text-muted-foreground flex items-center justify-end">
+                          {strategy.stats.totalTrades}
+                        </div>
+                        <div className="text-right text-sm flex items-center justify-end">
+                          <span className={strategy.stats.expectancy >= 0 ? 'text-profit' : 'text-loss'}>
+                            {formatCurrency(strategy.stats.expectancy)}
+                          </span>
+                        </div>
+                        <div className="text-right text-sm text-muted-foreground flex items-center justify-end">
+                          {formatPercent(strategy.stats.winRate)}
+                        </div>
+                        <div className="flex items-center justify-end">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <MoreVertical className="w-4 h-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); navigate(`/strategies/${strategy.id}`); }}>
+                                <ChevronRight className="w-4 h-4 mr-2" /> View Details
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); startEditing(strategy.id, strategy.name, strategy.description); }}>
+                                <Edit2 className="w-4 h-4 mr-2" /> Edit
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); openChecklistEditor(strategy.id, strategy.name, strategy.checklistItems || []); }}>
+                                <ClipboardList className="w-4 h-4 mr-2" /> Edit Checklist
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); removeStrategy(strategy.id); }} className="text-loss focus:text-loss">
+                                <Trash2 className="w-4 h-4 mr-2" /> Delete
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
+                      </>
+                    )}
+                  </motion.div>
+                ))}
+              </AnimatePresence>
             </div>
 
-            {/* Table Body */}
-            <AnimatePresence>
-              {strategiesWithStats.map((strategy) => (
-                <motion.div
-                  key={strategy.id}
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  className="grid grid-cols-[2fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr_auto] gap-4 px-6 py-4 border-b border-border hover:bg-muted/20 transition-colors group"
-                >
-                  {editingId === strategy.id ? (
-                    <div className="col-span-11 space-y-3">
-                      <Input
-                        value={editName}
-                        onChange={(e) => setEditName(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') saveEdit();
-                          if (e.key === 'Escape') cancelEdit();
-                        }}
-                        className="bg-background border-border h-8"
-                        autoFocus
-                      />
-                      <Textarea
-                        value={editDescription}
-                        onChange={(e) => setEditDescription(e.target.value)}
-                        className="bg-background border-border resize-none"
-                        rows={2}
-                      />
-                      <div className="flex gap-2">
-                        <Button size="sm" variant="default" onClick={saveEdit}>
-                          <Check className="w-4 h-4 mr-1" /> Save
-                        </Button>
-                        <Button size="sm" variant="ghost" onClick={cancelEdit}>
-                          <X className="w-4 h-4 mr-1" /> Cancel
-                        </Button>
+            {/* Mobile/Tablet Card Layout */}
+            <div className="lg:hidden divide-y divide-border">
+              <AnimatePresence>
+                {strategiesWithStats.map((strategy) => (
+                  <motion.div
+                    key={strategy.id}
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    className="p-4"
+                  >
+                    {editingId === strategy.id ? (
+                      <div className="space-y-3">
+                        <Input
+                          value={editName}
+                          onChange={(e) => setEditName(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') saveEdit();
+                            if (e.key === 'Escape') cancelEdit();
+                          }}
+                          className="bg-background border-border h-8"
+                          autoFocus
+                        />
+                        <Textarea
+                          value={editDescription}
+                          onChange={(e) => setEditDescription(e.target.value)}
+                          className="bg-background border-border resize-none"
+                          rows={2}
+                        />
+                        <div className="flex gap-2">
+                          <Button size="sm" variant="default" onClick={saveEdit}>
+                            <Check className="w-4 h-4 mr-1" /> Save
+                          </Button>
+                          <Button size="sm" variant="ghost" onClick={cancelEdit}>
+                            <X className="w-4 h-4 mr-1" /> Cancel
+                          </Button>
+                        </div>
                       </div>
-                    </div>
-                  ) : (
-                    <>
-                      {/* Title */}
-                      <div 
-                        className="flex items-center gap-3 cursor-pointer"
-                        onClick={() => navigate(`/strategies/${strategy.id}`)}
-                      >
-                        <span className="font-medium text-foreground hover:text-primary transition-colors">
-                          {strategy.name.toUpperCase()}
-                        </span>
+                    ) : (
+                      <div>
+                        <div className="flex items-center justify-between mb-3">
+                          <span
+                            className="font-medium text-foreground cursor-pointer hover:text-primary transition-colors"
+                            onClick={() => navigate(`/strategies/${strategy.id}`)}
+                          >
+                            {strategy.name.toUpperCase()}
+                          </span>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button size="sm" variant="ghost" className="h-8 w-8 p-0" onClick={(e) => e.stopPropagation()}>
+                                <MoreVertical className="w-4 h-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); navigate(`/strategies/${strategy.id}`); }}>
+                                <ChevronRight className="w-4 h-4 mr-2" /> View Details
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); startEditing(strategy.id, strategy.name, strategy.description); }}>
+                                <Edit2 className="w-4 h-4 mr-2" /> Edit
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); openChecklistEditor(strategy.id, strategy.name, strategy.checklistItems || []); }}>
+                                <ClipboardList className="w-4 h-4 mr-2" /> Edit Checklist
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); removeStrategy(strategy.id); }} className="text-loss focus:text-loss">
+                                <Trash2 className="w-4 h-4 mr-2" /> Delete
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
+                          <div>
+                            <p className="text-xs text-muted-foreground">Net P&L</p>
+                            <p className={cn("font-medium", strategy.stats.totalNetPnL >= 0 ? 'text-profit' : 'text-loss')}>
+                              {formatCurrency(strategy.stats.totalNetPnL)}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-xs text-muted-foreground">Win Rate</p>
+                            <p className="font-medium">{formatPercent(strategy.stats.winRate)}</p>
+                          </div>
+                          <div>
+                            <p className="text-xs text-muted-foreground">Trades</p>
+                            <p className="font-medium">{strategy.stats.totalTrades}</p>
+                          </div>
+                          <div>
+                            <p className="text-xs text-muted-foreground">Profit Factor</p>
+                            <p className="font-medium">{strategy.stats.profitFactor.toFixed(2)}</p>
+                          </div>
+                        </div>
                       </div>
-
-
-                      {/* Average Loser */}
-                      <div className="text-right text-sm flex items-center justify-end">
-                        <span className={strategy.stats.avgLoser < 0 ? 'text-loss' : 'text-muted-foreground'}>
-                          {formatCurrency(strategy.stats.avgLoser)}
-                        </span>
-                      </div>
-
-                      {/* Average Winner */}
-                      <div className="text-right text-sm flex items-center justify-end">
-                        <span className={strategy.stats.avgWinner > 0 ? 'text-profit' : 'text-muted-foreground'}>
-                          {formatCurrency(strategy.stats.avgWinner)}
-                        </span>
-                      </div>
-
-                      {/* Total Net P&L */}
-                      <div className="text-right text-sm flex items-center justify-end">
-                        <span className={strategy.stats.totalNetPnL >= 0 ? 'text-profit' : 'text-loss'}>
-                          {formatCurrency(strategy.stats.totalNetPnL)}
-                        </span>
-                      </div>
-
-                      {/* Profit Factor */}
-                      <div className="text-right text-sm text-muted-foreground flex items-center justify-end">
-                        {strategy.stats.profitFactor.toFixed(2)}
-                      </div>
-
-                      {/* Trades */}
-                      <div className="text-right text-sm text-muted-foreground flex items-center justify-end">
-                        {strategy.stats.totalTrades}
-                      </div>
-
-                      {/* Expectancy */}
-                      <div className="text-right text-sm flex items-center justify-end">
-                        <span className={strategy.stats.expectancy >= 0 ? 'text-profit' : 'text-loss'}>
-                          {formatCurrency(strategy.stats.expectancy)}
-                        </span>
-                      </div>
-
-                      {/* Win Rate */}
-                      <div className="text-right text-sm text-muted-foreground flex items-center justify-end">
-                        {formatPercent(strategy.stats.winRate)}
-                      </div>
-
-                      {/* Actions */}
-                      <div className="flex items-center justify-end">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              <MoreVertical className="w-4 h-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                navigate(`/strategies/${strategy.id}`);
-                              }}
-                            >
-                              <ChevronRight className="w-4 h-4 mr-2" />
-                              View Details
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                startEditing(strategy.id, strategy.name, strategy.description);
-                              }}
-                            >
-                              <Edit2 className="w-4 h-4 mr-2" />
-                              Edit
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                openChecklistEditor(strategy.id, strategy.name, strategy.checklistItems || []);
-                              }}
-                            >
-                              <ClipboardList className="w-4 h-4 mr-2" />
-                              Edit Checklist
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                removeStrategy(strategy.id);
-                              }}
-                              className="text-loss focus:text-loss"
-                            >
-                              <Trash2 className="w-4 h-4 mr-2" />
-                              Delete
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
-                    </>
-                  )}
-                </motion.div>
-              ))}
-            </AnimatePresence>
-          </div>
+                    )}
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </div>
+          </>
         )}
       </div>
 

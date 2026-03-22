@@ -28,23 +28,22 @@ const Reports = () => {
   return (
     <div className="space-y-6">
       {/* Sub-Navigation Menu */}
-      <div className="flex items-center gap-1 border-b border-border pb-2">
+      <div className="flex items-center gap-1 border-b border-border pb-2 overflow-x-auto">
         {mainTabs.map((tab) => (
-          <div key={tab.id} className="relative">
+          <div key={tab.id} className="relative flex-shrink-0">
             <button
               onClick={() => handleMainTabClick(tab)}
               className={cn(
-                "flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
+                "flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 whitespace-nowrap",
                 activeMainTab === tab.id
                   ? "text-primary"
                   : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
               )}
             >
-              <tab.icon className="w-4 h-4" />
+              <tab.icon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               <span>{tab.label}</span>
             </button>
 
-            {/* Active indicator */}
             {activeMainTab === tab.id && (
               <motion.div
                 layoutId="activeTab"
