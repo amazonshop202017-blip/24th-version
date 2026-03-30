@@ -65,10 +65,10 @@ export const AvgWinLossRatio = ({ avgWin, avgLoss }: AvgWinLossRatioProps) => {
       </div>
 
       <div className="flex justify-between text-[10px]">
-        <span className="text-profit font-mono font-medium">
+        <span className="profit-text font-mono font-medium">
           {formatCurrency(avgWin)}
         </span>
-        <span className="text-loss font-mono font-medium">
+        <span className="loss-text font-mono font-medium">
           -{formatCurrency(absLoss)}
         </span>
       </div>
