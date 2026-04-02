@@ -616,6 +616,31 @@ export const PerformanceByTimeChart = ({
     return data;
   }, [filteredTrades, displayType, dateSetting, period, totalStartingBalance, classifyTradeOutcome]);
 
+  const isMultiMetric = selectedMetrics.length > 1;
+  const multiMetricChartData = useMemo(() => {
+    if (!isMultiMetric) return timeData;
+    return timeData.map(item => {
+      const enhanced: Record<string, unknown> = { ...item };
+      selectedMetrics.forEach((metric, index) => {
+        enhanced[`metric_${index}`] = getMetricValue(item, metric);
+      });
+      return enhanced;
+    });
+  }, [timeData, selectedMetrics, isMultiMetric]);
+
+  const formatMetricTick = (value: number, metricType: ChartDisplayType): string => {
+    if (isPrivacyMode && ['dollar', 'percent', 'avg_win', 'avg_loss', 'largest_win', 'largest_loss', 'trade_expectancy', 'avg_net_trade_pnl', 'profit_factor', 'avg_daily_drawdown', 'largest_daily_loss'].includes(metricType)) return '**';
+    switch (metricType) {
+      case 'dollar': case 'avg_win': case 'avg_loss': case 'largest_win': case 'largest_loss': case 'trade_expectancy': case 'avg_net_trade_pnl': case 'avg_daily_drawdown': case 'largest_daily_loss': return `${currencyConfig.symbol}${value.toFixed(0)}`;
+      case 'percent': case 'winrate': case 'long_winrate': case 'short_winrate': return `${value.toFixed(0)}%`;
+      case 'tradecount': case 'tradecount_long': case 'tradecount_short': case 'avg_trades_per_day': case 'median_trades_per_day': case '90th_percentile_trades': case 'logged_days': case 'winning_days_count': case 'losing_days_count': case 'breakeven_days_count': return value % 1 === 0 ? `${Math.round(value)}` : value.toFixed(1);
+      case 'avg_hold_time': case 'longest_duration': return formatDurationTick(value);
+      case 'profit_factor': return value === Infinity ? '∞' : value.toFixed(2);
+      case 'avg_realized_r': case 'avg_planned_r': return value.toFixed(2);
+      default: return `${value}`;
+    }
+  };
+
   const formatValue = (value: number, type: ChartDisplayType = displayType): string => {
     if (type === 'percent') {
       return `${value >= 0 ? '+' : ''}${value.toFixed(2)}%`;
@@ -627,7 +652,6 @@ export const PerformanceByTimeChart = ({
       return `${Math.round(value)}`;
     }
     if (type === 'tickpip') {
-      // Placeholder for tick/pip display
       return `${value >= 0 ? '+' : ''}${value.toFixed(2)} T`;
     }
     if (type === 'privacy') {
@@ -642,14 +666,27 @@ export const PerformanceByTimeChart = ({
 
   return (
     <Card className="bg-card border-border h-full">
-      <CardContent className="p-4">
-        {/* Header with Dropdowns */}
-        <div className="flex items-start justify-between mb-3 flex-wrap gap-3">
-          <div className="flex items-center gap-3 flex-wrap">
-            <ChartDisplayDropdown
-              value={displayType}
-              onValueChange={(v) => { const next = [...selectedMetrics]; next[0] = v; setSelectedMetrics(next); }}
-            />
+      <CardContent className="p-4 pb-2">
+        <div className="flex flex-col gap-2 mb-4">
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <h3 className="text-sm font-medium text-muted-foreground">{title}</h3>
+            <div className="flex items-center gap-2">
+              <ChartMetricSettingsPopover metrics={selectedMetrics} configs={metricConfigs} onConfigChange={updateMetricConfig} />
+            </div>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            {selectedMetrics.map((metric, index) => (
+              <div key={`${metric}-${index}`} className="flex items-center gap-1.5">
+                {isMultiMetric && <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: getMetricColor(index) }} />}
+                <ChartDisplayDropdown value={metric} onValueChange={(v) => { const next = [...selectedMetrics]; next[index] = v; setSelectedMetrics(next); }} disabledValues={selectedMetrics.filter((_, i) => i !== index)} />
+                {selectedMetrics.length > 1 && (
+                  <button onClick={() => removeMetric(index)} className="p-0.5 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"><X className="w-3.5 h-3.5" /></button>
+                )}
+              </div>
+            ))}
+            {selectedMetrics.length < 3 && (
+              <Button variant="outline" size="sm" className="h-8 text-xs gap-1" onClick={addMetric}><Plus className="w-3.5 h-3.5" />Add Metric</Button>
+            )}
 
             <Select value={dateSetting} onValueChange={(v) => setDateSetting(v as DateSettingType)}>
               <SelectTrigger className="w-[130px] bg-background border-border h-auto py-1.5">
@@ -685,27 +722,36 @@ export const PerformanceByTimeChart = ({
               </SelectContent>
             </Select>
           </div>
-
           {/* Legend */}
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-1.5">
-              <div className="w-2.5 h-2.5 rounded-sm bg-profit" />
-              <span className="text-xs text-muted-foreground">Profit</span>
+          {isMultiMetric ? (
+            <div className="flex items-center gap-3 flex-wrap">
+              {selectedMetrics.map((metric, index) => (
+                <div key={`legend-${metric}-${index}`} className="flex items-center gap-1.5">
+                  <div className="w-2.5 h-2.5 rounded-sm shrink-0" style={{ backgroundColor: getMetricColor(index) }} />
+                  <span className="text-xs text-muted-foreground">{getDisplayLabel(metric)}</span>
+                </div>
+              ))}
             </div>
-            <div className="flex items-center gap-1.5">
-              <div className="w-2.5 h-2.5 rounded-sm bg-loss" />
-              <span className="text-xs text-muted-foreground">Loss</span>
+          ) : (
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-1.5">
+                <div className="w-2.5 h-2.5 rounded-sm bg-profit" />
+                <span className="text-xs text-muted-foreground">Profit</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <div className="w-2.5 h-2.5 rounded-sm bg-loss" />
+                <span className="text-xs text-muted-foreground">Loss</span>
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
-        {/* Chart */}
-        <div className="h-[300px] w-full">
+        <div className={`w-full -mx-2 px-0 ${isMultiMetric ? 'h-[340px]' : 'h-[300px]'}`}>
           {timeData.length > 0 ? (
             <ResponsiveContainer width="100%" height="100%">
               <ComposedChart
-                data={timeData}
-                margin={{ top: 10, right: 20, left: 0, bottom: 20 }}
+                data={isMultiMetric ? multiMetricChartData : timeData}
+                margin={{ top: 10, right: isMultiMetric ? (selectedMetrics.length === 3 ? 25 : 20) : -5, left: -10, bottom: isMultiMetric ? 30 : 20 }}
               >
                 <CartesianGrid 
                   strokeDasharray="3 3" 
@@ -724,37 +770,16 @@ export const PerformanceByTimeChart = ({
                   textAnchor={period.includes('min') ? 'end' : 'middle'}
                   height={period.includes('min') ? 50 : 25}
                 />
-                <YAxis
-                  axisLine={{ stroke: 'hsl(var(--border))' }}
-                  tickLine={false}
-                  tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 10 }}
-                  tickFormatter={(value) => {
-                    // Mask $ and % values in privacy mode
-                    if (isPrivacyMode && (displayType === 'dollar' || displayType === 'percent' || displayType === 'avg_win' || displayType === 'avg_loss' || displayType === 'largest_win' || displayType === 'largest_loss' || displayType === 'trade_expectancy' || displayType === 'avg_net_trade_pnl' || displayType === 'profit_factor' || displayType === 'avg_daily_drawdown' || displayType === 'largest_daily_loss')) {
-                      return '**';
-                    }
-                    if (displayType === 'dollar' || displayType === 'avg_win' || displayType === 'avg_loss' || displayType === 'largest_win' || displayType === 'largest_loss' || displayType === 'trade_expectancy' || displayType === 'avg_net_trade_pnl' || displayType === 'avg_daily_drawdown' || displayType === 'largest_daily_loss') {
-                      return `${currencyConfig.symbol}${value.toFixed(0)}`;
-                    }
-                    if (displayType === 'profit_factor') {
-                      return value === Infinity ? '∞' : value.toFixed(2);
-                    }
-                    if (displayType === 'avg_realized_r' || displayType === 'avg_planned_r') {
-                      return value.toFixed(2);
-                    }
-                    if (displayType === 'tradecount' || displayType === 'tradecount_long' || displayType === 'tradecount_short' || displayType === 'avg_trades_per_day' || displayType === 'median_trades_per_day' || displayType === '90th_percentile_trades' || displayType === 'logged_days') {
-                      return value % 1 === 0 ? `${Math.round(value)}` : value.toFixed(1);
-                    }
-                    if (displayType === 'avg_hold_time' || displayType === 'longest_duration') {
-                      return formatDurationTick(value);
-                    }
-                    if (displayType === 'percent' || displayType === 'winrate' || displayType === 'long_winrate' || displayType === 'short_winrate') {
-                      return `${value.toFixed(0)}%`;
-                    }
-                    return `${value.toFixed(1)}%`;
-                  }}
-                  width={50}
-                />
+                
+                {isMultiMetric ? (
+                  <>
+                    {selectedMetrics.map((metric, index) => (
+                      <YAxis key={metric} yAxisId={`y-${index}`} orientation={index === 0 ? 'left' : 'right'} axisLine={{ stroke: getMetricColor(index) }} tickLine={false} tick={{ fill: getMetricColor(index), fontSize: 10 }} tickFormatter={(value) => formatMetricTick(value, metric)} width={index === 0 ? 40 : 32} />
+                    ))}
+                  </>
+                ) : (
+                  <YAxis axisLine={{ stroke: 'hsl(var(--border))' }} tickLine={false} tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 10 }} tickFormatter={(value) => formatMetricTick(value, displayType)} width={50} />
+                )}
                 
                 {/* Reference Line at 0 - for monetary modes */}
                 {(displayType === 'dollar' || displayType === 'percent' || displayType === 'avg_win' || displayType === 'avg_loss' || displayType === 'largest_win' || displayType === 'largest_loss' || displayType === 'trade_expectancy' || displayType === 'avg_net_trade_pnl' || displayType === 'avg_daily_drawdown' || displayType === 'largest_daily_loss' || displayType === 'avg_realized_r' || displayType === 'avg_planned_r') && (
@@ -1317,24 +1342,39 @@ export const PerformanceByTimeChart = ({
                   }}
                 />
 
-                <Bar 
-                  dataKey="displayValue" 
-                  radius={[3, 3, 0, 0]}
-                  maxBarSize={40}
-                >
-                  {timeData.map((entry, index) => (
-                    <Cell 
-                      key={`cell-${index}`}
-                      fill={
-                        displayType === 'tradecount' || displayType === 'avg_hold_time' || displayType === 'longest_duration' || displayType === 'long_winrate' || displayType === 'short_winrate' || displayType === 'tradecount_long' || displayType === 'tradecount_short' || displayType === 'avg_planned_r'
-                          ? 'hsl(var(--primary))'
-                          : displayType === 'winrate'
-                            ? entry.displayValue >= 50 ? 'hsl(142, 71%, 45%)' : 'hsl(0, 84%, 60%)'
-                            : entry.displayValue >= 0 ? 'hsl(142, 71%, 45%)' : 'hsl(0, 84%, 60%)'
+                {isMultiMetric ? (
+                  <>
+                    {selectedMetrics.map((metric, index) => {
+                      const config = metricConfigs[index];
+                      const color = getMetricColor(index);
+                      if (config?.type === 'line') {
+                        return (
+                          <Line key={`line-${metric}-${index}`} yAxisId={`y-${index}`} type="monotone" dataKey={`metric_${index}`} stroke={color} strokeWidth={2} dot={{ fill: color, r: 3 }} activeDot={{ r: 5 }} />
+                        );
                       }
-                    />
-                  ))}
-                </Bar>
+                      return (
+                        <Bar key={`bar-${metric}-${index}`} yAxisId={`y-${index}`} dataKey={`metric_${index}`} fill={color} radius={[4, 4, 0, 0]} maxBarSize={40} />
+                      );
+                    })}
+                  </>
+                ) : (
+                  <Bar dataKey="displayValue" radius={[3, 3, 0, 0]} maxBarSize={40}>
+                    {timeData.map((entry, index) => {
+                      const config = metricConfigs[0];
+                      let fillColor: string;
+                      if (config?.color && config.color !== DEFAULT_METRIC_COLORS[0]) {
+                        fillColor = config.color;
+                      } else if (displayType === 'tradecount' || displayType === 'avg_hold_time' || displayType === 'longest_duration' || displayType === 'long_winrate' || displayType === 'short_winrate' || displayType === 'tradecount_long' || displayType === 'tradecount_short' || displayType === 'avg_planned_r') {
+                        fillColor = 'hsl(var(--primary))';
+                      } else if (displayType === 'winrate') {
+                        fillColor = entry.displayValue >= 50 ? 'hsl(var(--profit))' : 'hsl(var(--loss))';
+                      } else {
+                        fillColor = entry.displayValue >= 0 ? 'hsl(var(--profit))' : 'hsl(var(--loss))';
+                      }
+                      return <Cell key={`cell-${index}`} fill={fillColor} />;
+                    })}
+                  </Bar>
+                )}
               </ComposedChart>
             </ResponsiveContainer>
           ) : (
