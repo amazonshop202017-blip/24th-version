@@ -555,6 +555,13 @@ export const InstrumentPerformanceChart = ({
         <div className="flex flex-col gap-2 mb-4">
           <div className="flex items-center justify-between flex-wrap gap-2">
             <h3 className="text-sm font-medium text-muted-foreground">{title}</h3>
+            {isMultiMetric && (
+              <ChartMetricSettingsPopover
+                metrics={selectedMetrics}
+                configs={metricConfigs}
+                onConfigChange={updateMetricConfig}
+              />
+            )}
           </div>
           <div className="flex flex-wrap items-center gap-2">
             {selectedMetrics.map((metric, index) => (
@@ -573,7 +580,7 @@ export const InstrumentPerformanceChart = ({
                 />
                 {selectedMetrics.length > 1 && (
                   <button
-                    onClick={() => setSelectedMetrics(prev => prev.filter((_, i) => i !== index))}
+                    onClick={() => removeMetric(index)}
                     className="p-0.5 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
                   >
                     <X className="w-3.5 h-3.5" />
