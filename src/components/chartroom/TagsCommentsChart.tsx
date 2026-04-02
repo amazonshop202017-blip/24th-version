@@ -1065,6 +1065,30 @@ export const TagsCommentsChart = ({
                 <Tooltip content={<CustomTooltip />} cursor={{ fill: 'hsl(var(--muted)/0.1)' }} />
                 {!isMultiMetric && <ReferenceLine y={0} stroke="hsl(var(--border))" />}
                 
+                {isMultiMetric && (
+                  <Legend
+                    verticalAlign="bottom"
+                    height={24}
+                    content={() => (
+                      <div className="flex flex-wrap items-center justify-center gap-4 mt-1">
+                        {selectedMetrics.map((metric, index) => {
+                          const config = metricConfigs[index];
+                          return (
+                            <div key={metric} className="flex items-center gap-1.5">
+                              {config?.type === 'line' ? (
+                                <div className="w-4 h-0.5 rounded" style={{ backgroundColor: getMetricColor(index) }} />
+                              ) : (
+                                <div className="w-2.5 h-2.5 rounded-sm" style={{ backgroundColor: getMetricColor(index) }} />
+                              )}
+                              <span className="text-xs text-muted-foreground">{getDisplayLabel(metric)}</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  />
+                )}
+
                 {isMultiMetric ? (
                   <>
                     {selectedMetrics.map((metric, index) => {
