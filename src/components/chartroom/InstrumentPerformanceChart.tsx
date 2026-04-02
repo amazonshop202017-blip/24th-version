@@ -555,13 +555,11 @@ export const InstrumentPerformanceChart = ({
         <div className="flex flex-col gap-2 mb-4">
           <div className="flex items-center justify-between flex-wrap gap-2">
             <h3 className="text-sm font-medium text-muted-foreground">{title}</h3>
-            {isMultiMetric && (
-              <ChartMetricSettingsPopover
-                metrics={selectedMetrics}
-                configs={metricConfigs}
-                onConfigChange={updateMetricConfig}
-              />
-            )}
+            <ChartMetricSettingsPopover
+              metrics={selectedMetrics}
+              configs={metricConfigs}
+              onConfigChange={updateMetricConfig}
+            />
           </div>
           <div className="flex flex-wrap items-center gap-2">
             {selectedMetrics.map((metric, index) => (
