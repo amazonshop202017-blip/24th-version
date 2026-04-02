@@ -107,6 +107,46 @@ interface PerformanceByTimeChartProps {
   useGlobalDefault?: boolean; // true = use global filter as default, false = use defaultDisplayType
 }
 
+const DEFAULT_METRIC_COLORS = [
+  'hsl(var(--primary))',
+  'hsl(var(--profit))',
+  'hsl(45 93% 47%)',
+];
+
+const getMetricValue = (data: TimeData, metric: ChartDisplayType): number => {
+  switch (metric) {
+    case 'dollar': return data.totalPnl;
+    case 'percent': return data.totalPercent;
+    case 'winrate': return data.winrate;
+    case 'tradecount': return data.tradeCount;
+    case 'avg_hold_time': return data.avgHoldTimeMinutes;
+    case 'longest_duration': return data.longestDurationMinutes;
+    case 'long_winrate': return data.longWinrate;
+    case 'short_winrate': return data.shortWinrate;
+    case 'tradecount_long': return data.longTradeCount;
+    case 'tradecount_short': return data.shortTradeCount;
+    case 'avg_win': return data.avgWin;
+    case 'avg_loss': return data.avgLoss;
+    case 'largest_win': return data.largestWin;
+    case 'largest_loss': return data.largestLoss;
+    case 'avg_trades_per_day': return data.avgTradesPerDay;
+    case 'median_trades_per_day': return data.medianTradesPerDay;
+    case '90th_percentile_trades': return data.percentile90TradesPerDay;
+    case 'logged_days': return data.loggedDays;
+    case 'profit_factor': return data.profitFactor;
+    case 'trade_expectancy': return data.tradeExpectancy;
+    case 'avg_net_trade_pnl': return data.avgNetTradePnl;
+    case 'avg_realized_r': return data.avgRealizedR;
+    case 'avg_planned_r': return data.avgPlannedR;
+    case 'avg_daily_drawdown': return data.avgDailyDrawdown;
+    case 'largest_daily_loss': return data.largestDailyLoss;
+    case 'winning_days_count': return data.winningDaysCount;
+    case 'losing_days_count': return data.losingDaysCount;
+    case 'breakeven_days_count': return data.breakevenDaysCount;
+    default: return data.totalPnl;
+  }
+};
+
 const WEEKDAY_LABELS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
