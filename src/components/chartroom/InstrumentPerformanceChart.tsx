@@ -1028,6 +1028,23 @@ export const InstrumentPerformanceChart = ({
                     }}
                   />
 
+                  {isMultiMetric && (
+                    <Legend
+                      verticalAlign="bottom"
+                      height={24}
+                      content={() => (
+                        <div className="flex flex-wrap items-center justify-center gap-4 mt-1">
+                          {selectedMetrics.map((metric, index) => (
+                            <div key={metric} className="flex items-center gap-1.5">
+                              <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: METRIC_COLORS[index] }} />
+                              <span className="text-xs text-muted-foreground">{getDisplayLabel(metric)}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    />
+                  )}
+
                   {isMultiMetric ? (
                     <>
                       {selectedMetrics.map((metric, index) => (
