@@ -97,6 +97,7 @@ export const ChartDisplayDropdown = ({
   value,
   onValueChange,
   className,
+  disabledValues = [],
 }: ChartDisplayDropdownProps) => {
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
   const [isOpen, setIsOpen] = useState(false);
