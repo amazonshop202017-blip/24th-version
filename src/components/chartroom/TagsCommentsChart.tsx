@@ -1063,7 +1063,7 @@ export const TagsCommentsChart = ({
                 )}
                 
                 <Tooltip content={<CustomTooltip />} cursor={{ fill: 'hsl(var(--muted)/0.1)' }} />
-                <ReferenceLine y={0} stroke="hsl(var(--border))" />
+                {!isMultiMetric && <ReferenceLine y={0} stroke="hsl(var(--border))" />}
                 
                 {isMultiMetric ? (
                   <>
