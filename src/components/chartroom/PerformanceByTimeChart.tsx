@@ -1,16 +1,27 @@
-import { useMemo, useState } from 'react';
-import { useFilteredTrades } from '@/hooks/useFilteredTrades';
-import { useGlobalFilters, BreakevenTolerance } from '@/contexts/GlobalFiltersContext';
-import { useAccountsContext } from '@/contexts/AccountsContext';
-import { usePrivacyMode } from '@/hooks/usePrivacyMode';
-import { calculateTradeMetrics, Trade } from '@/types/trade';
-import { parseISO, getDay, getMonth, getWeek, getHours, getMinutes, format } from 'date-fns';
-import { ChartDisplayType, mapGlobalToChartDisplay, formatDuration, formatDurationTick } from '@/hooks/useChartDisplayMode';
-import { calculateTradingActivityStatsFromCounts } from '@/lib/tradingActivityStats';
-import { calculateRiskDrawdownStats } from '@/lib/riskDrawdownStats';
 import {
-  BarChart,
+  useMemo, useState } from 'react';
+import {
+  useFilteredTrades } from '@/hooks/useFilteredTrades';
+import {
+  useGlobalFilters, BreakevenTolerance } from '@/contexts/GlobalFiltersContext';
+import {
+  useAccountsContext } from '@/contexts/AccountsContext';
+import {
+  usePrivacyMode } from '@/hooks/usePrivacyMode';
+import {
+  calculateTradeMetrics, Trade } from '@/types/trade';
+import {
+  parseISO, getDay, getMonth, getWeek, getHours, getMinutes, format } from 'date-fns';
+import {
+  ChartDisplayType, mapGlobalToChartDisplay, formatDuration, formatDurationTick } from '@/hooks/useChartDisplayMode';
+import {
+  calculateTradingActivityStatsFromCounts } from '@/lib/tradingActivityStats';
+import {
+  calculateRiskDrawdownStats } from '@/lib/riskDrawdownStats';
+import {
+  ComposedChart,
   Bar,
+  Line,
   XAxis,
   YAxis,
   ResponsiveContainer,
@@ -18,6 +29,7 @@ import {
   ReferenceLine,
   CartesianGrid,
   Cell,
+  Legend,
 } from 'recharts';
 import {
   Select,
@@ -26,8 +38,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Card, CardContent } from '@/components/ui/card';
+import {
+  Card, CardContent } from '@/components/ui/card';
 import { ChartDisplayDropdown } from './ChartDisplayDropdown';
+import { ChartMetricSettingsPopover, MetricConfig } from './ChartMetricSettingsPopover';
+import { Button } from '@/components/ui/button';
+import { X, Plus } from 'lucide-react';
+import { getDisplayLabel } from '@/hooks/useChartDisplayMode';
 
 type DateSettingType = 'entry' | 'exit';
 type PeriodType = 'weekday' | 'month' | 'week' | 'hour' | '2hour' | '1hour' | '30min' | '15min' | '10min' | '5min';
@@ -90,6 +107,46 @@ interface PerformanceByTimeChartProps {
   useGlobalDefault?: boolean; // true = use global filter as default, false = use defaultDisplayType
 }
 
+const DEFAULT_METRIC_COLORS = [
+  'hsl(var(--primary))',
+  'hsl(var(--profit))',
+  'hsl(45 93% 47%)',
+];
+
+const getMetricValue = (data: TimeData, metric: ChartDisplayType): number => {
+  switch (metric) {
+    case 'dollar': return data.totalPnl;
+    case 'percent': return data.totalPercent;
+    case 'winrate': return data.winrate;
+    case 'tradecount': return data.tradeCount;
+    case 'avg_hold_time': return data.avgHoldTimeMinutes;
+    case 'longest_duration': return data.longestDurationMinutes;
+    case 'long_winrate': return data.longWinrate;
+    case 'short_winrate': return data.shortWinrate;
+    case 'tradecount_long': return data.longTradeCount;
+    case 'tradecount_short': return data.shortTradeCount;
+    case 'avg_win': return data.avgWin;
+    case 'avg_loss': return data.avgLoss;
+    case 'largest_win': return data.largestWin;
+    case 'largest_loss': return data.largestLoss;
+    case 'avg_trades_per_day': return data.avgTradesPerDay;
+    case 'median_trades_per_day': return data.medianTradesPerDay;
+    case '90th_percentile_trades': return data.percentile90TradesPerDay;
+    case 'logged_days': return data.loggedDays;
+    case 'profit_factor': return data.profitFactor;
+    case 'trade_expectancy': return data.tradeExpectancy;
+    case 'avg_net_trade_pnl': return data.avgNetTradePnl;
+    case 'avg_realized_r': return data.avgRealizedR;
+    case 'avg_planned_r': return data.avgPlannedR;
+    case 'avg_daily_drawdown': return data.avgDailyDrawdown;
+    case 'largest_daily_loss': return data.largestDailyLoss;
+    case 'winning_days_count': return data.winningDaysCount;
+    case 'losing_days_count': return data.losingDaysCount;
+    case 'breakeven_days_count': return data.breakevenDaysCount;
+    default: return data.totalPnl;
+  }
+};
+
 const WEEKDAY_LABELS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
@@ -111,7 +168,35 @@ export const PerformanceByTimeChart = ({
     return defaultDisplayType;
   };
   
-  const [displayType, setDisplayType] = useState<ChartDisplayType>(getInitialDisplayType);
+  const [selectedMetrics, setSelectedMetrics] = useState<ChartDisplayType[]>([getInitialDisplayType()]);
+  const [metricConfigs, setMetricConfigs] = useState<MetricConfig[]>([
+    { type: 'column', color: DEFAULT_METRIC_COLORS[0] }
+  ]);
+  const displayType = selectedMetrics[0];
+
+  const getMetricColor = (index: number) => metricConfigs[index]?.color || DEFAULT_METRIC_COLORS[index] || DEFAULT_METRIC_COLORS[0];
+
+  const updateMetricConfig = (index: number, partial: Partial<MetricConfig>) => {
+    setMetricConfigs(prev => {
+      const next = [...prev];
+      next[index] = { ...next[index], ...partial };
+      return next;
+    });
+  };
+
+  const addMetric = () => {
+    if (selectedMetrics.length >= 3) return;
+    const allOptions: ChartDisplayType[] = ['dollar', 'winrate', 'tradecount', 'percent', 'avg_win', 'avg_loss', 'profit_factor', 'trade_expectancy'];
+    const next = allOptions.find(m => !selectedMetrics.includes(m)) || 'dollar';
+    setSelectedMetrics(prev => [...prev, next]);
+    setMetricConfigs(prev => [...prev, { type: 'column', color: DEFAULT_METRIC_COLORS[prev.length] || DEFAULT_METRIC_COLORS[0] }]);
+  };
+
+  const removeMetric = (index: number) => {
+    setSelectedMetrics(prev => prev.filter((_, i) => i !== index));
+    setMetricConfigs(prev => prev.filter((_, i) => i !== index));
+  };
+
   const [dateSetting, setDateSetting] = useState<DateSettingType>('entry');
   const [period, setPeriod] = useState<PeriodType>('weekday');
 
@@ -563,7 +648,7 @@ export const PerformanceByTimeChart = ({
           <div className="flex items-center gap-3 flex-wrap">
             <ChartDisplayDropdown
               value={displayType}
-              onValueChange={(v) => setDisplayType(v)}
+              onValueChange={(v) => { const next = [...selectedMetrics]; next[0] = v; setSelectedMetrics(next); }}
             />
 
             <Select value={dateSetting} onValueChange={(v) => setDateSetting(v as DateSettingType)}>
@@ -618,7 +703,7 @@ export const PerformanceByTimeChart = ({
         <div className="h-[300px] w-full">
           {timeData.length > 0 ? (
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart
+              <ComposedChart
                 data={timeData}
                 margin={{ top: 10, right: 20, left: 0, bottom: 20 }}
               >
@@ -1250,7 +1335,7 @@ export const PerformanceByTimeChart = ({
                     />
                   ))}
                 </Bar>
-              </BarChart>
+              </ComposedChart>
             </ResponsiveContainer>
           ) : (
             <div className="flex items-center justify-center h-full border border-dashed border-border rounded-xl bg-muted/20">

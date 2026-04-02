@@ -1,16 +1,27 @@
-import { useMemo, useState } from 'react';
-import { useFilteredTrades } from '@/hooks/useFilteredTrades';
-import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
-import { useAccountsContext } from '@/contexts/AccountsContext';
-import { usePrivacyMode } from '@/hooks/usePrivacyMode';
-import { calculateTradeMetrics, Trade } from '@/types/trade';
-import { useStrategiesContext } from '@/contexts/StrategiesContext';
-import { ChartDisplayType, mapGlobalToChartDisplay, formatDuration, formatDurationTick } from '@/hooks/useChartDisplayMode';
-import { buildGroupDailyCounts, getGroupTradingActivityStats } from '@/lib/tradingActivityStats';
-import { buildGroupedTradesMap, getGroupRiskDrawdownStats } from '@/lib/riskDrawdownStats';
 import {
-  BarChart,
+  useMemo, useState } from 'react';
+import {
+  useFilteredTrades } from '@/hooks/useFilteredTrades';
+import {
+  useGlobalFilters } from '@/contexts/GlobalFiltersContext';
+import {
+  useAccountsContext } from '@/contexts/AccountsContext';
+import {
+  usePrivacyMode } from '@/hooks/usePrivacyMode';
+import {
+  calculateTradeMetrics, Trade } from '@/types/trade';
+import {
+  useStrategiesContext } from '@/contexts/StrategiesContext';
+import {
+  ChartDisplayType, mapGlobalToChartDisplay, formatDuration, formatDurationTick } from '@/hooks/useChartDisplayMode';
+import {
+  buildGroupDailyCounts, getGroupTradingActivityStats } from '@/lib/tradingActivityStats';
+import {
+  buildGroupedTradesMap, getGroupRiskDrawdownStats } from '@/lib/riskDrawdownStats';
+import {
+  ComposedChart,
   Bar,
+  Line,
   XAxis,
   YAxis,
   ResponsiveContainer,
@@ -18,9 +29,15 @@ import {
   ReferenceLine,
   CartesianGrid,
   Cell,
+  Legend,
 } from 'recharts';
-import { Card, CardContent } from '@/components/ui/card';
+import {
+  Card, CardContent } from '@/components/ui/card';
 import { ChartDisplayDropdown } from './ChartDisplayDropdown';
+import { ChartMetricSettingsPopover, MetricConfig } from './ChartMetricSettingsPopover';
+import { Button } from '@/components/ui/button';
+import { X, Plus } from 'lucide-react';
+import { getDisplayLabel } from '@/hooks/useChartDisplayMode';
 
 interface SetupData {
   setup: string;
@@ -74,10 +91,50 @@ interface SetupData {
   tradesWithPlannedR: number;
 }
 
+const DEFAULT_METRIC_COLORS = [
+  'hsl(var(--primary))',
+  'hsl(var(--profit))',
+  'hsl(45 93% 47%)',
+];
+
+const getMetricValue = (data: SetupData, metric: ChartDisplayType): number => {
+  switch (metric) {
+    case 'dollar': return data.totalPnl;
+    case 'percent': return data.totalPercent;
+    case 'winrate': return data.winrate;
+    case 'tradecount': return data.tradeCount;
+    case 'avg_hold_time': return data.avgHoldTimeMinutes;
+    case 'longest_duration': return data.longestDurationMinutes;
+    case 'long_winrate': return data.longWinrate;
+    case 'short_winrate': return data.shortWinrate;
+    case 'tradecount_long': return data.longTradeCount;
+    case 'tradecount_short': return data.shortTradeCount;
+    case 'avg_win': return data.avgWin;
+    case 'avg_loss': return data.avgLoss;
+    case 'largest_win': return data.largestWin;
+    case 'largest_loss': return data.largestLoss;
+    case 'avg_trades_per_day': return data.avgTradesPerDay;
+    case 'median_trades_per_day': return data.medianTradesPerDay;
+    case '90th_percentile_trades': return data.percentile90TradesPerDay;
+    case 'logged_days': return data.loggedDays;
+    case 'profit_factor': return data.profitFactor;
+    case 'trade_expectancy': return data.tradeExpectancy;
+    case 'avg_net_trade_pnl': return data.avgNetTradePnl;
+    case 'avg_realized_r': return data.avgRealizedR;
+    case 'avg_planned_r': return data.avgPlannedR;
+    case 'avg_daily_drawdown': return data.avgDailyDrawdown;
+    case 'largest_daily_loss': return data.largestDailyLoss;
+    case 'winning_days_count': return data.winningDaysCount;
+    case 'losing_days_count': return data.losingDaysCount;
+    case 'breakeven_days_count': return data.breakevenDaysCount;
+    default: return data.totalPnl;
+  }
+};
+
 interface SetupPerformanceChartProps {
   defaultDisplayType?: ChartDisplayType;
   title?: string;
-  useGlobalDefault?: boolean; // true = use global filter as default, false = use defaultDisplayType
+  useGlobalDefault?: boolean;
 }
 
 export const SetupPerformanceChart = ({ 
@@ -91,7 +148,6 @@ export const SetupPerformanceChart = ({
   const { strategies } = useStrategiesContext();
   const { isPrivacyMode } = usePrivacyMode();
   
-  // Calculate initial display type from global filter or prop
   const getInitialDisplayType = (): ChartDisplayType => {
     if (useGlobalDefault) {
       return mapGlobalToChartDisplay(displayMode);
@@ -99,7 +155,34 @@ export const SetupPerformanceChart = ({
     return defaultDisplayType;
   };
   
-  const [displayType, setDisplayType] = useState<ChartDisplayType>(getInitialDisplayType);
+  const [selectedMetrics, setSelectedMetrics] = useState<ChartDisplayType[]>([getInitialDisplayType()]);
+  const [metricConfigs, setMetricConfigs] = useState<MetricConfig[]>([
+    { type: 'column', color: DEFAULT_METRIC_COLORS[0] }
+  ]);
+  const displayType = selectedMetrics[0];
+
+  const getMetricColor = (index: number) => metricConfigs[index]?.color || DEFAULT_METRIC_COLORS[index] || DEFAULT_METRIC_COLORS[0];
+
+  const updateMetricConfig = (index: number, partial: Partial<MetricConfig>) => {
+    setMetricConfigs(prev => {
+      const next = [...prev];
+      next[index] = { ...next[index], ...partial };
+      return next;
+    });
+  };
+
+  const addMetric = () => {
+    if (selectedMetrics.length >= 3) return;
+    const allOptions: ChartDisplayType[] = ['dollar', 'winrate', 'tradecount', 'percent', 'avg_win', 'avg_loss', 'profit_factor', 'trade_expectancy'];
+    const next = allOptions.find(m => !selectedMetrics.includes(m)) || 'dollar';
+    setSelectedMetrics(prev => [...prev, next]);
+    setMetricConfigs(prev => [...prev, { type: 'column', color: DEFAULT_METRIC_COLORS[prev.length] || DEFAULT_METRIC_COLORS[0] }]);
+  };
+
+  const removeMetric = (index: number) => {
+    setSelectedMetrics(prev => prev.filter((_, i) => i !== index));
+    setMetricConfigs(prev => prev.filter((_, i) => i !== index));
+  };
 
   // Calculate total starting balance for Return (%) denominator
   const totalStartingBalance = useMemo(() => {
@@ -445,97 +528,77 @@ export const SetupPerformanceChart = ({
     return `${value >= 0 ? '+' : '-'}${currencyConfig.symbol}${absValue.toFixed(2)}`;
   };
 
+  const isMultiMetric = selectedMetrics.length > 1;
+  const multiMetricChartData = useMemo(() => {
+    if (!isMultiMetric) return setupData;
+    return setupData.map(item => {
+      const enhanced: Record<string, unknown> = { ...item };
+      selectedMetrics.forEach((metric, index) => {
+        enhanced[`metric_${index}`] = getMetricValue(item, metric);
+      });
+      return enhanced;
+    });
+  }, [setupData, selectedMetrics, isMultiMetric]);
+
+  const formatMetricTick = (value: number, metricType: ChartDisplayType): string => {
+    if (isPrivacyMode && ['dollar', 'percent', 'avg_win', 'avg_loss', 'largest_win', 'largest_loss', 'trade_expectancy', 'avg_net_trade_pnl', 'profit_factor', 'avg_daily_drawdown', 'largest_daily_loss'].includes(metricType)) return '**';
+    switch (metricType) {
+      case 'dollar': case 'avg_win': case 'avg_loss': case 'largest_win': case 'largest_loss': case 'trade_expectancy': case 'avg_net_trade_pnl': case 'avg_daily_drawdown': case 'largest_daily_loss': return `${currencyConfig.symbol}${value.toFixed(0)}`;
+      case 'percent': case 'winrate': case 'long_winrate': case 'short_winrate': return `${value.toFixed(0)}%`;
+      case 'tradecount': case 'tradecount_long': case 'tradecount_short': case 'avg_trades_per_day': case 'median_trades_per_day': case '90th_percentile_trades': case 'logged_days': case 'winning_days_count': case 'losing_days_count': case 'breakeven_days_count': return value % 1 === 0 ? `${Math.round(value)}` : value.toFixed(1);
+      case 'avg_hold_time': case 'longest_duration': return formatDurationTick(value);
+      case 'profit_factor': return value === Infinity ? '∞' : value.toFixed(2);
+      case 'avg_realized_r': case 'avg_planned_r': return value.toFixed(2);
+      default: return `${value}`;
+    }
+  };
+
   return (
     <Card className="bg-card border-border h-full">
-      <CardContent className="p-4">
-        {/* Header with Dropdowns */}
-        <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
-          <h3 className="text-sm font-medium text-muted-foreground">{title}</h3>
-          <div className="flex items-center gap-2">
-            <ChartDisplayDropdown
-              value={displayType}
-              onValueChange={(v) => setDisplayType(v)}
-            />
+      <CardContent className="p-4 pb-2">
+        <div className="flex flex-col gap-2 mb-4">
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <h3 className="text-sm font-medium text-muted-foreground">{title}</h3>
+            <ChartMetricSettingsPopover metrics={selectedMetrics} configs={metricConfigs} onConfigChange={updateMetricConfig} />
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            {selectedMetrics.map((metric, index) => (
+              <div key={`${metric}-${index}`} className="flex items-center gap-1.5">
+                {isMultiMetric && <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: getMetricColor(index) }} />}
+                <ChartDisplayDropdown value={metric} onValueChange={(v) => { const next = [...selectedMetrics]; next[index] = v; setSelectedMetrics(next); }} disabledValues={selectedMetrics.filter((_, i) => i !== index)} />
+                {selectedMetrics.length > 1 && (
+                  <button onClick={() => removeMetric(index)} className="p-0.5 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"><X className="w-3.5 h-3.5" /></button>
+                )}
+              </div>
+            ))}
+            {selectedMetrics.length < 3 && (
+              <Button variant="outline" size="sm" className="h-8 text-xs gap-1" onClick={addMetric}><Plus className="w-3.5 h-3.5" />Add Metric</Button>
+            )}
           </div>
         </div>
 
-        {/* Chart */}
-        <div className="h-[300px] w-full">
+        <div className={`w-full -mx-2 px-0 ${isMultiMetric ? 'h-[340px]' : 'h-[300px]'}`}>
           {setupData.length > 0 ? (
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart
-                data={setupData}
-                margin={{ top: 10, right: 10, left: 0, bottom: 20 }}
+              <ComposedChart
+                data={isMultiMetric ? multiMetricChartData : setupData}
+                margin={{ top: 10, right: -5, left: -10, bottom: isMultiMetric ? 30 : 20 }}
               >
-                <CartesianGrid 
-                  strokeDasharray="3 3" 
-                  stroke="hsl(var(--border))" 
-                  opacity={0.3}
-                  vertical={false}
-                />
-                <XAxis
-                  dataKey="setup"
-                  axisLine={{ stroke: 'hsl(var(--border))' }}
-                  tickLine={false}
-                  tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 10 }}
-                  dy={5}
-                />
-                <YAxis
-                  axisLine={{ stroke: 'hsl(var(--border))' }}
-                  tickLine={false}
-                  tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 10 }}
-                  tickFormatter={(value) => {
-                    // Mask $ and % values in privacy mode
-                    if (isPrivacyMode && (displayType === 'dollar' || displayType === 'percent' || displayType === 'avg_win' || displayType === 'avg_loss' || displayType === 'largest_win' || displayType === 'largest_loss' || displayType === 'trade_expectancy' || displayType === 'avg_net_trade_pnl' || displayType === 'profit_factor' || displayType === 'avg_daily_drawdown' || displayType === 'largest_daily_loss')) {
-                      return '**';
-                    }
-                    switch (displayType) {
-                      case 'dollar':
-                      case 'avg_win':
-                      case 'avg_loss':
-                      case 'largest_win':
-                      case 'largest_loss':
-                      case 'trade_expectancy':
-                      case 'avg_net_trade_pnl':
-                      case 'avg_daily_drawdown':
-                      case 'largest_daily_loss':
-                        return `${currencyConfig.symbol}${value.toFixed(0)}`;
-                      case 'percent':
-                      case 'winrate':
-                      case 'long_winrate':
-                      case 'short_winrate':
-                        return `${value.toFixed(0)}%`;
-                       case 'tradecount':
-                       case 'tradecount_long':
-                       case 'tradecount_short':
-                       case 'avg_trades_per_day':
-                       case 'median_trades_per_day':
-                       case '90th_percentile_trades':
-                       case 'logged_days':
-                         return value % 1 === 0 ? `${Math.round(value)}` : value.toFixed(1);
-                      case 'avg_hold_time':
-                      case 'longest_duration':
-                        return formatDurationTick(value);
-                      case 'profit_factor':
-                        return value === Infinity ? '∞' : value.toFixed(2);
-                      case 'avg_realized_r':
-                      case 'avg_planned_r':
-                        return value.toFixed(2);
-                      default:
-                        return `${value}`;
-                    }
-                  }}
-                  width={50}
-                />
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} vertical={false} />
+                <XAxis dataKey="setup" axisLine={{ stroke: 'hsl(var(--border))' }} tickLine={false} tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 10 }} dy={5} />
                 
-                {/* Reference Line at 0 - for monetary and percent modes */}
-                {(displayType === 'dollar' || displayType === 'percent' || displayType === 'avg_win' || displayType === 'avg_loss' || displayType === 'largest_win' || displayType === 'largest_loss' || displayType === 'trade_expectancy' || displayType === 'avg_net_trade_pnl' || displayType === 'avg_daily_drawdown' || displayType === 'largest_daily_loss' || displayType === 'avg_realized_r' || displayType === 'avg_planned_r') && (
-                  <ReferenceLine 
-                    y={0} 
-                    stroke="hsl(var(--muted-foreground))" 
-                    strokeWidth={1}
-                    strokeDasharray="3 3"
-                  />
+                {isMultiMetric ? (
+                  <>
+                    {selectedMetrics.map((metric, index) => (
+                      <YAxis key={metric} yAxisId={`y-${index}`} orientation={index === 0 ? 'left' : 'right'} axisLine={{ stroke: getMetricColor(index) }} tickLine={false} tick={{ fill: getMetricColor(index), fontSize: 10 }} tickFormatter={(value) => formatMetricTick(value, metric)} width={index === 0 ? 40 : 32} />
+                    ))}
+                  </>
+                ) : (
+                  <YAxis axisLine={{ stroke: 'hsl(var(--border))' }} tickLine={false} tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 10 }} tickFormatter={(value) => formatMetricTick(value, displayType)} width={50} />
+                )}
+                
+                {!isMultiMetric && (displayType === 'dollar' || displayType === 'percent' || displayType === 'avg_win' || displayType === 'avg_loss' || displayType === 'largest_win' || displayType === 'largest_loss' || displayType === 'trade_expectancy' || displayType === 'avg_net_trade_pnl' || displayType === 'avg_daily_drawdown' || displayType === 'largest_daily_loss' || displayType === 'avg_realized_r' || displayType === 'avg_planned_r') && (
+                  <ReferenceLine y={0} stroke="hsl(var(--muted-foreground))" strokeWidth={1} strokeDasharray="3 3" />
                 )}
 
                 <Tooltip
@@ -1109,7 +1172,7 @@ export const SetupPerformanceChart = ({
                     );
                   })}
                 </Bar>
-              </BarChart>
+              </ComposedChart>
             </ResponsiveContainer>
           ) : (
             <div className="flex items-center justify-center h-full border border-dashed border-border rounded-xl bg-muted/20">
