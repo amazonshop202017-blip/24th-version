@@ -1084,16 +1084,6 @@ export const InstrumentPerformanceChart = ({
                 </BarChart>
               </ResponsiveContainer>
 
-              {isMultiMetric && (
-                <div className="flex flex-wrap items-center justify-center gap-4 mt-2">
-                  {selectedMetrics.map((metric, index) => (
-                    <div key={metric} className="flex items-center gap-1.5">
-                      <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: METRIC_COLORS[index] }} />
-                      <span className="text-xs text-muted-foreground">{getDisplayLabel(metric)}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
             </>
           ) : (
             <div className="flex items-center justify-center h-full border border-dashed border-border rounded-xl bg-muted/20">
