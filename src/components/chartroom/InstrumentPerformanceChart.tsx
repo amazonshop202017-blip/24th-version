@@ -1060,12 +1060,19 @@ export const InstrumentPerformanceChart = ({
                       height={24}
                       content={() => (
                         <div className="flex flex-wrap items-center justify-center gap-4 mt-1">
-                          {selectedMetrics.map((metric, index) => (
-                            <div key={metric} className="flex items-center gap-1.5">
-                              <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: getMetricColor(index) }} />
-                              <span className="text-xs text-muted-foreground">{getDisplayLabel(metric)}</span>
-                            </div>
-                          ))}
+                          {selectedMetrics.map((metric, index) => {
+                            const config = metricConfigs[index];
+                            return (
+                              <div key={metric} className="flex items-center gap-1.5">
+                                {config?.type === 'line' ? (
+                                  <div className="w-4 h-0.5 rounded" style={{ backgroundColor: getMetricColor(index) }} />
+                                ) : (
+                                  <div className="w-2.5 h-2.5 rounded-sm" style={{ backgroundColor: getMetricColor(index) }} />
+                                )}
+                                <span className="text-xs text-muted-foreground">{getDisplayLabel(metric)}</span>
+                              </div>
+                            );
+                          })}
                         </div>
                       )}
                     />
@@ -1073,17 +1080,36 @@ export const InstrumentPerformanceChart = ({
 
                   {isMultiMetric ? (
                     <>
-                      {selectedMetrics.map((metric, index) => (
-                        <Bar
-                          key={metric}
-                          yAxisId={`y-${index}`}
-                          dataKey={`metric_${index}`}
-                          name={getDisplayLabel(metric)}
-                          fill={getMetricColor(index)}
-                          radius={[4, 4, 0, 0]}
-                          maxBarSize={30}
-                        />
-                      ))}
+                      {selectedMetrics.map((metric, index) => {
+                        const config = metricConfigs[index];
+                        const color = getMetricColor(index);
+                        if (config?.type === 'line') {
+                          return (
+                            <Line
+                              key={metric}
+                              yAxisId={`y-${index}`}
+                              type="monotone"
+                              dataKey={`metric_${index}`}
+                              name={getDisplayLabel(metric)}
+                              stroke={color}
+                              strokeWidth={2}
+                              dot={{ fill: color, r: 3 }}
+                              activeDot={{ r: 5 }}
+                            />
+                          );
+                        }
+                        return (
+                          <Bar
+                            key={metric}
+                            yAxisId={`y-${index}`}
+                            dataKey={`metric_${index}`}
+                            name={getDisplayLabel(metric)}
+                            fill={color}
+                            radius={[4, 4, 0, 0]}
+                            maxBarSize={30}
+                          />
+                        );
+                      })}
                     </>
                   ) : (
                     <Bar
