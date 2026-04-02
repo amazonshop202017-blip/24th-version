@@ -4,7 +4,7 @@ import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
 import { usePrivacyMode, PRIVACY_MASK } from '@/hooks/usePrivacyMode';
 import { useAccountsContext } from '@/contexts/AccountsContext';
 import { calculateTradeMetrics, Trade } from '@/types/trade';
-import { ChartDisplayType, mapGlobalToChartDisplay, formatDuration, formatDurationTick } from '@/hooks/useChartDisplayMode';
+import { ChartDisplayType, mapGlobalToChartDisplay, formatDuration, formatDurationTick, getDisplayLabel } from '@/hooks/useChartDisplayMode';
 import { buildGroupDailyCounts, getGroupTradingActivityStats } from '@/lib/tradingActivityStats';
 import { buildGroupedTradesMap, getGroupRiskDrawdownStats } from '@/lib/riskDrawdownStats';
 import {
@@ -17,9 +17,12 @@ import {
   ReferenceLine,
   CartesianGrid,
   Cell,
+  Legend,
 } from 'recharts';
 import { Card, CardContent } from '@/components/ui/card';
 import { ChartDisplayDropdown } from './ChartDisplayDropdown';
+import { Button } from '@/components/ui/button';
+import { X, Plus } from 'lucide-react';
 
 interface InstrumentData {
   symbol: string;
