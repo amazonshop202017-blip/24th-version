@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { Settings2 } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -10,17 +10,6 @@ export interface MetricConfig {
   type: ChartSeriesType;
   color: string;
 }
-
-const COLOR_PALETTE = [
-  'hsl(var(--primary))',
-  'hsl(var(--profit))',
-  'hsl(45 93% 47%)',
-  'hsl(280 65% 60%)',
-  'hsl(200 80% 55%)',
-  'hsl(340 75% 55%)',
-  'hsl(160 60% 45%)',
-  'hsl(25 90% 55%)',
-];
 
 interface ChartMetricSettingsPopoverProps {
   metrics: ChartDisplayType[];
@@ -63,7 +52,7 @@ export const ChartMetricSettingsPopover = ({
                     <SelectItem value="line">Line</SelectItem>
                   </SelectContent>
                 </Select>
-                <ColorPicker
+                <NativeColorPicker
                   color={config.color}
                   onChange={(c) => onConfigChange(index, { color: c })}
                 />
@@ -76,39 +65,46 @@ export const ChartMetricSettingsPopover = ({
   );
 };
 
-const ColorPicker = ({ color, onChange }: { color: string; onChange: (color: string) => void }) => {
-  const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
+const NativeColorPicker = ({ color, onChange }: { color: string; onChange: (color: string) => void }) => {
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
-        setOpen(false);
+  // Convert hsl(...) to a hex approximation for the native input
+  const getHexFromColor = useCallback((c: string): string => {
+    try {
+      const el = document.createElement('div');
+      el.style.color = c;
+      document.body.appendChild(el);
+      const computed = getComputedStyle(el).color;
+      document.body.removeChild(el);
+      const match = computed.match(/(\d+)/g);
+      if (match && match.length >= 3) {
+        const [r, g, b] = match.map(Number);
+        return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
       }
-    };
-    if (open) document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
-  }, [open]);
+    } catch {}
+    return '#3b82f6';
+  }, []);
+
+  const [hexValue, setHexValue] = useState(() => getHexFromColor(color));
 
   return (
-    <div className="relative" ref={ref}>
+    <div className="relative shrink-0">
       <button
-        onClick={() => setOpen(!open)}
-        className="w-6 h-6 rounded border border-border shrink-0 transition-transform hover:scale-110"
+        onClick={() => inputRef.current?.click()}
+        className="w-6 h-6 rounded border border-border transition-transform hover:scale-110 cursor-pointer"
         style={{ backgroundColor: color }}
       />
-      {open && (
-        <div className="absolute right-0 top-8 z-50 bg-popover border border-border rounded-lg p-2 shadow-lg grid grid-cols-4 gap-1.5">
-          {COLOR_PALETTE.map((c) => (
-            <button
-              key={c}
-              onClick={() => { onChange(c); setOpen(false); }}
-              className={`w-6 h-6 rounded border transition-transform hover:scale-110 ${c === color ? 'border-foreground ring-1 ring-foreground' : 'border-border'}`}
-              style={{ backgroundColor: c }}
-            />
-          ))}
-        </div>
-      )}
+      <input
+        ref={inputRef}
+        type="color"
+        value={hexValue}
+        onChange={(e) => {
+          const hex = e.target.value;
+          setHexValue(hex);
+          onChange(hex);
+        }}
+        className="absolute inset-0 w-6 h-6 opacity-0 cursor-pointer"
+      />
     </div>
   );
 };
