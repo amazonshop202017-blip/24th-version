@@ -598,30 +598,46 @@ export const InstrumentPerformanceChart = ({
                   
                   {isMultiMetric ? (
                     <>
-                      {selectedMetrics.map((metric, index) => (
-                        <YAxis
-                          key={metric}
-                          yAxisId={`y-${index}`}
-                          orientation={index === 0 ? 'left' : 'right'}
-                          axisLine={{ stroke: METRIC_COLORS[index] }}
-                          tickLine={false}
-                          tick={{ fill: METRIC_COLORS[index], fontSize: 10 }}
-                          tickFormatter={(value) => formatMetricTick(value, metric)}
-                          width={50}
-                          {...(index > 0 ? { 
-                            dx: index === 2 ? 10 : 0,
-                          } : {})}
-                        />
-                      ))}
+                      {selectedMetrics.map((metric, index) => {
+                        const values = instrumentData.map(d => getMetricValue(d, metric));
+                        const minVal = Math.min(...values);
+                        const maxVal = Math.max(...values);
+                        // If all values >= 0, start axis at 0; otherwise start at data min
+                        const domainMin = minVal >= 0 ? 0 : minVal;
+                        return (
+                          <YAxis
+                            key={metric}
+                            yAxisId={`y-${index}`}
+                            orientation={index === 0 ? 'left' : 'right'}
+                            axisLine={{ stroke: METRIC_COLORS[index] }}
+                            tickLine={false}
+                            tick={{ fill: METRIC_COLORS[index], fontSize: 10 }}
+                            tickFormatter={(value) => formatMetricTick(value, metric)}
+                            width={50}
+                            domain={[domainMin, 'auto']}
+                            {...(index > 0 ? { 
+                              dx: index === 2 ? 10 : 0,
+                            } : {})}
+                          />
+                        );
+                      })}
                     </>
                   ) : (
-                    <YAxis
-                      axisLine={{ stroke: 'hsl(var(--border))' }}
-                      tickLine={false}
-                      tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 10 }}
-                      tickFormatter={(value) => formatMetricTick(value, displayType)}
-                      width={50}
-                    />
+                    (() => {
+                      const values = instrumentData.map(d => d.displayValue);
+                      const minVal = Math.min(...values);
+                      const domainMin = minVal >= 0 ? 0 : minVal;
+                      return (
+                        <YAxis
+                          axisLine={{ stroke: 'hsl(var(--border))' }}
+                          tickLine={false}
+                          tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 10 }}
+                          tickFormatter={(value) => formatMetricTick(value, displayType)}
+                          width={50}
+                          domain={[domainMin, 'auto']}
+                        />
+                      );
+                    })()
                   )}
                   
                   {!isMultiMetric && (displayType === 'dollar' || displayType === 'percent' || displayType === 'avg_win' || displayType === 'avg_loss' || displayType === 'largest_win' || displayType === 'largest_loss' || displayType === 'trade_expectancy' || displayType === 'avg_net_trade_pnl' || displayType === 'avg_daily_drawdown' || displayType === 'largest_daily_loss' || displayType === 'avg_realized_r' || displayType === 'avg_planned_r') && (
