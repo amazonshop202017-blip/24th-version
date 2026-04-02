@@ -33,8 +33,11 @@ import {
 } from 'recharts';
 import {
   Card, CardContent } from '@/components/ui/card';
-import {
-  ChartDisplayDropdown } from './ChartDisplayDropdown';
+import { ChartDisplayDropdown } from './ChartDisplayDropdown';
+import { ChartMetricSettingsPopover, MetricConfig } from './ChartMetricSettingsPopover';
+import { Button } from '@/components/ui/button';
+import { X, Plus } from 'lucide-react';
+import { getDisplayLabel } from '@/hooks/useChartDisplayMode';
 
 interface SetupData {
   setup: string;
