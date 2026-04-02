@@ -1152,26 +1152,62 @@ export const SetupPerformanceChart = ({
                   }}
                 />
 
-                <Bar 
-                  dataKey="displayValue" 
-                  radius={[4, 4, 0, 0]}
-                  maxBarSize={40}
-                >
-                  {setupData.map((entry, index) => {
-                    let fillColor: string;
-                    if (displayType === 'winrate' || displayType === 'tradecount' || displayType === 'avg_hold_time' || displayType === 'longest_duration' || displayType === 'long_winrate' || displayType === 'short_winrate' || displayType === 'tradecount_long' || displayType === 'tradecount_short' || displayType === 'avg_planned_r') {
-                      fillColor = 'hsl(var(--primary))';
-                    } else {
-                      fillColor = entry.displayValue >= 0 ? 'hsl(var(--profit))' : 'hsl(var(--loss))';
-                    }
-                    return (
-                      <Cell 
-                        key={`cell-${index}`}
-                        fill={fillColor}
-                      />
-                    );
-                  })}
-                </Bar>
+                {isMultiMetric ? (
+                  <>
+                    {selectedMetrics.map((metric, index) => {
+                      const config = metricConfigs[index];
+                      const color = getMetricColor(index);
+                      if (config?.type === 'line') {
+                        return (
+                          <Line
+                            key={`line-${metric}-${index}`}
+                            yAxisId={`y-${index}`}
+                            type="monotone"
+                            dataKey={`metric_${index}`}
+                            stroke={color}
+                            strokeWidth={2}
+                            dot={{ fill: color, r: 3 }}
+                            activeDot={{ r: 5 }}
+                          />
+                        );
+                      }
+                      return (
+                        <Bar
+                          key={`bar-${metric}-${index}`}
+                          yAxisId={`y-${index}`}
+                          dataKey={`metric_${index}`}
+                          fill={color}
+                          radius={[4, 4, 0, 0]}
+                          maxBarSize={40}
+                        />
+                      );
+                    })}
+                  </>
+                ) : (
+                  <Bar 
+                    dataKey="displayValue" 
+                    radius={[4, 4, 0, 0]}
+                    maxBarSize={40}
+                  >
+                    {setupData.map((entry, index) => {
+                      const config = metricConfigs[0];
+                      let fillColor: string;
+                      if (config?.color && config.color !== DEFAULT_METRIC_COLORS[0]) {
+                        fillColor = config.color;
+                      } else if (displayType === 'winrate' || displayType === 'tradecount' || displayType === 'avg_hold_time' || displayType === 'longest_duration' || displayType === 'long_winrate' || displayType === 'short_winrate' || displayType === 'tradecount_long' || displayType === 'tradecount_short' || displayType === 'avg_planned_r') {
+                        fillColor = 'hsl(var(--primary))';
+                      } else {
+                        fillColor = entry.displayValue >= 0 ? 'hsl(var(--profit))' : 'hsl(var(--loss))';
+                      }
+                      return (
+                        <Cell 
+                          key={`cell-${index}`}
+                          fill={fillColor}
+                        />
+                      );
+                    })}
+                  </Bar>
+                )}
               </ComposedChart>
             </ResponsiveContainer>
           ) : (
