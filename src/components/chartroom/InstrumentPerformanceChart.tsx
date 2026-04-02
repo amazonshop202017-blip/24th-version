@@ -574,13 +574,13 @@ export const InstrumentPerformanceChart = ({
         </div>
 
         {/* Chart */}
-        <div className={`w-full ${isMultiMetric ? 'h-[340px]' : 'h-[300px]'}`}>
+        <div className={`w-full -mx-2 px-0 ${isMultiMetric ? 'h-[340px]' : 'h-[300px]'}`}>
           {instrumentData.length > 0 ? (
             <>
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart
                   data={isMultiMetric ? multiMetricChartData : instrumentData}
-                  margin={{ top: 10, right: isMultiMetric && selectedMetrics.length > 1 ? (selectedMetrics.length === 3 ? 90 : 50) : 10, left: 0, bottom: isMultiMetric ? 30 : 20 }}
+                  margin={{ top: 10, right: isMultiMetric && selectedMetrics.length > 1 ? (selectedMetrics.length === 3 ? 80 : 45) : 5, left: -10, bottom: isMultiMetric ? 30 : 5 }}
                 >
                   <CartesianGrid 
                     strokeDasharray="3 3" 
