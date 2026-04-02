@@ -32,7 +32,6 @@ import {
   Legend,
 } from 'recharts';
 import {
-  ComposedChart,
   Select,
   SelectContent,
   SelectItem,
