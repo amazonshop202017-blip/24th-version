@@ -142,7 +142,22 @@ export const InstrumentPerformanceChart = ({
   };
   
   const [selectedMetrics, setSelectedMetrics] = useState<ChartDisplayType[]>([getInitialDisplayType()]);
+  const [metricConfigs, setMetricConfigs] = useState<MetricConfig[]>([
+    { type: 'column', color: DEFAULT_METRIC_COLORS[0] }
+  ]);
   const displayType = selectedMetrics[0]; // Primary metric for backward compat
+
+  // Helper to get color for a metric index
+  const getMetricColor = (index: number) => metricConfigs[index]?.color || DEFAULT_METRIC_COLORS[index] || DEFAULT_METRIC_COLORS[0];
+
+  // Update metric configs when metrics are added/removed
+  const updateMetricConfig = (index: number, partial: Partial<MetricConfig>) => {
+    setMetricConfigs(prev => {
+      const next = [...prev];
+      next[index] = { ...next[index], ...partial };
+      return next;
+    });
+  };
 
   // Calculate total starting balance for Return (%) denominator
   const totalStartingBalance = useMemo(() => {
