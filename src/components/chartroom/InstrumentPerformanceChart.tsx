@@ -78,7 +78,7 @@ interface InstrumentData {
   tradesWithPlannedR: number;
 }
 
-const METRIC_COLORS = [
+const DEFAULT_METRIC_COLORS = [
   'hsl(var(--primary))',
   'hsl(var(--profit))',
   'hsl(45 93% 47%)',
