@@ -607,7 +607,7 @@ export const InstrumentPerformanceChart = ({
                           tickLine={false}
                           tick={{ fill: METRIC_COLORS[index], fontSize: 10 }}
                           tickFormatter={(value) => formatMetricTick(value, metric)}
-                          width={index === 0 ? 45 : 40}
+                          width={index === 0 ? 40 : 32}
                         />
                       ))}
                     </>
