@@ -609,7 +609,30 @@ export const TagsCommentsChart = ({
     return data;
   }, [filteredTrades, selectionType, selectedCommentCategory, selectedTagIds, displayType, totalStartingBalance, tags, classifyTradeOutcome]);
 
-  // Custom tooltip - content varies based on display type
+  const isMultiMetric = selectedMetrics.length > 1;
+  const multiMetricChartData = useMemo(() => {
+    if (!isMultiMetric) return groupedData;
+    return groupedData.map(item => {
+      const enhanced: Record<string, unknown> = { ...item };
+      selectedMetrics.forEach((metric, index) => {
+        enhanced[`metric_${index}`] = getMetricValue(item, metric);
+      });
+      return enhanced;
+    });
+  }, [groupedData, selectedMetrics, isMultiMetric]);
+
+  const formatMetricTick = (value: number, metricType: ChartDisplayType): string => {
+    if (isPrivacyMode && ['dollar', 'percent', 'avg_win', 'avg_loss', 'largest_win', 'largest_loss', 'trade_expectancy', 'avg_net_trade_pnl', 'profit_factor', 'avg_daily_drawdown', 'largest_daily_loss'].includes(metricType)) return '**';
+    switch (metricType) {
+      case 'dollar': case 'avg_win': case 'avg_loss': case 'largest_win': case 'largest_loss': case 'trade_expectancy': case 'avg_net_trade_pnl': case 'avg_daily_drawdown': case 'largest_daily_loss': return `${currencyConfig.symbol}${value.toFixed(0)}`;
+      case 'percent': case 'winrate': case 'long_winrate': case 'short_winrate': return `${value.toFixed(0)}%`;
+      case 'tradecount': case 'tradecount_long': case 'tradecount_short': case 'avg_trades_per_day': case 'median_trades_per_day': case '90th_percentile_trades': case 'logged_days': case 'winning_days_count': case 'losing_days_count': case 'breakeven_days_count': return value % 1 === 0 ? `${Math.round(value)}` : value.toFixed(1);
+      case 'avg_hold_time': case 'longest_duration': return formatDurationTick(value);
+      case 'profit_factor': return value === Infinity ? '∞' : value.toFixed(2);
+      case 'avg_realized_r': case 'avg_planned_r': return value.toFixed(2);
+      default: return `${value}`;
+    }
+  };
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (!active || !payload || !payload.length) return null;
     
