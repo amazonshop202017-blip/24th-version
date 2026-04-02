@@ -485,14 +485,46 @@ export const InstrumentPerformanceChart = ({
   return (
     <Card className="bg-card border-border h-full">
       <CardContent className="p-4">
-        {/* Header with Dropdowns */}
-        <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
-          <h3 className="text-sm font-medium text-muted-foreground">{title}</h3>
-          <div className="flex items-center gap-2">
-            <ChartDisplayDropdown
-              value={displayType}
-              onValueChange={(v) => setDisplayType(v)}
-            />
+        <div className="flex flex-col gap-2 mb-4">
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <h3 className="text-sm font-medium text-muted-foreground">{title}</h3>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            {selectedMetrics.map((metric, index) => (
+              <div key={`${metric}-${index}`} className="flex items-center gap-1.5">
+                {isMultiMetric && (
+                  <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: METRIC_COLORS[index] }} />
+                )}
+                <ChartDisplayDropdown
+                  value={metric}
+                  onValueChange={(v) => {
+                    const next = [...selectedMetrics];
+                    next[index] = v;
+                    setSelectedMetrics(next);
+                  }}
+                  disabledValues={selectedMetrics.filter((_, i) => i !== index)}
+                />
+                {index > 0 && (
+                  <button
+                    onClick={() => setSelectedMetrics(prev => prev.filter((_, i) => i !== index))}
+                    className="p-0.5 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
+            ))}
+            {selectedMetrics.length < 3 && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 text-xs gap-1"
+                onClick={addMetric}
+              >
+                <Plus className="w-3.5 h-3.5" />
+                Add Metric
+              </Button>
+            )}
           </div>
         </div>
 
