@@ -148,7 +148,7 @@ export const InstrumentPerformanceChart = ({
   const displayType = selectedMetrics[0]; // Primary metric for backward compat
 
   // Helper to get color for a metric index
-  const getMetricColor = (index: number) => metricConfigs[index]?.color || DEFAULT_METRIC_COLORS[index] || DEFAULT_METRIC_COLORS[0];
+  const getMetricColor = (index: number) => metricConfigs[index]?.color || DEFAULT_getMetricColor(index) || DEFAULT_METRIC_COLORS[0];
 
   // Update metric configs when metrics are added/removed
   const updateMetricConfig = (index: number, partial: Partial<MetricConfig>) => {
@@ -560,7 +560,7 @@ export const InstrumentPerformanceChart = ({
             {selectedMetrics.map((metric, index) => (
               <div key={`${metric}-${index}`} className="flex items-center gap-1.5">
                 {isMultiMetric && (
-                  <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: METRIC_COLORS[index] }} />
+                  <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: getMetricColor(index) }} />
                 )}
                 <ChartDisplayDropdown
                   value={metric}
@@ -600,7 +600,7 @@ export const InstrumentPerformanceChart = ({
           {instrumentData.length > 0 ? (
             <>
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart
+                <ComposedChart
                   data={isMultiMetric ? multiMetricChartData : instrumentData}
                   margin={{ top: 10, right: -5, left: -10, bottom: isMultiMetric ? 30 : 5 }}
                 >
@@ -625,9 +625,9 @@ export const InstrumentPerformanceChart = ({
                           key={metric}
                           yAxisId={`y-${index}`}
                           orientation={index === 0 ? 'left' : 'right'}
-                          axisLine={{ stroke: METRIC_COLORS[index] }}
+                          axisLine={{ stroke: getMetricColor(index) }}
                           tickLine={false}
-                          tick={{ fill: METRIC_COLORS[index], fontSize: 10 }}
+                          tick={{ fill: getMetricColor(index), fontSize: 10 }}
                           tickFormatter={(value) => formatMetricTick(value, metric)}
                           width={index === 0 ? 40 : 32}
                         />
@@ -668,7 +668,7 @@ export const InstrumentPerformanceChart = ({
                                 const val = getMetricValue(data, metric);
                                 return (
                                   <div key={metric} className="flex items-center gap-2">
-                                    <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: METRIC_COLORS[index] }} />
+                                    <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: getMetricColor(index) }} />
                                     <span className="text-muted-foreground">{getDisplayLabel(metric)}:</span>
                                     <span className="text-foreground font-mono">
                                       {isPrivacyMode ? PRIVACY_MASK : typeof val === 'number' ? val.toFixed(2) : val}
@@ -1055,7 +1055,7 @@ export const InstrumentPerformanceChart = ({
                         <div className="flex flex-wrap items-center justify-center gap-4 mt-1">
                           {selectedMetrics.map((metric, index) => (
                             <div key={metric} className="flex items-center gap-1.5">
-                              <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: METRIC_COLORS[index] }} />
+                              <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: getMetricColor(index) }} />
                               <span className="text-xs text-muted-foreground">{getDisplayLabel(metric)}</span>
                             </div>
                           ))}
@@ -1072,7 +1072,7 @@ export const InstrumentPerformanceChart = ({
                           yAxisId={`y-${index}`}
                           dataKey={`metric_${index}`}
                           name={getDisplayLabel(metric)}
-                          fill={METRIC_COLORS[index]}
+                          fill={getMetricColor(index)}
                           radius={[4, 4, 0, 0]}
                           maxBarSize={30}
                         />
@@ -1100,7 +1100,7 @@ export const InstrumentPerformanceChart = ({
                       })}
                     </Bar>
                   )}
-                </BarChart>
+                </ComposedChart>
               </ResponsiveContainer>
 
             </>
