@@ -473,10 +473,15 @@ export const InstrumentPerformanceChart = ({
 
   const addMetric = () => {
     if (selectedMetrics.length >= 3) return;
-    // Find first metric not already selected
     const allOptions: ChartDisplayType[] = ['dollar', 'winrate', 'tradecount', 'percent', 'avg_win', 'avg_loss', 'profit_factor', 'trade_expectancy'];
     const next = allOptions.find(m => !selectedMetrics.includes(m)) || 'dollar';
     setSelectedMetrics(prev => [...prev, next]);
+    setMetricConfigs(prev => [...prev, { type: 'column', color: DEFAULT_METRIC_COLORS[prev.length] || DEFAULT_METRIC_COLORS[0] }]);
+  };
+
+  const removeMetric = (index: number) => {
+    setSelectedMetrics(prev => prev.filter((_, i) => i !== index));
+    setMetricConfigs(prev => prev.filter((_, i) => i !== index));
   };
 
   // Format currency
