@@ -463,6 +463,51 @@ export const InstrumentPerformanceChart = ({
   };
 
   // Format currency
+  // Format Y-axis tick for a given metric type
+  const formatMetricTick = (value: number, metricType: ChartDisplayType): string => {
+    if (isPrivacyMode && ['dollar', 'percent', 'avg_win', 'avg_loss', 'largest_win', 'largest_loss', 'trade_expectancy', 'avg_net_trade_pnl', 'profit_factor', 'avg_daily_drawdown', 'largest_daily_loss'].includes(metricType)) {
+      return PRIVACY_MASK;
+    }
+    switch (metricType) {
+      case 'dollar':
+      case 'avg_win':
+      case 'avg_loss':
+      case 'largest_win':
+      case 'largest_loss':
+      case 'trade_expectancy':
+      case 'avg_net_trade_pnl':
+      case 'avg_daily_drawdown':
+      case 'largest_daily_loss':
+        return `${currencyConfig.symbol}${value.toFixed(0)}`;
+      case 'percent':
+      case 'winrate':
+      case 'long_winrate':
+      case 'short_winrate':
+        return `${value.toFixed(0)}%`;
+      case 'tradecount':
+      case 'tradecount_long':
+      case 'tradecount_short':
+      case 'avg_trades_per_day':
+      case 'median_trades_per_day':
+      case '90th_percentile_trades':
+      case 'logged_days':
+      case 'winning_days_count':
+      case 'losing_days_count':
+      case 'breakeven_days_count':
+        return value % 1 === 0 ? `${Math.round(value)}` : value.toFixed(1);
+      case 'avg_hold_time':
+      case 'longest_duration':
+        return formatDurationTick(value);
+      case 'profit_factor':
+        return value === Infinity ? '∞' : value.toFixed(2);
+      case 'avg_realized_r':
+      case 'avg_planned_r':
+        return value.toFixed(2);
+      default:
+        return `${value}`;
+    }
+  };
+
   const formatValue = (value: number, forceType?: ChartDisplayType): string => {
     const type = forceType || displayType;
     if (type === 'percent') {
@@ -535,7 +580,7 @@ export const InstrumentPerformanceChart = ({
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart
                   data={isMultiMetric ? multiMetricChartData : instrumentData}
-                  margin={{ top: 10, right: 10, left: 0, bottom: 20 }}
+                  margin={{ top: 10, right: isMultiMetric && selectedMetrics.length > 1 ? (selectedMetrics.length === 3 ? 100 : 55) : 10, left: 0, bottom: 20 }}
                 >
                   <CartesianGrid 
                     strokeDasharray="3 3" 
@@ -550,54 +595,36 @@ export const InstrumentPerformanceChart = ({
                     tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 10 }}
                     dy={5}
                   />
-                  <YAxis
-                    axisLine={{ stroke: 'hsl(var(--border))' }}
-                    tickLine={false}
-                    tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 10 }}
-                    tickFormatter={(value) => {
-                      if (isPrivacyMode && (displayType === 'dollar' || displayType === 'percent' || displayType === 'avg_win' || displayType === 'avg_loss' || displayType === 'largest_win' || displayType === 'largest_loss' || displayType === 'trade_expectancy' || displayType === 'avg_net_trade_pnl' || displayType === 'profit_factor' || displayType === 'avg_daily_drawdown' || displayType === 'largest_daily_loss')) {
-                        return PRIVACY_MASK;
-                      }
-                      switch (displayType) {
-                        case 'dollar':
-                        case 'avg_win':
-                        case 'avg_loss':
-                        case 'largest_win':
-                        case 'largest_loss':
-                        case 'trade_expectancy':
-                        case 'avg_net_trade_pnl':
-                        case 'avg_daily_drawdown':
-                        case 'largest_daily_loss':
-                          return `${currencyConfig.symbol}${value.toFixed(0)}`;
-                        case 'percent':
-                        case 'winrate':
-                        case 'long_winrate':
-                        case 'short_winrate':
-                          return `${value.toFixed(0)}%`;
-                        case 'tradecount':
-                        case 'tradecount_long':
-                        case 'tradecount_short':
-                        case 'avg_trades_per_day':
-                        case 'median_trades_per_day':
-                        case '90th_percentile_trades':
-                        case 'logged_days':
-                          return value % 1 === 0 ? `${Math.round(value)}` : value.toFixed(1);
-                        case 'avg_hold_time':
-                        case 'longest_duration':
-                          return formatDurationTick(value);
-                        case 'profit_factor':
-                          return value === Infinity ? '∞' : value.toFixed(2);
-                        case 'avg_realized_r':
-                        case 'avg_planned_r':
-                          return value.toFixed(2);
-                        default:
-                          return `${value}`;
-                      }
-                    }}
-                    width={50}
-                  />
                   
-                  {(displayType === 'dollar' || displayType === 'percent' || displayType === 'avg_win' || displayType === 'avg_loss' || displayType === 'largest_win' || displayType === 'largest_loss' || displayType === 'trade_expectancy' || displayType === 'avg_net_trade_pnl' || displayType === 'avg_daily_drawdown' || displayType === 'largest_daily_loss' || displayType === 'avg_realized_r' || displayType === 'avg_planned_r') && (
+                  {isMultiMetric ? (
+                    <>
+                      {selectedMetrics.map((metric, index) => (
+                        <YAxis
+                          key={metric}
+                          yAxisId={`y-${index}`}
+                          orientation={index === 0 ? 'left' : 'right'}
+                          axisLine={{ stroke: METRIC_COLORS[index] }}
+                          tickLine={false}
+                          tick={{ fill: METRIC_COLORS[index], fontSize: 10 }}
+                          tickFormatter={(value) => formatMetricTick(value, metric)}
+                          width={50}
+                          {...(index > 0 ? { 
+                            dx: index === 2 ? 10 : 0,
+                          } : {})}
+                        />
+                      ))}
+                    </>
+                  ) : (
+                    <YAxis
+                      axisLine={{ stroke: 'hsl(var(--border))' }}
+                      tickLine={false}
+                      tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 10 }}
+                      tickFormatter={(value) => formatMetricTick(value, displayType)}
+                      width={50}
+                    />
+                  )}
+                  
+                  {!isMultiMetric && (displayType === 'dollar' || displayType === 'percent' || displayType === 'avg_win' || displayType === 'avg_loss' || displayType === 'largest_win' || displayType === 'largest_loss' || displayType === 'trade_expectancy' || displayType === 'avg_net_trade_pnl' || displayType === 'avg_daily_drawdown' || displayType === 'largest_daily_loss' || displayType === 'avg_realized_r' || displayType === 'avg_planned_r') && (
                     <ReferenceLine 
                       y={0} 
                       stroke="hsl(var(--muted-foreground))" 
@@ -1006,6 +1033,7 @@ export const InstrumentPerformanceChart = ({
                       {selectedMetrics.map((metric, index) => (
                         <Bar
                           key={metric}
+                          yAxisId={`y-${index}`}
                           dataKey={`metric_${index}`}
                           name={getDisplayLabel(metric)}
                           fill={METRIC_COLORS[index]}
