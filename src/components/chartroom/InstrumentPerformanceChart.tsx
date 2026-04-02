@@ -148,7 +148,7 @@ export const InstrumentPerformanceChart = ({
   const displayType = selectedMetrics[0]; // Primary metric for backward compat
 
   // Helper to get color for a metric index
-  const getMetricColor = (index: number) => metricConfigs[index]?.color || DEFAULT_getMetricColor(index) || DEFAULT_METRIC_COLORS[0];
+  const getMetricColor = (index: number) => metricConfigs[index]?.color || DEFAULT_METRIC_COLORS[index] || DEFAULT_METRIC_COLORS[0];
 
   // Update metric configs when metrics are added/removed
   const updateMetricConfig = (index: number, partial: Partial<MetricConfig>) => {
