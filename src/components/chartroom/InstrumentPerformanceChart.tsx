@@ -555,13 +555,11 @@ export const InstrumentPerformanceChart = ({
         <div className="flex flex-col gap-2 mb-4">
           <div className="flex items-center justify-between flex-wrap gap-2">
             <h3 className="text-sm font-medium text-muted-foreground">{title}</h3>
-            {isMultiMetric && (
-              <ChartMetricSettingsPopover
-                metrics={selectedMetrics}
-                configs={metricConfigs}
-                onConfigChange={updateMetricConfig}
-              />
-            )}
+            <ChartMetricSettingsPopover
+              metrics={selectedMetrics}
+              configs={metricConfigs}
+              onConfigChange={updateMetricConfig}
+            />
           </div>
           <div className="flex flex-wrap items-center gap-2">
             {selectedMetrics.map((metric, index) => (
@@ -1111,6 +1109,15 @@ export const InstrumentPerformanceChart = ({
                         );
                       })}
                     </>
+                  ) : metricConfigs[0]?.type === 'line' ? (
+                    <Line
+                      type="monotone"
+                      dataKey="displayValue"
+                      stroke={metricConfigs[0]?.color || 'hsl(var(--primary))'}
+                      strokeWidth={2}
+                      dot={{ fill: metricConfigs[0]?.color || 'hsl(var(--primary))', r: 3 }}
+                      activeDot={{ r: 5 }}
+                    />
                   ) : (
                     <Bar
                       dataKey="displayValue" 
@@ -1118,8 +1125,11 @@ export const InstrumentPerformanceChart = ({
                       maxBarSize={40}
                     >
                       {instrumentData.map((entry, index) => {
+                        const customColor = metricConfigs[0]?.color;
                         let fillColor: string;
-                        if (displayType === 'winrate' || displayType === 'tradecount' || displayType === 'avg_hold_time' || displayType === 'longest_duration' || displayType === 'long_winrate' || displayType === 'short_winrate' || displayType === 'tradecount_long' || displayType === 'tradecount_short' || displayType === 'avg_planned_r') {
+                        if (customColor && customColor !== DEFAULT_METRIC_COLORS[0]) {
+                          fillColor = customColor;
+                        } else if (displayType === 'winrate' || displayType === 'tradecount' || displayType === 'avg_hold_time' || displayType === 'longest_duration' || displayType === 'long_winrate' || displayType === 'short_winrate' || displayType === 'tradecount_long' || displayType === 'tradecount_short' || displayType === 'avg_planned_r') {
                           fillColor = 'hsl(var(--primary))';
                         } else {
                           fillColor = entry.displayValue >= 0 ? 'hsl(var(--profit))' : 'hsl(var(--loss))';
