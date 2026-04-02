@@ -441,6 +441,27 @@ export const InstrumentPerformanceChart = ({
     return data;
   }, [filteredTrades, displayType, totalStartingBalance, classifyTradeOutcome]);
 
+  // Build multi-metric chart data
+  const isMultiMetric = selectedMetrics.length > 1;
+  const multiMetricChartData = useMemo(() => {
+    if (!isMultiMetric) return instrumentData;
+    return instrumentData.map(item => {
+      const enhanced: Record<string, unknown> = { ...item };
+      selectedMetrics.forEach((metric, index) => {
+        enhanced[`metric_${index}`] = getMetricValue(item, metric);
+      });
+      return enhanced;
+    });
+  }, [instrumentData, selectedMetrics, isMultiMetric]);
+
+  const addMetric = () => {
+    if (selectedMetrics.length >= 3) return;
+    // Find first metric not already selected
+    const allOptions: ChartDisplayType[] = ['dollar', 'winrate', 'tradecount', 'percent', 'avg_win', 'avg_loss', 'profit_factor', 'trade_expectancy'];
+    const next = allOptions.find(m => !selectedMetrics.includes(m)) || 'dollar';
+    setSelectedMetrics(prev => [...prev, next]);
+  };
+
   // Format currency
   const formatValue = (value: number, forceType?: ChartDisplayType): string => {
     const type = forceType || displayType;
