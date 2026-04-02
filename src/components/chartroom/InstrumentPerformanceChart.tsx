@@ -1157,28 +1157,55 @@ export const InstrumentPerformanceChart = ({
                   }}
                 />
 
-                <Bar
-                  dataKey="displayValue" 
-                  radius={[4, 4, 0, 0]}
-                  maxBarSize={40}
-                >
-                  {instrumentData.map((entry, index) => {
-                    let fillColor: string;
-                    if (displayType === 'winrate' || displayType === 'tradecount' || displayType === 'avg_hold_time' || displayType === 'longest_duration' || displayType === 'long_winrate' || displayType === 'short_winrate' || displayType === 'tradecount_long' || displayType === 'tradecount_short' || displayType === 'avg_planned_r') {
-                      fillColor = 'hsl(var(--primary))';
-                    } else {
-                      fillColor = entry.displayValue >= 0 ? 'hsl(var(--profit))' : 'hsl(var(--loss))';
-                    }
-                    return (
-                      <Cell 
-                        key={`cell-${index}`}
-                        fill={fillColor}
+                {isMultiMetric ? (
+                  <>
+                    {selectedMetrics.map((metric, index) => (
+                      <Bar
+                        key={metric}
+                        dataKey={`metric_${index}`}
+                        name={getDisplayLabel(metric)}
+                        fill={METRIC_COLORS[index]}
+                        radius={[4, 4, 0, 0]}
+                        maxBarSize={30}
                       />
-                    );
-                  })}
-                </Bar>
+                    ))}
+                  </>
+                ) : (
+                  <Bar
+                    dataKey="displayValue" 
+                    radius={[4, 4, 0, 0]}
+                    maxBarSize={40}
+                  >
+                    {instrumentData.map((entry, index) => {
+                      let fillColor: string;
+                      if (displayType === 'winrate' || displayType === 'tradecount' || displayType === 'avg_hold_time' || displayType === 'longest_duration' || displayType === 'long_winrate' || displayType === 'short_winrate' || displayType === 'tradecount_long' || displayType === 'tradecount_short' || displayType === 'avg_planned_r') {
+                        fillColor = 'hsl(var(--primary))';
+                      } else {
+                        fillColor = entry.displayValue >= 0 ? 'hsl(var(--profit))' : 'hsl(var(--loss))';
+                      }
+                      return (
+                        <Cell 
+                          key={`cell-${index}`}
+                          fill={fillColor}
+                        />
+                      );
+                    })}
+                  </Bar>
+                )}
               </BarChart>
             </ResponsiveContainer>
+
+            {/* Multi-metric legend */}
+            {isMultiMetric && (
+              <div className="flex flex-wrap items-center justify-center gap-4 mt-2">
+                {selectedMetrics.map((metric, index) => (
+                  <div key={metric} className="flex items-center gap-1.5">
+                    <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: METRIC_COLORS[index] }} />
+                    <span className="text-xs text-muted-foreground">{getDisplayLabel(metric)}</span>
+                  </div>
+                ))}
+              </div>
+            )}
           ) : (
             <div className="flex items-center justify-center h-full border border-dashed border-border rounded-xl bg-muted/20">
               <p className="text-muted-foreground text-sm">No closed trades available for analysis.</p>
