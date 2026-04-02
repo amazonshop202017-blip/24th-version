@@ -1,23 +1,23 @@
 import {
-  ComposedChart, useMemo, useState } from 'react';
+  useMemo, useState } from 'react';
 import {
-  ComposedChart, useFilteredTrades } from '@/hooks/useFilteredTrades';
+  useFilteredTrades } from '@/hooks/useFilteredTrades';
 import {
-  ComposedChart, useGlobalFilters } from '@/contexts/GlobalFiltersContext';
+  useGlobalFilters } from '@/contexts/GlobalFiltersContext';
 import {
-  ComposedChart, useAccountsContext } from '@/contexts/AccountsContext';
+  useAccountsContext } from '@/contexts/AccountsContext';
 import {
-  ComposedChart, usePrivacyMode } from '@/hooks/usePrivacyMode';
+  usePrivacyMode } from '@/hooks/usePrivacyMode';
 import {
-  ComposedChart, calculateTradeMetrics, Trade } from '@/types/trade';
+  calculateTradeMetrics, Trade } from '@/types/trade';
 import {
-  ComposedChart, useStrategiesContext } from '@/contexts/StrategiesContext';
+  useStrategiesContext } from '@/contexts/StrategiesContext';
 import {
-  ComposedChart, ChartDisplayType, mapGlobalToChartDisplay, formatDuration, formatDurationTick } from '@/hooks/useChartDisplayMode';
+  ChartDisplayType, mapGlobalToChartDisplay, formatDuration, formatDurationTick } from '@/hooks/useChartDisplayMode';
 import {
-  ComposedChart, buildGroupDailyCounts, getGroupTradingActivityStats } from '@/lib/tradingActivityStats';
+  buildGroupDailyCounts, getGroupTradingActivityStats } from '@/lib/tradingActivityStats';
 import {
-  ComposedChart, buildGroupedTradesMap, getGroupRiskDrawdownStats } from '@/lib/riskDrawdownStats';
+  buildGroupedTradesMap, getGroupRiskDrawdownStats } from '@/lib/riskDrawdownStats';
 import {
   ComposedChart,
   Bar,
