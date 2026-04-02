@@ -533,7 +533,7 @@ export const InstrumentPerformanceChart = ({
           {instrumentData.length > 0 ? (
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
-                data={instrumentData}
+                data={isMultiMetric ? multiMetricChartData : instrumentData}
                 margin={{ top: 10, right: 10, left: 0, bottom: 20 }}
               >
                 <CartesianGrid 
