@@ -35,6 +35,39 @@ import {
   Card, CardContent } from '@/components/ui/card';
 import {
   ChartDisplayDropdown } from './ChartDisplayDropdown';
+import { ChartMetricSettingsPopover, MetricConfig } from './ChartMetricSettingsPopover';
+import { Button } from '@/components/ui/button';
+import { X, Plus } from 'lucide-react';
+import { getDisplayLabel } from '@/hooks/useChartDisplayMode';
+
+const DEFAULT_METRIC_COLORS = [
+  'hsl(var(--primary))'  ,
+  'hsl(var(--profit))'  ,
+  'hsl(45 93% 47%)'  ,
+];
+
+const getMetricValue = (data: GroupedData, metric: ChartDisplayType): number => {
+  switch (metric) {
+    case 'dollar': return data.totalPnl;
+    case 'percent': return data.totalPercent;
+    case 'winrate': return data.winrate;
+    case 'tradecount': return data.tradeCount;
+    case 'avg_hold_time': return data.avgHoldTimeMinutes;
+    case 'longest_duration': return data.longestDurationMinutes;
+    case 'long_winrate': return data.longWinrate;
+    case 'short_winrate': return data.shortWinrate;
+    case 'tradecount_long': return data.longTradeCount;
+    case 'tradecount_short': return data.shortTradeCount;
+    case 'avg_win': return data.avgWin;
+    case 'avg_loss': return data.avgLoss;
+    case 'largest_win': return data.largestWin;
+    case 'largest_loss': return data.largestLoss;
+    case 'profit_factor': return data.profitFactor;
+    case 'trade_expectancy': return data.tradeExpectancy;
+    case 'avg_net_trade_pnl': return data.avgNetTradePnl;
+    default: return data.totalPnl;
+  }
+};
 
 type SelectionType = 'tradeComments' | 'tags';
 type CommentCategory = 'entryComments' | 'tradeManagement' | 'exitComments';
@@ -120,7 +153,26 @@ export const TagsCommentsChart = ({
     return defaultDisplayType;
   };
 
-  const [displayType, setDisplayType] = useState<ChartDisplayType>(getInitialDisplayType);
+  const [selectedMetrics, setSelectedMetrics] = useState<ChartDisplayType[]>([getInitialDisplayType()]);
+  const [metricConfigs, setMetricConfigs] = useState<MetricConfig[]>([
+    { type: 'column', color: DEFAULT_METRIC_COLORS[0] }
+  ]);
+  const displayType = selectedMetrics[0];
+  const getMetricColor = (index: number) => metricConfigs[index]?.color || DEFAULT_METRIC_COLORS[index] || DEFAULT_METRIC_COLORS[0];
+  const updateMetricConfig = (index: number, partial: Partial<MetricConfig>) => {
+    setMetricConfigs(prev => { const next = [...prev]; next[index] = { ...next[index], ...partial }; return next; });
+  };
+  const addMetric = () => {
+    if (selectedMetrics.length >= 3) return;
+    const allOptions: ChartDisplayType[] = ['dollar', 'winrate', 'tradecount', 'percent'];
+    const next = allOptions.find(m => !selectedMetrics.includes(m)) || 'dollar';
+    setSelectedMetrics(prev => [...prev, next]);
+    setMetricConfigs(prev => [...prev, { type: 'column', color: DEFAULT_METRIC_COLORS[prev.length] || DEFAULT_METRIC_COLORS[0] }]);
+  };
+  const removeMetric = (index: number) => {
+    setSelectedMetrics(prev => prev.filter((_, i) => i !== index));
+    setMetricConfigs(prev => prev.filter((_, i) => i !== index));
+  };
 
   // Calculate total starting balance
   const totalStartingBalance = useMemo(() => {
@@ -912,7 +964,7 @@ export const TagsCommentsChart = ({
           <div className="flex items-center gap-3 flex-wrap">
             <ChartDisplayDropdown
               value={displayType}
-              onValueChange={(v) => setDisplayType(v)}
+              onValueChange={(v) => { const next = [...selectedMetrics]; next[0] = v; setSelectedMetrics(next); }}
             />
           </div>
 

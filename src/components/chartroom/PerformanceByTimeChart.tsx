@@ -648,7 +648,7 @@ export const PerformanceByTimeChart = ({
           <div className="flex items-center gap-3 flex-wrap">
             <ChartDisplayDropdown
               value={displayType}
-              onValueChange={(v) => setDisplayType(v)}
+              onValueChange={(v) => { const next = [...selectedMetrics]; next[0] = v; setSelectedMetrics(next); }}
             />
 
             <Select value={dateSetting} onValueChange={(v) => setDateSetting(v as DateSettingType)}>

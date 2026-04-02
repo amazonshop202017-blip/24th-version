@@ -537,7 +537,7 @@ export const SetupPerformanceChart = ({
           <div className="flex items-center gap-2">
             <ChartDisplayDropdown
               value={displayType}
-              onValueChange={(v) => setDisplayType(v)}
+              onValueChange={(v) => { const next = [...selectedMetrics]; next[0] = v; setSelectedMetrics(next); }}
             />
           </div>
         </div>
