@@ -531,681 +531,525 @@ export const InstrumentPerformanceChart = ({
         {/* Chart */}
         <div className="h-[300px] w-full">
           {instrumentData.length > 0 ? (
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart
-                data={isMultiMetric ? multiMetricChartData : instrumentData}
-                margin={{ top: 10, right: 10, left: 0, bottom: 20 }}
-              >
-                <CartesianGrid 
-                  strokeDasharray="3 3" 
-                  stroke="hsl(var(--border))" 
-                  opacity={0.3}
-                  vertical={false}
-                />
-                <XAxis
-                  dataKey="symbol"
-                  axisLine={{ stroke: 'hsl(var(--border))' }}
-                  tickLine={false}
-                  tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 10 }}
-                  dy={5}
-                />
-                <YAxis
-                  axisLine={{ stroke: 'hsl(var(--border))' }}
-                  tickLine={false}
-                  tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 10 }}
-                  tickFormatter={(value) => {
-                    // Hide Y-axis values for monetary modes when privacy is active
-                    if (isPrivacyMode && (displayType === 'dollar' || displayType === 'percent' || displayType === 'avg_win' || displayType === 'avg_loss' || displayType === 'largest_win' || displayType === 'largest_loss' || displayType === 'trade_expectancy' || displayType === 'avg_net_trade_pnl' || displayType === 'profit_factor' || displayType === 'avg_daily_drawdown' || displayType === 'largest_daily_loss')) {
-                      return PRIVACY_MASK;
-                    }
-                    switch (displayType) {
-                      case 'dollar':
-                      case 'avg_win':
-                      case 'avg_loss':
-                      case 'largest_win':
-                      case 'largest_loss':
-                      case 'trade_expectancy':
-                      case 'avg_net_trade_pnl':
-                      case 'avg_daily_drawdown':
-                      case 'largest_daily_loss':
-                        return `${currencyConfig.symbol}${value.toFixed(0)}`;
-                      case 'percent':
-                      case 'winrate':
-                      case 'long_winrate':
-                      case 'short_winrate':
-                        return `${value.toFixed(0)}%`;
-                       case 'tradecount':
-                       case 'tradecount_long':
-                       case 'tradecount_short':
-                       case 'avg_trades_per_day':
-                       case 'median_trades_per_day':
-                       case '90th_percentile_trades':
-                       case 'logged_days':
-                         return value % 1 === 0 ? `${Math.round(value)}` : value.toFixed(1);
-                      case 'avg_hold_time':
-                      case 'longest_duration':
-                        return formatDurationTick(value);
-                      case 'profit_factor':
-                        return value === Infinity ? '∞' : value.toFixed(2);
-                      case 'avg_realized_r':
-                      case 'avg_planned_r':
-                        return value.toFixed(2);
-                      default:
-                        return `${value}`;
-                    }
-                  }}
-                  width={50}
-                />
-                
-                {/* Reference Line at 0 - for monetary and percent modes */}
-                {(displayType === 'dollar' || displayType === 'percent' || displayType === 'avg_win' || displayType === 'avg_loss' || displayType === 'largest_win' || displayType === 'largest_loss' || displayType === 'trade_expectancy' || displayType === 'avg_net_trade_pnl' || displayType === 'avg_daily_drawdown' || displayType === 'largest_daily_loss' || displayType === 'avg_realized_r' || displayType === 'avg_planned_r') && (
-                  <ReferenceLine 
-                    y={0} 
-                    stroke="hsl(var(--muted-foreground))" 
-                    strokeWidth={1}
-                    strokeDasharray="3 3"
+            <>
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={isMultiMetric ? multiMetricChartData : instrumentData}
+                  margin={{ top: 10, right: 10, left: 0, bottom: 20 }}
+                >
+                  <CartesianGrid 
+                    strokeDasharray="3 3" 
+                    stroke="hsl(var(--border))" 
+                    opacity={0.3}
+                    vertical={false}
                   />
-                )}
+                  <XAxis
+                    dataKey="symbol"
+                    axisLine={{ stroke: 'hsl(var(--border))' }}
+                    tickLine={false}
+                    tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 10 }}
+                    dy={5}
+                  />
+                  <YAxis
+                    axisLine={{ stroke: 'hsl(var(--border))' }}
+                    tickLine={false}
+                    tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 10 }}
+                    tickFormatter={(value) => {
+                      if (isPrivacyMode && (displayType === 'dollar' || displayType === 'percent' || displayType === 'avg_win' || displayType === 'avg_loss' || displayType === 'largest_win' || displayType === 'largest_loss' || displayType === 'trade_expectancy' || displayType === 'avg_net_trade_pnl' || displayType === 'profit_factor' || displayType === 'avg_daily_drawdown' || displayType === 'largest_daily_loss')) {
+                        return PRIVACY_MASK;
+                      }
+                      switch (displayType) {
+                        case 'dollar':
+                        case 'avg_win':
+                        case 'avg_loss':
+                        case 'largest_win':
+                        case 'largest_loss':
+                        case 'trade_expectancy':
+                        case 'avg_net_trade_pnl':
+                        case 'avg_daily_drawdown':
+                        case 'largest_daily_loss':
+                          return `${currencyConfig.symbol}${value.toFixed(0)}`;
+                        case 'percent':
+                        case 'winrate':
+                        case 'long_winrate':
+                        case 'short_winrate':
+                          return `${value.toFixed(0)}%`;
+                        case 'tradecount':
+                        case 'tradecount_long':
+                        case 'tradecount_short':
+                        case 'avg_trades_per_day':
+                        case 'median_trades_per_day':
+                        case '90th_percentile_trades':
+                        case 'logged_days':
+                          return value % 1 === 0 ? `${Math.round(value)}` : value.toFixed(1);
+                        case 'avg_hold_time':
+                        case 'longest_duration':
+                          return formatDurationTick(value);
+                        case 'profit_factor':
+                          return value === Infinity ? '∞' : value.toFixed(2);
+                        case 'avg_realized_r':
+                        case 'avg_planned_r':
+                          return value.toFixed(2);
+                        default:
+                          return `${value}`;
+                      }
+                    }}
+                    width={50}
+                  />
+                  
+                  {(displayType === 'dollar' || displayType === 'percent' || displayType === 'avg_win' || displayType === 'avg_loss' || displayType === 'largest_win' || displayType === 'largest_loss' || displayType === 'trade_expectancy' || displayType === 'avg_net_trade_pnl' || displayType === 'avg_daily_drawdown' || displayType === 'largest_daily_loss' || displayType === 'avg_realized_r' || displayType === 'avg_planned_r') && (
+                    <ReferenceLine 
+                      y={0} 
+                      stroke="hsl(var(--muted-foreground))" 
+                      strokeWidth={1}
+                      strokeDasharray="3 3"
+                    />
+                  )}
 
-                <Tooltip
-                  cursor={{ fill: 'hsl(var(--muted))', opacity: 0.3 }}
-                  content={({ active, payload }) => {
-                    if (!active || !payload || payload.length === 0) return null;
-                    const data = payload[0].payload as InstrumentData;
-                    
-                    if (displayType === 'tradecount') {
-                      return (
-                        <div className="bg-card border border-border rounded-lg p-3 shadow-lg">
-                          <p className="text-foreground font-medium mb-2">{data.symbol}</p>
-                          <p className="text-sm text-foreground">
-                            Trade Count: {data.tradeCount}
-                          </p>
-                        </div>
-                      );
-                    }
-                    
-                    if (displayType === 'avg_hold_time') {
-                      return (
-                        <div className="bg-card border border-border rounded-lg p-3 shadow-lg">
-                          <p className="text-foreground font-medium mb-2">{data.symbol}</p>
-                          <div className="space-y-1 text-sm">
-                            <p className="text-foreground">
-                              Avg Hold Time: {formatDuration(data.avgHoldTimeMinutes)}
-                            </p>
-                            <p className="text-muted-foreground">
-                              Total Trades: {data.tradeCount}
-                            </p>
+                  <Tooltip
+                    cursor={{ fill: 'hsl(var(--muted))', opacity: 0.3 }}
+                    content={({ active, payload }) => {
+                      if (!active || !payload || payload.length === 0) return null;
+                      const data = payload[0].payload as InstrumentData;
+
+                      // Multi-metric tooltip
+                      if (isMultiMetric) {
+                        return (
+                          <div className="bg-card border border-border rounded-lg p-3 shadow-lg">
+                            <p className="text-foreground font-medium mb-2">{data.symbol}</p>
+                            <div className="space-y-1.5 text-sm">
+                              {selectedMetrics.map((metric, index) => {
+                                const val = getMetricValue(data, metric);
+                                return (
+                                  <div key={metric} className="flex items-center gap-2">
+                                    <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: METRIC_COLORS[index] }} />
+                                    <span className="text-muted-foreground">{getDisplayLabel(metric)}:</span>
+                                    <span className="text-foreground font-mono">
+                                      {isPrivacyMode ? PRIVACY_MASK : typeof val === 'number' ? val.toFixed(2) : val}
+                                    </span>
+                                  </div>
+                                );
+                              })}
+                            </div>
                           </div>
-                        </div>
-                      );
-                    }
-                    
-                    if (displayType === 'longest_duration') {
-                      return (
-                        <div className="bg-card border border-border rounded-lg p-3 shadow-lg">
-                          <p className="text-foreground font-medium mb-2">{data.symbol}</p>
-                          <div className="space-y-1 text-sm">
-                            <p className="text-foreground">
-                              Longest Duration: {formatDuration(data.longestDurationMinutes)}
-                            </p>
-                            <p className="text-muted-foreground">
-                              Total Trades: {data.tradeCount}
-                            </p>
+                        );
+                      }
+
+                      // Single metric tooltips (existing behavior)
+                      if (displayType === 'tradecount') {
+                        return (
+                          <div className="bg-card border border-border rounded-lg p-3 shadow-lg">
+                            <p className="text-foreground font-medium mb-2">{data.symbol}</p>
+                            <p className="text-sm text-foreground">Trade Count: {data.tradeCount}</p>
                           </div>
-                        </div>
-                      );
-                    }
-                    
-                    if (displayType === 'winrate') {
-                      return (
-                        <div className="bg-card border border-border rounded-lg p-3 shadow-lg">
-                          <p className="text-foreground font-medium mb-2">{data.symbol}</p>
-                          <div className="space-y-1 text-sm">
-                            <p className="text-foreground">
-                              Winrate: {data.winrate.toFixed(1)}%
-                            </p>
-                            <p className="text-muted-foreground">
-                              Wins: {data.winCount}
-                            </p>
-                            <p className="text-muted-foreground">
-                              Losses: {data.lossCount}
-                            </p>
-                            <p className="text-muted-foreground">
-                              Breakeven: {data.beCount}
-                            </p>
+                        );
+                      }
+                      if (displayType === 'avg_hold_time') {
+                        return (
+                          <div className="bg-card border border-border rounded-lg p-3 shadow-lg">
+                            <p className="text-foreground font-medium mb-2">{data.symbol}</p>
+                            <div className="space-y-1 text-sm">
+                              <p className="text-foreground">Avg Hold Time: {formatDuration(data.avgHoldTimeMinutes)}</p>
+                              <p className="text-muted-foreground">Total Trades: {data.tradeCount}</p>
+                            </div>
                           </div>
-                        </div>
-                      );
-                    }
-                    
-                    if (displayType === 'long_winrate') {
-                      const longTotal = data.longWinCount + data.longLossCount;
-                      return (
-                        <div className="bg-card border border-border rounded-lg p-3 shadow-lg">
-                          <p className="text-foreground font-medium mb-2">{data.symbol}</p>
-                          <div className="space-y-1 text-sm">
-                            <p className="text-foreground">
-                              Long Win %: {data.longWinrate.toFixed(1)}%
-                            </p>
-                            <p className="text-muted-foreground">
-                              Long Wins: {data.longWinCount}
-                            </p>
-                            <p className="text-muted-foreground">
-                              Long Losses: {data.longLossCount}
-                            </p>
-                            <p className="text-muted-foreground">
-                              Total Long Trades: {longTotal}
-                            </p>
+                        );
+                      }
+                      if (displayType === 'longest_duration') {
+                        return (
+                          <div className="bg-card border border-border rounded-lg p-3 shadow-lg">
+                            <p className="text-foreground font-medium mb-2">{data.symbol}</p>
+                            <div className="space-y-1 text-sm">
+                              <p className="text-foreground">Longest Duration: {formatDuration(data.longestDurationMinutes)}</p>
+                              <p className="text-muted-foreground">Total Trades: {data.tradeCount}</p>
+                            </div>
                           </div>
-                        </div>
-                      );
-                    }
-                    
-                    if (displayType === 'short_winrate') {
-                      const shortTotal = data.shortWinCount + data.shortLossCount;
-                      return (
-                        <div className="bg-card border border-border rounded-lg p-3 shadow-lg">
-                          <p className="text-foreground font-medium mb-2">{data.symbol}</p>
-                          <div className="space-y-1 text-sm">
-                            <p className="text-foreground">
-                              Short Win %: {data.shortWinrate.toFixed(1)}%
-                            </p>
-                            <p className="text-muted-foreground">
-                              Short Wins: {data.shortWinCount}
-                            </p>
-                            <p className="text-muted-foreground">
-                              Short Losses: {data.shortLossCount}
-                            </p>
-                            <p className="text-muted-foreground">
-                              Total Short Trades: {shortTotal}
-                            </p>
+                        );
+                      }
+                      if (displayType === 'winrate') {
+                        return (
+                          <div className="bg-card border border-border rounded-lg p-3 shadow-lg">
+                            <p className="text-foreground font-medium mb-2">{data.symbol}</p>
+                            <div className="space-y-1 text-sm">
+                              <p className="text-foreground">Winrate: {data.winrate.toFixed(1)}%</p>
+                              <p className="text-muted-foreground">Wins: {data.winCount}</p>
+                              <p className="text-muted-foreground">Losses: {data.lossCount}</p>
+                              <p className="text-muted-foreground">Breakeven: {data.beCount}</p>
+                            </div>
                           </div>
-                        </div>
-                      );
-                    }
-                    
-                    if (displayType === 'tradecount_long') {
-                      return (
-                        <div className="bg-card border border-border rounded-lg p-3 shadow-lg">
-                          <p className="text-foreground font-medium mb-2">{data.symbol}</p>
-                          <div className="space-y-1 text-sm">
-                            <p className="text-foreground">
-                              Trade Count (Long): {data.longTradeCount}
-                            </p>
-                            <p className="text-muted-foreground">
-                              Direction: Long
-                            </p>
+                        );
+                      }
+                      if (displayType === 'long_winrate') {
+                        const longTotal = data.longWinCount + data.longLossCount;
+                        return (
+                          <div className="bg-card border border-border rounded-lg p-3 shadow-lg">
+                            <p className="text-foreground font-medium mb-2">{data.symbol}</p>
+                            <div className="space-y-1 text-sm">
+                              <p className="text-foreground">Long Win %: {data.longWinrate.toFixed(1)}%</p>
+                              <p className="text-muted-foreground">Long Wins: {data.longWinCount}</p>
+                              <p className="text-muted-foreground">Long Losses: {data.longLossCount}</p>
+                              <p className="text-muted-foreground">Total Long Trades: {longTotal}</p>
+                            </div>
                           </div>
-                        </div>
-                      );
-                    }
-                    
-                    if (displayType === 'tradecount_short') {
-                      return (
-                        <div className="bg-card border border-border rounded-lg p-3 shadow-lg">
-                          <p className="text-foreground font-medium mb-2">{data.symbol}</p>
-                          <div className="space-y-1 text-sm">
-                            <p className="text-foreground">
-                              Trade Count (Short): {data.shortTradeCount}
-                            </p>
-                            <p className="text-muted-foreground">
-                              Direction: Short
-                            </p>
+                        );
+                      }
+                      if (displayType === 'short_winrate') {
+                        const shortTotal = data.shortWinCount + data.shortLossCount;
+                        return (
+                          <div className="bg-card border border-border rounded-lg p-3 shadow-lg">
+                            <p className="text-foreground font-medium mb-2">{data.symbol}</p>
+                            <div className="space-y-1 text-sm">
+                              <p className="text-foreground">Short Win %: {data.shortWinrate.toFixed(1)}%</p>
+                              <p className="text-muted-foreground">Short Wins: {data.shortWinCount}</p>
+                              <p className="text-muted-foreground">Short Losses: {data.shortLossCount}</p>
+                              <p className="text-muted-foreground">Total Short Trades: {shortTotal}</p>
+                            </div>
                           </div>
-                        </div>
-                      );
-                    }
-                    
-                    if (displayType === 'avg_win') {
-                      return (
-                        <div className="bg-card border border-border rounded-lg p-3 shadow-lg">
-                          <p className="text-foreground font-medium mb-2">{data.symbol}</p>
-                          <div className="space-y-1 text-sm">
-                            <p className={data.avgWin >= 0 ? 'text-profit' : 'text-foreground'}>
-                              Avg Win: {isPrivacyMode ? PRIVACY_MASK : `${currencyConfig.symbol}${data.avgWin.toFixed(2)}`}
-                            </p>
-                            <p className="text-muted-foreground">
-                              Winning Trades: {data.winCount}
-                            </p>
+                        );
+                      }
+                      if (displayType === 'tradecount_long') {
+                        return (
+                          <div className="bg-card border border-border rounded-lg p-3 shadow-lg">
+                            <p className="text-foreground font-medium mb-2">{data.symbol}</p>
+                            <div className="space-y-1 text-sm">
+                              <p className="text-foreground">Trade Count (Long): {data.longTradeCount}</p>
+                              <p className="text-muted-foreground">Direction: Long</p>
+                            </div>
                           </div>
-                        </div>
-                      );
-                    }
-                    
-                    if (displayType === 'avg_loss') {
-                      return (
-                        <div className="bg-card border border-border rounded-lg p-3 shadow-lg">
-                          <p className="text-foreground font-medium mb-2">{data.symbol}</p>
-                          <div className="space-y-1 text-sm">
-                            <p className={data.avgLoss < 0 ? 'text-loss' : 'text-foreground'}>
-                              Avg Loss: {isPrivacyMode ? PRIVACY_MASK : `${data.avgLoss < 0 ? '-' : ''}${currencyConfig.symbol}${Math.abs(data.avgLoss).toFixed(2)}`}
-                            </p>
-                            <p className="text-muted-foreground">
-                              Losing Trades: {data.lossCount}
-                            </p>
+                        );
+                      }
+                      if (displayType === 'tradecount_short') {
+                        return (
+                          <div className="bg-card border border-border rounded-lg p-3 shadow-lg">
+                            <p className="text-foreground font-medium mb-2">{data.symbol}</p>
+                            <div className="space-y-1 text-sm">
+                              <p className="text-foreground">Trade Count (Short): {data.shortTradeCount}</p>
+                              <p className="text-muted-foreground">Direction: Short</p>
+                            </div>
                           </div>
-                        </div>
-                      );
-                    }
-                    
-                    if (displayType === 'largest_win') {
-                      return (
-                        <div className="bg-card border border-border rounded-lg p-3 shadow-lg">
-                          <p className="text-foreground font-medium mb-2">{data.symbol}</p>
-                          <div className="space-y-1 text-sm">
-                            <p className={data.largestWin >= 0 ? 'text-profit' : 'text-foreground'}>
-                              Largest Win: {isPrivacyMode ? PRIVACY_MASK : `${currencyConfig.symbol}${data.largestWin.toFixed(2)}`}
-                            </p>
-                            <p className="text-muted-foreground">
-                              Winning Trades: {data.winCount}
-                            </p>
-                          </div>
-                        </div>
-                      );
-                    }
-                    
-                    if (displayType === 'largest_loss') {
-                      return (
-                        <div className="bg-card border border-border rounded-lg p-3 shadow-lg">
-                          <p className="text-foreground font-medium mb-2">{data.symbol}</p>
-                          <div className="space-y-1 text-sm">
-                            <p className={data.largestLoss < 0 ? 'text-loss' : 'text-foreground'}>
-                              Largest Loss: {isPrivacyMode ? PRIVACY_MASK : `${data.largestLoss < 0 ? '-' : ''}${currencyConfig.symbol}${Math.abs(data.largestLoss).toFixed(2)}`}
-                            </p>
-                            <p className="text-muted-foreground">
-                              Losing Trades: {data.lossCount}
-                            </p>
-                          </div>
-                        </div>
-                      );
-                    }
-                    
-                    if (displayType === 'avg_trades_per_day') {
-                      return (
-                        <div className="bg-card border border-border rounded-lg p-3 shadow-lg">
-                          <p className="text-foreground font-medium mb-2">{data.symbol}</p>
-                          <div className="space-y-1 text-sm">
-                            <p className="text-foreground">
-                              Avg Trades/Day: {data.avgTradesPerDay.toFixed(1)}
-                            </p>
-                            <p className="text-muted-foreground">
-                              Logged Days: {data.loggedDays}
-                            </p>
-                            <p className="text-muted-foreground">
-                              Total Trades: {data.tradeCount}
-                            </p>
-                          </div>
-                        </div>
-                      );
-                    }
-                    
-                    if (displayType === 'median_trades_per_day') {
-                      return (
-                        <div className="bg-card border border-border rounded-lg p-3 shadow-lg">
-                          <p className="text-foreground font-medium mb-2">{data.symbol}</p>
-                          <div className="space-y-1 text-sm">
-                            <p className="text-foreground">
-                              Median Trades/Day: {data.medianTradesPerDay.toFixed(1)}
-                            </p>
-                            <p className="text-muted-foreground">
-                              Logged Days: {data.loggedDays}
-                            </p>
-                            <p className="text-muted-foreground">
-                              Total Trades: {data.tradeCount}
-                            </p>
-                          </div>
-                        </div>
-                      );
-                    }
-                    
-                    if (displayType === '90th_percentile_trades') {
-                      return (
-                        <div className="bg-card border border-border rounded-lg p-3 shadow-lg">
-                          <p className="text-foreground font-medium mb-2">{data.symbol}</p>
-                          <div className="space-y-1 text-sm">
-                            <p className="text-foreground">
-                              90th Percentile Trades / Day: {Math.round(data.percentile90TradesPerDay)}
-                            </p>
-                            <p className="text-muted-foreground">
-                              Median Trades / Day: {data.medianTradesPerDay.toFixed(1)}
-                            </p>
-                            <p className="text-muted-foreground">
-                              Max Trades in a Day: {data.maxTradesInDay}
-                            </p>
-                            <p className="text-muted-foreground text-xs mt-2 italic border-t border-border pt-2">
-                              Largest drawdowns occur when trades/day &gt; {Math.round(data.percentile90TradesPerDay)}
-                            </p>
-                          </div>
-                        </div>
-                      );
-                    }
-                    
-                    if (displayType === 'logged_days') {
-                      return (
-                        <div className="bg-card border border-border rounded-lg p-3 shadow-lg">
-                          <p className="text-foreground font-medium mb-2">{data.symbol}</p>
-                          <div className="space-y-1 text-sm">
-                            <p className="text-foreground">
-                              Logged Days: {data.loggedDays}
-                            </p>
-                            <p className="text-muted-foreground">
-                              Total Trades: {data.tradeCount}
-                            </p>
-                            <p className="text-muted-foreground">
-                              Median Trades / Day: {data.medianTradesPerDay.toFixed(1)}
-                            </p>
-                          </div>
-                        </div>
-                      );
-                    }
-                    
-                    if (displayType === 'profit_factor') {
-                      const pfDisplay = data.profitFactor === Infinity ? '∞' : data.profitFactor.toFixed(2);
-                      return (
-                        <div className="bg-card border border-border rounded-lg p-3 shadow-lg">
-                          <p className="text-foreground font-medium mb-2">{data.symbol}</p>
-                          <div className="space-y-1 text-sm">
-                            <p className="text-foreground">
-                              Profit Factor: {isPrivacyMode ? PRIVACY_MASK : pfDisplay}
-                            </p>
-                            <p className={data.grossProfit >= 0 ? 'text-profit' : 'text-foreground'}>
-                              Gross Profit: {isPrivacyMode ? PRIVACY_MASK : `+${currencyConfig.symbol}${data.grossProfit.toFixed(2)}`}
-                            </p>
-                            <p className="text-loss">
-                              Gross Loss: {isPrivacyMode ? PRIVACY_MASK : `-${currencyConfig.symbol}${data.grossLoss.toFixed(2)}`}
-                            </p>
-                            <p className="text-muted-foreground">
-                              Total Trades: {data.tradeCount}
-                            </p>
-                          </div>
-                        </div>
-                      );
-                    }
-                    
-                    if (displayType === 'avg_net_trade_pnl') {
-                      return (
-                        <div className="bg-card border border-border rounded-lg p-3 shadow-lg">
-                          <p className="text-foreground font-medium mb-2">{data.symbol}</p>
-                          <div className="space-y-1 text-sm">
-                            <p className={data.avgNetTradePnl >= 0 ? 'text-profit' : 'text-loss'}>
-                              Avg Net P&L / Trade: {isPrivacyMode ? PRIVACY_MASK : `${data.avgNetTradePnl >= 0 ? '+' : ''}${currencyConfig.symbol}${data.avgNetTradePnl.toFixed(2)}`}
-                            </p>
-                            <p className={data.totalPnl >= 0 ? 'text-profit' : 'text-loss'}>
-                              Net P&L: {isPrivacyMode ? PRIVACY_MASK : `${data.totalPnl >= 0 ? '+' : ''}${currencyConfig.symbol}${data.totalPnl.toFixed(2)}`}
-                            </p>
-                            <p className="text-muted-foreground">
-                              Total Trades: {data.tradeCount}
-                            </p>
-                          </div>
-                        </div>
-                      );
-                    }
-                    
-                    if (displayType === 'trade_expectancy') {
-                      return (
-                        <div className="bg-card border border-border rounded-lg p-3 shadow-lg">
-                          <p className="text-foreground font-medium mb-2">{data.symbol}</p>
-                          <div className="space-y-1 text-sm">
-                            <p className={data.tradeExpectancy >= 0 ? 'text-profit' : 'text-loss'}>
-                              Trade Expectancy: {isPrivacyMode ? PRIVACY_MASK : `${data.tradeExpectancy >= 0 ? '+' : ''}${currencyConfig.symbol}${data.tradeExpectancy.toFixed(2)}`}
-                            </p>
-                            <p className="text-muted-foreground">
-                              Win Rate: {data.winrate.toFixed(1)}%
-                            </p>
-                            <p className={data.avgWin >= 0 ? 'text-profit' : 'text-foreground'}>
-                              Avg Win: {isPrivacyMode ? PRIVACY_MASK : `${currencyConfig.symbol}${data.avgWin.toFixed(2)}`}
-                            </p>
-                            <p className="text-loss">
-                              Avg Loss: {isPrivacyMode ? PRIVACY_MASK : `-${currencyConfig.symbol}${Math.abs(data.avgLoss).toFixed(2)}`}
-                            </p>
-                          </div>
-                        </div>
-                      );
-                    }
-                    
-                    if (displayType === 'avg_realized_r') {
-                      return (
-                        <div className="bg-card border border-border rounded-lg p-3 shadow-lg">
-                          <p className="text-foreground font-medium mb-2">{data.symbol}</p>
-                          <div className="space-y-1 text-sm">
-                            <p className={data.avgRealizedR >= 0 ? 'text-profit' : 'text-loss'}>
-                              Avg Realized R: {data.avgRealizedR.toFixed(2)}
-                            </p>
-                            <p className="text-muted-foreground">
-                              Total Trades: {data.tradesWithRealizedR}
-                            </p>
-                          </div>
-                        </div>
-                      );
-                    }
-                    
-                    if (displayType === 'avg_planned_r') {
-                      return (
-                        <div className="bg-card border border-border rounded-lg p-3 shadow-lg">
-                          <p className="text-foreground font-medium mb-2">{data.symbol}</p>
-                          <div className="space-y-1 text-sm">
-                            <p className="text-foreground">
-                              Avg Planned R: {data.avgPlannedR.toFixed(2)}
-                            </p>
-                            <p className="text-muted-foreground">
-                              Total Trades: {data.tradesWithPlannedR}
-                            </p>
-                          </div>
-                        </div>
-                      );
-                    }
-                    
-                    if (displayType === 'avg_daily_drawdown') {
-                      return (
-                        <div className="bg-card border border-border rounded-lg p-3 shadow-lg">
-                          <p className="text-foreground font-medium mb-2">{data.symbol}</p>
-                          <div className="space-y-1 text-sm">
-                            <p className="text-loss">
-                              Avg Daily Net Drawdown: {isPrivacyMode ? PRIVACY_MASK : `${currencyConfig.symbol}${data.avgDailyDrawdown.toFixed(2)}`}
-                            </p>
-                            <p className="text-muted-foreground">
-                              Losing Days: {data.losingDaysCount}
-                            </p>
-                          </div>
-                        </div>
-                      );
-                    }
-                    
-                    if (displayType === 'largest_daily_loss') {
-                      return (
-                        <div className="bg-card border border-border rounded-lg p-3 shadow-lg">
-                          <p className="text-foreground font-medium mb-2">{data.symbol}</p>
-                          <div className="space-y-1 text-sm">
-                            <p className="text-loss">
-                              Largest Daily Loss: {isPrivacyMode ? PRIVACY_MASK : `${currencyConfig.symbol}${data.largestDailyLoss.toFixed(2)}`}
-                            </p>
-                            {data.largestDailyLossDate && (
-                              <p className="text-muted-foreground">
-                                Date: {data.largestDailyLossDate}
+                        );
+                      }
+                      if (displayType === 'avg_win') {
+                        return (
+                          <div className="bg-card border border-border rounded-lg p-3 shadow-lg">
+                            <p className="text-foreground font-medium mb-2">{data.symbol}</p>
+                            <div className="space-y-1 text-sm">
+                              <p className={data.avgWin >= 0 ? 'text-profit' : 'text-foreground'}>
+                                Avg Win: {isPrivacyMode ? PRIVACY_MASK : `${currencyConfig.symbol}${data.avgWin.toFixed(2)}`}
                               </p>
-                            )}
+                              <p className="text-muted-foreground">Winning Trades: {data.winCount}</p>
+                            </div>
                           </div>
-                        </div>
-                      );
-                    }
-                    
-                    if (displayType === 'winning_days_count') {
-                      return (
-                        <div className="bg-card border border-border rounded-lg p-3 shadow-lg">
-                          <p className="text-foreground font-medium mb-2">{data.symbol}</p>
-                          <div className="space-y-1 text-sm">
-                            <p className="text-profit">
-                              Winning Days: {data.winningDaysCount}
-                            </p>
-                            <p className="text-muted-foreground">
-                              Total Logged Days: {data.loggedDays}
-                            </p>
+                        );
+                      }
+                      if (displayType === 'avg_loss') {
+                        return (
+                          <div className="bg-card border border-border rounded-lg p-3 shadow-lg">
+                            <p className="text-foreground font-medium mb-2">{data.symbol}</p>
+                            <div className="space-y-1 text-sm">
+                              <p className={data.avgLoss < 0 ? 'text-loss' : 'text-foreground'}>
+                                Avg Loss: {isPrivacyMode ? PRIVACY_MASK : `${data.avgLoss < 0 ? '-' : ''}${currencyConfig.symbol}${Math.abs(data.avgLoss).toFixed(2)}`}
+                              </p>
+                              <p className="text-muted-foreground">Losing Trades: {data.lossCount}</p>
+                            </div>
                           </div>
-                        </div>
-                      );
-                    }
-                    
-                    if (displayType === 'losing_days_count') {
-                      return (
-                        <div className="bg-card border border-border rounded-lg p-3 shadow-lg">
-                          <p className="text-foreground font-medium mb-2">{data.symbol}</p>
-                          <div className="space-y-1 text-sm">
-                            <p className="text-loss">
-                              Losing Days: {data.losingDaysCount}
-                            </p>
-                            <p className="text-muted-foreground">
-                              Total Logged Days: {data.loggedDays}
-                            </p>
+                        );
+                      }
+                      if (displayType === 'largest_win') {
+                        return (
+                          <div className="bg-card border border-border rounded-lg p-3 shadow-lg">
+                            <p className="text-foreground font-medium mb-2">{data.symbol}</p>
+                            <div className="space-y-1 text-sm">
+                              <p className={data.largestWin >= 0 ? 'text-profit' : 'text-foreground'}>
+                                Largest Win: {isPrivacyMode ? PRIVACY_MASK : `${currencyConfig.symbol}${data.largestWin.toFixed(2)}`}
+                              </p>
+                              <p className="text-muted-foreground">Winning Trades: {data.winCount}</p>
+                            </div>
                           </div>
-                        </div>
-                      );
-                    }
-                    
-                    if (displayType === 'breakeven_days_count') {
-                      return (
-                        <div className="bg-card border border-border rounded-lg p-3 shadow-lg">
-                          <p className="text-foreground font-medium mb-2">{data.symbol}</p>
-                          <div className="space-y-1 text-sm">
-                            <p className="text-foreground">
-                              Breakeven Days: {data.breakevenDaysCount}
-                            </p>
-                            <p className="text-muted-foreground">
-                              Breakeven Threshold: {currencyConfig.symbol}250
-                            </p>
-                            <p className="text-muted-foreground">
-                              Total Logged Days: {data.loggedDays}
-                            </p>
+                        );
+                      }
+                      if (displayType === 'largest_loss') {
+                        return (
+                          <div className="bg-card border border-border rounded-lg p-3 shadow-lg">
+                            <p className="text-foreground font-medium mb-2">{data.symbol}</p>
+                            <div className="space-y-1 text-sm">
+                              <p className={data.largestLoss < 0 ? 'text-loss' : 'text-foreground'}>
+                                Largest Loss: {isPrivacyMode ? PRIVACY_MASK : `${data.largestLoss < 0 ? '-' : ''}${currencyConfig.symbol}${Math.abs(data.largestLoss).toFixed(2)}`}
+                              </p>
+                              <p className="text-muted-foreground">Losing Trades: {data.lossCount}</p>
+                            </div>
                           </div>
-                        </div>
-                      );
-                    }
-                    
-                    if (displayType === 'dollar') {
-                      return (
-                        <div className="bg-card border border-border rounded-lg p-3 shadow-lg">
-                          <p className="text-foreground font-medium mb-2">{data.symbol}</p>
-                          <div className="space-y-1 text-sm">
-                            <p className={data.totalPnl >= 0 ? 'text-profit' : 'text-loss'}>
-                              Net PNL: {formatValue(data.totalPnl, 'dollar')}
-                            </p>
-                            <p className="text-muted-foreground">
-                              Total Trades: {data.tradeCount}
-                            </p>
-                            <p className="text-muted-foreground">
-                              Winners: {data.winCount}
-                            </p>
-                            <p className="text-muted-foreground">
-                              Losers: {data.lossCount}
-                            </p>
-                            <p className="text-muted-foreground">
-                              BE: {data.beCount}
-                            </p>
+                        );
+                      }
+                      if (displayType === 'avg_trades_per_day') {
+                        return (
+                          <div className="bg-card border border-border rounded-lg p-3 shadow-lg">
+                            <p className="text-foreground font-medium mb-2">{data.symbol}</p>
+                            <div className="space-y-1 text-sm">
+                              <p className="text-foreground">Avg Trades/Day: {data.avgTradesPerDay.toFixed(1)}</p>
+                              <p className="text-muted-foreground">Logged Days: {data.loggedDays}</p>
+                              <p className="text-muted-foreground">Total Trades: {data.tradeCount}</p>
+                            </div>
                           </div>
-                        </div>
-                      );
-                    }
-                    
-                    // Percent mode: show Return % + counts
-                    if (displayType === 'percent') {
-                      return (
-                        <div className="bg-card border border-border rounded-lg p-3 shadow-lg">
-                          <p className="text-foreground font-medium mb-2">{data.symbol}</p>
-                          <div className="space-y-1 text-sm">
-                            <p className={data.totalPercent >= 0 ? 'text-profit' : 'text-loss'}>
-                              Return %: {formatValue(data.totalPercent, 'percent')}
-                            </p>
-                            <p className="text-muted-foreground">
-                              Total Trades: {data.tradeCount}
-                            </p>
-                            <p className="text-muted-foreground">
-                              Winners: {data.winCount}
-                            </p>
-                            <p className="text-muted-foreground">
-                              Losers: {data.lossCount}
-                            </p>
-                            <p className="text-muted-foreground">
-                              BE: {data.beCount}
-                            </p>
+                        );
+                      }
+                      if (displayType === 'median_trades_per_day') {
+                        return (
+                          <div className="bg-card border border-border rounded-lg p-3 shadow-lg">
+                            <p className="text-foreground font-medium mb-2">{data.symbol}</p>
+                            <div className="space-y-1 text-sm">
+                              <p className="text-foreground">Median Trades/Day: {data.medianTradesPerDay.toFixed(1)}</p>
+                              <p className="text-muted-foreground">Logged Days: {data.loggedDays}</p>
+                              <p className="text-muted-foreground">Total Trades: {data.tradeCount}</p>
+                            </div>
                           </div>
-                        </div>
-                      );
-                    }
-                    
-                    // Tick/Pip and Privacy modes - placeholder
-                    return (
-                      <div className="bg-card border border-border rounded-lg p-3 shadow-lg">
-                        <p className="text-foreground font-medium mb-2">{data.symbol}</p>
-                        <div className="space-y-1 text-sm">
-                          <p className="text-foreground">
-                            {displayType === 'privacy' ? '•••••' : '--'}
-                          </p>
-                          <p className="text-muted-foreground">
-                            Total Trades: {data.tradeCount}
-                          </p>
-                          <p className="text-muted-foreground">
-                            Winners: {data.winCount}
-                          </p>
-                          <p className="text-muted-foreground">
-                            Losers: {data.lossCount}
-                          </p>
-                          <p className="text-muted-foreground">
-                            BE: {data.beCount}
-                          </p>
-                        </div>
-                      </div>
-                    );
-                  }}
-                />
-
-                {isMultiMetric ? (
-                  <>
-                    {selectedMetrics.map((metric, index) => (
-                      <Bar
-                        key={metric}
-                        dataKey={`metric_${index}`}
-                        name={getDisplayLabel(metric)}
-                        fill={METRIC_COLORS[index]}
-                        radius={[4, 4, 0, 0]}
-                        maxBarSize={30}
-                      />
-                    ))}
-                  </>
-                ) : (
-                  <Bar
-                    dataKey="displayValue" 
-                    radius={[4, 4, 0, 0]}
-                    maxBarSize={40}
-                  >
-                    {instrumentData.map((entry, index) => {
-                      let fillColor: string;
-                      if (displayType === 'winrate' || displayType === 'tradecount' || displayType === 'avg_hold_time' || displayType === 'longest_duration' || displayType === 'long_winrate' || displayType === 'short_winrate' || displayType === 'tradecount_long' || displayType === 'tradecount_short' || displayType === 'avg_planned_r') {
-                        fillColor = 'hsl(var(--primary))';
-                      } else {
-                        fillColor = entry.displayValue >= 0 ? 'hsl(var(--profit))' : 'hsl(var(--loss))';
+                        );
+                      }
+                      if (displayType === '90th_percentile_trades') {
+                        return (
+                          <div className="bg-card border border-border rounded-lg p-3 shadow-lg">
+                            <p className="text-foreground font-medium mb-2">{data.symbol}</p>
+                            <div className="space-y-1 text-sm">
+                              <p className="text-foreground">90th Percentile Trades / Day: {Math.round(data.percentile90TradesPerDay)}</p>
+                              <p className="text-muted-foreground">Median Trades / Day: {data.medianTradesPerDay.toFixed(1)}</p>
+                              <p className="text-muted-foreground">Max Trades in a Day: {data.maxTradesInDay}</p>
+                            </div>
+                          </div>
+                        );
+                      }
+                      if (displayType === 'logged_days') {
+                        return (
+                          <div className="bg-card border border-border rounded-lg p-3 shadow-lg">
+                            <p className="text-foreground font-medium mb-2">{data.symbol}</p>
+                            <div className="space-y-1 text-sm">
+                              <p className="text-foreground">Logged Days: {data.loggedDays}</p>
+                              <p className="text-muted-foreground">Total Trades: {data.tradeCount}</p>
+                            </div>
+                          </div>
+                        );
+                      }
+                      if (displayType === 'profit_factor') {
+                        const pfDisplay = data.profitFactor === Infinity ? '∞' : data.profitFactor.toFixed(2);
+                        return (
+                          <div className="bg-card border border-border rounded-lg p-3 shadow-lg">
+                            <p className="text-foreground font-medium mb-2">{data.symbol}</p>
+                            <div className="space-y-1 text-sm">
+                              <p className="text-foreground">Profit Factor: {isPrivacyMode ? PRIVACY_MASK : pfDisplay}</p>
+                              <p className={data.grossProfit >= 0 ? 'text-profit' : 'text-foreground'}>
+                                Gross Profit: {isPrivacyMode ? PRIVACY_MASK : `+${currencyConfig.symbol}${data.grossProfit.toFixed(2)}`}
+                              </p>
+                              <p className="text-loss">
+                                Gross Loss: {isPrivacyMode ? PRIVACY_MASK : `-${currencyConfig.symbol}${data.grossLoss.toFixed(2)}`}
+                              </p>
+                              <p className="text-muted-foreground">Total Trades: {data.tradeCount}</p>
+                            </div>
+                          </div>
+                        );
+                      }
+                      if (displayType === 'avg_net_trade_pnl') {
+                        return (
+                          <div className="bg-card border border-border rounded-lg p-3 shadow-lg">
+                            <p className="text-foreground font-medium mb-2">{data.symbol}</p>
+                            <div className="space-y-1 text-sm">
+                              <p className={data.avgNetTradePnl >= 0 ? 'text-profit' : 'text-loss'}>
+                                Avg Net P&L / Trade: {isPrivacyMode ? PRIVACY_MASK : `${data.avgNetTradePnl >= 0 ? '+' : ''}${currencyConfig.symbol}${data.avgNetTradePnl.toFixed(2)}`}
+                              </p>
+                              <p className="text-muted-foreground">Total Trades: {data.tradeCount}</p>
+                            </div>
+                          </div>
+                        );
+                      }
+                      if (displayType === 'trade_expectancy') {
+                        return (
+                          <div className="bg-card border border-border rounded-lg p-3 shadow-lg">
+                            <p className="text-foreground font-medium mb-2">{data.symbol}</p>
+                            <div className="space-y-1 text-sm">
+                              <p className={data.tradeExpectancy >= 0 ? 'text-profit' : 'text-loss'}>
+                                Trade Expectancy: {isPrivacyMode ? PRIVACY_MASK : `${data.tradeExpectancy >= 0 ? '+' : ''}${currencyConfig.symbol}${data.tradeExpectancy.toFixed(2)}`}
+                              </p>
+                              <p className="text-muted-foreground">Win Rate: {data.winrate.toFixed(1)}%</p>
+                            </div>
+                          </div>
+                        );
+                      }
+                      if (displayType === 'avg_realized_r') {
+                        return (
+                          <div className="bg-card border border-border rounded-lg p-3 shadow-lg">
+                            <p className="text-foreground font-medium mb-2">{data.symbol}</p>
+                            <div className="space-y-1 text-sm">
+                              <p className={data.avgRealizedR >= 0 ? 'text-profit' : 'text-loss'}>
+                                Avg Realized R: {data.avgRealizedR.toFixed(2)}
+                              </p>
+                              <p className="text-muted-foreground">Total Trades: {data.tradesWithRealizedR}</p>
+                            </div>
+                          </div>
+                        );
+                      }
+                      if (displayType === 'avg_planned_r') {
+                        return (
+                          <div className="bg-card border border-border rounded-lg p-3 shadow-lg">
+                            <p className="text-foreground font-medium mb-2">{data.symbol}</p>
+                            <div className="space-y-1 text-sm">
+                              <p className="text-foreground">Avg Planned R: {data.avgPlannedR.toFixed(2)}</p>
+                              <p className="text-muted-foreground">Total Trades: {data.tradesWithPlannedR}</p>
+                            </div>
+                          </div>
+                        );
+                      }
+                      if (displayType === 'avg_daily_drawdown') {
+                        return (
+                          <div className="bg-card border border-border rounded-lg p-3 shadow-lg">
+                            <p className="text-foreground font-medium mb-2">{data.symbol}</p>
+                            <div className="space-y-1 text-sm">
+                              <p className="text-loss">
+                                Avg Daily Net Drawdown: {isPrivacyMode ? PRIVACY_MASK : `${currencyConfig.symbol}${data.avgDailyDrawdown.toFixed(2)}`}
+                              </p>
+                              <p className="text-muted-foreground">Losing Days: {data.losingDaysCount}</p>
+                            </div>
+                          </div>
+                        );
+                      }
+                      if (displayType === 'largest_daily_loss') {
+                        return (
+                          <div className="bg-card border border-border rounded-lg p-3 shadow-lg">
+                            <p className="text-foreground font-medium mb-2">{data.symbol}</p>
+                            <div className="space-y-1 text-sm">
+                              <p className="text-loss">
+                                Largest Daily Loss: {isPrivacyMode ? PRIVACY_MASK : `${currencyConfig.symbol}${data.largestDailyLoss.toFixed(2)}`}
+                              </p>
+                              {data.largestDailyLossDate && (
+                                <p className="text-muted-foreground">Date: {data.largestDailyLossDate}</p>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      }
+                      if (displayType === 'winning_days_count') {
+                        return (
+                          <div className="bg-card border border-border rounded-lg p-3 shadow-lg">
+                            <p className="text-foreground font-medium mb-2">{data.symbol}</p>
+                            <div className="space-y-1 text-sm">
+                              <p className="text-profit">Winning Days: {data.winningDaysCount}</p>
+                              <p className="text-muted-foreground">Total Logged Days: {data.loggedDays}</p>
+                            </div>
+                          </div>
+                        );
+                      }
+                      if (displayType === 'losing_days_count') {
+                        return (
+                          <div className="bg-card border border-border rounded-lg p-3 shadow-lg">
+                            <p className="text-foreground font-medium mb-2">{data.symbol}</p>
+                            <div className="space-y-1 text-sm">
+                              <p className="text-loss">Losing Days: {data.losingDaysCount}</p>
+                              <p className="text-muted-foreground">Total Logged Days: {data.loggedDays}</p>
+                            </div>
+                          </div>
+                        );
+                      }
+                      if (displayType === 'breakeven_days_count') {
+                        return (
+                          <div className="bg-card border border-border rounded-lg p-3 shadow-lg">
+                            <p className="text-foreground font-medium mb-2">{data.symbol}</p>
+                            <div className="space-y-1 text-sm">
+                              <p className="text-foreground">Breakeven Days: {data.breakevenDaysCount}</p>
+                              <p className="text-muted-foreground">Total Logged Days: {data.loggedDays}</p>
+                            </div>
+                          </div>
+                        );
+                      }
+                      if (displayType === 'dollar') {
+                        return (
+                          <div className="bg-card border border-border rounded-lg p-3 shadow-lg">
+                            <p className="text-foreground font-medium mb-2">{data.symbol}</p>
+                            <div className="space-y-1 text-sm">
+                              <p className={data.totalPnl >= 0 ? 'text-profit' : 'text-loss'}>
+                                Net PNL: {formatValue(data.totalPnl, 'dollar')}
+                              </p>
+                              <p className="text-muted-foreground">Total Trades: {data.tradeCount}</p>
+                              <p className="text-muted-foreground">Winners: {data.winCount}</p>
+                              <p className="text-muted-foreground">Losers: {data.lossCount}</p>
+                              <p className="text-muted-foreground">BE: {data.beCount}</p>
+                            </div>
+                          </div>
+                        );
+                      }
+                      if (displayType === 'percent') {
+                        return (
+                          <div className="bg-card border border-border rounded-lg p-3 shadow-lg">
+                            <p className="text-foreground font-medium mb-2">{data.symbol}</p>
+                            <div className="space-y-1 text-sm">
+                              <p className={data.totalPercent >= 0 ? 'text-profit' : 'text-loss'}>
+                                Return %: {formatValue(data.totalPercent, 'percent')}
+                              </p>
+                              <p className="text-muted-foreground">Total Trades: {data.tradeCount}</p>
+                              <p className="text-muted-foreground">Winners: {data.winCount}</p>
+                              <p className="text-muted-foreground">Losers: {data.lossCount}</p>
+                              <p className="text-muted-foreground">BE: {data.beCount}</p>
+                            </div>
+                          </div>
+                        );
                       }
                       return (
-                        <Cell 
-                          key={`cell-${index}`}
-                          fill={fillColor}
-                        />
+                        <div className="bg-card border border-border rounded-lg p-3 shadow-lg">
+                          <p className="text-foreground font-medium mb-2">{data.symbol}</p>
+                          <div className="space-y-1 text-sm">
+                            <p className="text-foreground">{displayType === 'privacy' ? '•••••' : '--'}</p>
+                            <p className="text-muted-foreground">Total Trades: {data.tradeCount}</p>
+                          </div>
+                        </div>
                       );
-                    })}
-                  </Bar>
-                )}
-              </BarChart>
-            </ResponsiveContainer>
+                    }}
+                  />
 
-            {/* Multi-metric legend */}
-            {isMultiMetric && (
-              <div className="flex flex-wrap items-center justify-center gap-4 mt-2">
-                {selectedMetrics.map((metric, index) => (
-                  <div key={metric} className="flex items-center gap-1.5">
-                    <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: METRIC_COLORS[index] }} />
-                    <span className="text-xs text-muted-foreground">{getDisplayLabel(metric)}</span>
-                  </div>
-                ))}
-              </div>
-            )}
+                  {isMultiMetric ? (
+                    <>
+                      {selectedMetrics.map((metric, index) => (
+                        <Bar
+                          key={metric}
+                          dataKey={`metric_${index}`}
+                          name={getDisplayLabel(metric)}
+                          fill={METRIC_COLORS[index]}
+                          radius={[4, 4, 0, 0]}
+                          maxBarSize={30}
+                        />
+                      ))}
+                    </>
+                  ) : (
+                    <Bar
+                      dataKey="displayValue" 
+                      radius={[4, 4, 0, 0]}
+                      maxBarSize={40}
+                    >
+                      {instrumentData.map((entry, index) => {
+                        let fillColor: string;
+                        if (displayType === 'winrate' || displayType === 'tradecount' || displayType === 'avg_hold_time' || displayType === 'longest_duration' || displayType === 'long_winrate' || displayType === 'short_winrate' || displayType === 'tradecount_long' || displayType === 'tradecount_short' || displayType === 'avg_planned_r') {
+                          fillColor = 'hsl(var(--primary))';
+                        } else {
+                          fillColor = entry.displayValue >= 0 ? 'hsl(var(--profit))' : 'hsl(var(--loss))';
+                        }
+                        return (
+                          <Cell 
+                            key={`cell-${index}`}
+                            fill={fillColor}
+                          />
+                        );
+                      })}
+                    </Bar>
+                  )}
+                </BarChart>
+              </ResponsiveContainer>
+
+              {isMultiMetric && (
+                <div className="flex flex-wrap items-center justify-center gap-4 mt-2">
+                  {selectedMetrics.map((metric, index) => (
+                    <div key={metric} className="flex items-center gap-1.5">
+                      <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: METRIC_COLORS[index] }} />
+                      <span className="text-xs text-muted-foreground">{getDisplayLabel(metric)}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </>
           ) : (
             <div className="flex items-center justify-center h-full border border-dashed border-border rounded-xl bg-muted/20">
               <p className="text-muted-foreground text-sm">No closed trades available for analysis.</p>
