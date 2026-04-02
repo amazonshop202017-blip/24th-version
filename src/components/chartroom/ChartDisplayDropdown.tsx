@@ -23,6 +23,7 @@ interface ChartDisplayDropdownProps {
   value: ChartDisplayType;
   onValueChange: (value: ChartDisplayType) => void;
   className?: string;
+  disabledValues?: ChartDisplayType[];
 }
 
 // Functional options that actually work
