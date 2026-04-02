@@ -1,16 +1,27 @@
-import { useMemo, useState } from 'react';
-import { useFilteredTrades } from '@/hooks/useFilteredTrades';
-import { useGlobalFilters, BreakevenTolerance } from '@/contexts/GlobalFiltersContext';
-import { useAccountsContext } from '@/contexts/AccountsContext';
-import { usePrivacyMode } from '@/hooks/usePrivacyMode';
-import { calculateTradeMetrics, Trade } from '@/types/trade';
-import { parseISO, getDay, getMonth, getWeek, getHours, getMinutes, format } from 'date-fns';
-import { ChartDisplayType, mapGlobalToChartDisplay, formatDuration, formatDurationTick } from '@/hooks/useChartDisplayMode';
-import { calculateTradingActivityStatsFromCounts } from '@/lib/tradingActivityStats';
-import { calculateRiskDrawdownStats } from '@/lib/riskDrawdownStats';
 import {
-  BarChart,
+  ComposedChart, useMemo, useState } from 'react';
+import {
+  ComposedChart, useFilteredTrades } from '@/hooks/useFilteredTrades';
+import {
+  ComposedChart, useGlobalFilters, BreakevenTolerance } from '@/contexts/GlobalFiltersContext';
+import {
+  ComposedChart, useAccountsContext } from '@/contexts/AccountsContext';
+import {
+  ComposedChart, usePrivacyMode } from '@/hooks/usePrivacyMode';
+import {
+  ComposedChart, calculateTradeMetrics, Trade } from '@/types/trade';
+import {
+  ComposedChart, parseISO, getDay, getMonth, getWeek, getHours, getMinutes, format } from 'date-fns';
+import {
+  ComposedChart, ChartDisplayType, mapGlobalToChartDisplay, formatDuration, formatDurationTick } from '@/hooks/useChartDisplayMode';
+import {
+  ComposedChart, calculateTradingActivityStatsFromCounts } from '@/lib/tradingActivityStats';
+import {
+  ComposedChart, calculateRiskDrawdownStats } from '@/lib/riskDrawdownStats';
+import {
+  ComposedChart,
   Bar,
+  Line,
   XAxis,
   YAxis,
   ResponsiveContainer,
@@ -18,16 +29,20 @@ import {
   ReferenceLine,
   CartesianGrid,
   Cell,
+  Legend,
 } from 'recharts';
 import {
+  ComposedChart,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Card, CardContent } from '@/components/ui/card';
-import { ChartDisplayDropdown } from './ChartDisplayDropdown';
+import {
+  ComposedChart, Card, CardContent } from '@/components/ui/card';
+import {
+  ComposedChart, ChartDisplayDropdown } from './ChartDisplayDropdown';
 
 type DateSettingType = 'entry' | 'exit';
 type PeriodType = 'weekday' | 'month' | 'week' | 'hour' | '2hour' | '1hour' | '30min' | '15min' | '10min' | '5min';
@@ -618,7 +633,7 @@ export const PerformanceByTimeChart = ({
         <div className="h-[300px] w-full">
           {timeData.length > 0 ? (
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart
+              <ComposedChart
                 data={timeData}
                 margin={{ top: 10, right: 20, left: 0, bottom: 20 }}
               >
@@ -1250,7 +1265,7 @@ export const PerformanceByTimeChart = ({
                     />
                   ))}
                 </Bar>
-              </BarChart>
+              </ComposedChart>
             </ResponsiveContainer>
           ) : (
             <div className="flex items-center justify-center h-full border border-dashed border-border rounded-xl bg-muted/20">

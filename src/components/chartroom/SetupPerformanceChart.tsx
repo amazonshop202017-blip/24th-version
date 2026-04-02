@@ -1,16 +1,27 @@
-import { useMemo, useState } from 'react';
-import { useFilteredTrades } from '@/hooks/useFilteredTrades';
-import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
-import { useAccountsContext } from '@/contexts/AccountsContext';
-import { usePrivacyMode } from '@/hooks/usePrivacyMode';
-import { calculateTradeMetrics, Trade } from '@/types/trade';
-import { useStrategiesContext } from '@/contexts/StrategiesContext';
-import { ChartDisplayType, mapGlobalToChartDisplay, formatDuration, formatDurationTick } from '@/hooks/useChartDisplayMode';
-import { buildGroupDailyCounts, getGroupTradingActivityStats } from '@/lib/tradingActivityStats';
-import { buildGroupedTradesMap, getGroupRiskDrawdownStats } from '@/lib/riskDrawdownStats';
 import {
-  BarChart,
+  ComposedChart, useMemo, useState } from 'react';
+import {
+  ComposedChart, useFilteredTrades } from '@/hooks/useFilteredTrades';
+import {
+  ComposedChart, useGlobalFilters } from '@/contexts/GlobalFiltersContext';
+import {
+  ComposedChart, useAccountsContext } from '@/contexts/AccountsContext';
+import {
+  ComposedChart, usePrivacyMode } from '@/hooks/usePrivacyMode';
+import {
+  ComposedChart, calculateTradeMetrics, Trade } from '@/types/trade';
+import {
+  ComposedChart, useStrategiesContext } from '@/contexts/StrategiesContext';
+import {
+  ComposedChart, ChartDisplayType, mapGlobalToChartDisplay, formatDuration, formatDurationTick } from '@/hooks/useChartDisplayMode';
+import {
+  ComposedChart, buildGroupDailyCounts, getGroupTradingActivityStats } from '@/lib/tradingActivityStats';
+import {
+  ComposedChart, buildGroupedTradesMap, getGroupRiskDrawdownStats } from '@/lib/riskDrawdownStats';
+import {
+  ComposedChart,
   Bar,
+  Line,
   XAxis,
   YAxis,
   ResponsiveContainer,
@@ -18,9 +29,12 @@ import {
   ReferenceLine,
   CartesianGrid,
   Cell,
+  Legend,
 } from 'recharts';
-import { Card, CardContent } from '@/components/ui/card';
-import { ChartDisplayDropdown } from './ChartDisplayDropdown';
+import {
+  ComposedChart, Card, CardContent } from '@/components/ui/card';
+import {
+  ComposedChart, ChartDisplayDropdown } from './ChartDisplayDropdown';
 
 interface SetupData {
   setup: string;
@@ -463,7 +477,7 @@ export const SetupPerformanceChart = ({
         <div className="h-[300px] w-full">
           {setupData.length > 0 ? (
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart
+              <ComposedChart
                 data={setupData}
                 margin={{ top: 10, right: 10, left: 0, bottom: 20 }}
               >
@@ -1109,7 +1123,7 @@ export const SetupPerformanceChart = ({
                     );
                   })}
                 </Bar>
-              </BarChart>
+              </ComposedChart>
             </ResponsiveContainer>
           ) : (
             <div className="flex items-center justify-center h-full border border-dashed border-border rounded-xl bg-muted/20">
