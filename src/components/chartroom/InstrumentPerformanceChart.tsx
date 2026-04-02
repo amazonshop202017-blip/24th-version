@@ -574,7 +574,7 @@ export const InstrumentPerformanceChart = ({
         </div>
 
         {/* Chart */}
-        <div className="h-[300px] w-full">
+        <div className={`w-full ${isMultiMetric ? 'h-[340px]' : 'h-[300px]'}`}>
           {instrumentData.length > 0 ? (
             <>
               <ResponsiveContainer width="100%" height="100%">
