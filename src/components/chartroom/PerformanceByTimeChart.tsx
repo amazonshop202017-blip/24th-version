@@ -782,10 +782,10 @@ export const PerformanceByTimeChart = ({
                 )}
                 
                 {/* Reference Line at 0 - for monetary modes */}
-                {(displayType === 'dollar' || displayType === 'percent' || displayType === 'avg_win' || displayType === 'avg_loss' || displayType === 'largest_win' || displayType === 'largest_loss' || displayType === 'trade_expectancy' || displayType === 'avg_net_trade_pnl' || displayType === 'avg_daily_drawdown' || displayType === 'largest_daily_loss' || displayType === 'avg_realized_r' || displayType === 'avg_planned_r') && (
+                {!isMultiMetric && (displayType === 'dollar' || displayType === 'percent' || displayType === 'avg_win' || displayType === 'avg_loss' || displayType === 'largest_win' || displayType === 'largest_loss' || displayType === 'trade_expectancy' || displayType === 'avg_net_trade_pnl' || displayType === 'avg_daily_drawdown' || displayType === 'largest_daily_loss' || displayType === 'avg_realized_r' || displayType === 'avg_planned_r') && (
                   <ReferenceLine 
                     y={0} 
-                    stroke="hsl(var(--muted-foreground))" 
+                    stroke="hsl(var(--muted-foreground))"
                     strokeWidth={1}
                     strokeDasharray="3 3"
                   />
