@@ -23,6 +23,7 @@ interface ChartDisplayDropdownProps {
   value: ChartDisplayType;
   onValueChange: (value: ChartDisplayType) => void;
   className?: string;
+  disabledValues?: ChartDisplayType[];
 }
 
 // Functional options that actually work
@@ -96,6 +97,7 @@ export const ChartDisplayDropdown = ({
   value,
   onValueChange,
   className,
+  disabledValues = [],
 }: ChartDisplayDropdownProps) => {
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
   const [isOpen, setIsOpen] = useState(false);
@@ -172,7 +174,8 @@ export const ChartDisplayDropdown = ({
                 <div className="pl-2">
                   {group.options.map((option) => {
                     const isSelected = value === option.value;
-                    const isFunctional = functionalValues.has(option.value);
+                    const isDisabledByParent = disabledValues.includes(option.value);
+                    const isFunctional = functionalValues.has(option.value) && !isDisabledByParent;
                     return (
                       <button
                         key={`${group.name}-${option.value}-${option.label}`}
