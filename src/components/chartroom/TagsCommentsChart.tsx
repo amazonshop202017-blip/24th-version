@@ -1003,28 +1003,6 @@ export const TagsCommentsChart = ({
               <Button variant="outline" size="sm" className="h-8 text-xs gap-1" onClick={addMetric}><Plus className="w-3.5 h-3.5" />Add Metric</Button>
             )}
           </div>
-          {/* Legend */}
-          {isMultiMetric ? (
-            <div className="flex items-center gap-3 flex-wrap">
-              {selectedMetrics.map((metric, index) => (
-                <div key={`legend-${metric}-${index}`} className="flex items-center gap-1.5">
-                  <div className="w-2.5 h-2.5 rounded-sm shrink-0" style={{ backgroundColor: getMetricColor(index) }} />
-                  <span className="text-xs text-muted-foreground">{getDisplayLabel(metric)}</span>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-1.5">
-                <div className="w-2.5 h-2.5 rounded-sm bg-profit" />
-                <span className="text-xs text-muted-foreground">Profit</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <div className="w-2.5 h-2.5 rounded-sm bg-loss" />
-                <span className="text-xs text-muted-foreground">Loss</span>
-              </div>
-            </div>
-          )}
         </div>
 
         {/* Chart */}
