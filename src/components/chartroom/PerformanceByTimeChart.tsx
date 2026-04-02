@@ -666,14 +666,27 @@ export const PerformanceByTimeChart = ({
 
   return (
     <Card className="bg-card border-border h-full">
-      <CardContent className="p-4">
-        {/* Header with Dropdowns */}
-        <div className="flex items-start justify-between mb-3 flex-wrap gap-3">
-          <div className="flex items-center gap-3 flex-wrap">
-            <ChartDisplayDropdown
-              value={displayType}
-              onValueChange={(v) => { const next = [...selectedMetrics]; next[0] = v; setSelectedMetrics(next); }}
-            />
+      <CardContent className="p-4 pb-2">
+        <div className="flex flex-col gap-2 mb-4">
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <h3 className="text-sm font-medium text-muted-foreground">{title}</h3>
+            <div className="flex items-center gap-2">
+              <ChartMetricSettingsPopover metrics={selectedMetrics} configs={metricConfigs} onConfigChange={updateMetricConfig} />
+            </div>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            {selectedMetrics.map((metric, index) => (
+              <div key={`${metric}-${index}`} className="flex items-center gap-1.5">
+                {isMultiMetric && <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: getMetricColor(index) }} />}
+                <ChartDisplayDropdown value={metric} onValueChange={(v) => { const next = [...selectedMetrics]; next[index] = v; setSelectedMetrics(next); }} disabledValues={selectedMetrics.filter((_, i) => i !== index)} />
+                {selectedMetrics.length > 1 && (
+                  <button onClick={() => removeMetric(index)} className="p-0.5 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"><X className="w-3.5 h-3.5" /></button>
+                )}
+              </div>
+            ))}
+            {selectedMetrics.length < 3 && (
+              <Button variant="outline" size="sm" className="h-8 text-xs gap-1" onClick={addMetric}><Plus className="w-3.5 h-3.5" />Add Metric</Button>
+            )}
 
             <Select value={dateSetting} onValueChange={(v) => setDateSetting(v as DateSettingType)}>
               <SelectTrigger className="w-[130px] bg-background border-border h-auto py-1.5">
@@ -709,18 +722,28 @@ export const PerformanceByTimeChart = ({
               </SelectContent>
             </Select>
           </div>
-
           {/* Legend */}
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-1.5">
-              <div className="w-2.5 h-2.5 rounded-sm bg-profit" />
-              <span className="text-xs text-muted-foreground">Profit</span>
+          {isMultiMetric ? (
+            <div className="flex items-center gap-3 flex-wrap">
+              {selectedMetrics.map((metric, index) => (
+                <div key={`legend-${metric}-${index}`} className="flex items-center gap-1.5">
+                  <div className="w-2.5 h-2.5 rounded-sm shrink-0" style={{ backgroundColor: getMetricColor(index) }} />
+                  <span className="text-xs text-muted-foreground">{getDisplayLabel(metric)}</span>
+                </div>
+              ))}
             </div>
-            <div className="flex items-center gap-1.5">
-              <div className="w-2.5 h-2.5 rounded-sm bg-loss" />
-              <span className="text-xs text-muted-foreground">Loss</span>
+          ) : (
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-1.5">
+                <div className="w-2.5 h-2.5 rounded-sm bg-profit" />
+                <span className="text-xs text-muted-foreground">Profit</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <div className="w-2.5 h-2.5 rounded-sm bg-loss" />
+                <span className="text-xs text-muted-foreground">Loss</span>
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
         {/* Chart */}
