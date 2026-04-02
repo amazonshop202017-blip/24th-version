@@ -32,9 +32,9 @@ import {
   Legend,
 } from 'recharts';
 import {
-  ComposedChart, Card, CardContent } from '@/components/ui/card';
+  Card, CardContent } from '@/components/ui/card';
 import {
-  ComposedChart, ChartDisplayDropdown } from './ChartDisplayDropdown';
+  ChartDisplayDropdown } from './ChartDisplayDropdown';
 
 type SelectionType = 'tradeComments' | 'tags';
 type CommentCategory = 'entryComments' | 'tradeManagement' | 'exitComments';

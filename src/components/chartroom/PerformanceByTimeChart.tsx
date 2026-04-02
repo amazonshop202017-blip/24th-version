@@ -40,9 +40,9 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import {
-  ComposedChart, Card, CardContent } from '@/components/ui/card';
+  Card, CardContent } from '@/components/ui/card';
 import {
-  ComposedChart, ChartDisplayDropdown } from './ChartDisplayDropdown';
+  ChartDisplayDropdown } from './ChartDisplayDropdown';
 
 type DateSettingType = 'entry' | 'exit';
 type PeriodType = 'weekday' | 'month' | 'week' | 'hour' | '2hour' | '1hour' | '30min' | '15min' | '10min' | '5min';
