@@ -1043,13 +1043,13 @@ export const TagsCommentsChart = ({
                 <Tooltip content={<CustomTooltip />} cursor={{ fill: 'hsl(var(--muted)/0.1)' }} />
                 {!isMultiMetric && <ReferenceLine y={0} stroke="hsl(var(--border))" />}
                 
-                {isMultiMetric && (
-                  <Legend
-                    verticalAlign="bottom"
-                    height={24}
-                    content={() => (
-                      <div className="flex flex-wrap items-center justify-center gap-4 mt-1">
-                        {selectedMetrics.map((metric, index) => {
+                <Legend
+                  verticalAlign="bottom"
+                  height={24}
+                  content={() => (
+                    <div className="flex flex-wrap items-center justify-center gap-4 mt-1">
+                      {isMultiMetric ? (
+                        selectedMetrics.map((metric, index) => {
                           const config = metricConfigs[index];
                           return (
                             <div key={metric} className="flex items-center gap-1.5">
@@ -1061,11 +1061,22 @@ export const TagsCommentsChart = ({
                               <span className="text-xs text-muted-foreground">{getDisplayLabel(metric)}</span>
                             </div>
                           );
-                        })}
-                      </div>
-                    )}
-                  />
-                )}
+                        })
+                      ) : (
+                        <>
+                          <div className="flex items-center gap-1.5">
+                            <div className="w-2.5 h-2.5 rounded-sm bg-profit" />
+                            <span className="text-xs text-muted-foreground">Profit</span>
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <div className="w-2.5 h-2.5 rounded-sm bg-loss" />
+                            <span className="text-xs text-muted-foreground">Loss</span>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  )}
+                />
 
                 {isMultiMetric ? (
                   <>
