@@ -8,8 +8,9 @@ import { ChartDisplayType, mapGlobalToChartDisplay, formatDuration, formatDurati
 import { buildGroupDailyCounts, getGroupTradingActivityStats } from '@/lib/tradingActivityStats';
 import { buildGroupedTradesMap, getGroupRiskDrawdownStats } from '@/lib/riskDrawdownStats';
 import {
-  BarChart,
+  ComposedChart,
   Bar,
+  Line,
   XAxis,
   YAxis,
   ResponsiveContainer,
@@ -21,6 +22,7 @@ import {
 } from 'recharts';
 import { Card, CardContent } from '@/components/ui/card';
 import { ChartDisplayDropdown } from './ChartDisplayDropdown';
+import { ChartMetricSettingsPopover, MetricConfig } from './ChartMetricSettingsPopover';
 import { Button } from '@/components/ui/button';
 import { X, Plus } from 'lucide-react';
 
