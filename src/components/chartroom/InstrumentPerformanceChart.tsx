@@ -549,7 +549,7 @@ export const InstrumentPerformanceChart = ({
                   }}
                   disabledValues={selectedMetrics.filter((_, i) => i !== index)}
                 />
-                {index > 0 && (
+                {selectedMetrics.length > 1 && (
                   <button
                     onClick={() => setSelectedMetrics(prev => prev.filter((_, i) => i !== index))}
                     className="p-0.5 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
