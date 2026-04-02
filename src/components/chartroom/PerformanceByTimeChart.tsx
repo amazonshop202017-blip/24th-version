@@ -746,13 +746,12 @@ export const PerformanceByTimeChart = ({
           )}
         </div>
 
-        {/* Chart */}
-        <div className="h-[300px] w-full">
+        <div className={`w-full -mx-2 px-0 ${isMultiMetric ? 'h-[340px]' : 'h-[300px]'}`}>
           {timeData.length > 0 ? (
             <ResponsiveContainer width="100%" height="100%">
               <ComposedChart
-                data={timeData}
-                margin={{ top: 10, right: 20, left: 0, bottom: 20 }}
+                data={isMultiMetric ? multiMetricChartData : timeData}
+                margin={{ top: 10, right: isMultiMetric ? (selectedMetrics.length === 3 ? 25 : 20) : -5, left: -10, bottom: isMultiMetric ? 30 : 20 }}
               >
                 <CartesianGrid 
                   strokeDasharray="3 3" 
@@ -771,37 +770,16 @@ export const PerformanceByTimeChart = ({
                   textAnchor={period.includes('min') ? 'end' : 'middle'}
                   height={period.includes('min') ? 50 : 25}
                 />
-                <YAxis
-                  axisLine={{ stroke: 'hsl(var(--border))' }}
-                  tickLine={false}
-                  tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 10 }}
-                  tickFormatter={(value) => {
-                    // Mask $ and % values in privacy mode
-                    if (isPrivacyMode && (displayType === 'dollar' || displayType === 'percent' || displayType === 'avg_win' || displayType === 'avg_loss' || displayType === 'largest_win' || displayType === 'largest_loss' || displayType === 'trade_expectancy' || displayType === 'avg_net_trade_pnl' || displayType === 'profit_factor' || displayType === 'avg_daily_drawdown' || displayType === 'largest_daily_loss')) {
-                      return '**';
-                    }
-                    if (displayType === 'dollar' || displayType === 'avg_win' || displayType === 'avg_loss' || displayType === 'largest_win' || displayType === 'largest_loss' || displayType === 'trade_expectancy' || displayType === 'avg_net_trade_pnl' || displayType === 'avg_daily_drawdown' || displayType === 'largest_daily_loss') {
-                      return `${currencyConfig.symbol}${value.toFixed(0)}`;
-                    }
-                    if (displayType === 'profit_factor') {
-                      return value === Infinity ? '∞' : value.toFixed(2);
-                    }
-                    if (displayType === 'avg_realized_r' || displayType === 'avg_planned_r') {
-                      return value.toFixed(2);
-                    }
-                    if (displayType === 'tradecount' || displayType === 'tradecount_long' || displayType === 'tradecount_short' || displayType === 'avg_trades_per_day' || displayType === 'median_trades_per_day' || displayType === '90th_percentile_trades' || displayType === 'logged_days') {
-                      return value % 1 === 0 ? `${Math.round(value)}` : value.toFixed(1);
-                    }
-                    if (displayType === 'avg_hold_time' || displayType === 'longest_duration') {
-                      return formatDurationTick(value);
-                    }
-                    if (displayType === 'percent' || displayType === 'winrate' || displayType === 'long_winrate' || displayType === 'short_winrate') {
-                      return `${value.toFixed(0)}%`;
-                    }
-                    return `${value.toFixed(1)}%`;
-                  }}
-                  width={50}
-                />
+                
+                {isMultiMetric ? (
+                  <>
+                    {selectedMetrics.map((metric, index) => (
+                      <YAxis key={metric} yAxisId={`y-${index}`} orientation={index === 0 ? 'left' : 'right'} axisLine={{ stroke: getMetricColor(index) }} tickLine={false} tick={{ fill: getMetricColor(index), fontSize: 10 }} tickFormatter={(value) => formatMetricTick(value, metric)} width={index === 0 ? 40 : 32} />
+                    ))}
+                  </>
+                ) : (
+                  <YAxis axisLine={{ stroke: 'hsl(var(--border))' }} tickLine={false} tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 10 }} tickFormatter={(value) => formatMetricTick(value, displayType)} width={50} />
+                )}
                 
                 {/* Reference Line at 0 - for monetary modes */}
                 {(displayType === 'dollar' || displayType === 'percent' || displayType === 'avg_win' || displayType === 'avg_loss' || displayType === 'largest_win' || displayType === 'largest_loss' || displayType === 'trade_expectancy' || displayType === 'avg_net_trade_pnl' || displayType === 'avg_daily_drawdown' || displayType === 'largest_daily_loss' || displayType === 'avg_realized_r' || displayType === 'avg_planned_r') && (
