@@ -528,22 +528,56 @@ export const SetupPerformanceChart = ({
     return `${value >= 0 ? '+' : '-'}${currencyConfig.symbol}${absValue.toFixed(2)}`;
   };
 
+  const isMultiMetric = selectedMetrics.length > 1;
+  const multiMetricChartData = useMemo(() => {
+    if (!isMultiMetric) return setupData;
+    return setupData.map(item => {
+      const enhanced: Record<string, unknown> = { ...item };
+      selectedMetrics.forEach((metric, index) => {
+        enhanced[`metric_${index}`] = getMetricValue(item, metric);
+      });
+      return enhanced;
+    });
+  }, [setupData, selectedMetrics, isMultiMetric]);
+
+  const formatMetricTick = (value: number, metricType: ChartDisplayType): string => {
+    if (isPrivacyMode && ['dollar', 'percent', 'avg_win', 'avg_loss', 'largest_win', 'largest_loss', 'trade_expectancy', 'avg_net_trade_pnl', 'profit_factor', 'avg_daily_drawdown', 'largest_daily_loss'].includes(metricType)) return '**';
+    switch (metricType) {
+      case 'dollar': case 'avg_win': case 'avg_loss': case 'largest_win': case 'largest_loss': case 'trade_expectancy': case 'avg_net_trade_pnl': case 'avg_daily_drawdown': case 'largest_daily_loss': return `${currencyConfig.symbol}${value.toFixed(0)}`;
+      case 'percent': case 'winrate': case 'long_winrate': case 'short_winrate': return `${value.toFixed(0)}%`;
+      case 'tradecount': case 'tradecount_long': case 'tradecount_short': case 'avg_trades_per_day': case 'median_trades_per_day': case '90th_percentile_trades': case 'logged_days': case 'winning_days_count': case 'losing_days_count': case 'breakeven_days_count': return value % 1 === 0 ? `${Math.round(value)}` : value.toFixed(1);
+      case 'avg_hold_time': case 'longest_duration': return formatDurationTick(value);
+      case 'profit_factor': return value === Infinity ? '∞' : value.toFixed(2);
+      case 'avg_realized_r': case 'avg_planned_r': return value.toFixed(2);
+      default: return `${value}`;
+    }
+  };
+
   return (
     <Card className="bg-card border-border h-full">
-      <CardContent className="p-4">
-        {/* Header with Dropdowns */}
-        <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
-          <h3 className="text-sm font-medium text-muted-foreground">{title}</h3>
-          <div className="flex items-center gap-2">
-            <ChartDisplayDropdown
-              value={displayType}
-              onValueChange={(v) => { const next = [...selectedMetrics]; next[0] = v; setSelectedMetrics(next); }}
-            />
+      <CardContent className="p-4 pb-2">
+        <div className="flex flex-col gap-2 mb-4">
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <h3 className="text-sm font-medium text-muted-foreground">{title}</h3>
+            <ChartMetricSettingsPopover metrics={selectedMetrics} configs={metricConfigs} onConfigChange={updateMetricConfig} />
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            {selectedMetrics.map((metric, index) => (
+              <div key={`${metric}-${index}`} className="flex items-center gap-1.5">
+                {isMultiMetric && <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: getMetricColor(index) }} />}
+                <ChartDisplayDropdown value={metric} onValueChange={(v) => { const next = [...selectedMetrics]; next[index] = v; setSelectedMetrics(next); }} disabledValues={selectedMetrics.filter((_, i) => i !== index)} />
+                {selectedMetrics.length > 1 && (
+                  <button onClick={() => removeMetric(index)} className="p-0.5 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"><X className="w-3.5 h-3.5" /></button>
+                )}
+              </div>
+            ))}
+            {selectedMetrics.length < 3 && (
+              <Button variant="outline" size="sm" className="h-8 text-xs gap-1" onClick={addMetric}><Plus className="w-3.5 h-3.5" />Add Metric</Button>
+            )}
           </div>
         </div>
 
-        {/* Chart */}
-        <div className="h-[300px] w-full">
+        <div className={`w-full -mx-2 px-0 ${isMultiMetric ? 'h-[340px]' : 'h-[300px]'}`}>
           {setupData.length > 0 ? (
             <ResponsiveContainer width="100%" height="100%">
               <ComposedChart
