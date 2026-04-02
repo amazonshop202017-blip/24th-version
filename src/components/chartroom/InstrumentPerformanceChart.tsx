@@ -1033,6 +1033,7 @@ export const InstrumentPerformanceChart = ({
                       {selectedMetrics.map((metric, index) => (
                         <Bar
                           key={metric}
+                          yAxisId={`y-${index}`}
                           dataKey={`metric_${index}`}
                           name={getDisplayLabel(metric)}
                           fill={METRIC_COLORS[index]}
