@@ -529,7 +529,7 @@ export const InstrumentPerformanceChart = ({
 
   return (
     <Card className="bg-card border-border h-full">
-      <CardContent className="p-4">
+      <CardContent className="p-4 pb-2">
         <div className="flex flex-col gap-2 mb-4">
           <div className="flex items-center justify-between flex-wrap gap-2">
             <h3 className="text-sm font-medium text-muted-foreground">{title}</h3>
