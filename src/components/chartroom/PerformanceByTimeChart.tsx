@@ -1342,24 +1342,39 @@ export const PerformanceByTimeChart = ({
                   }}
                 />
 
-                <Bar 
-                  dataKey="displayValue" 
-                  radius={[3, 3, 0, 0]}
-                  maxBarSize={40}
-                >
-                  {timeData.map((entry, index) => (
-                    <Cell 
-                      key={`cell-${index}`}
-                      fill={
-                        displayType === 'tradecount' || displayType === 'avg_hold_time' || displayType === 'longest_duration' || displayType === 'long_winrate' || displayType === 'short_winrate' || displayType === 'tradecount_long' || displayType === 'tradecount_short' || displayType === 'avg_planned_r'
-                          ? 'hsl(var(--primary))'
-                          : displayType === 'winrate'
-                            ? entry.displayValue >= 50 ? 'hsl(142, 71%, 45%)' : 'hsl(0, 84%, 60%)'
-                            : entry.displayValue >= 0 ? 'hsl(142, 71%, 45%)' : 'hsl(0, 84%, 60%)'
+                {isMultiMetric ? (
+                  <>
+                    {selectedMetrics.map((metric, index) => {
+                      const config = metricConfigs[index];
+                      const color = getMetricColor(index);
+                      if (config?.type === 'line') {
+                        return (
+                          <Line key={`line-${metric}-${index}`} yAxisId={`y-${index}`} type="monotone" dataKey={`metric_${index}`} stroke={color} strokeWidth={2} dot={{ fill: color, r: 3 }} activeDot={{ r: 5 }} />
+                        );
                       }
-                    />
-                  ))}
-                </Bar>
+                      return (
+                        <Bar key={`bar-${metric}-${index}`} yAxisId={`y-${index}`} dataKey={`metric_${index}`} fill={color} radius={[4, 4, 0, 0]} maxBarSize={40} />
+                      );
+                    })}
+                  </>
+                ) : (
+                  <Bar dataKey="displayValue" radius={[3, 3, 0, 0]} maxBarSize={40}>
+                    {timeData.map((entry, index) => {
+                      const config = metricConfigs[0];
+                      let fillColor: string;
+                      if (config?.color && config.color !== DEFAULT_METRIC_COLORS[0]) {
+                        fillColor = config.color;
+                      } else if (displayType === 'tradecount' || displayType === 'avg_hold_time' || displayType === 'longest_duration' || displayType === 'long_winrate' || displayType === 'short_winrate' || displayType === 'tradecount_long' || displayType === 'tradecount_short' || displayType === 'avg_planned_r') {
+                        fillColor = 'hsl(var(--primary))';
+                      } else if (displayType === 'winrate') {
+                        fillColor = entry.displayValue >= 50 ? 'hsl(var(--profit))' : 'hsl(var(--loss))';
+                      } else {
+                        fillColor = entry.displayValue >= 0 ? 'hsl(var(--profit))' : 'hsl(var(--loss))';
+                      }
+                      return <Cell key={`cell-${index}`} fill={fillColor} />;
+                    })}
+                  </Bar>
+                )}
               </ComposedChart>
             </ResponsiveContainer>
           ) : (
