@@ -574,13 +574,13 @@ export const InstrumentPerformanceChart = ({
         </div>
 
         {/* Chart */}
-        <div className="h-[300px] w-full">
+        <div className={`w-full ${isMultiMetric ? 'h-[340px]' : 'h-[300px]'}`}>
           {instrumentData.length > 0 ? (
             <>
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart
                   data={isMultiMetric ? multiMetricChartData : instrumentData}
-                  margin={{ top: 10, right: isMultiMetric && selectedMetrics.length > 1 ? (selectedMetrics.length === 3 ? 100 : 55) : 10, left: 0, bottom: 20 }}
+                  margin={{ top: 10, right: isMultiMetric && selectedMetrics.length > 1 ? (selectedMetrics.length === 3 ? 90 : 50) : 10, left: 0, bottom: isMultiMetric ? 30 : 20 }}
                 >
                   <CartesianGrid 
                     strokeDasharray="3 3" 
@@ -1028,6 +1028,23 @@ export const InstrumentPerformanceChart = ({
                     }}
                   />
 
+                  {isMultiMetric && (
+                    <Legend
+                      verticalAlign="bottom"
+                      height={24}
+                      content={() => (
+                        <div className="flex flex-wrap items-center justify-center gap-4 mt-1">
+                          {selectedMetrics.map((metric, index) => (
+                            <div key={metric} className="flex items-center gap-1.5">
+                              <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: METRIC_COLORS[index] }} />
+                              <span className="text-xs text-muted-foreground">{getDisplayLabel(metric)}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    />
+                  )}
+
                   {isMultiMetric ? (
                     <>
                       {selectedMetrics.map((metric, index) => (
@@ -1067,16 +1084,6 @@ export const InstrumentPerformanceChart = ({
                 </BarChart>
               </ResponsiveContainer>
 
-              {isMultiMetric && (
-                <div className="flex flex-wrap items-center justify-center gap-4 mt-2">
-                  {selectedMetrics.map((metric, index) => (
-                    <div key={metric} className="flex items-center gap-1.5">
-                      <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: METRIC_COLORS[index] }} />
-                      <span className="text-xs text-muted-foreground">{getDisplayLabel(metric)}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
             </>
           ) : (
             <div className="flex items-center justify-center h-full border border-dashed border-border rounded-xl bg-muted/20">
