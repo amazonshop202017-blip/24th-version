@@ -581,78 +581,24 @@ export const SetupPerformanceChart = ({
           {setupData.length > 0 ? (
             <ResponsiveContainer width="100%" height="100%">
               <ComposedChart
-                data={setupData}
-                margin={{ top: 10, right: 10, left: 0, bottom: 20 }}
+                data={isMultiMetric ? multiMetricChartData : setupData}
+                margin={{ top: 10, right: -5, left: -10, bottom: isMultiMetric ? 30 : 20 }}
               >
-                <CartesianGrid 
-                  strokeDasharray="3 3" 
-                  stroke="hsl(var(--border))" 
-                  opacity={0.3}
-                  vertical={false}
-                />
-                <XAxis
-                  dataKey="setup"
-                  axisLine={{ stroke: 'hsl(var(--border))' }}
-                  tickLine={false}
-                  tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 10 }}
-                  dy={5}
-                />
-                <YAxis
-                  axisLine={{ stroke: 'hsl(var(--border))' }}
-                  tickLine={false}
-                  tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 10 }}
-                  tickFormatter={(value) => {
-                    // Mask $ and % values in privacy mode
-                    if (isPrivacyMode && (displayType === 'dollar' || displayType === 'percent' || displayType === 'avg_win' || displayType === 'avg_loss' || displayType === 'largest_win' || displayType === 'largest_loss' || displayType === 'trade_expectancy' || displayType === 'avg_net_trade_pnl' || displayType === 'profit_factor' || displayType === 'avg_daily_drawdown' || displayType === 'largest_daily_loss')) {
-                      return '**';
-                    }
-                    switch (displayType) {
-                      case 'dollar':
-                      case 'avg_win':
-                      case 'avg_loss':
-                      case 'largest_win':
-                      case 'largest_loss':
-                      case 'trade_expectancy':
-                      case 'avg_net_trade_pnl':
-                      case 'avg_daily_drawdown':
-                      case 'largest_daily_loss':
-                        return `${currencyConfig.symbol}${value.toFixed(0)}`;
-                      case 'percent':
-                      case 'winrate':
-                      case 'long_winrate':
-                      case 'short_winrate':
-                        return `${value.toFixed(0)}%`;
-                       case 'tradecount':
-                       case 'tradecount_long':
-                       case 'tradecount_short':
-                       case 'avg_trades_per_day':
-                       case 'median_trades_per_day':
-                       case '90th_percentile_trades':
-                       case 'logged_days':
-                         return value % 1 === 0 ? `${Math.round(value)}` : value.toFixed(1);
-                      case 'avg_hold_time':
-                      case 'longest_duration':
-                        return formatDurationTick(value);
-                      case 'profit_factor':
-                        return value === Infinity ? '∞' : value.toFixed(2);
-                      case 'avg_realized_r':
-                      case 'avg_planned_r':
-                        return value.toFixed(2);
-                      default:
-                        return `${value}`;
-                    }
-                  }}
-                  width={50}
-                />
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} vertical={false} />
+                <XAxis dataKey="setup" axisLine={{ stroke: 'hsl(var(--border))' }} tickLine={false} tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 10 }} dy={5} />
                 
-                {/* Reference Line at 0 - for monetary and percent modes */}
-                {(displayType === 'dollar' || displayType === 'percent' || displayType === 'avg_win' || displayType === 'avg_loss' || displayType === 'largest_win' || displayType === 'largest_loss' || displayType === 'trade_expectancy' || displayType === 'avg_net_trade_pnl' || displayType === 'avg_daily_drawdown' || displayType === 'largest_daily_loss' || displayType === 'avg_realized_r' || displayType === 'avg_planned_r') && (
-                  <ReferenceLine 
-                    y={0} 
-                    stroke="hsl(var(--muted-foreground))" 
-                    strokeWidth={1}
-                    strokeDasharray="3 3"
-                  />
+                {isMultiMetric ? (
+                  <>
+                    {selectedMetrics.map((metric, index) => (
+                      <YAxis key={metric} yAxisId={`y-${index}`} orientation={index === 0 ? 'left' : 'right'} axisLine={{ stroke: getMetricColor(index) }} tickLine={false} tick={{ fill: getMetricColor(index), fontSize: 10 }} tickFormatter={(value) => formatMetricTick(value, metric)} width={index === 0 ? 40 : 32} />
+                    ))}
+                  </>
+                ) : (
+                  <YAxis axisLine={{ stroke: 'hsl(var(--border))' }} tickLine={false} tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 10 }} tickFormatter={(value) => formatMetricTick(value, displayType)} width={50} />
+                )}
+                
+                {!isMultiMetric && (displayType === 'dollar' || displayType === 'percent' || displayType === 'avg_win' || displayType === 'avg_loss' || displayType === 'largest_win' || displayType === 'largest_loss' || displayType === 'trade_expectancy' || displayType === 'avg_net_trade_pnl' || displayType === 'avg_daily_drawdown' || displayType === 'largest_daily_loss' || displayType === 'avg_realized_r' || displayType === 'avg_planned_r') && (
+                  <ReferenceLine y={0} stroke="hsl(var(--muted-foreground))" strokeWidth={1} strokeDasharray="3 3" />
                 )}
 
                 <Tooltip
