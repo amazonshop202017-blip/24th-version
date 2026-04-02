@@ -40,8 +40,11 @@ import {
 } from '@/components/ui/select';
 import {
   Card, CardContent } from '@/components/ui/card';
-import {
-  ChartDisplayDropdown } from './ChartDisplayDropdown';
+import { ChartDisplayDropdown } from './ChartDisplayDropdown';
+import { ChartMetricSettingsPopover, MetricConfig } from './ChartMetricSettingsPopover';
+import { Button } from '@/components/ui/button';
+import { X, Plus } from 'lucide-react';
+import { getDisplayLabel } from '@/hooks/useChartDisplayMode';
 
 type DateSettingType = 'entry' | 'exit';
 type PeriodType = 'weekday' | 'month' | 'week' | 'hour' | '2hour' | '1hour' | '30min' | '15min' | '10min' | '5min';
