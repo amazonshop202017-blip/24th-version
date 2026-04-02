@@ -126,7 +126,35 @@ export const PerformanceByTimeChart = ({
     return defaultDisplayType;
   };
   
-  const [displayType, setDisplayType] = useState<ChartDisplayType>(getInitialDisplayType);
+  const [selectedMetrics, setSelectedMetrics] = useState<ChartDisplayType[]>([getInitialDisplayType()]);
+  const [metricConfigs, setMetricConfigs] = useState<MetricConfig[]>([
+    { type: 'column', color: DEFAULT_METRIC_COLORS[0] }
+  ]);
+  const displayType = selectedMetrics[0];
+
+  const getMetricColor = (index: number) => metricConfigs[index]?.color || DEFAULT_METRIC_COLORS[index] || DEFAULT_METRIC_COLORS[0];
+
+  const updateMetricConfig = (index: number, partial: Partial<MetricConfig>) => {
+    setMetricConfigs(prev => {
+      const next = [...prev];
+      next[index] = { ...next[index], ...partial };
+      return next;
+    });
+  };
+
+  const addMetric = () => {
+    if (selectedMetrics.length >= 3) return;
+    const allOptions: ChartDisplayType[] = ['dollar', 'winrate', 'tradecount', 'percent', 'avg_win', 'avg_loss', 'profit_factor', 'trade_expectancy'];
+    const next = allOptions.find(m => !selectedMetrics.includes(m)) || 'dollar';
+    setSelectedMetrics(prev => [...prev, next]);
+    setMetricConfigs(prev => [...prev, { type: 'column', color: DEFAULT_METRIC_COLORS[prev.length] || DEFAULT_METRIC_COLORS[0] }]);
+  };
+
+  const removeMetric = (index: number) => {
+    setSelectedMetrics(prev => prev.filter((_, i) => i !== index));
+    setMetricConfigs(prev => prev.filter((_, i) => i !== index));
+  };
+
   const [dateSetting, setDateSetting] = useState<DateSettingType>('entry');
   const [period, setPeriod] = useState<PeriodType>('weekday');
 
