@@ -8,8 +8,9 @@ import { ChartDisplayType, mapGlobalToChartDisplay, formatDuration, formatDurati
 import { buildGroupDailyCounts, getGroupTradingActivityStats } from '@/lib/tradingActivityStats';
 import { buildGroupedTradesMap, getGroupRiskDrawdownStats } from '@/lib/riskDrawdownStats';
 import {
-  BarChart,
+  ComposedChart,
   Bar,
+  Line,
   XAxis,
   YAxis,
   ResponsiveContainer,
@@ -21,6 +22,7 @@ import {
 } from 'recharts';
 import { Card, CardContent } from '@/components/ui/card';
 import { ChartDisplayDropdown } from './ChartDisplayDropdown';
+import { ChartMetricSettingsPopover, MetricConfig } from './ChartMetricSettingsPopover';
 import { Button } from '@/components/ui/button';
 import { X, Plus } from 'lucide-react';
 
@@ -76,7 +78,7 @@ interface InstrumentData {
   tradesWithPlannedR: number;
 }
 
-const METRIC_COLORS = [
+const DEFAULT_METRIC_COLORS = [
   'hsl(var(--primary))',
   'hsl(var(--profit))',
   'hsl(45 93% 47%)',
@@ -140,7 +142,22 @@ export const InstrumentPerformanceChart = ({
   };
   
   const [selectedMetrics, setSelectedMetrics] = useState<ChartDisplayType[]>([getInitialDisplayType()]);
+  const [metricConfigs, setMetricConfigs] = useState<MetricConfig[]>([
+    { type: 'column', color: DEFAULT_METRIC_COLORS[0] }
+  ]);
   const displayType = selectedMetrics[0]; // Primary metric for backward compat
+
+  // Helper to get color for a metric index
+  const getMetricColor = (index: number) => metricConfigs[index]?.color || DEFAULT_METRIC_COLORS[index] || DEFAULT_METRIC_COLORS[0];
+
+  // Update metric configs when metrics are added/removed
+  const updateMetricConfig = (index: number, partial: Partial<MetricConfig>) => {
+    setMetricConfigs(prev => {
+      const next = [...prev];
+      next[index] = { ...next[index], ...partial };
+      return next;
+    });
+  };
 
   // Calculate total starting balance for Return (%) denominator
   const totalStartingBalance = useMemo(() => {
@@ -456,10 +473,15 @@ export const InstrumentPerformanceChart = ({
 
   const addMetric = () => {
     if (selectedMetrics.length >= 3) return;
-    // Find first metric not already selected
     const allOptions: ChartDisplayType[] = ['dollar', 'winrate', 'tradecount', 'percent', 'avg_win', 'avg_loss', 'profit_factor', 'trade_expectancy'];
     const next = allOptions.find(m => !selectedMetrics.includes(m)) || 'dollar';
     setSelectedMetrics(prev => [...prev, next]);
+    setMetricConfigs(prev => [...prev, { type: 'column', color: DEFAULT_METRIC_COLORS[prev.length] || DEFAULT_METRIC_COLORS[0] }]);
+  };
+
+  const removeMetric = (index: number) => {
+    setSelectedMetrics(prev => prev.filter((_, i) => i !== index));
+    setMetricConfigs(prev => prev.filter((_, i) => i !== index));
   };
 
   // Format currency
@@ -533,12 +555,19 @@ export const InstrumentPerformanceChart = ({
         <div className="flex flex-col gap-2 mb-4">
           <div className="flex items-center justify-between flex-wrap gap-2">
             <h3 className="text-sm font-medium text-muted-foreground">{title}</h3>
+            {isMultiMetric && (
+              <ChartMetricSettingsPopover
+                metrics={selectedMetrics}
+                configs={metricConfigs}
+                onConfigChange={updateMetricConfig}
+              />
+            )}
           </div>
           <div className="flex flex-wrap items-center gap-2">
             {selectedMetrics.map((metric, index) => (
               <div key={`${metric}-${index}`} className="flex items-center gap-1.5">
                 {isMultiMetric && (
-                  <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: METRIC_COLORS[index] }} />
+                  <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: getMetricColor(index) }} />
                 )}
                 <ChartDisplayDropdown
                   value={metric}
@@ -551,7 +580,7 @@ export const InstrumentPerformanceChart = ({
                 />
                 {selectedMetrics.length > 1 && (
                   <button
-                    onClick={() => setSelectedMetrics(prev => prev.filter((_, i) => i !== index))}
+                    onClick={() => removeMetric(index)}
                     className="p-0.5 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
                   >
                     <X className="w-3.5 h-3.5" />
@@ -578,7 +607,7 @@ export const InstrumentPerformanceChart = ({
           {instrumentData.length > 0 ? (
             <>
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart
+                <ComposedChart
                   data={isMultiMetric ? multiMetricChartData : instrumentData}
                   margin={{ top: 10, right: -5, left: -10, bottom: isMultiMetric ? 30 : 5 }}
                 >
@@ -603,9 +632,9 @@ export const InstrumentPerformanceChart = ({
                           key={metric}
                           yAxisId={`y-${index}`}
                           orientation={index === 0 ? 'left' : 'right'}
-                          axisLine={{ stroke: METRIC_COLORS[index] }}
+                          axisLine={{ stroke: getMetricColor(index) }}
                           tickLine={false}
-                          tick={{ fill: METRIC_COLORS[index], fontSize: 10 }}
+                          tick={{ fill: getMetricColor(index), fontSize: 10 }}
                           tickFormatter={(value) => formatMetricTick(value, metric)}
                           width={index === 0 ? 40 : 32}
                         />
@@ -646,7 +675,7 @@ export const InstrumentPerformanceChart = ({
                                 const val = getMetricValue(data, metric);
                                 return (
                                   <div key={metric} className="flex items-center gap-2">
-                                    <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: METRIC_COLORS[index] }} />
+                                    <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: getMetricColor(index) }} />
                                     <span className="text-muted-foreground">{getDisplayLabel(metric)}:</span>
                                     <span className="text-foreground font-mono">
                                       {isPrivacyMode ? PRIVACY_MASK : typeof val === 'number' ? val.toFixed(2) : val}
@@ -1031,12 +1060,19 @@ export const InstrumentPerformanceChart = ({
                       height={24}
                       content={() => (
                         <div className="flex flex-wrap items-center justify-center gap-4 mt-1">
-                          {selectedMetrics.map((metric, index) => (
-                            <div key={metric} className="flex items-center gap-1.5">
-                              <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: METRIC_COLORS[index] }} />
-                              <span className="text-xs text-muted-foreground">{getDisplayLabel(metric)}</span>
-                            </div>
-                          ))}
+                          {selectedMetrics.map((metric, index) => {
+                            const config = metricConfigs[index];
+                            return (
+                              <div key={metric} className="flex items-center gap-1.5">
+                                {config?.type === 'line' ? (
+                                  <div className="w-4 h-0.5 rounded" style={{ backgroundColor: getMetricColor(index) }} />
+                                ) : (
+                                  <div className="w-2.5 h-2.5 rounded-sm" style={{ backgroundColor: getMetricColor(index) }} />
+                                )}
+                                <span className="text-xs text-muted-foreground">{getDisplayLabel(metric)}</span>
+                              </div>
+                            );
+                          })}
                         </div>
                       )}
                     />
@@ -1044,17 +1080,36 @@ export const InstrumentPerformanceChart = ({
 
                   {isMultiMetric ? (
                     <>
-                      {selectedMetrics.map((metric, index) => (
-                        <Bar
-                          key={metric}
-                          yAxisId={`y-${index}`}
-                          dataKey={`metric_${index}`}
-                          name={getDisplayLabel(metric)}
-                          fill={METRIC_COLORS[index]}
-                          radius={[4, 4, 0, 0]}
-                          maxBarSize={30}
-                        />
-                      ))}
+                      {selectedMetrics.map((metric, index) => {
+                        const config = metricConfigs[index];
+                        const color = getMetricColor(index);
+                        if (config?.type === 'line') {
+                          return (
+                            <Line
+                              key={metric}
+                              yAxisId={`y-${index}`}
+                              type="monotone"
+                              dataKey={`metric_${index}`}
+                              name={getDisplayLabel(metric)}
+                              stroke={color}
+                              strokeWidth={2}
+                              dot={{ fill: color, r: 3 }}
+                              activeDot={{ r: 5 }}
+                            />
+                          );
+                        }
+                        return (
+                          <Bar
+                            key={metric}
+                            yAxisId={`y-${index}`}
+                            dataKey={`metric_${index}`}
+                            name={getDisplayLabel(metric)}
+                            fill={color}
+                            radius={[4, 4, 0, 0]}
+                            maxBarSize={30}
+                          />
+                        );
+                      })}
                     </>
                   ) : (
                     <Bar
@@ -1078,7 +1133,7 @@ export const InstrumentPerformanceChart = ({
                       })}
                     </Bar>
                   )}
-                </BarChart>
+                </ComposedChart>
               </ResponsiveContainer>
 
             </>
