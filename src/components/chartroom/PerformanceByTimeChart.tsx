@@ -1396,7 +1396,7 @@ export const PerformanceByTimeChart = ({
                       } else if (config?.color && config.color !== DEFAULT_METRIC_COLORS[0]) {
                         fillColor = config.color;
                       } else if (displayType === 'tradecount' || displayType === 'avg_hold_time' || displayType === 'longest_duration' || displayType === 'long_winrate' || displayType === 'short_winrate' || displayType === 'tradecount_long' || displayType === 'tradecount_short') {
-                        fillColor = 'hsl(var(--primary))';
+                        fillColor = primaryFill;
                       } else if (displayType === 'winrate') {
                         fillColor = getFill(entry.displayValue >= 50);
                       } else {
