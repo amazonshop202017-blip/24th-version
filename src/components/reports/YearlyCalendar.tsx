@@ -212,6 +212,7 @@ const YearlyCalendar = () => {
                         <TooltipTrigger asChild>
                           <div
                             onClick={() => isCurrentMonth && handleDayClick(date)}
+                            style={dayData && isCurrentMonth ? { backgroundColor: dayData.netPnl > 0 ? 'hsl(var(--profit) / 0.15)' : dayData.netPnl < 0 ? 'hsl(var(--loss) / 0.15)' : undefined } : undefined}
                             className={cn(
                               "aspect-square flex items-center justify-center text-[9px] rounded-[2px] transition-colors",
                               getDayClass(date, monthIndex),
