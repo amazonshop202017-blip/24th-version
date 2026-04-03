@@ -389,17 +389,20 @@ export const MonthlyPerformanceCalendar = () => {
                   const isCurrentMonth = isSameMonth(day, currentMonth);
                   const hasData = stats?.hasData && isCurrentMonth;
 
+                  const bgStyle: React.CSSProperties = {};
                   let bgClass = 'bg-secondary/30';
                   if (hasData) {
-                    bgClass = stats.pnl >= 0 
-                      ? 'bg-[hsl(142_76%_45%/0.15)]' 
-                      : 'bg-[hsl(0_84%_60%/0.15)]';
+                    bgClass = '';
+                    bgStyle.backgroundColor = stats.pnl >= 0 
+                      ? 'hsl(var(--profit) / 0.15)' 
+                      : 'hsl(var(--loss) / 0.15)';
                   }
 
                   return (
                     <div
                       key={dayKey}
                       onClick={() => isCurrentMonth && handleDayClick(day)}
+                      style={isCurrentMonth && hasData ? bgStyle : undefined}
                       className={`
                         min-h-[68px] md:min-h-[80px] p-1 md:p-2 rounded-md md:rounded-lg border-transparent transition-colors
                         ${isCurrentMonth ? bgClass : 'bg-muted/20 opacity-40'}
@@ -456,11 +459,14 @@ export const MonthlyPerformanceCalendar = () => {
               <div className={`text-sm font-bold font-mono ${isPrivacyMode ? 'text-foreground' : summary.pnl >= 0 ? 'profit-text' : 'loss-text'}`}>
                 {formatCurrencyDecimal(summary.pnl)}
               </div>
-              <div className={`text-[10px] px-1.5 py-0.5 rounded mt-0.5 ${
-                summary.tradingDays > 0 
-                  ? summary.pnl >= 0 ? 'bg-[hsl(142_76%_45%/0.2)] text-[hsl(142_76%_55%)]' : 'bg-[hsl(0_84%_60%/0.2)] text-[hsl(0_84%_70%)]'
-                  : 'bg-muted text-muted-foreground'
-              }`}>
+              <div 
+                className={`text-[10px] px-1.5 py-0.5 rounded mt-0.5 ${
+                  summary.tradingDays > 0 
+                    ? summary.pnl >= 0 ? 'profit-text' : 'loss-text'
+                    : 'bg-muted text-muted-foreground'
+                }`}
+                style={summary.tradingDays > 0 ? { backgroundColor: summary.pnl >= 0 ? 'hsl(var(--profit) / 0.2)' : 'hsl(var(--loss) / 0.2)' } : undefined}
+              >
                 {summary.tradingDays} day{summary.tradingDays !== 1 ? 's' : ''}
               </div>
             </div>

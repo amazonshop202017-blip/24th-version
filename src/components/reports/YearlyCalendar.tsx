@@ -130,9 +130,9 @@ const YearlyCalendar = () => {
     
     if (dayData) {
       if (dayData.netPnl > 0) {
-        return 'bg-profit/20 text-profit border border-profit/40';
+        return 'profit-text border border-profit/40';
       } else if (dayData.netPnl < 0) {
-        return 'bg-loss/20 text-loss border border-loss/40';
+        return 'loss-text border border-loss/40';
       }
     }
     
@@ -212,6 +212,7 @@ const YearlyCalendar = () => {
                         <TooltipTrigger asChild>
                           <div
                             onClick={() => isCurrentMonth && handleDayClick(date)}
+                            style={dayData && isCurrentMonth ? { backgroundColor: dayData.netPnl > 0 ? 'hsl(var(--profit) / 0.15)' : dayData.netPnl < 0 ? 'hsl(var(--loss) / 0.15)' : undefined } : undefined}
                             className={cn(
                               "aspect-square flex items-center justify-center text-[9px] rounded-[2px] transition-colors",
                               getDayClass(date, monthIndex),
