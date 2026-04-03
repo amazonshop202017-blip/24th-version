@@ -19,6 +19,7 @@ export const SymbolAnalysisChart = () => {
   const { filteredTrades: trades } = useFilteredTrades();
   const { currencyConfig } = useGlobalFilters();
   const { isPrivacyMode } = usePrivacyMode();
+  const { getFill } = useGradientFill('symbolAnalysis');
 
   const chartData = useMemo(() => {
     if (trades.length === 0) return [];
