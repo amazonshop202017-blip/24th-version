@@ -8,9 +8,9 @@ interface ChartGradientDefsProps {
 }
 
 /**
- * SVG gradient definitions for bar charts — rendered via Recharts <customized>.
- * Place as a direct child of <BarChart>, <ComposedChart>, etc.
- * Only renders gradient defs when gradient mode is enabled.
+ * SVG gradient definitions for bar charts.
+ * Renders inside Recharts via <Customized component={() => <ChartGradientDefs ... />} />.
+ * Only renders when gradient mode is enabled in Interface Theme.
  */
 export const ChartGradientDefs = ({ direction = 'vertical', idPrefix = '' }: ChartGradientDefsProps) => {
   const { theme } = useInterfaceTheme();
@@ -19,36 +19,33 @@ export const ChartGradientDefs = ({ direction = 'vertical', idPrefix = '' }: Cha
 
   const profitId = `${idPrefix}profitGradient`;
   const lossId = `${idPrefix}lossGradient`;
+  const primaryId = `${idPrefix}primaryGradient`;
 
-  const profitCoords = direction === 'horizontal'
+  const positiveCoords = direction === 'horizontal'
     ? { x1: '0', y1: '0', x2: '1', y2: '0' }
     : { x1: '0', y1: '1', x2: '0', y2: '0' };
 
-  const lossCoords = direction === 'horizontal'
+  const negativeCoords = direction === 'horizontal'
     ? { x1: '1', y1: '0', x2: '0', y2: '0' }
     : { x1: '0', y1: '0', x2: '0', y2: '1' };
 
-  // Render raw SVG defs — this component must be used inside a Recharts
-  // <Customized> wrapper or placed where raw SVG is accepted.
   return (
     <defs>
-      <linearGradient id={profitId} {...profitCoords}>
+      <linearGradient id={profitId} {...positiveCoords}>
         <stop offset="0%" stopColor="hsl(var(--profit))" stopOpacity={0.3} />
         <stop offset="100%" stopColor="hsl(var(--profit))" stopOpacity={0.85} />
       </linearGradient>
-      <linearGradient id={lossId} {...lossCoords}>
+      <linearGradient id={lossId} {...negativeCoords}>
         <stop offset="0%" stopColor="hsl(var(--loss))" stopOpacity={0.3} />
         <stop offset="100%" stopColor="hsl(var(--loss))" stopOpacity={0.85} />
+      </linearGradient>
+      <linearGradient id={primaryId} {...positiveCoords}>
+        <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
+        <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0.85} />
       </linearGradient>
     </defs>
   );
 };
-
-/**
- * Wrapper that uses Recharts' Customized component to inject gradient defs into the SVG.
- * Use this as a direct child of BarChart/ComposedChart.
- */
-export { ChartGradientDefs as ChartGradientDefsRaw };
 
 /**
  * Hook that returns the correct fill value based on gradient mode.
@@ -60,8 +57,9 @@ export const useGradientFill = (idPrefix = '') => {
 
   const profitFill = isGradient ? `url(#${idPrefix}profitGradient)` : 'hsl(var(--profit))';
   const lossFill = isGradient ? `url(#${idPrefix}lossGradient)` : 'hsl(var(--loss))';
+  const primaryFill = isGradient ? `url(#${idPrefix}primaryGradient)` : 'hsl(var(--primary))';
 
   const getFill = (isPositive: boolean) => isPositive ? profitFill : lossFill;
 
-  return { profitFill, lossFill, getFill, isGradient };
+  return { profitFill, lossFill, primaryFill, getFill, isGradient };
 };
