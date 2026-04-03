@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, Cell   Customized,
+  Customized,
 } from 'recharts';
 import { format, parseISO } from 'date-fns';
 import { motion } from 'framer-motion';
