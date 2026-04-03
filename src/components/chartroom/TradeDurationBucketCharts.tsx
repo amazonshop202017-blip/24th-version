@@ -260,8 +260,8 @@ export const TradeCountByDurationChart = () => {
                         <p className="text-muted-foreground">
                           Total Trades: {data.tradeCount}
                         </p>
-                        <p className="text-green-500">Winners: {data.winCount}</p>
-                        <p className="text-red-500">Losers: {data.lossCount}</p>
+                        <p className="profit-text">Winners: {data.winCount}</p>
+                        <p className="loss-text">Losers: {data.lossCount}</p>
                       </div>
                     </div>
                   );
