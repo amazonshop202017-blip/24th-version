@@ -117,6 +117,15 @@ export const InterfaceThemeProvider = ({ children }: { children: ReactNode }) =>
 
 export const useInterfaceTheme = () => {
   const ctx = useContext(InterfaceThemeContext);
-  if (!ctx) throw new Error('useInterfaceTheme must be used within InterfaceThemeProvider');
+  if (!ctx) {
+    // Fallback for portal rendering outside provider tree
+    const fallback: InterfaceThemeContextType = {
+      theme: { positive: '#00c2ab', negative: '#d10046', neutral: '#4a4a4a', mode: 'flat' as const },
+      setThemeColor: () => {},
+      setMode: () => {},
+      resetToDefaults: () => {},
+    };
+    return fallback;
+  }
   return ctx;
 };
