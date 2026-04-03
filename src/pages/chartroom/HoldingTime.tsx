@@ -354,7 +354,7 @@ const HoldingTime = () => {
                   <Scatter
                     name="Losers"
                     data={loserData}
-                    fill="hsl(0, 84%, 60%)"
+                    fill="hsl(var(--loss))"
                   />
                 </ScatterChart>
               </ResponsiveContainer>
