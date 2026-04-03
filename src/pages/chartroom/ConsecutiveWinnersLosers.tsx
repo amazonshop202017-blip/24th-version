@@ -428,6 +428,7 @@ const ConsecutiveWinnersLosers = () => {
                   barGap={0}
                   barCategoryGap="20%"
                 >
+                  <ChartGradientDefs direction="vertical" idPrefix="consec" />
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
                   <XAxis
                     dataKey="streak"
