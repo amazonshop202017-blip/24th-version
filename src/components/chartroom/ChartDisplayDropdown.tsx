@@ -155,40 +155,59 @@ export const ChartDisplayDropdown = ({
         align="end"
         className="w-[260px] max-h-[360px] overflow-y-auto bg-popover border-border p-1 z-50"
       >
-        {/* Favorites Section */}
+        {/* Favorites Section - collapsible like other groups */}
         {favoriteItems.length > 0 && (
-          <>
-            <div className="px-2 py-1.5 text-xs font-medium text-muted-foreground flex items-center gap-1.5">
-              <Heart className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-              Favourites
-            </div>
-            {favoriteItems.map((metric) => {
-              const isSelected = value === metric;
-              return (
-                <button
-                  key={`fav-${metric}`}
-                  type="button"
-                  onClick={() => handleSelectOption(metric)}
-                  className={cn(
-                    'flex items-center w-full px-2 py-1.5 text-sm rounded-sm cursor-pointer',
-                    isSelected
-                      ? 'bg-primary/10 text-primary'
-                      : 'text-foreground hover:bg-accent hover:text-accent-foreground'
-                  )}
-                >
-                  <span className="w-5 shrink-0">
-                    {isSelected && <Check className="h-4 w-4" />}
-                  </span>
-                  <span className="flex-1 text-left">{getDisplayLabel(metric)}</span>
-                  <Heart
-                    className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400 shrink-0 ml-1 hover:scale-125 transition-transform"
-                    onClick={(e) => handleToggleFavorite(metric, e)}
-                  />
-                </button>
-              );
-            })}
-            <div className="mx-2 my-1 h-px bg-border" />
-          </>
+          <div>
+            <button
+              type="button"
+              onClick={(e) => toggleGroup('__favorites__', e)}
+              className={cn(
+                'flex items-center justify-between w-full px-2 py-1.5 text-sm rounded-sm cursor-pointer transition-colors',
+                expandedGroups.has('__favorites__')
+                  ? 'bg-primary/10 text-primary font-medium'
+                  : 'text-foreground hover:bg-accent hover:text-accent-foreground'
+              )}
+            >
+              <span className="flex items-center gap-1.5">
+                <Heart className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
+                Favourites
+              </span>
+              {expandedGroups.has('__favorites__') ? (
+                <ChevronUp className="h-4 w-4 text-primary" />
+              ) : (
+                <ChevronDown className="h-4 w-4 text-muted-foreground" />
+              )}
+            </button>
+            {expandedGroups.has('__favorites__') && (
+              <div className="pl-2">
+                {favoriteItems.map((metric) => {
+                  const isSelected = value === metric;
+                  return (
+                    <button
+                      key={`fav-${metric}`}
+                      type="button"
+                      onClick={() => handleSelectOption(metric)}
+                      className={cn(
+                        'flex items-center w-full px-2 py-1.5 text-sm rounded-sm cursor-pointer',
+                        isSelected
+                          ? 'bg-primary/10 text-primary'
+                          : 'text-foreground hover:bg-accent hover:text-accent-foreground'
+                      )}
+                    >
+                      <span className="w-5 shrink-0">
+                        {isSelected && <Check className="h-4 w-4" />}
+                      </span>
+                      <span className="flex-1 text-left">{getDisplayLabel(metric)}</span>
+                      <Heart
+                        className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400 shrink-0 ml-1 hover:scale-125 transition-transform"
+                        onClick={(e) => handleToggleFavorite(metric, e)}
+                      />
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
         )}
 
         {/* Regular Groups */}
