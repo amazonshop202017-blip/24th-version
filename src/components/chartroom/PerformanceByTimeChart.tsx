@@ -1397,7 +1397,7 @@ export const PerformanceByTimeChart = ({
                       } else if (displayType === 'tradecount' || displayType === 'avg_hold_time' || displayType === 'longest_duration' || displayType === 'long_winrate' || displayType === 'short_winrate' || displayType === 'tradecount_long' || displayType === 'tradecount_short') {
                         fillColor = 'hsl(var(--primary))';
                       } else if (displayType === 'winrate') {
-                        fillColor = entry.displayValue >= 50 ? 'hsl(var(--profit))' : 'hsl(var(--loss))';
+                        fillColor = getFill(entry.displayValue >= 50);
                       } else {
                         fillColor = getFill(entry.displayValue >= 0);
                       }
