@@ -102,6 +102,7 @@ export const ChartDisplayDropdown = ({
 }: ChartDisplayDropdownProps) => {
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
   const [isOpen, setIsOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const { favorites, toggleFavorite, isFavorite } = useFavoriteMetrics();
 
   const toggleGroup = (groupName: string, e: React.MouseEvent) => {
@@ -122,6 +123,7 @@ export const ChartDisplayDropdown = ({
     if (functionalValues.has(optionValue)) {
       onValueChange(optionValue);
       setIsOpen(false);
+      setSearchQuery('');
     }
   };
 
@@ -135,6 +137,20 @@ export const ChartDisplayDropdown = ({
 
   // Get favorite items that are functional
   const favoriteItems = favorites.filter((m) => functionalValues.has(m) && !disabledValues.includes(m));
+
+  // Search results grouped by category
+  const searchResults = useMemo(() => {
+    if (!searchQuery.trim()) return null;
+    const q = searchQuery.toLowerCase();
+    const results: { group: string; options: DisplayOption[] }[] = [];
+    for (const group of displayGroups) {
+      const matched = group.options.filter(
+        (o) => functionalValues.has(o.value) && !disabledValues.includes(o.value) && o.label.toLowerCase().includes(q)
+      );
+      if (matched.length > 0) results.push({ group: group.name, options: matched });
+    }
+    return results;
+  }, [searchQuery, disabledValues]);
 
   return (
     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
