@@ -418,7 +418,7 @@ const RiskDistribution = () => {
             <p className="text-xs text-muted-foreground font-medium mb-1">
               {displayType === 'rMultiple' ? 'Total R Multiple' : 'Total Return (%)'}
             </p>
-            <p className={`text-xl font-bold ${metrics.totalValue >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>
+            <p className={`text-xl font-bold ${metrics.totalValue >= 0 ? 'profit-text' : 'loss-text'}`}>
               {formatValue(metrics.totalValue)}
             </p>
           </CardContent>
