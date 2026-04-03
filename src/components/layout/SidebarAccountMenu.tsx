@@ -1,9 +1,10 @@
-import { CircleUser, Settings, LogOut, Sun, Moon } from 'lucide-react';
+import { CircleUser, Settings, LogOut, Sun, Moon, Palette } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/hooks/useTheme';
 import { cn } from '@/lib/utils';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Separator } from '@/components/ui/separator';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { AnimatePresence, motion } from 'framer-motion';
 
@@ -80,6 +81,12 @@ export const SidebarAccountMenu = ({ isCollapsed }: { isCollapsed: boolean }) =>
           </button>
           <span className={cn("text-xs font-medium transition-colors", isDark ? "text-foreground" : "text-muted-foreground")}>Dark</span>
         </div>
+
+        <button onClick={() => navigate('/settings')} className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-foreground hover:bg-accent hover:text-accent-foreground transition-colors">
+          <Palette className="w-4 h-4" /> Customization
+        </button>
+
+        <Separator className="my-1" />
 
         <button onClick={() => navigate('/settings')} className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-foreground hover:bg-accent hover:text-accent-foreground transition-colors">
           <Settings className="w-4 h-4" /> Settings
