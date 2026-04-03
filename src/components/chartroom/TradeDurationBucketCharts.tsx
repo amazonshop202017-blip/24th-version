@@ -303,6 +303,8 @@ export const TradeCountByDurationChart = () => {
 // Win Rate by Trade Duration Chart - Horizontal bars
 export const WinRateByDurationChart = () => {
   const bucketData = useTradeDurationBuckets();
+  const { getCustomFill } = useCustomColorGradientFill('wrDur');
+  const BLUE = 'hsl(217, 91%, 60%)';
 
   // Calculate overall win rate
   const overallWinRate = useMemo(() => {
