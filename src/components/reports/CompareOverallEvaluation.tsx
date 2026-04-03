@@ -17,8 +17,8 @@ export const CompareOverallEvaluation = ({ groupNumber, stats }: CompareOverallE
     }
     
     return [
-      { name: 'Winners', value: wins, color: '#10b981' }, // emerald-500
-      { name: 'Losers', value: losses, color: '#ef4444' }, // red-500
+      { name: 'Winners', value: wins, color: 'hsl(var(--profit))' },
+      { name: 'Losers', value: losses, color: 'hsl(var(--loss))' },
     ];
   }, [stats.winningTradesCount, stats.losingTradesCount]);
 
