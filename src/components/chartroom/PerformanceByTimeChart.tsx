@@ -160,6 +160,7 @@ export const PerformanceByTimeChart = ({
   const { currencyConfig, selectedAccounts, isAllAccountsSelected, classifyTradeOutcome, displayMode, breakevenTolerance } = useGlobalFilters();
   const { accounts, getAccountBalanceBeforeTrades } = useAccountsContext();
   const { isPrivacyMode } = usePrivacyMode();
+  const { getFill } = useGradientFill('timePerf');
   
   // Calculate initial display type from global filter or prop
   const getInitialDisplayType = (): ChartDisplayType => {
