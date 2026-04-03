@@ -135,7 +135,7 @@ export const InstrumentPerformanceChart = ({
   const { currencyConfig, selectedAccounts, isAllAccountsSelected, classifyTradeOutcome, displayMode, breakevenTolerance } = useGlobalFilters();
   const { isPrivacyMode } = usePrivacyMode();
   const { accounts, getAccountBalanceBeforeTrades } = useAccountsContext();
-  const { getFill } = useGradientFill('instrPerf');
+  const { getFill, primaryFill } = useGradientFill('instrPerf');
   
   const getInitialDisplayType = (): ChartDisplayType => {
     if (useGlobalDefault) {

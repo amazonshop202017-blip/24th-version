@@ -146,7 +146,7 @@ export const TagsCommentsChart = ({
   const { accounts, getAccountBalanceBeforeTrades } = useAccountsContext();
   const { tags } = useTagsContext();
   const { isPrivacyMode } = usePrivacyMode();
-  const { getFill } = useGradientFill('tagsComments');
+  const { getFill, primaryFill } = useGradientFill('tagsComments');
 
   // Calculate initial display type from global filter or prop
   const getInitialDisplayType = (): ChartDisplayType => {

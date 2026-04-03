@@ -149,7 +149,7 @@ export const SetupPerformanceChart = ({
   const { accounts, getAccountBalanceBeforeTrades } = useAccountsContext();
   const { strategies } = useStrategiesContext();
   const { isPrivacyMode } = usePrivacyMode();
-  const { getFill } = useGradientFill('setupPerf');
+  const { getFill, primaryFill } = useGradientFill('setupPerf');
   
   const getInitialDisplayType = (): ChartDisplayType => {
     if (useGlobalDefault) {
