@@ -252,3 +252,15 @@
 .MuiPieArc-root {
   stroke: none !important;
 }
+
+/* Darken recharts bar on hover */
+.recharts-bar-rectangle:hover path,
+.recharts-bar-rectangle:hover rect {
+  filter: brightness(0.75);
+  transition: filter 0.15s ease;
+}
+
+.recharts-bar-rectangle path,
+.recharts-bar-rectangle rect {
+  transition: filter 0.15s ease;
+}
