@@ -274,10 +274,10 @@ const RiskDistribution = () => {
           <p className="text-muted-foreground">
             Number of trades: <span className="text-foreground font-medium">{data.tradeCount}</span>
           </p>
-          <p className="text-emerald-500">
+          <p className="profit-text">
             Winners: <span className="font-medium">{data.winCount}</span>
           </p>
-          <p className="text-red-500">
+          <p className="loss-text">
             Losers: <span className="font-medium">{data.lossCount}</span>
           </p>
           <p className="text-muted-foreground">
