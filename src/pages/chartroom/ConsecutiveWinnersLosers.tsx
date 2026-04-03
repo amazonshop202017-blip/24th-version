@@ -64,6 +64,7 @@ const ConsecutiveWinnersLosers = () => {
   const { formatCurrency } = useGlobalFilters();
   const { isPrivacyMode, maskCurrency } = usePrivacyMode();
   const { displayType, setDisplayType } = useChartDisplayMode('dollar', true);
+  const { profitFill, lossFill } = useGradientFill('consec');
 
   // Filter to only dollar/percent for this chart
   const chartDisplayType = displayType === 'percent' ? 'percent' : 'dollar';

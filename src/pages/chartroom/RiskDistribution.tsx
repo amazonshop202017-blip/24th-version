@@ -40,6 +40,7 @@ interface BucketData {
 const RiskDistribution = () => {
   const { filteredTrades } = useFilteredTrades();
   const { currencyConfig } = useGlobalFilters();
+  const { getFill } = useGradientFill('riskDist');
   
   const [displayType, setDisplayType] = useState<DisplayType>('returnPercent');
   const [isMobile, setIsMobile] = useState(false);
