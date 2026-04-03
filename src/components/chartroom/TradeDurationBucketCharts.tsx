@@ -351,7 +351,7 @@ export const WinRateByDurationChart = () => {
                     <div className="bg-card border border-border rounded-lg p-3 shadow-lg">
                       <p className="text-foreground font-medium mb-2">{data.bucket}</p>
                       <div className="space-y-1 text-sm">
-                        <p className={data.winRate >= 50 ? 'text-green-500' : 'text-red-500'}>
+                        <p className={data.winRate >= 50 ? 'profit-text' : 'loss-text'}>
                           Win Rate: {data.winRate.toFixed(1)}%
                         </p>
                         <p className="text-muted-foreground">
