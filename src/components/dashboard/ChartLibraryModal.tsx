@@ -12,6 +12,7 @@ const WIDGET_LIST = [
   { id: 'symbolAnalysis', name: 'Symbol Analysis', description: 'Breakdown by traded instruments' },
   { id: 'longShortAnalysis', name: 'Long/Short Analysis', description: 'Long vs short trade comparison' },
   { id: 'externalLinks', name: 'External Links', description: 'Quick access to your favorite external links' },
+  { id: 'instrumentDistribution', name: 'Instrument Trade Distribution', description: 'Donut chart showing trade distribution across symbols' },
 ];
 
 interface ChartLibraryModalProps {
