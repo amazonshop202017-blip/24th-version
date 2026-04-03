@@ -165,7 +165,7 @@ export const SymbolAnalysisChart = () => {
               {chartData.map((entry, index) => (
                 <Cell 
                   key={`cell-${index}`}
-                  fill={entry.pnl >= 0 ? 'hsl(var(--profit))' : 'hsl(var(--loss))'}
+                  fill={getFill(entry.pnl >= 0)}
                 />
               ))}
             </Bar>
