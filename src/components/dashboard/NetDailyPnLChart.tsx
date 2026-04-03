@@ -22,6 +22,7 @@ export const NetDailyPnLChart = () => {
   const { filteredTrades: trades } = useFilteredTrades();
   const { currencyConfig } = useGlobalFilters();
   const { isPrivacyMode } = usePrivacyMode();
+  const { getFill } = useGradientFill('netDaily');
 
   const [selectedDayDate, setSelectedDayDate] = useState<Date | null>(null);
   const [selectedDayTrades, setSelectedDayTrades] = useState<Trade[]>([]);
