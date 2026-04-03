@@ -138,7 +138,7 @@ export const InstrumentTradeDistribution = () => {
                     className="h-full rounded"
                     style={{
                       ...(isGradient
-                        ? { background: `linear-gradient(to right, ${entry.color}4D, ${entry.color}D9)` }
+                        ? { background: `linear-gradient(to right, color-mix(in srgb, ${entry.color} 30%, transparent), color-mix(in srgb, ${entry.color} 85%, transparent))` }
                         : { backgroundColor: entry.color }),
                     }}
                     initial={{ width: 0 }}
