@@ -1113,9 +1113,9 @@ export const InstrumentPerformanceChart = ({
                     <Line
                       type="monotone"
                       dataKey="displayValue"
-                      stroke={metricConfigs[0]?.color || 'hsl(var(--primary))'}
+                      stroke={metricConfigs[0]?.color || 'hsl(var(--neutral-theme))'}
                       strokeWidth={2}
-                      dot={{ fill: metricConfigs[0]?.color || 'hsl(var(--primary))', r: 3 }}
+                      dot={{ fill: metricConfigs[0]?.color || 'hsl(var(--neutral-theme))', r: 3 }}
                       activeDot={{ r: 5 }}
                     />
                   ) : (
