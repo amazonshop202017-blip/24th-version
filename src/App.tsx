@@ -15,6 +15,7 @@ import { GlobalFiltersProvider } from "@/contexts/GlobalFiltersContext";
 import { CustomStatsProvider } from "@/contexts/CustomStatsContext";
 import { DiaryProvider } from "@/contexts/DiaryContext";
 import { SymbolTickSizeProvider } from "@/contexts/SymbolTickSizeContext";
+import { InterfaceThemeProvider } from "@/contexts/InterfaceThemeContext";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { TradeModal } from "@/components/trades/TradeModal";
 import Dashboard from "./pages/Dashboard";
@@ -130,13 +131,15 @@ const AuthenticatedApp = () => {
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <AuthProvider>
-        <BrowserRouter>
-          <Toaster />
-          <Sonner />
-          <AuthenticatedApp />
-        </BrowserRouter>
-      </AuthProvider>
+      <InterfaceThemeProvider>
+        <AuthProvider>
+          <BrowserRouter>
+            <Toaster />
+            <Sonner />
+            <AuthenticatedApp />
+          </BrowserRouter>
+        </AuthProvider>
+      </InterfaceThemeProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );
