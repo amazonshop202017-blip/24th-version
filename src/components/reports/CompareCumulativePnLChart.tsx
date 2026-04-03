@@ -54,7 +54,7 @@ export const CompareCumulativePnLChart = ({
       return (
         <div className="bg-popover border border-border rounded-lg p-3 shadow-lg">
           <p className="text-sm text-muted-foreground mb-1">{label}</p>
-          <p className={`text-sm font-semibold ${value >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>
+          <p className={`text-sm font-semibold ${value >= 0 ? 'profit-text' : 'loss-text'}`}>
             Cumulative P&L: {isPrivacyMode ? PRIVACY_MASK : `$${value.toFixed(2)}`}
           </p>
         </div>
