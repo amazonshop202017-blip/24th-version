@@ -402,6 +402,7 @@ export const MonthlyPerformanceCalendar = () => {
                     <div
                       key={dayKey}
                       onClick={() => isCurrentMonth && handleDayClick(day)}
+                      style={isCurrentMonth && hasData ? bgStyle : undefined}
                       className={`
                         min-h-[68px] md:min-h-[80px] p-1 md:p-2 rounded-md md:rounded-lg border-transparent transition-colors
                         ${isCurrentMonth ? bgClass : 'bg-muted/20 opacity-40'}
