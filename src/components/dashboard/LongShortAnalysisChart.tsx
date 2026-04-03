@@ -30,6 +30,7 @@ export const LongShortAnalysisChart = () => {
   const { filteredTrades: trades } = useFilteredTrades();
   const { currencyConfig } = useGlobalFilters();
   const { isPrivacyMode } = usePrivacyMode();
+  const { getFill } = useGradientFill('longShort');
   const [displayMode, setDisplayMode] = useState<DisplayMode>('pnl');
 
   const chartData = useMemo(() => {
