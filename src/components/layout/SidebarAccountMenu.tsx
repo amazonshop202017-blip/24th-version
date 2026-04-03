@@ -1,4 +1,4 @@
-import { CircleUser, Settings, LogOut, Sun, Moon } from 'lucide-react';
+import { CircleUser, Settings, LogOut, Sun, Moon, Palette } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/hooks/useTheme';
