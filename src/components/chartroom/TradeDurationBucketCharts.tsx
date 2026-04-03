@@ -107,6 +107,7 @@ export const PerformanceByDurationChart = () => {
   const bucketData = useTradeDurationBuckets();
   const { currencyConfig } = useGlobalFilters();
   const { isPrivacyMode } = usePrivacyMode();
+  const { profitFill, lossFill } = useGradientFill('perfDur');
 
   const formatCurrency = (value: number) => {
     if (isPrivacyMode) return '**';
