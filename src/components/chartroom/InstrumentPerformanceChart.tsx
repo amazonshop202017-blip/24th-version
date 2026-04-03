@@ -20,7 +20,6 @@ import {
   Cell,
   Legend,
   Customized,
-  Customized,
 } from 'recharts';
 import { Card, CardContent } from '@/components/ui/card';
 import { ChartDisplayDropdown } from './ChartDisplayDropdown';
