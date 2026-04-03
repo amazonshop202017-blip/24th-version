@@ -187,7 +187,6 @@ export const PerformanceByDurationChart = () => {
               />
               <Bar
                 dataKey="totalPnl"
-                fill="hsl(217, 91%, 60%)"
                 radius={[0, 4, 4, 0]}
                 label={{
                   position: 'right',
@@ -195,7 +194,14 @@ export const PerformanceByDurationChart = () => {
                   fontSize: 11,
                   formatter: (value: number) => value !== 0 ? formatCurrency(value) : '',
                 }}
-              />
+              >
+                {bucketData.map((entry, index) => (
+                  <Cell
+                    key={`cell-${index}`}
+                    fill={entry.totalPnl >= 0 ? profitFill : lossFill}
+                  />
+                ))}
+              </Bar>
             </BarChart>
           </ResponsiveContainer>
         </div>
