@@ -17,7 +17,7 @@ import {
   Cell,
   Customized,
 } from 'recharts';
-import { ChartGradientDefs, useGradientFill } from '@/components/charts/ChartGradientDefs';
+import { ChartGradientDefs, useGradientFill, CustomColorGradientDefs, useCustomColorGradientFill } from '@/components/charts/ChartGradientDefs';
 
 interface DurationBucket {
   label: string;

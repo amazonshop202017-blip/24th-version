@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { PieChart } from '@mui/x-charts/PieChart';
 import { motion } from 'framer-motion';
 import { useFilteredTrades } from '@/hooks/useFilteredTrades';
+import { useCustomColorGradientFill } from '@/components/charts/ChartGradientDefs';
 
 const COLORS = [
   'hsl(174, 32%, 50%)',
