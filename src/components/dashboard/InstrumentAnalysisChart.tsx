@@ -110,7 +110,7 @@ export const SymbolAnalysisChart = () => {
             data={chartData}
             margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
           >
-            <ChartGradientDefs direction="vertical" idPrefix="symbolAnalysis" />
+            <Customized component={() => <ChartGradientDefs direction="vertical" idPrefix="symbolAnalysis" />} />
             <CartesianGrid 
               strokeDasharray="3 3" 
               stroke="hsl(var(--border))" 

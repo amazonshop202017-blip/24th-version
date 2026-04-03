@@ -173,7 +173,7 @@ export const LongShortAnalysisChart = () => {
             data={chartData}
             margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
           >
-            <ChartGradientDefs direction="vertical" idPrefix="longShort" />
+            <Customized component={() => <ChartGradientDefs direction="vertical" idPrefix="longShort" />} />
             <CartesianGrid
               strokeDasharray="3 3"
               stroke="hsl(var(--border))"

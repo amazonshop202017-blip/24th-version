@@ -586,7 +586,7 @@ export const SetupPerformanceChart = ({
                 data={isMultiMetric ? multiMetricChartData : setupData}
                 margin={{ top: 10, right: -5, left: -10, bottom: isMultiMetric ? 30 : 20 }}
               >
-                <ChartGradientDefs direction="vertical" idPrefix="setupPerf" />
+                <Customized component={() => <ChartGradientDefs direction="vertical" idPrefix="setupPerf" />} />
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} vertical={false} />
                 <XAxis dataKey="setup" axisLine={{ stroke: 'hsl(var(--border))' }} tickLine={false} tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 10 }} dy={5} />
                 

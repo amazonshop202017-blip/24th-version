@@ -135,7 +135,7 @@ export const NetDailyPnLChart = () => {
             margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
             onClick={handleChartClick}
           >
-            <ChartGradientDefs direction="vertical" idPrefix="netDaily" />
+            <Customized component={() => <ChartGradientDefs direction="vertical" idPrefix="netDaily" />} />
             <CartesianGrid 
               strokeDasharray="3 3" 
               stroke="hsl(var(--border))" 
