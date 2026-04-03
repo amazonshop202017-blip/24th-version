@@ -510,7 +510,7 @@ const ConsecutiveWinnersLosers = () => {
                               y={barTop}
                               width={width}
                               height={Math.max(0, zeroY - barTop)}
-                              fill="hsl(var(--profit))"
+                              fill={profitFill}
                               rx={4}
                               ry={4}
                             />
