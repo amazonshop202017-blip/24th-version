@@ -240,6 +240,7 @@ export const TradeCountByDurationChart = () => {
               layout="vertical"
               margin={{ top: 10, right: 50, left: 10, bottom: 10 }}
             >
+              <Customized component={() => <CustomColorGradientDefs colors={[BLUE]} idPrefix="tcDur" />} />
               <CartesianGrid
                 strokeDasharray="3 3"
                 stroke="hsl(var(--border))"
@@ -282,7 +283,7 @@ export const TradeCountByDurationChart = () => {
               />
               <Bar
                 dataKey="tradeCount"
-                fill="hsl(217, 91%, 60%)"
+                fill={getCustomFill(BLUE, 0)}
                 radius={[0, 4, 4, 0]}
                 label={{
                   position: 'right',
