@@ -28,6 +28,7 @@ import { MonthlyPerformanceCalendar } from '@/components/dashboard/MonthlyPerfor
 import { SymbolAnalysisChart } from '@/components/dashboard/InstrumentAnalysisChart';
 import { LongShortAnalysisChart } from '@/components/dashboard/LongShortAnalysisChart';
 import { ExternalLinksWidget } from '@/components/dashboard/ExternalLinksWidget';
+import { InstrumentTradeDistribution } from '@/components/dashboard/InstrumentTradeDistribution';
 import { DraggableChartWrapper } from '@/components/dashboard/DraggableChartWrapper';
 import { useFilteredTrades } from '@/hooks/useFilteredTrades';
 import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
