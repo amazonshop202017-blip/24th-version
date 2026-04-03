@@ -63,3 +63,38 @@ export const useGradientFill = (idPrefix = '') => {
 
   return { profitFill, lossFill, primaryFill, getFill, isGradient };
 };
+
+/**
+ * SVG gradient defs for bars with arbitrary colors (not profit/loss).
+ * Each color gets its own gradient with 0.3→0.85 opacity, left→right.
+ */
+export const CustomColorGradientDefs = ({ colors, idPrefix = '' }: { colors: string[]; idPrefix?: string }) => {
+  const { theme } = useInterfaceTheme();
+  if (theme.mode !== 'gradient') return null;
+
+  const unique = Array.from(new Set(colors));
+  return (
+    <defs>
+      {unique.map((color, i) => (
+        <linearGradient key={i} id={`${idPrefix}customGrad-${i}`} x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stopColor={color} stopOpacity={0.3} />
+          <stop offset="100%" stopColor={color} stopOpacity={0.85} />
+        </linearGradient>
+      ))}
+    </defs>
+  );
+};
+
+/**
+ * Returns fill for a custom color based on gradient mode.
+ * colorIndex must match the index in the colors array passed to CustomColorGradientDefs.
+ */
+export const useCustomColorGradientFill = (idPrefix = '') => {
+  const { theme } = useInterfaceTheme();
+  const isGradient = theme.mode === 'gradient';
+
+  const getCustomFill = (color: string, colorIndex: number) =>
+    isGradient ? `url(#${idPrefix}customGrad-${colorIndex})` : color;
+
+  return { getCustomFill, isGradient };
+};

@@ -17,7 +17,7 @@ import {
   Cell,
   Customized,
 } from 'recharts';
-import { ChartGradientDefs, useGradientFill } from '@/components/charts/ChartGradientDefs';
+import { ChartGradientDefs, useGradientFill, CustomColorGradientDefs, useCustomColorGradientFill } from '@/components/charts/ChartGradientDefs';
 
 interface DurationBucket {
   label: string;
@@ -215,6 +215,8 @@ export const PerformanceByDurationChart = () => {
 // Trade Count by Trade Duration Chart - Horizontal bars
 export const TradeCountByDurationChart = () => {
   const bucketData = useTradeDurationBuckets();
+  const { getCustomFill } = useCustomColorGradientFill('tcDur');
+  const BLUE = 'hsl(217, 91%, 60%)';
 
   // Calculate max for domain
   const xMax = useMemo(() => {
@@ -238,6 +240,7 @@ export const TradeCountByDurationChart = () => {
               layout="vertical"
               margin={{ top: 10, right: 50, left: 10, bottom: 10 }}
             >
+              <Customized component={() => <CustomColorGradientDefs colors={[BLUE]} idPrefix="tcDur" />} />
               <CartesianGrid
                 strokeDasharray="3 3"
                 stroke="hsl(var(--border))"
@@ -280,7 +283,7 @@ export const TradeCountByDurationChart = () => {
               />
               <Bar
                 dataKey="tradeCount"
-                fill="hsl(217, 91%, 60%)"
+                fill={getCustomFill(BLUE, 0)}
                 radius={[0, 4, 4, 0]}
                 label={{
                   position: 'right',
@@ -300,6 +303,8 @@ export const TradeCountByDurationChart = () => {
 // Win Rate by Trade Duration Chart - Horizontal bars
 export const WinRateByDurationChart = () => {
   const bucketData = useTradeDurationBuckets();
+  const { getCustomFill } = useCustomColorGradientFill('wrDur');
+  const BLUE = 'hsl(217, 91%, 60%)';
 
   // Calculate overall win rate
   const overallWinRate = useMemo(() => {
@@ -324,6 +329,7 @@ export const WinRateByDurationChart = () => {
               layout="vertical"
               margin={{ top: 10, right: 50, left: 10, bottom: 10 }}
             >
+              <Customized component={() => <CustomColorGradientDefs colors={[BLUE]} idPrefix="wrDur" />} />
               <CartesianGrid
                 strokeDasharray="3 3"
                 stroke="hsl(var(--border))"
@@ -375,7 +381,7 @@ export const WinRateByDurationChart = () => {
               />
               <Bar
                 dataKey="winRate"
-                fill="hsl(217, 91%, 60%)"
+                fill={getCustomFill(BLUE, 0)}
                 radius={[0, 4, 4, 0]}
                 label={{
                   position: 'right',

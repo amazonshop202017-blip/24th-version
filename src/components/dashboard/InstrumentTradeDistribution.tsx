@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { PieChart } from '@mui/x-charts/PieChart';
 import { motion } from 'framer-motion';
 import { useFilteredTrades } from '@/hooks/useFilteredTrades';
+import { useCustomColorGradientFill } from '@/components/charts/ChartGradientDefs';
 
 const COLORS = [
   'hsl(174, 32%, 50%)',
@@ -25,6 +26,7 @@ interface SymbolEntry {
 
 export const InstrumentTradeDistribution = () => {
   const { filteredTrades: trades } = useFilteredTrades();
+  const { getCustomFill, isGradient } = useCustomColorGradientFill('instDist');
 
   const { entries, totalTrades, uniqueCount } = useMemo(() => {
     if (trades.length === 0) return { entries: [], totalTrades: 0, uniqueCount: 0 };
@@ -134,7 +136,11 @@ export const InstrumentTradeDistribution = () => {
                 <div className="flex-1 h-4 bg-muted/40 rounded overflow-hidden">
                   <motion.div
                     className="h-full rounded"
-                    style={{ backgroundColor: entry.color }}
+                    style={{
+                      ...(isGradient
+                        ? { background: `linear-gradient(to right, color-mix(in srgb, ${entry.color} 30%, transparent), color-mix(in srgb, ${entry.color} 85%, transparent))` }
+                        : { backgroundColor: entry.color }),
+                    }}
                     initial={{ width: 0 }}
                     animate={{ width: `${(entry.count / maxCount) * 100}%` }}
                     transition={{ duration: 0.6, delay: idx * 0.05 }}
