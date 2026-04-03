@@ -9,6 +9,7 @@ import { calculateTradeMetrics, Trade } from '@/types/trade';
 import { Info } from 'lucide-react';
 import { Tooltip as UITooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { DayDetailsModal } from '@/components/dayview/DayDetailsModal';
+import { ChartGradientDefs, useGradientFill } from '@/components/charts/ChartGradientDefs';
 
 interface DailyData {
   date: string;
@@ -21,6 +22,7 @@ export const NetDailyPnLChart = () => {
   const { filteredTrades: trades } = useFilteredTrades();
   const { currencyConfig } = useGlobalFilters();
   const { isPrivacyMode } = usePrivacyMode();
+  const { getFill } = useGradientFill('netDaily');
 
   const [selectedDayDate, setSelectedDayDate] = useState<Date | null>(null);
   const [selectedDayTrades, setSelectedDayTrades] = useState<Trade[]>([]);
@@ -133,6 +135,7 @@ export const NetDailyPnLChart = () => {
             margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
             onClick={handleChartClick}
           >
+            <ChartGradientDefs direction="vertical" idPrefix="netDaily" />
             <CartesianGrid 
               strokeDasharray="3 3" 
               stroke="hsl(var(--border))" 
@@ -187,7 +190,7 @@ export const NetDailyPnLChart = () => {
               {chartData.map((entry, index) => (
                 <Cell 
                   key={`cell-${index}`}
-                  fill={entry.dailyPnl >= 0 ? 'hsl(var(--profit))' : 'hsl(var(--loss))'}
+                  fill={getFill(entry.dailyPnl >= 0)}
                 />
               ))}
             </Bar>

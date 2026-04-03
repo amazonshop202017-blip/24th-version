@@ -13,6 +13,7 @@ import {
   CartesianGrid,
   Cell,
 } from 'recharts';
+import { ChartGradientDefs, useGradientFill } from '@/components/charts/ChartGradientDefs';
 import {
   Select,
   SelectContent,
@@ -39,6 +40,7 @@ interface BucketData {
 const RiskDistribution = () => {
   const { filteredTrades } = useFilteredTrades();
   const { currencyConfig } = useGlobalFilters();
+  const { getFill } = useGradientFill('riskDist');
   
   const [displayType, setDisplayType] = useState<DisplayType>('returnPercent');
   const [isMobile, setIsMobile] = useState(false);
@@ -362,6 +364,7 @@ const RiskDistribution = () => {
                 data={isMobile ? bucketData.filter(b => b.tradeCount > 0) : bucketData} 
                 margin={isMobile ? { top: 10, right: 5, left: 0, bottom: 40 } : { top: 20, right: 30, left: 20, bottom: 60 }}
               >
+                <ChartGradientDefs direction="vertical" idPrefix="riskDist" />
                 <CartesianGrid strokeDasharray="3 3" className="stroke-border/50" />
                 <XAxis 
                   dataKey="label" 
@@ -386,7 +389,7 @@ const RiskDistribution = () => {
                   {(isMobile ? bucketData.filter(b => b.tradeCount > 0) : bucketData).map((entry, index) => (
                     <Cell 
                       key={`cell-${index}`}
-                      fill={entry.isWinningBucket ? 'hsl(var(--profit))' : 'hsl(var(--loss))'}
+                      fill={getFill(entry.isWinningBucket)}
                     />
                   ))}
                 </Bar>

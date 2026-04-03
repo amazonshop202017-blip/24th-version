@@ -14,7 +14,9 @@ import {
   Tooltip,
   ResponsiveContainer,
   ReferenceLine,
+  Cell,
 } from 'recharts';
+import { ChartGradientDefs, useGradientFill } from '@/components/charts/ChartGradientDefs';
 
 interface DurationBucket {
   label: string;
@@ -106,6 +108,7 @@ export const PerformanceByDurationChart = () => {
   const bucketData = useTradeDurationBuckets();
   const { currencyConfig } = useGlobalFilters();
   const { isPrivacyMode } = usePrivacyMode();
+  const { profitFill, lossFill } = useGradientFill('perfDur');
 
   const formatCurrency = (value: number) => {
     if (isPrivacyMode) return '**';
@@ -139,6 +142,7 @@ export const PerformanceByDurationChart = () => {
               layout="vertical"
               margin={{ top: 10, right: 80, left: 10, bottom: 10 }}
             >
+              <ChartGradientDefs direction="horizontal" idPrefix="perfDur" />
               <CartesianGrid
                 strokeDasharray="3 3"
                 stroke="hsl(var(--border))"
@@ -184,7 +188,6 @@ export const PerformanceByDurationChart = () => {
               />
               <Bar
                 dataKey="totalPnl"
-                fill="hsl(217, 91%, 60%)"
                 radius={[0, 4, 4, 0]}
                 label={{
                   position: 'right',
@@ -192,7 +195,14 @@ export const PerformanceByDurationChart = () => {
                   fontSize: 11,
                   formatter: (value: number) => value !== 0 ? formatCurrency(value) : '',
                 }}
-              />
+              >
+                {bucketData.map((entry, index) => (
+                  <Cell
+                    key={`cell-${index}`}
+                    fill={entry.totalPnl >= 0 ? profitFill : lossFill}
+                  />
+                ))}
+              </Bar>
             </BarChart>
           </ResponsiveContainer>
         </div>

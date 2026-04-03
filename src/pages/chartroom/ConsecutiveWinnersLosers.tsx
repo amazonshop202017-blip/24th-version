@@ -17,6 +17,7 @@ import {
   ResponsiveContainer,
   ReferenceLine,
 } from 'recharts';
+import { ChartGradientDefs, useGradientFill } from '@/components/charts/ChartGradientDefs';
 import {
   Table,
   TableBody,
@@ -63,6 +64,7 @@ const ConsecutiveWinnersLosers = () => {
   const { formatCurrency } = useGlobalFilters();
   const { isPrivacyMode, maskCurrency } = usePrivacyMode();
   const { displayType, setDisplayType } = useChartDisplayMode('dollar', true);
+  const { profitFill, lossFill } = useGradientFill('consec');
 
   // Filter to only dollar/percent for this chart
   const chartDisplayType = displayType === 'percent' ? 'percent' : 'dollar';
@@ -426,6 +428,7 @@ const ConsecutiveWinnersLosers = () => {
                   barGap={0}
                   barCategoryGap="20%"
                 >
+                  <ChartGradientDefs direction="vertical" idPrefix="consec" />
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
                   <XAxis
                     dataKey="streak"
@@ -507,7 +510,7 @@ const ConsecutiveWinnersLosers = () => {
                               y={barTop}
                               width={width}
                               height={Math.max(0, zeroY - barTop)}
-                              fill="hsl(var(--profit))"
+                              fill={profitFill}
                               rx={4}
                               ry={4}
                             />
@@ -519,7 +522,7 @@ const ConsecutiveWinnersLosers = () => {
                               y={zeroY}
                               width={width}
                               height={Math.max(0, barBottom - zeroY)}
-                              fill="hsl(var(--loss))"
+                              fill={lossFill}
                               rx={4}
                               ry={4}
                             />

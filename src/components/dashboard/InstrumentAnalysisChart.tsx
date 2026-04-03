@@ -7,6 +7,7 @@ import { usePrivacyMode, PRIVACY_MASK } from '@/hooks/usePrivacyMode';
 import { calculateTradeMetrics } from '@/types/trade';
 import { Info } from 'lucide-react';
 import { Tooltip as UITooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { ChartGradientDefs, useGradientFill } from '@/components/charts/ChartGradientDefs';
 
 interface SymbolData {
   symbol: string;
@@ -18,6 +19,7 @@ export const SymbolAnalysisChart = () => {
   const { filteredTrades: trades } = useFilteredTrades();
   const { currencyConfig } = useGlobalFilters();
   const { isPrivacyMode } = usePrivacyMode();
+  const { getFill } = useGradientFill('symbolAnalysis');
 
   const chartData = useMemo(() => {
     if (trades.length === 0) return [];
@@ -108,6 +110,7 @@ export const SymbolAnalysisChart = () => {
             data={chartData}
             margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
           >
+            <ChartGradientDefs direction="vertical" idPrefix="symbolAnalysis" />
             <CartesianGrid 
               strokeDasharray="3 3" 
               stroke="hsl(var(--border))" 
@@ -162,7 +165,7 @@ export const SymbolAnalysisChart = () => {
               {chartData.map((entry, index) => (
                 <Cell 
                   key={`cell-${index}`}
-                  fill={entry.pnl >= 0 ? 'hsl(var(--profit))' : 'hsl(var(--loss))'}
+                  fill={getFill(entry.pnl >= 0)}
                 />
               ))}
             </Bar>

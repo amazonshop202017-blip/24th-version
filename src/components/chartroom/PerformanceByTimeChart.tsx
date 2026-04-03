@@ -31,6 +31,7 @@ import {
   Cell,
   Legend,
 } from 'recharts';
+import { ChartGradientDefs, useGradientFill } from '@/components/charts/ChartGradientDefs';
 import {
   Select,
   SelectContent,
@@ -159,6 +160,7 @@ export const PerformanceByTimeChart = ({
   const { currencyConfig, selectedAccounts, isAllAccountsSelected, classifyTradeOutcome, displayMode, breakevenTolerance } = useGlobalFilters();
   const { accounts, getAccountBalanceBeforeTrades } = useAccountsContext();
   const { isPrivacyMode } = usePrivacyMode();
+  const { getFill } = useGradientFill('timePerf');
   
   // Calculate initial display type from global filter or prop
   const getInitialDisplayType = (): ChartDisplayType => {
@@ -753,6 +755,7 @@ export const PerformanceByTimeChart = ({
                 data={isMultiMetric ? multiMetricChartData : timeData}
                 margin={{ top: 10, right: isMultiMetric ? (selectedMetrics.length === 3 ? 25 : 20) : -5, left: -10, bottom: isMultiMetric ? 30 : 20 }}
               >
+                <ChartGradientDefs direction="vertical" idPrefix="timePerf" />
                 <CartesianGrid 
                   strokeDasharray="3 3" 
                   stroke="hsl(var(--border))" 
@@ -1388,15 +1391,15 @@ export const PerformanceByTimeChart = ({
                       const isPnlMetric = displayType === 'dollar' || displayType === 'percent' || displayType === 'avg_win' || displayType === 'avg_loss' || displayType === 'largest_win' || displayType === 'largest_loss' || displayType === 'trade_expectancy' || displayType === 'avg_net_trade_pnl' || displayType === 'avg_daily_drawdown' || displayType === 'largest_daily_loss' || displayType === 'avg_realized_r' || displayType === 'avg_planned_r';
                       let fillColor: string;
                       if (isPnlMetric) {
-                        fillColor = entry.displayValue >= 0 ? 'hsl(var(--profit))' : 'hsl(var(--loss))';
+                        fillColor = getFill(entry.displayValue >= 0);
                       } else if (config?.color && config.color !== DEFAULT_METRIC_COLORS[0]) {
                         fillColor = config.color;
                       } else if (displayType === 'tradecount' || displayType === 'avg_hold_time' || displayType === 'longest_duration' || displayType === 'long_winrate' || displayType === 'short_winrate' || displayType === 'tradecount_long' || displayType === 'tradecount_short') {
                         fillColor = 'hsl(var(--primary))';
                       } else if (displayType === 'winrate') {
-                        fillColor = entry.displayValue >= 50 ? 'hsl(var(--profit))' : 'hsl(var(--loss))';
+                        fillColor = getFill(entry.displayValue >= 50);
                       } else {
-                        fillColor = entry.displayValue >= 0 ? 'hsl(var(--profit))' : 'hsl(var(--loss))';
+                        fillColor = getFill(entry.displayValue >= 0);
                       }
                       return <Cell key={`cell-${index}`} fill={fillColor} />;
                     })}

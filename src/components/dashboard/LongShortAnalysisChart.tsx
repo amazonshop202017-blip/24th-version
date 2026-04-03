@@ -7,6 +7,7 @@ import { usePrivacyMode, PRIVACY_MASK } from '@/hooks/usePrivacyMode';
 import { calculateTradeMetrics } from '@/types/trade';
 import { Info, Settings } from 'lucide-react';
 import { Tooltip as UITooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { ChartGradientDefs, useGradientFill } from '@/components/charts/ChartGradientDefs';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -29,6 +30,7 @@ export const LongShortAnalysisChart = () => {
   const { filteredTrades: trades } = useFilteredTrades();
   const { currencyConfig } = useGlobalFilters();
   const { isPrivacyMode } = usePrivacyMode();
+  const { getFill } = useGradientFill('longShort');
   const [displayMode, setDisplayMode] = useState<DisplayMode>('pnl');
 
   const chartData = useMemo(() => {
@@ -171,6 +173,7 @@ export const LongShortAnalysisChart = () => {
             data={chartData}
             margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
           >
+            <ChartGradientDefs direction="vertical" idPrefix="longShort" />
             <CartesianGrid
               strokeDasharray="3 3"
               stroke="hsl(var(--border))"
@@ -239,7 +242,7 @@ export const LongShortAnalysisChart = () => {
                   key={`cell-${index}`}
                   fill={
                     displayMode === 'pnl'
-                      ? entry.pnl >= 0 ? 'hsl(var(--profit))' : 'hsl(var(--loss))'
+                      ? getFill(entry.pnl >= 0)
                       : 'hsl(var(--primary))'
                   }
                 />
