@@ -215,6 +215,8 @@ export const PerformanceByDurationChart = () => {
 // Trade Count by Trade Duration Chart - Horizontal bars
 export const TradeCountByDurationChart = () => {
   const bucketData = useTradeDurationBuckets();
+  const { getCustomFill } = useCustomColorGradientFill('tcDur');
+  const BLUE = 'hsl(217, 91%, 60%)';
 
   // Calculate max for domain
   const xMax = useMemo(() => {
