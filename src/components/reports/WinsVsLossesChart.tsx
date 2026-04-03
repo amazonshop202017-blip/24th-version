@@ -40,7 +40,7 @@ export const WinsVsLossesChart = ({
   formatCurrency,
 }: WinsVsLossesChartProps) => {
   const { isPrivacyMode } = usePrivacyMode();
-  const chartColor = variant === 'wins' ? '#10b981' : '#ef4444';
+  const chartColor = variant === 'wins' ? 'hsl(var(--profit))' : 'hsl(var(--loss))';
   const gradientId = variant === 'wins' ? 'winsGradient' : 'lossesGradient';
 
   const formattedData = useMemo(() => {
