@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { ChevronDown, ChevronUp, Check, Heart } from 'lucide-react';
+import { useState, useMemo } from 'react';
+import { ChevronDown, ChevronUp, Check, Heart, Search } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
