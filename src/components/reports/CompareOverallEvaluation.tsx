@@ -57,11 +57,11 @@ export const CompareOverallEvaluation = ({ groupNumber, stats }: CompareOverallE
           
           {/* Center Text */}
           <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <span className="text-3xl font-bold text-emerald-500">
+            <span className="text-3xl font-bold profit-text">
               {winRateDisplay}
               <span className="text-lg">%</span>
             </span>
-            <span className="text-xs text-emerald-500 uppercase tracking-wider">
+            <span className="text-xs profit-text uppercase tracking-wider">
               WINRATE
             </span>
           </div>
