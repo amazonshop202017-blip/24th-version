@@ -169,131 +169,195 @@ export const ChartDisplayDropdown = ({
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="end"
-        className="w-[260px] max-h-[360px] overflow-y-auto bg-popover border-border p-1 z-50"
+        className="w-[260px] max-h-[400px] overflow-hidden bg-popover border-border p-1 z-50 flex flex-col"
+        onCloseAutoFocus={() => setSearchQuery('')}
       >
-        {/* Favorites Section - collapsible like other groups */}
-        {favoriteItems.length > 0 && (
-          <div>
-            <button
-              type="button"
-              onClick={(e) => toggleGroup('__favorites__', e)}
-              className={cn(
-                'flex items-center justify-between w-full px-2 py-1.5 text-sm rounded-sm cursor-pointer transition-colors',
-                expandedGroups.has('__favorites__')
-                  ? 'bg-primary/10 text-primary font-medium'
-                  : 'text-foreground hover:bg-accent hover:text-accent-foreground'
-              )}
-            >
-              <span className="flex items-center gap-1.5">
-                <Heart className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
-                Favourites
-              </span>
-              {expandedGroups.has('__favorites__') ? (
-                <ChevronUp className="h-4 w-4 text-primary" />
-              ) : (
-                <ChevronDown className="h-4 w-4 text-muted-foreground" />
-              )}
-            </button>
-            {expandedGroups.has('__favorites__') && (
-              <div className="pl-2">
-                {favoriteItems.map((metric) => {
-                  const isSelected = value === metric;
-                  return (
-                    <button
-                      key={`fav-${metric}`}
-                      type="button"
-                      onClick={() => handleSelectOption(metric)}
-                      className={cn(
-                        'flex items-center w-full px-2 py-1.5 text-sm rounded-sm cursor-pointer',
-                        isSelected
-                          ? 'bg-primary/10 text-primary'
-                          : 'text-foreground hover:bg-accent hover:text-accent-foreground'
-                      )}
-                    >
-                      <span className="w-5 shrink-0">
-                        {isSelected && <Check className="h-4 w-4" />}
-                      </span>
-                      <span className="flex-1 text-left">{getDisplayLabel(metric)}</span>
-                      <Heart
-                        className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400 shrink-0 ml-1 hover:scale-125 transition-transform"
-                        onClick={(e) => handleToggleFavorite(metric, e)}
-                      />
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        )}
+        {/* Search Input */}
+        <div className="flex items-center gap-1.5 px-2 py-1.5 border-b border-border mb-1">
+          <Search className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search metrics..."
+            className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+            autoFocus
+          />
+        </div>
 
-        {/* Regular Groups */}
-        {displayGroups.map((group) => {
-          const isExpanded = expandedGroups.has(group.name);
-          return (
-            <div key={group.name}>
-              <button
-                type="button"
-                onClick={(e) => toggleGroup(group.name, e)}
-                className={cn(
-                  'flex items-center justify-between w-full px-2 py-1.5 text-sm rounded-sm cursor-pointer transition-colors',
-                  isExpanded
-                    ? 'bg-primary/10 text-primary font-medium'
-                    : 'text-foreground hover:bg-accent hover:text-accent-foreground'
-                )}
-              >
-                <span>{group.name}</span>
-                {isExpanded ? (
-                  <ChevronUp className={cn('h-4 w-4', isExpanded ? 'text-primary' : 'text-muted-foreground')} />
-                ) : (
-                  <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                )}
-              </button>
-
-              {isExpanded && (
-                <div className="pl-2">
-                  {group.options.map((option) => {
+        <div className="overflow-y-auto flex-1">
+          {/* Search Results Mode */}
+          {searchResults ? (
+            searchResults.length === 0 ? (
+              <div className="px-2 py-3 text-sm text-muted-foreground text-center">No metrics found</div>
+            ) : (
+              searchResults.map((result) => (
+                <div key={result.group}>
+                  <div className="px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                    {result.group}
+                  </div>
+                  {result.options.map((option) => {
                     const isSelected = value === option.value;
-                    const isDisabledByParent = disabledValues.includes(option.value);
-                    const isFunctional = functionalValues.has(option.value) && !isDisabledByParent;
                     const isFav = isFavorite(option.value);
                     return (
                       <button
-                        key={`${group.name}-${option.value}-${option.label}`}
+                        key={option.value}
                         type="button"
                         onClick={() => handleSelectOption(option.value)}
                         className={cn(
-                          'flex items-center w-full px-2 py-1.5 text-sm rounded-sm',
-                          isFunctional ? 'cursor-pointer' : 'cursor-default opacity-60',
-                          isSelected && isFunctional
+                          'flex items-center w-full px-2 py-1.5 text-sm rounded-sm cursor-pointer',
+                          isSelected
                             ? 'bg-primary/10 text-primary'
-                            : isFunctional
-                              ? 'text-foreground hover:bg-accent hover:text-accent-foreground'
-                              : 'text-muted-foreground'
+                            : 'text-foreground hover:bg-accent hover:text-accent-foreground'
                         )}
                       >
                         <span className="w-5 shrink-0">
-                          {isSelected && isFunctional && <Check className="h-4 w-4" />}
+                          {isSelected && <Check className="h-4 w-4" />}
                         </span>
                         <span className="flex-1 text-left">{option.label}</span>
-                        {isFunctional && (
-                          <Heart
-                            className={cn(
-                              'h-3.5 w-3.5 shrink-0 ml-1 transition-all hover:scale-125',
-                              isFav
-                                ? 'fill-yellow-400 text-yellow-400'
-                                : 'text-muted-foreground/40 hover:text-yellow-400'
-                            )}
-                            onClick={(e) => handleToggleFavorite(option.value, e)}
-                          />
-                        )}
+                        <Heart
+                          className={cn(
+                            'h-3.5 w-3.5 shrink-0 ml-1 transition-all hover:scale-125',
+                            isFav
+                              ? 'fill-yellow-400 text-yellow-400'
+                              : 'text-muted-foreground/40 hover:text-yellow-400'
+                          )}
+                          onClick={(e) => handleToggleFavorite(option.value, e)}
+                        />
                       </button>
                     );
                   })}
                 </div>
+              ))
+            )
+          ) : (
+            <>
+              {/* Favorites Section */}
+              {favoriteItems.length > 0 && (
+                <div>
+                  <button
+                    type="button"
+                    onClick={(e) => toggleGroup('__favorites__', e)}
+                    className={cn(
+                      'flex items-center justify-between w-full px-2 py-1.5 text-sm rounded-sm cursor-pointer transition-colors',
+                      expandedGroups.has('__favorites__')
+                        ? 'bg-primary/10 text-primary font-medium'
+                        : 'text-foreground hover:bg-accent hover:text-accent-foreground'
+                    )}
+                  >
+                    <span className="flex items-center gap-1.5">
+                      <Heart className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
+                      Favourites
+                    </span>
+                    {expandedGroups.has('__favorites__') ? (
+                      <ChevronUp className="h-4 w-4 text-primary" />
+                    ) : (
+                      <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                    )}
+                  </button>
+                  {expandedGroups.has('__favorites__') && (
+                    <div className="pl-2">
+                      {favoriteItems.map((metric) => {
+                        const isSelected = value === metric;
+                        return (
+                          <button
+                            key={`fav-${metric}`}
+                            type="button"
+                            onClick={() => handleSelectOption(metric)}
+                            className={cn(
+                              'flex items-center w-full px-2 py-1.5 text-sm rounded-sm cursor-pointer',
+                              isSelected
+                                ? 'bg-primary/10 text-primary'
+                                : 'text-foreground hover:bg-accent hover:text-accent-foreground'
+                            )}
+                          >
+                            <span className="w-5 shrink-0">
+                              {isSelected && <Check className="h-4 w-4" />}
+                            </span>
+                            <span className="flex-1 text-left">{getDisplayLabel(metric)}</span>
+                            <Heart
+                              className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400 shrink-0 ml-1 hover:scale-125 transition-transform"
+                              onClick={(e) => handleToggleFavorite(metric, e)}
+                            />
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
               )}
-            </div>
-          );
-        })}
+
+              {/* Regular Groups */}
+              {displayGroups.map((group) => {
+                const isExpanded = expandedGroups.has(group.name);
+                return (
+                  <div key={group.name}>
+                    <button
+                      type="button"
+                      onClick={(e) => toggleGroup(group.name, e)}
+                      className={cn(
+                        'flex items-center justify-between w-full px-2 py-1.5 text-sm rounded-sm cursor-pointer transition-colors',
+                        isExpanded
+                          ? 'bg-primary/10 text-primary font-medium'
+                          : 'text-foreground hover:bg-accent hover:text-accent-foreground'
+                      )}
+                    >
+                      <span>{group.name}</span>
+                      {isExpanded ? (
+                        <ChevronUp className={cn('h-4 w-4', isExpanded ? 'text-primary' : 'text-muted-foreground')} />
+                      ) : (
+                        <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                      )}
+                    </button>
+
+                    {isExpanded && (
+                      <div className="pl-2">
+                        {group.options.map((option) => {
+                          const isSelected = value === option.value;
+                          const isDisabledByParent = disabledValues.includes(option.value);
+                          const isFunctional = functionalValues.has(option.value) && !isDisabledByParent;
+                          const isFav = isFavorite(option.value);
+                          return (
+                            <button
+                              key={`${group.name}-${option.value}-${option.label}`}
+                              type="button"
+                              onClick={() => handleSelectOption(option.value)}
+                              className={cn(
+                                'flex items-center w-full px-2 py-1.5 text-sm rounded-sm',
+                                isFunctional ? 'cursor-pointer' : 'cursor-default opacity-60',
+                                isSelected && isFunctional
+                                  ? 'bg-primary/10 text-primary'
+                                  : isFunctional
+                                    ? 'text-foreground hover:bg-accent hover:text-accent-foreground'
+                                    : 'text-muted-foreground'
+                              )}
+                            >
+                              <span className="w-5 shrink-0">
+                                {isSelected && isFunctional && <Check className="h-4 w-4" />}
+                              </span>
+                              <span className="flex-1 text-left">{option.label}</span>
+                              {isFunctional && (
+                                <Heart
+                                  className={cn(
+                                    'h-3.5 w-3.5 shrink-0 ml-1 transition-all hover:scale-125',
+                                    isFav
+                                      ? 'fill-yellow-400 text-yellow-400'
+                                      : 'text-muted-foreground/40 hover:text-yellow-400'
+                                  )}
+                                  onClick={(e) => handleToggleFavorite(option.value, e)}
+                                />
+                              )}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </>
+          )}
+        </div>
       </DropdownMenuContent>
     </DropdownMenu>
   );
