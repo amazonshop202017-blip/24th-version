@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ChevronDown, ChevronUp, Check } from 'lucide-react';
+import { ChevronDown, ChevronUp, Check, Heart } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -8,6 +8,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { ChartDisplayType, getDisplayLabel } from '@/hooks/useChartDisplayMode';
+import { useFavoriteMetrics } from '@/hooks/useFavoriteMetrics';
 
 interface DisplayOption {
   value: ChartDisplayType;
@@ -101,6 +102,7 @@ export const ChartDisplayDropdown = ({
 }: ChartDisplayDropdownProps) => {
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
   const [isOpen, setIsOpen] = useState(false);
+  const { favorites, toggleFavorite, isFavorite } = useFavoriteMetrics();
 
   const toggleGroup = (groupName: string, e: React.MouseEvent) => {
     e.preventDefault();
@@ -117,15 +119,22 @@ export const ChartDisplayDropdown = ({
   };
 
   const handleSelectOption = (optionValue: ChartDisplayType) => {
-    // Only trigger change for functional options
     if (functionalValues.has(optionValue)) {
       onValueChange(optionValue);
       setIsOpen(false);
     }
-    // Non-functional options do nothing
+  };
+
+  const handleToggleFavorite = (metric: ChartDisplayType, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    toggleFavorite(metric);
   };
 
   const currentLabel = getDisplayLabel(value);
+
+  // Get favorite items that are functional
+  const favoriteItems = favorites.filter((m) => functionalValues.has(m) && !disabledValues.includes(m));
 
   return (
     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
@@ -144,13 +153,49 @@ export const ChartDisplayDropdown = ({
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="end"
-        className="w-[260px] max-h-[320px] overflow-y-auto bg-popover border-border p-1 z-50"
+        className="w-[260px] max-h-[360px] overflow-y-auto bg-popover border-border p-1 z-50"
       >
+        {/* Favorites Section */}
+        {favoriteItems.length > 0 && (
+          <>
+            <div className="px-2 py-1.5 text-xs font-medium text-muted-foreground flex items-center gap-1.5">
+              <Heart className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+              Favourites
+            </div>
+            {favoriteItems.map((metric) => {
+              const isSelected = value === metric;
+              return (
+                <button
+                  key={`fav-${metric}`}
+                  type="button"
+                  onClick={() => handleSelectOption(metric)}
+                  className={cn(
+                    'flex items-center w-full px-2 py-1.5 text-sm rounded-sm cursor-pointer',
+                    isSelected
+                      ? 'bg-primary/10 text-primary'
+                      : 'text-foreground hover:bg-accent hover:text-accent-foreground'
+                  )}
+                >
+                  <span className="w-5 shrink-0">
+                    {isSelected && <Check className="h-4 w-4" />}
+                  </span>
+                  <span className="flex-1 text-left">{getDisplayLabel(metric)}</span>
+                  <Heart
+                    className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400 shrink-0 ml-1 hover:scale-125 transition-transform"
+                    onClick={(e) => handleToggleFavorite(metric, e)}
+                  />
+                </button>
+              );
+            })}
+            <div className="mx-2 my-1 h-px bg-border" />
+          </>
+        )}
+
+        {/* Regular Groups */}
         {displayGroups.map((group) => {
           const isExpanded = expandedGroups.has(group.name);
           return (
             <div key={group.name}>
-              {/* Group Header - Clickable to expand/collapse */}
               <button
                 type="button"
                 onClick={(e) => toggleGroup(group.name, e)}
@@ -169,13 +214,13 @@ export const ChartDisplayDropdown = ({
                 )}
               </button>
 
-              {/* Sub-options - Only visible when expanded */}
               {isExpanded && (
                 <div className="pl-2">
                   {group.options.map((option) => {
                     const isSelected = value === option.value;
                     const isDisabledByParent = disabledValues.includes(option.value);
                     const isFunctional = functionalValues.has(option.value) && !isDisabledByParent;
+                    const isFav = isFavorite(option.value);
                     return (
                       <button
                         key={`${group.name}-${option.value}-${option.label}`}
@@ -186,7 +231,7 @@ export const ChartDisplayDropdown = ({
                           isFunctional ? 'cursor-pointer' : 'cursor-default opacity-60',
                           isSelected && isFunctional
                             ? 'bg-primary/10 text-primary'
-                            : isFunctional 
+                            : isFunctional
                               ? 'text-foreground hover:bg-accent hover:text-accent-foreground'
                               : 'text-muted-foreground'
                         )}
@@ -194,7 +239,18 @@ export const ChartDisplayDropdown = ({
                         <span className="w-5 shrink-0">
                           {isSelected && isFunctional && <Check className="h-4 w-4" />}
                         </span>
-                        <span>{option.label}</span>
+                        <span className="flex-1 text-left">{option.label}</span>
+                        {isFunctional && (
+                          <Heart
+                            className={cn(
+                              'h-3.5 w-3.5 shrink-0 ml-1 transition-all hover:scale-125',
+                              isFav
+                                ? 'fill-yellow-400 text-yellow-400'
+                                : 'text-muted-foreground/40 hover:text-yellow-400'
+                            )}
+                            onClick={(e) => handleToggleFavorite(option.value, e)}
+                          />
+                        )}
                       </button>
                     );
                   })}
