@@ -7,6 +7,7 @@ import { usePrivacyMode, PRIVACY_MASK } from '@/hooks/usePrivacyMode';
 import { calculateTradeMetrics } from '@/types/trade';
 import { Info } from 'lucide-react';
 import { Tooltip as UITooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { ChartGradientDefs, useGradientFill } from '@/components/charts/ChartGradientDefs';
 
 interface SymbolData {
   symbol: string;

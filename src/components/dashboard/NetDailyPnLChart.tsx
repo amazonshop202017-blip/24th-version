@@ -9,6 +9,7 @@ import { calculateTradeMetrics, Trade } from '@/types/trade';
 import { Info } from 'lucide-react';
 import { Tooltip as UITooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { DayDetailsModal } from '@/components/dayview/DayDetailsModal';
+import { ChartGradientDefs, useGradientFill } from '@/components/charts/ChartGradientDefs';
 
 interface DailyData {
   date: string;
