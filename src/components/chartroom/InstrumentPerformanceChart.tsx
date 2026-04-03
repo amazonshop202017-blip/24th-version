@@ -25,6 +25,7 @@ import { ChartDisplayDropdown } from './ChartDisplayDropdown';
 import { ChartMetricSettingsPopover, MetricConfig } from './ChartMetricSettingsPopover';
 import { Button } from '@/components/ui/button';
 import { X, Plus } from 'lucide-react';
+import { ChartGradientDefs, useGradientFill } from '@/components/charts/ChartGradientDefs';
 
 interface InstrumentData {
   symbol: string;

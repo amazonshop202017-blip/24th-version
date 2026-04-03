@@ -31,6 +31,10 @@ import {
   Cell,
   Legend,
 } from 'recharts';
+import { ChartGradientDefs, useGradientFill } from '@/components/charts/ChartGradientDefs';
+  Cell,
+  Legend,
+} from 'recharts';
 import {
   Card, CardContent } from '@/components/ui/card';
 import {

@@ -13,6 +13,7 @@ import {
   CartesianGrid,
   Cell,
 } from 'recharts';
+import { ChartGradientDefs, useGradientFill } from '@/components/charts/ChartGradientDefs';
 import {
   Select,
   SelectContent,
