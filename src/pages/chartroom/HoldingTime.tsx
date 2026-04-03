@@ -347,7 +347,7 @@ const HoldingTime = () => {
                   <Scatter
                     name="Winners"
                     data={winnerData}
-                    fill="hsl(142, 71%, 45%)"
+                    fill="hsl(var(--profit))"
                   />
 
                   {/* Loser dots (red) */}
