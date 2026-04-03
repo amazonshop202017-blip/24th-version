@@ -26,6 +26,7 @@ interface SymbolEntry {
 
 export const InstrumentTradeDistribution = () => {
   const { filteredTrades: trades } = useFilteredTrades();
+  const { getCustomFill, isGradient } = useCustomColorGradientFill('instDist');
 
   const { entries, totalTrades, uniqueCount } = useMemo(() => {
     if (trades.length === 0) return { entries: [], totalTrades: 0, uniqueCount: 0 };
