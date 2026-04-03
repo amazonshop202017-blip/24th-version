@@ -242,7 +242,7 @@ export const LongShortAnalysisChart = () => {
                   key={`cell-${index}`}
                   fill={
                     displayMode === 'pnl'
-                      ? entry.pnl >= 0 ? 'hsl(var(--profit))' : 'hsl(var(--loss))'
+                      ? getFill(entry.pnl >= 0)
                       : 'hsl(var(--primary))'
                   }
                 />
