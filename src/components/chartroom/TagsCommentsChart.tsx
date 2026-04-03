@@ -146,7 +146,7 @@ export const TagsCommentsChart = ({
   const { accounts, getAccountBalanceBeforeTrades } = useAccountsContext();
   const { tags } = useTagsContext();
   const { isPrivacyMode } = usePrivacyMode();
-  const { getFill } = useGradientFill('tagsComments');
+  const { getFill, primaryFill } = useGradientFill('tagsComments');
 
   // Calculate initial display type from global filter or prop
   const getInitialDisplayType = (): ChartDisplayType => {
@@ -1108,7 +1108,7 @@ export const TagsCommentsChart = ({
                       } else if (config?.color && config.color !== DEFAULT_METRIC_COLORS[0]) {
                         fillColor = config.color;
                       } else if (displayType === 'winrate' || displayType === 'tradecount' || displayType === 'avg_hold_time' || displayType === 'longest_duration' || displayType === 'long_winrate' || displayType === 'short_winrate' || displayType === 'tradecount_long' || displayType === 'tradecount_short' || displayType === 'logged_days' || displayType === 'profit_factor' || displayType === 'avg_trades_per_day' || displayType === 'median_trades_per_day' || displayType === '90th_percentile_trades') {
-                        fillColor = 'hsl(var(--primary))';
+                        fillColor = primaryFill;
                       } else {
                         fillColor = getFill(entry.displayValue >= 0);
                       }

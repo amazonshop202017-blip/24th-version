@@ -135,7 +135,7 @@ export const InstrumentPerformanceChart = ({
   const { currencyConfig, selectedAccounts, isAllAccountsSelected, classifyTradeOutcome, displayMode, breakevenTolerance } = useGlobalFilters();
   const { isPrivacyMode } = usePrivacyMode();
   const { accounts, getAccountBalanceBeforeTrades } = useAccountsContext();
-  const { getFill } = useGradientFill('instrPerf');
+  const { getFill, primaryFill } = useGradientFill('instrPerf');
   
   const getInitialDisplayType = (): ChartDisplayType => {
     if (useGlobalDefault) {
@@ -1137,7 +1137,7 @@ export const InstrumentPerformanceChart = ({
                         } else if (customColor && customColor !== DEFAULT_METRIC_COLORS[0]) {
                           fillColor = customColor;
                         } else if (displayType === 'winrate' || displayType === 'tradecount' || displayType === 'avg_hold_time' || displayType === 'longest_duration' || displayType === 'long_winrate' || displayType === 'short_winrate' || displayType === 'tradecount_long' || displayType === 'tradecount_short') {
-                          fillColor = 'hsl(var(--primary))';
+                          fillColor = primaryFill;
                         } else {
                           fillColor = getFill(entry.displayValue >= 0);
                         }

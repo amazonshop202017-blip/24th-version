@@ -149,7 +149,7 @@ export const SetupPerformanceChart = ({
   const { accounts, getAccountBalanceBeforeTrades } = useAccountsContext();
   const { strategies } = useStrategiesContext();
   const { isPrivacyMode } = usePrivacyMode();
-  const { getFill } = useGradientFill('setupPerf');
+  const { getFill, primaryFill } = useGradientFill('setupPerf');
   
   const getInitialDisplayType = (): ChartDisplayType => {
     if (useGlobalDefault) {
@@ -1226,7 +1226,7 @@ export const SetupPerformanceChart = ({
                       } else if (config?.color && config.color !== DEFAULT_METRIC_COLORS[0]) {
                         fillColor = config.color;
                       } else if (displayType === 'winrate' || displayType === 'tradecount' || displayType === 'avg_hold_time' || displayType === 'longest_duration' || displayType === 'long_winrate' || displayType === 'short_winrate' || displayType === 'tradecount_long' || displayType === 'tradecount_short') {
-                        fillColor = 'hsl(var(--primary))';
+                        fillColor = primaryFill;
                       } else {
                         fillColor = getFill(entry.displayValue >= 0);
                       }
