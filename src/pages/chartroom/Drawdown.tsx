@@ -366,7 +366,7 @@ const Drawdown = () => {
                   <Area
                     type="monotone"
                     dataKey={displayType === 'percent' ? 'drawdownPercent' : 'drawdown'}
-                    stroke="hsl(0, 84%, 60%)"
+                    stroke="hsl(var(--loss))"
                     strokeWidth={2}
                     fill="url(#drawdownGradient)"
                   />
