@@ -12,6 +12,7 @@ import {
   ReferenceLine,
   CartesianGrid,
   Cell,
+  Customized,
 } from 'recharts';
 import { ChartGradientDefs, useGradientFill } from '@/components/charts/ChartGradientDefs';
 import {

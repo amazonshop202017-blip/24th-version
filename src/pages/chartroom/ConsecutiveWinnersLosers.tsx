@@ -16,6 +16,7 @@ import {
   Tooltip,
   ResponsiveContainer,
   ReferenceLine,
+  Customized,
 } from 'recharts';
 import { ChartGradientDefs, useGradientFill } from '@/components/charts/ChartGradientDefs';
 import {

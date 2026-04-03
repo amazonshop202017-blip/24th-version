@@ -19,6 +19,7 @@ import {
   CartesianGrid,
   Cell,
   Legend,
+  Customized,
 } from 'recharts';
 import { Card, CardContent } from '@/components/ui/card';
 import { ChartDisplayDropdown } from './ChartDisplayDropdown';
