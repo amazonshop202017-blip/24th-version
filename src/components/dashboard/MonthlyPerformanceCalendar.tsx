@@ -459,11 +459,14 @@ export const MonthlyPerformanceCalendar = () => {
               <div className={`text-sm font-bold font-mono ${isPrivacyMode ? 'text-foreground' : summary.pnl >= 0 ? 'profit-text' : 'loss-text'}`}>
                 {formatCurrencyDecimal(summary.pnl)}
               </div>
-              <div className={`text-[10px] px-1.5 py-0.5 rounded mt-0.5 ${
-                summary.tradingDays > 0 
-                  ? summary.pnl >= 0 ? 'bg-[hsl(142_76%_45%/0.2)] text-[hsl(142_76%_55%)]' : 'bg-[hsl(0_84%_60%/0.2)] text-[hsl(0_84%_70%)]'
-                  : 'bg-muted text-muted-foreground'
-              }`}>
+              <div 
+                className={`text-[10px] px-1.5 py-0.5 rounded mt-0.5 ${
+                  summary.tradingDays > 0 
+                    ? summary.pnl >= 0 ? 'profit-text' : 'loss-text'
+                    : 'bg-muted text-muted-foreground'
+                }`}
+                style={summary.tradingDays > 0 ? { backgroundColor: summary.pnl >= 0 ? 'hsl(var(--profit) / 0.2)' : 'hsl(var(--loss) / 0.2)' } : undefined}
+              >
                 {summary.tradingDays} day{summary.tradingDays !== 1 ? 's' : ''}
               </div>
             </div>

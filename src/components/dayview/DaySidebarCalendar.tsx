@@ -146,12 +146,13 @@ export const DaySidebarCalendar = ({
             <button
               key={date.toISOString()}
               onClick={() => onDateSelect(date)}
+              style={status === 'profit' ? { backgroundColor: 'hsl(var(--profit) / 0.15)' } : status === 'loss' ? { backgroundColor: 'hsl(var(--loss) / 0.15)' } : undefined}
               className={cn(
                 'h-8 w-8 flex items-center justify-center rounded text-sm transition-colors',
                 !isCurrentMonth && 'text-muted-foreground/30',
                 isCurrentMonth && !status && 'text-muted-foreground hover:bg-muted/50',
-                status === 'profit' && 'bg-profit/80 text-profit-foreground hover:bg-profit',
-                status === 'loss' && 'bg-loss/80 text-loss-foreground hover:bg-loss',
+                status === 'profit' && 'profit-text',
+                status === 'loss' && 'loss-text',
                 isSelected && 'ring-2 ring-primary ring-offset-1 ring-offset-background'
               )}
             >

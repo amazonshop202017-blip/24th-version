@@ -130,9 +130,9 @@ const YearlyCalendar = () => {
     
     if (dayData) {
       if (dayData.netPnl > 0) {
-        return 'bg-profit/20 text-profit border border-profit/40';
+        return 'profit-text border border-profit/40';
       } else if (dayData.netPnl < 0) {
-        return 'bg-loss/20 text-loss border border-loss/40';
+        return 'loss-text border border-loss/40';
       }
     }
     
