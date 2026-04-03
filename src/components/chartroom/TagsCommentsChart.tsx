@@ -41,7 +41,7 @@ import { X, Plus } from 'lucide-react';
 import { getDisplayLabel } from '@/hooks/useChartDisplayMode';
 
 const DEFAULT_METRIC_COLORS = [
-  'hsl(var(--primary))'  ,
+  'hsl(var(--neutral-theme))'  ,
   'hsl(var(--profit))'  ,
   'hsl(45 93% 47%)'  ,
 ];
@@ -1104,7 +1104,7 @@ export const TagsCommentsChart = ({
                       } else if (config?.color && config.color !== DEFAULT_METRIC_COLORS[0]) {
                         fillColor = config.color;
                       } else if (displayType === 'winrate' || displayType === 'tradecount' || displayType === 'avg_hold_time' || displayType === 'longest_duration' || displayType === 'long_winrate' || displayType === 'short_winrate' || displayType === 'tradecount_long' || displayType === 'tradecount_short' || displayType === 'logged_days' || displayType === 'profit_factor' || displayType === 'avg_trades_per_day' || displayType === 'median_trades_per_day' || displayType === '90th_percentile_trades') {
-                        fillColor = 'hsl(var(--primary))';
+                        fillColor = 'hsl(var(--neutral-theme))';
                       } else {
                         fillColor = entry.displayValue >= 0 ? 'hsl(var(--profit))' : 'hsl(var(--loss))';
                       }

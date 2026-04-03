@@ -92,7 +92,7 @@ interface SetupData {
 }
 
 const DEFAULT_METRIC_COLORS = [
-  'hsl(var(--primary))',
+  'hsl(var(--neutral-theme))',
   'hsl(var(--profit))',
   'hsl(45 93% 47%)',
 ];
@@ -1222,7 +1222,7 @@ export const SetupPerformanceChart = ({
                       } else if (config?.color && config.color !== DEFAULT_METRIC_COLORS[0]) {
                         fillColor = config.color;
                       } else if (displayType === 'winrate' || displayType === 'tradecount' || displayType === 'avg_hold_time' || displayType === 'longest_duration' || displayType === 'long_winrate' || displayType === 'short_winrate' || displayType === 'tradecount_long' || displayType === 'tradecount_short') {
-                        fillColor = 'hsl(var(--primary))';
+                        fillColor = 'hsl(var(--neutral-theme))';
                       } else {
                         fillColor = entry.displayValue >= 0 ? 'hsl(var(--profit))' : 'hsl(var(--loss))';
                       }
