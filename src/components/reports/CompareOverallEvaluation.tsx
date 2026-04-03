@@ -17,8 +17,8 @@ export const CompareOverallEvaluation = ({ groupNumber, stats }: CompareOverallE
     }
     
     return [
-      { name: 'Winners', value: wins, color: '#10b981' }, // emerald-500
-      { name: 'Losers', value: losses, color: '#ef4444' }, // red-500
+      { name: 'Winners', value: wins, color: 'hsl(var(--profit))' },
+      { name: 'Losers', value: losses, color: 'hsl(var(--loss))' },
     ];
   }, [stats.winningTradesCount, stats.losingTradesCount]);
 
@@ -57,11 +57,11 @@ export const CompareOverallEvaluation = ({ groupNumber, stats }: CompareOverallE
           
           {/* Center Text */}
           <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <span className="text-3xl font-bold text-emerald-500">
+            <span className="text-3xl font-bold profit-text">
               {winRateDisplay}
               <span className="text-lg">%</span>
             </span>
-            <span className="text-xs text-emerald-500 uppercase tracking-wider">
+            <span className="text-xs profit-text uppercase tracking-wider">
               WINRATE
             </span>
           </div>
@@ -70,18 +70,18 @@ export const CompareOverallEvaluation = ({ groupNumber, stats }: CompareOverallE
         {/* Legend */}
         <div className="space-y-4">
           <div className="flex items-center gap-3">
-            <div className="w-3 h-3 rounded-sm bg-emerald-500" />
+            <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: 'hsl(var(--profit))' }} />
             <div>
               <span className="text-2xl font-bold text-foreground">{stats.winningTradesCount}</span>
-              <p className="text-xs text-emerald-500">winners</p>
+              <p className="text-xs profit-text">winners</p>
             </div>
           </div>
           
           <div className="flex items-center gap-3">
-            <div className="w-3 h-3 rounded-sm bg-red-500" />
+            <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: 'hsl(var(--loss))' }} />
             <div>
               <span className="text-2xl font-bold text-foreground">{stats.losingTradesCount}</span>
-              <p className="text-xs text-red-500">losers</p>
+              <p className="text-xs loss-text">losers</p>
             </div>
           </div>
         </div>

@@ -171,7 +171,7 @@ export const PerformanceByDurationChart = () => {
                     <div className="bg-card border border-border rounded-lg p-3 shadow-lg">
                       <p className="text-foreground font-medium mb-2">{data.bucket}</p>
                       <div className="space-y-1 text-sm">
-                        <p className={isPrivacyMode ? 'text-foreground' : data.totalPnl >= 0 ? 'text-green-500' : 'text-red-500'}>
+                        <p className={isPrivacyMode ? 'text-foreground' : data.totalPnl >= 0 ? 'profit-text' : 'loss-text'}>
                           P&L: {isPrivacyMode ? '**' : formatCurrency(data.totalPnl)}
                         </p>
                         <p className="text-muted-foreground">
@@ -260,8 +260,8 @@ export const TradeCountByDurationChart = () => {
                         <p className="text-muted-foreground">
                           Total Trades: {data.tradeCount}
                         </p>
-                        <p className="text-green-500">Winners: {data.winCount}</p>
-                        <p className="text-red-500">Losers: {data.lossCount}</p>
+                        <p className="profit-text">Winners: {data.winCount}</p>
+                        <p className="loss-text">Losers: {data.lossCount}</p>
                       </div>
                     </div>
                   );
@@ -351,7 +351,7 @@ export const WinRateByDurationChart = () => {
                     <div className="bg-card border border-border rounded-lg p-3 shadow-lg">
                       <p className="text-foreground font-medium mb-2">{data.bucket}</p>
                       <div className="space-y-1 text-sm">
-                        <p className={data.winRate >= 50 ? 'text-green-500' : 'text-red-500'}>
+                        <p className={data.winRate >= 50 ? 'profit-text' : 'loss-text'}>
                           Win Rate: {data.winRate.toFixed(1)}%
                         </p>
                         <p className="text-muted-foreground">

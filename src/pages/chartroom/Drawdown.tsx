@@ -308,8 +308,8 @@ const Drawdown = () => {
                 >
                   <defs>
                     <linearGradient id="drawdownGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="hsl(0, 84%, 60%)" stopOpacity={0.4} />
-                      <stop offset="100%" stopColor="hsl(0, 84%, 60%)" stopOpacity={0.1} />
+                      <stop offset="0%" stopColor="hsl(var(--loss))" stopOpacity={0.4} />
+                      <stop offset="100%" stopColor="hsl(var(--loss))" stopOpacity={0.1} />
                     </linearGradient>
                   </defs>
                   <XAxis
@@ -366,7 +366,7 @@ const Drawdown = () => {
                   <Area
                     type="monotone"
                     dataKey={displayType === 'percent' ? 'drawdownPercent' : 'drawdown'}
-                    stroke="hsl(0, 84%, 60%)"
+                    stroke="hsl(var(--loss))"
                     strokeWidth={2}
                     fill="url(#drawdownGradient)"
                   />
@@ -387,7 +387,7 @@ const Drawdown = () => {
           <Card key={metric.label} className="bg-card border-border">
             <CardContent className="p-4">
               <div className="flex items-center gap-1 mb-1">
-                <div className="w-1 h-4 bg-green-500 rounded-full" />
+                <div className="w-1 h-4 rounded-full" style={{ backgroundColor: 'hsl(var(--profit))' }} />
                 <span className="text-sm text-muted-foreground">{metric.label}</span>
                 {metric.hasInfo && (
                   <TooltipProvider>

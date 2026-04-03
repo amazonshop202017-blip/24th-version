@@ -54,7 +54,7 @@ export const CompareCumulativePnLChart = ({
       return (
         <div className="bg-popover border border-border rounded-lg p-3 shadow-lg">
           <p className="text-sm text-muted-foreground mb-1">{label}</p>
-          <p className={`text-sm font-semibold ${value >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>
+          <p className={`text-sm font-semibold ${value >= 0 ? 'profit-text' : 'loss-text'}`}>
             Cumulative P&L: {isPrivacyMode ? PRIVACY_MASK : `$${value.toFixed(2)}`}
           </p>
         </div>
@@ -107,12 +107,12 @@ export const CompareCumulativePnLChart = ({
           <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
             <defs>
               <linearGradient id={`positiveGradient-${groupNumber}`} x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
-                <stop offset="95%" stopColor="#10b981" stopOpacity={0.05} />
+                <stop offset="5%" stopColor="hsl(var(--profit))" stopOpacity={0.3} />
+                <stop offset="95%" stopColor="hsl(var(--profit))" stopOpacity={0.05} />
               </linearGradient>
               <linearGradient id={`negativeGradient-${groupNumber}`} x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#ef4444" stopOpacity={0.05} />
-                <stop offset="95%" stopColor="#ef4444" stopOpacity={0.3} />
+                <stop offset="5%" stopColor="hsl(var(--loss))" stopOpacity={0.05} />
+                <stop offset="95%" stopColor="hsl(var(--loss))" stopOpacity={0.3} />
               </linearGradient>
             </defs>
             
@@ -142,7 +142,7 @@ export const CompareCumulativePnLChart = ({
             <Area
               type="monotone"
               dataKey="cumulativePnl"
-              stroke="#10b981"
+              stroke="hsl(var(--profit))"
               strokeWidth={2}
               fill={`url(#positiveGradient-${groupNumber})`}
               fillOpacity={1}

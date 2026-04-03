@@ -267,7 +267,7 @@ export const TradeTimePerformanceChart = () => {
               {chartData.map((entry, index) => (
                 <Cell 
                   key={`cell-${index}`} 
-                  fill={entry.isProfit ? 'hsl(142, 76%, 36%)' : 'hsl(0, 84%, 60%)'}
+                  fill={entry.isProfit ? 'hsl(var(--profit))' : 'hsl(var(--loss))'}
                 />
               ))}
             </Scatter>

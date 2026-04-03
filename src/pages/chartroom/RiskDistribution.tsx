@@ -274,10 +274,10 @@ const RiskDistribution = () => {
           <p className="text-muted-foreground">
             Number of trades: <span className="text-foreground font-medium">{data.tradeCount}</span>
           </p>
-          <p className="text-emerald-500">
+          <p className="profit-text">
             Winners: <span className="font-medium">{data.winCount}</span>
           </p>
-          <p className="text-red-500">
+          <p className="loss-text">
             Losers: <span className="font-medium">{data.lossCount}</span>
           </p>
           <p className="text-muted-foreground">
@@ -386,7 +386,7 @@ const RiskDistribution = () => {
                   {(isMobile ? bucketData.filter(b => b.tradeCount > 0) : bucketData).map((entry, index) => (
                     <Cell 
                       key={`cell-${index}`}
-                      fill={entry.isWinningBucket ? '#10b981' : '#ef4444'}
+                      fill={entry.isWinningBucket ? 'hsl(var(--profit))' : 'hsl(var(--loss))'}
                     />
                   ))}
                 </Bar>
@@ -407,7 +407,7 @@ const RiskDistribution = () => {
             <p className="text-xs text-muted-foreground font-medium mb-1">
               {displayType === 'rMultiple' ? 'Avg R Multiple' : 'Avg Return (%)'}
             </p>
-            <p className={`text-xl font-bold ${metrics.avgValue >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>
+            <p className={`text-xl font-bold ${metrics.avgValue >= 0 ? 'profit-text' : 'loss-text'}`}>
               {formatValue(metrics.avgValue)}
             </p>
           </CardContent>
@@ -418,7 +418,7 @@ const RiskDistribution = () => {
             <p className="text-xs text-muted-foreground font-medium mb-1">
               {displayType === 'rMultiple' ? 'Total R Multiple' : 'Total Return (%)'}
             </p>
-            <p className={`text-xl font-bold ${metrics.totalValue >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>
+            <p className={`text-xl font-bold ${metrics.totalValue >= 0 ? 'profit-text' : 'loss-text'}`}>
               {formatValue(metrics.totalValue)}
             </p>
           </CardContent>
@@ -429,7 +429,7 @@ const RiskDistribution = () => {
             <p className="text-xs text-muted-foreground font-medium mb-1">
               {displayType === 'rMultiple' ? 'Avg R Multiple Winner' : 'Avg Return (%) Winner'}
             </p>
-            <p className="text-xl font-bold text-emerald-500">
+            <p className="text-xl font-bold profit-text">
               {formatValue(metrics.avgWinnerValue)}
             </p>
           </CardContent>
@@ -440,7 +440,7 @@ const RiskDistribution = () => {
             <p className="text-xs text-muted-foreground font-medium mb-1">
               {displayType === 'rMultiple' ? 'Avg R Multiple Loser' : 'Avg Return (%) Loser'}
             </p>
-            <p className="text-xl font-bold text-red-500">
+            <p className="text-xl font-bold loss-text">
               {formatValue(-metrics.avgLoserValue)}
             </p>
           </CardContent>

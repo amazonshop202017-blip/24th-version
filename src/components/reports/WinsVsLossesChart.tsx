@@ -40,7 +40,7 @@ export const WinsVsLossesChart = ({
   formatCurrency,
 }: WinsVsLossesChartProps) => {
   const { isPrivacyMode } = usePrivacyMode();
-  const chartColor = variant === 'wins' ? '#10b981' : '#ef4444';
+  const chartColor = variant === 'wins' ? 'hsl(var(--profit))' : 'hsl(var(--loss))';
   const gradientId = variant === 'wins' ? 'winsGradient' : 'lossesGradient';
 
   const formattedData = useMemo(() => {
@@ -126,13 +126,13 @@ export const WinsVsLossesChart = ({
                     <div className="space-y-1">
                       <div className="flex items-center justify-between gap-4">
                         <span className="text-xs text-muted-foreground">Daily P&L:</span>
-                        <span className={`text-xs font-medium ${data.netPnl >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>
+                        <span className={`text-xs font-medium ${data.netPnl >= 0 ? 'profit-text' : 'loss-text'}`}>
                           {isPrivacyMode ? PRIVACY_MASK : formatCurrency(data.netPnl, true)}
                         </span>
                       </div>
                       <div className="flex items-center justify-between gap-4">
                         <span className="text-xs text-muted-foreground">Cumulative:</span>
-                        <span className={`text-xs font-medium ${data.cumulativePnl >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>
+                        <span className={`text-xs font-medium ${data.cumulativePnl >= 0 ? 'profit-text' : 'loss-text'}`}>
                           {isPrivacyMode ? PRIVACY_MASK : formatCurrency(data.cumulativePnl, true)}
                         </span>
                       </div>

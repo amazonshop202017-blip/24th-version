@@ -380,14 +380,14 @@ interface StatRowProps {
 
 const StatRow = ({ label, value, isPositive, isNegative }: StatRowProps) => {
   const getTextColor = () => {
-    if (isPositive) return 'text-emerald-500';
-    if (isNegative) return 'text-red-500';
+    if (isPositive) return 'profit-text';
+    if (isNegative) return 'loss-text';
     return 'text-muted-foreground';
   };
 
   const getValueColor = () => {
-    if (isPositive) return 'text-emerald-500';
-    if (isNegative) return 'text-red-500';
+    if (isPositive) return 'profit-text';
+    if (isNegative) return 'loss-text';
     return 'text-foreground';
   };
 

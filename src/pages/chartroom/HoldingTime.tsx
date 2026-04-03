@@ -241,11 +241,11 @@ const HoldingTime = () => {
             {/* Legend */}
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-green-500" />
+                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: 'hsl(var(--profit))' }} />
                 <span className="text-sm text-muted-foreground">Winner</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-red-500" />
+                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: 'hsl(var(--loss))' }} />
                 <span className="text-sm text-muted-foreground">Loser</span>
               </div>
             </div>
@@ -323,17 +323,17 @@ const HoldingTime = () => {
                               Holding Time: {formatTimeValue(data.holdingTime)}
                             </p>
                             {displayType === 'dollar' && (
-                              <p className={data.isWinner ? 'text-green-500' : 'text-red-500'}>
+                              <p className={data.isWinner ? 'profit-text' : 'loss-text'}>
                                 Net P/L: {isPrivacyMode ? PRIVACY_MASK : `$${data.netPnl.toFixed(2)}`}
                               </p>
                             )}
                             {displayType === 'percent' && (
-                              <p className={data.isWinner ? 'text-green-500' : 'text-red-500'}>
+                              <p className={data.isWinner ? 'profit-text' : 'loss-text'}>
                                 Return: {isPrivacyMode ? PRIVACY_MASK : `${data.returnPercent.toFixed(2)}%`}
                               </p>
                             )}
                             {displayType === 'tickpip' && (
-                              <p className={data.isWinner ? 'text-green-500' : 'text-red-500'}>
+                              <p className={data.isWinner ? 'profit-text' : 'loss-text'}>
                                 Tick/Pip: {isPrivacyMode ? PRIVACY_MASK : '--'}
                               </p>
                             )}
@@ -347,14 +347,14 @@ const HoldingTime = () => {
                   <Scatter
                     name="Winners"
                     data={winnerData}
-                    fill="hsl(142, 71%, 45%)"
+                    fill="hsl(var(--profit))"
                   />
 
                   {/* Loser dots (red) */}
                   <Scatter
                     name="Losers"
                     data={loserData}
-                    fill="hsl(0, 84%, 60%)"
+                    fill="hsl(var(--loss))"
                   />
                 </ScatterChart>
               </ResponsiveContainer>
@@ -374,7 +374,7 @@ const HoldingTime = () => {
             <CardContent className="p-4">
               <p className="text-xs text-muted-foreground mb-1">{metric.label}</p>
               <p className={`text-lg font-semibold ${
-                metric.color === 'green' ? 'text-green-500' : 'text-red-500'
+                metric.color === 'green' ? 'profit-text' : 'loss-text'
               }`}>
                 {metric.value}
               </p>

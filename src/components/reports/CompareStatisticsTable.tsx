@@ -41,15 +41,15 @@ export const CompareStatisticsTable = ({ groupNumber, stats }: CompareStatistics
         {rows.map((row, index) => (
           <div key={index} className="flex justify-between items-center py-1 border-b border-border/50 last:border-0">
             <span className={`text-sm ${
-              row.isPositive === true ? 'text-emerald-500' : 
-              row.isPositive === false ? 'text-red-500' : 
+              row.isPositive === true ? 'profit-text' : 
+              row.isPositive === false ? 'loss-text' : 
               'text-muted-foreground'
             }`}>
               {row.label}
             </span>
             <span className={`text-sm font-medium ${
-              row.isPositive === true ? 'text-emerald-500' : 
-              row.isPositive === false ? 'text-red-500' : 
+              row.isPositive === true ? 'profit-text' : 
+              row.isPositive === false ? 'loss-text' : 
               'text-foreground'
             }`}>
               {row.value}
