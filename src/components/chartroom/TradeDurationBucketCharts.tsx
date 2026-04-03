@@ -184,7 +184,7 @@ export const PerformanceByDurationChart = () => {
               />
               <Bar
                 dataKey="totalPnl"
-                fill="hsl(var(--neutral-theme))"
+                fill="hsl(217, 91%, 60%)"
                 radius={[0, 4, 4, 0]}
                 label={{
                   position: 'right',
@@ -269,7 +269,7 @@ export const TradeCountByDurationChart = () => {
               />
               <Bar
                 dataKey="tradeCount"
-                fill="hsl(var(--neutral-theme))"
+                fill="hsl(217, 91%, 60%)"
                 radius={[0, 4, 4, 0]}
                 label={{
                   position: 'right',
@@ -364,7 +364,7 @@ export const WinRateByDurationChart = () => {
               />
               <Bar
                 dataKey="winRate"
-                fill="hsl(var(--neutral-theme))"
+                fill="hsl(217, 91%, 60%)"
                 radius={[0, 4, 4, 0]}
                 label={{
                   position: 'right',

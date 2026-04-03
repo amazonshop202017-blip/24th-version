@@ -79,7 +79,7 @@ interface InstrumentData {
 }
 
 const DEFAULT_METRIC_COLORS = [
-  'hsl(var(--neutral-theme))',
+  'hsl(var(--primary))',
   'hsl(var(--profit))',
   'hsl(45 93% 47%)',
 ];
@@ -1113,9 +1113,9 @@ export const InstrumentPerformanceChart = ({
                     <Line
                       type="monotone"
                       dataKey="displayValue"
-                      stroke={metricConfigs[0]?.color || 'hsl(var(--neutral-theme))'}
+                      stroke={metricConfigs[0]?.color || 'hsl(var(--primary))'}
                       strokeWidth={2}
-                      dot={{ fill: metricConfigs[0]?.color || 'hsl(var(--neutral-theme))', r: 3 }}
+                      dot={{ fill: metricConfigs[0]?.color || 'hsl(var(--primary))', r: 3 }}
                       activeDot={{ r: 5 }}
                     />
                   ) : (
@@ -1133,7 +1133,7 @@ export const InstrumentPerformanceChart = ({
                         } else if (customColor && customColor !== DEFAULT_METRIC_COLORS[0]) {
                           fillColor = customColor;
                         } else if (displayType === 'winrate' || displayType === 'tradecount' || displayType === 'avg_hold_time' || displayType === 'longest_duration' || displayType === 'long_winrate' || displayType === 'short_winrate' || displayType === 'tradecount_long' || displayType === 'tradecount_short') {
-                          fillColor = 'hsl(var(--neutral-theme))';
+                          fillColor = 'hsl(var(--primary))';
                         } else {
                           fillColor = entry.displayValue >= 0 ? 'hsl(var(--profit))' : 'hsl(var(--loss))';
                         }

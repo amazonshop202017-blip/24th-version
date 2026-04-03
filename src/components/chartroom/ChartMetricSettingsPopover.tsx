@@ -82,7 +82,7 @@ const NativeColorPicker = ({ color, onChange }: { color: string; onChange: (colo
         return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
       }
     } catch {}
-    return '#4a4a4a';
+    return '#3b82f6';
   }, []);
 
   const [hexValue, setHexValue] = useState(() => getHexFromColor(color));
