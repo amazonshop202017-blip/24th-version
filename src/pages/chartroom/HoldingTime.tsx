@@ -323,17 +323,17 @@ const HoldingTime = () => {
                               Holding Time: {formatTimeValue(data.holdingTime)}
                             </p>
                             {displayType === 'dollar' && (
-                              <p className={data.isWinner ? 'text-green-500' : 'text-red-500'}>
+                              <p className={data.isWinner ? 'profit-text' : 'loss-text'}>
                                 Net P/L: {isPrivacyMode ? PRIVACY_MASK : `$${data.netPnl.toFixed(2)}`}
                               </p>
                             )}
                             {displayType === 'percent' && (
-                              <p className={data.isWinner ? 'text-green-500' : 'text-red-500'}>
+                              <p className={data.isWinner ? 'profit-text' : 'loss-text'}>
                                 Return: {isPrivacyMode ? PRIVACY_MASK : `${data.returnPercent.toFixed(2)}%`}
                               </p>
                             )}
                             {displayType === 'tickpip' && (
-                              <p className={data.isWinner ? 'text-green-500' : 'text-red-500'}>
+                              <p className={data.isWinner ? 'profit-text' : 'loss-text'}>
                                 Tick/Pip: {isPrivacyMode ? PRIVACY_MASK : '--'}
                               </p>
                             )}
