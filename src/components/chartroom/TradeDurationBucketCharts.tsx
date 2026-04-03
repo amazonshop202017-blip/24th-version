@@ -141,6 +141,7 @@ export const PerformanceByDurationChart = () => {
               layout="vertical"
               margin={{ top: 10, right: 80, left: 10, bottom: 10 }}
             >
+              <ChartGradientDefs direction="horizontal" idPrefix="perfDur" />
               <CartesianGrid
                 strokeDasharray="3 3"
                 stroke="hsl(var(--border))"
