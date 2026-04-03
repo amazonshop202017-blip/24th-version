@@ -32,9 +32,6 @@ import {
   Legend,
 } from 'recharts';
 import { ChartGradientDefs, useGradientFill } from '@/components/charts/ChartGradientDefs';
-  Cell,
-  Legend,
-} from 'recharts';
 import {
   Select,
   SelectContent,
