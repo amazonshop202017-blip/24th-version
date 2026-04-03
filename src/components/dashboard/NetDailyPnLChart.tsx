@@ -190,7 +190,7 @@ export const NetDailyPnLChart = () => {
               {chartData.map((entry, index) => (
                 <Cell 
                   key={`cell-${index}`}
-                  fill={entry.dailyPnl >= 0 ? 'hsl(var(--profit))' : 'hsl(var(--loss))'}
+                  fill={getFill(entry.dailyPnl >= 0)}
                 />
               ))}
             </Bar>
