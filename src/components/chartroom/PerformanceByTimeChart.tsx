@@ -755,6 +755,7 @@ export const PerformanceByTimeChart = ({
                 data={isMultiMetric ? multiMetricChartData : timeData}
                 margin={{ top: 10, right: isMultiMetric ? (selectedMetrics.length === 3 ? 25 : 20) : -5, left: -10, bottom: isMultiMetric ? 30 : 20 }}
               >
+                <ChartGradientDefs direction="vertical" idPrefix="timePerf" />
                 <CartesianGrid 
                   strokeDasharray="3 3" 
                   stroke="hsl(var(--border))" 
