@@ -389,11 +389,13 @@ export const MonthlyPerformanceCalendar = () => {
                   const isCurrentMonth = isSameMonth(day, currentMonth);
                   const hasData = stats?.hasData && isCurrentMonth;
 
+                  const bgStyle: React.CSSProperties = {};
                   let bgClass = 'bg-secondary/30';
                   if (hasData) {
-                    bgClass = stats.pnl >= 0 
-                      ? 'bg-[hsl(142_76%_45%/0.15)]' 
-                      : 'bg-[hsl(0_84%_60%/0.15)]';
+                    bgClass = '';
+                    bgStyle.backgroundColor = stats.pnl >= 0 
+                      ? 'hsl(var(--profit) / 0.15)' 
+                      : 'hsl(var(--loss) / 0.15)';
                   }
 
                   return (
