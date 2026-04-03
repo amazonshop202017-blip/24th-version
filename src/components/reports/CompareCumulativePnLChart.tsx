@@ -142,7 +142,7 @@ export const CompareCumulativePnLChart = ({
             <Area
               type="monotone"
               dataKey="cumulativePnl"
-              stroke="#10b981"
+              stroke="hsl(var(--profit))"
               strokeWidth={2}
               fill={`url(#positiveGradient-${groupNumber})`}
               fillOpacity={1}

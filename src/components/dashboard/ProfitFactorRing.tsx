@@ -19,8 +19,8 @@ export const ProfitFactorRing = ({
   const lossPercent = total > 0 ? Math.abs(totalLosses) : 1;
 
   const pieData = [
-    { id: 0, value: profitPercent, label: 'Profits', color: 'hsl(142, 76%, 45%)' },
-    { id: 1, value: lossPercent, label: 'Losses', color: 'hsl(0, 84%, 60%)' },
+    { id: 0, value: profitPercent, label: 'Profits', color: 'hsl(var(--profit))' },
+    { id: 1, value: lossPercent, label: 'Losses', color: 'hsl(var(--loss))' },
   ].filter(d => d.value > 0);
 
   if (pieData.length === 0) {

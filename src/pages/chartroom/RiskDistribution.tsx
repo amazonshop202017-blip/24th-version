@@ -440,7 +440,7 @@ const RiskDistribution = () => {
             <p className="text-xs text-muted-foreground font-medium mb-1">
               {displayType === 'rMultiple' ? 'Avg R Multiple Loser' : 'Avg Return (%) Loser'}
             </p>
-            <p className="text-xl font-bold text-red-500">
+            <p className="text-xl font-bold loss-text">
               {formatValue(-metrics.avgLoserValue)}
             </p>
           </CardContent>

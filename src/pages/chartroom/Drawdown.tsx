@@ -387,7 +387,7 @@ const Drawdown = () => {
           <Card key={metric.label} className="bg-card border-border">
             <CardContent className="p-4">
               <div className="flex items-center gap-1 mb-1">
-                <div className="w-1 h-4 bg-green-500 rounded-full" />
+                <div className="w-1 h-4 rounded-full" style={{ backgroundColor: 'hsl(var(--profit))' }} />
                 <span className="text-sm text-muted-foreground">{metric.label}</span>
                 {metric.hasInfo && (
                   <TooltipProvider>

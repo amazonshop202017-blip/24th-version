@@ -13,9 +13,9 @@ export const WinRateGauge = ({ value, label, winners = 0, losers = 0, breakeven 
   const total = winners + losers + breakeven;
 
   const pieData = [
-    { id: 0, value: winners, label: 'Win', color: 'hsl(142, 76%, 45%)' },
+    { id: 0, value: winners, label: 'Win', color: 'hsl(var(--profit))' },
     { id: 1, value: breakeven, label: 'Breakeven', color: 'hsl(var(--muted-foreground))' },
-    { id: 2, value: losers, label: 'Loss', color: 'hsl(0, 84%, 60%)' },
+    { id: 2, value: losers, label: 'Loss', color: 'hsl(var(--loss))' },
   ].filter(d => d.value > 0);
 
   if (pieData.length === 0) {

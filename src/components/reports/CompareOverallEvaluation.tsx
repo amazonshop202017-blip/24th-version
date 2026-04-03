@@ -70,18 +70,18 @@ export const CompareOverallEvaluation = ({ groupNumber, stats }: CompareOverallE
         {/* Legend */}
         <div className="space-y-4">
           <div className="flex items-center gap-3">
-            <div className="w-3 h-3 rounded-sm bg-emerald-500" />
+            <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: 'hsl(var(--profit))' }} />
             <div>
               <span className="text-2xl font-bold text-foreground">{stats.winningTradesCount}</span>
-              <p className="text-xs text-emerald-500">winners</p>
+              <p className="text-xs profit-text">winners</p>
             </div>
           </div>
           
           <div className="flex items-center gap-3">
-            <div className="w-3 h-3 rounded-sm bg-red-500" />
+            <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: 'hsl(var(--loss))' }} />
             <div>
               <span className="text-2xl font-bold text-foreground">{stats.losingTradesCount}</span>
-              <p className="text-xs text-red-500">losers</p>
+              <p className="text-xs loss-text">losers</p>
             </div>
           </div>
         </div>

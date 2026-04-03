@@ -374,7 +374,7 @@ const HoldingTime = () => {
             <CardContent className="p-4">
               <p className="text-xs text-muted-foreground mb-1">{metric.label}</p>
               <p className={`text-lg font-semibold ${
-                metric.color === 'green' ? 'text-green-500' : 'text-red-500'
+                metric.color === 'green' ? 'profit-text' : 'loss-text'
               }`}>
                 {metric.value}
               </p>
