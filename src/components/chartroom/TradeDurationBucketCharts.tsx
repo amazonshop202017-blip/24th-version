@@ -15,6 +15,7 @@ import {
   ResponsiveContainer,
   ReferenceLine,
   Cell,
+  Customized,
 } from 'recharts';
 import { ChartGradientDefs, useGradientFill } from '@/components/charts/ChartGradientDefs';
 

@@ -30,6 +30,7 @@ import {
   CartesianGrid,
   Cell,
   Legend,
+  Customized,
 } from 'recharts';
 import { ChartGradientDefs, useGradientFill } from '@/components/charts/ChartGradientDefs';
 import {
