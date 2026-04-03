@@ -136,7 +136,11 @@ export const InstrumentTradeDistribution = () => {
                 <div className="flex-1 h-4 bg-muted/40 rounded overflow-hidden">
                   <motion.div
                     className="h-full rounded"
-                    style={{ backgroundColor: entry.color }}
+                    style={{
+                      ...(isGradient
+                        ? { background: `linear-gradient(to right, ${entry.color}4D, ${entry.color}D9)` }
+                        : { backgroundColor: entry.color }),
+                    }}
                     initial={{ width: 0 }}
                     animate={{ width: `${(entry.count / maxCount) * 100}%` }}
                     transition={{ duration: 0.6, delay: idx * 0.05 }}
