@@ -1012,7 +1012,7 @@ export const TagsCommentsChart = ({
           {groupedData.length > 0 ? (
             <ResponsiveContainer width="100%" height="100%">
               <ComposedChart data={isMultiMetric ? multiMetricChartData : groupedData} margin={{ top: 10, right: isMultiMetric ? (selectedMetrics.length === 3 ? 25 : 20) : -5, left: -10, bottom: isMultiMetric ? 30 : 60 }}>
-                <ChartGradientDefs direction="vertical" idPrefix="tagsComments" />
+                <Customized component={() => <ChartGradientDefs direction="vertical" idPrefix="tagsComments" />} />
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} opacity={0.3} />
                 <XAxis 
                   type="category" 

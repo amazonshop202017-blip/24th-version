@@ -611,7 +611,7 @@ export const InstrumentPerformanceChart = ({
                   data={isMultiMetric ? multiMetricChartData : instrumentData}
                   margin={{ top: 10, right: -5, left: -10, bottom: isMultiMetric ? 30 : 5 }}
                 >
-                  <ChartGradientDefs direction="vertical" idPrefix="instrPerf" />
+                  <Customized component={() => <ChartGradientDefs direction="vertical" idPrefix="instrPerf" />} />
                   <CartesianGrid 
                     strokeDasharray="3 3" 
                     stroke="hsl(var(--border))" 
