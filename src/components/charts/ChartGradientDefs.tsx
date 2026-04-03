@@ -8,9 +8,9 @@ interface ChartGradientDefsProps {
 }
 
 /**
- * SVG gradient definitions for bar charts.
- * Only renders when gradient mode is enabled in Interface Theme.
- * Place inside <BarChart> or <ComposedChart> as a child — it renders <defs>.
+ * SVG gradient definitions for bar charts — rendered via Recharts <customized>.
+ * Place as a direct child of <BarChart>, <ComposedChart>, etc.
+ * Only renders gradient defs when gradient mode is enabled.
  */
 export const ChartGradientDefs = ({ direction = 'vertical', idPrefix = '' }: ChartGradientDefsProps) => {
   const { theme } = useInterfaceTheme();
@@ -20,8 +20,6 @@ export const ChartGradientDefs = ({ direction = 'vertical', idPrefix = '' }: Cha
   const profitId = `${idPrefix}profitGradient`;
   const lossId = `${idPrefix}lossGradient`;
 
-  // Vertical bars: bottom→top for profit, top→bottom for loss
-  // Horizontal bars: left→right for profit, right→left for loss
   const profitCoords = direction === 'horizontal'
     ? { x1: '0', y1: '0', x2: '1', y2: '0' }
     : { x1: '0', y1: '1', x2: '0', y2: '0' };
@@ -30,6 +28,8 @@ export const ChartGradientDefs = ({ direction = 'vertical', idPrefix = '' }: Cha
     ? { x1: '1', y1: '0', x2: '0', y2: '0' }
     : { x1: '0', y1: '0', x2: '0', y2: '1' };
 
+  // Render raw SVG defs — this component must be used inside a Recharts
+  // <Customized> wrapper or placed where raw SVG is accepted.
   return (
     <defs>
       <linearGradient id={profitId} {...profitCoords}>
@@ -43,6 +43,12 @@ export const ChartGradientDefs = ({ direction = 'vertical', idPrefix = '' }: Cha
     </defs>
   );
 };
+
+/**
+ * Wrapper that uses Recharts' Customized component to inject gradient defs into the SVG.
+ * Use this as a direct child of BarChart/ComposedChart.
+ */
+export { ChartGradientDefs as ChartGradientDefsRaw };
 
 /**
  * Hook that returns the correct fill value based on gradient mode.
