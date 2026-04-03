@@ -184,7 +184,7 @@ export const PerformanceByDurationChart = () => {
               />
               <Bar
                 dataKey="totalPnl"
-                fill="hsl(217, 91%, 60%)"
+                fill="hsl(var(--neutral-theme))"
                 radius={[0, 4, 4, 0]}
                 label={{
                   position: 'right',
