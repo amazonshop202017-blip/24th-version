@@ -389,7 +389,7 @@ const RiskDistribution = () => {
                   {(isMobile ? bucketData.filter(b => b.tradeCount > 0) : bucketData).map((entry, index) => (
                     <Cell 
                       key={`cell-${index}`}
-                      fill={entry.isWinningBucket ? 'hsl(var(--profit))' : 'hsl(var(--loss))'}
+                      fill={getFill(entry.isWinningBucket)}
                     />
                   ))}
                 </Bar>
