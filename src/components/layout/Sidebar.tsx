@@ -99,12 +99,13 @@ export const Sidebar = ({ isCollapsed, setIsCollapsed, isMobileOpen = false, onM
   return (
     <aside
       className={cn(
-        "fixed left-0 top-0 h-screen bg-sidebar border-r border-sidebar-border flex flex-col z-40 transition-all duration-300",
+        "fixed left-0 top-0 bg-sidebar border-r border-sidebar-border flex flex-col z-40 transition-all duration-300",
         isCollapsed ? "w-16" : "w-52",
         // Mobile: hidden by default, shown when isMobileOpen
         "max-md:-translate-x-full max-md:w-52",
         isMobileOpen && "max-md:translate-x-0"
       )}
+      style={{ height: '100dvh', paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
     >
       {/* Collapse/Expand toggle - hidden on mobile */}
       <motion.button
