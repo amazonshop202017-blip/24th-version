@@ -314,7 +314,16 @@ export const MonthlyPerformanceCalendar = () => {
 
         <div className="flex items-center gap-2 md:gap-4 w-full sm:w-auto">
           <div className="flex items-center gap-2 md:gap-3 text-xs md:text-sm flex-wrap">
-            <span className={`font-mono font-semibold ${isPrivacyMode ? 'text-foreground' : monthlyStats.pnl >= 0 ? 'profit-text' : 'loss-text'}`}>
+             <span className="font-semibold text-foreground">Monthly Stats:</span>
+            <span
+              className={cn(
+                'font-mono font-semibold px-2 md:px-2.5 py-0.5 rounded-full',
+                isPrivacyMode
+                  ? 'text-foreground bg-muted/50'
+                  : monthlyStats.pnl >= 0
+                    ? 'profit-text bg-profit/15'
+                    : 'loss-text bg-loss/15'
+              )}
               {formatCurrencyDecimal(monthlyStats.pnl)}
             </span>
             <span className="bg-secondary px-1.5 md:px-2 py-0.5 rounded text-[10px] md:text-xs flex items-center gap-1 md:gap-1.5">
