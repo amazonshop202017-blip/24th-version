@@ -24,18 +24,19 @@ const ColorRow = ({
         <span className="text-sm font-medium text-foreground">{label}</span>
         <span className="text-xs font-mono text-muted-foreground uppercase">{color}</span>
       </div>
-      <button
-        onClick={() => inputRef.current?.click()}
-        className="w-full h-8 rounded-md cursor-pointer transition-all hover:opacity-90 hover:shadow-md border border-border/30"
-        style={{ backgroundColor: color }}
-      />
-      <input
-        ref={inputRef}
-        type="color"
-        value={color}
-        onChange={(e) => onChange(e.target.value)}
-        className="sr-only"
-      />
+      <div className="relative w-full h-8">
+        <div
+          className="w-full h-full rounded-md border border-border/30"
+          style={{ backgroundColor: color }}
+        />
+        <input
+          ref={inputRef}
+          type="color"
+          value={color}
+          onChange={(e) => onChange(e.target.value)}
+          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+        />
+      </div>
     </div>
   );
 };
