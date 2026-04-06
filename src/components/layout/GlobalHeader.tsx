@@ -550,10 +550,12 @@ export const GlobalHeader = () => {
         <DisplayModeSelector />
       </div>
 
-      {/* Basic Filters Dropdown */}
-      <DropdownMenu open={basicFiltersOpen} onOpenChange={setBasicFiltersOpen}>
-        <DropdownMenuTrigger asChild>
-          <Button variant="outline" size="sm" className="gap-1.5 bg-background border-border hidden lg:flex h-9 px-3 text-sm">
+      {/* Grouped filter bar with shared border and vertical dividers */}
+      <div className="hidden lg:flex items-center border border-border rounded-md bg-background h-9 overflow-hidden">
+        {/* Basic Filters Dropdown */}
+        <DropdownMenu open={basicFiltersOpen} onOpenChange={setBasicFiltersOpen}>
+          <DropdownMenuTrigger asChild>
+            <button className="gap-1.5 flex items-center h-full px-3 text-sm text-foreground hover:bg-accent transition-colors">
             <Filter className="w-4 h-4 text-muted-foreground" />
             <span>Filters</span>
             {activeBasicFiltersCount > 0 && (
