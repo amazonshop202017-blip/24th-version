@@ -550,20 +550,22 @@ export const GlobalHeader = () => {
         <DisplayModeSelector />
       </div>
 
-      {/* Basic Filters Dropdown */}
-      <DropdownMenu open={basicFiltersOpen} onOpenChange={setBasicFiltersOpen}>
-        <DropdownMenuTrigger asChild>
-          <Button variant="outline" size="sm" className="gap-1.5 bg-background border-border hidden lg:flex h-9 px-3 text-sm">
-            <Filter className="w-4 h-4 text-muted-foreground" />
-            <span>Filters</span>
-            {activeBasicFiltersCount > 0 && (
-              <span className="ml-1 px-1.5 py-0.5 text-xs rounded-full bg-primary text-primary-foreground">
-                {activeBasicFiltersCount}
-              </span>
-            )}
-            <ChevronDown className="w-4 h-4 text-muted-foreground" />
-          </Button>
-        </DropdownMenuTrigger>
+      {/* Grouped filter bar with shared border and vertical dividers */}
+      <div className="hidden lg:flex items-center border border-border rounded-md bg-background h-9 overflow-visible">
+        {/* Basic Filters Dropdown */}
+        <DropdownMenu open={basicFiltersOpen} onOpenChange={setBasicFiltersOpen}>
+          <DropdownMenuTrigger asChild>
+            <button className="flex items-center gap-1.5 h-9 px-3 text-sm text-foreground hover:bg-accent transition-colors">
+              <Filter className="w-4 h-4 text-muted-foreground" />
+              <span>Filters</span>
+              {activeBasicFiltersCount > 0 && (
+                <span className="ml-0.5 px-1.5 py-0.5 text-xs rounded-full bg-primary text-primary-foreground">
+                  {activeBasicFiltersCount}
+                </span>
+              )}
+              <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />
+            </button>
+          </DropdownMenuTrigger>
         <DropdownMenuContent align="start" className="w-[calc(100vw-2rem)] lg:w-[900px] p-4 bg-popover border-border z-50 max-h-[80vh] overflow-auto">
           <div className="space-y-4">
             {/* Row 1: Core Trade Context - Symbol, Setup, Checklist of Setup, Outcome, Direction, Starred */}
@@ -1164,161 +1166,145 @@ export const GlobalHeader = () => {
             </div>
           </div>
         </DropdownMenuContent>
-      </DropdownMenu>
+        </DropdownMenu>
 
-      {/* Advanced Filters Dropdown */}
-      <Popover open={advancedFiltersOpen} onOpenChange={setAdvancedFiltersOpen}>
-        <PopoverTrigger asChild>
-          <Button variant="outline" size="sm" className="gap-1.5 bg-background border-border hidden lg:flex h-9 px-3 text-sm">
-            <SlidersHorizontal className="w-4 h-4 text-muted-foreground" />
-            <span>Advanced Filters</span>
-            {hasActiveTagFilters && (
-              <span className="ml-1 px-1.5 py-0.5 text-xs rounded-full bg-primary text-primary-foreground">
-                Tags
-              </span>
-            )}
-            <ChevronDown className="w-4 h-4 text-muted-foreground" />
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent align="start" className="w-auto p-0 bg-popover border-border z-50">
-          <AdvancedFiltersPanel />
-        </PopoverContent>
-      </Popover>
+        {/* Divider */}
+        <div className="w-px h-5 bg-border" />
 
-      {/* Spacer removed - filters are right-aligned via earlier flex-1 */}
+        {/* Advanced Filters Dropdown */}
+        <Popover open={advancedFiltersOpen} onOpenChange={setAdvancedFiltersOpen}>
+          <PopoverTrigger asChild>
+            <button className="flex items-center gap-1.5 h-9 px-3 text-sm text-foreground hover:bg-accent transition-colors">
+              <SlidersHorizontal className="w-4 h-4 text-muted-foreground" />
+              <span>Advanced Filters</span>
+              {hasActiveTagFilters && (
+                <span className="ml-0.5 px-1.5 py-0.5 text-xs rounded-full bg-primary text-primary-foreground">
+                  Tags
+                </span>
+              )}
+              <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />
+            </button>
+          </PopoverTrigger>
+          <PopoverContent align="start" className="w-auto p-0 bg-popover border-border z-50">
+            <AdvancedFiltersPanel />
+          </PopoverContent>
+        </Popover>
 
-      {/* Date Range Selector - hidden on mobile */}
-      <div className="hidden lg:flex items-center">
+        {/* Divider */}
+        <div className="w-px h-5 bg-border" />
+
+        {/* Date Range Selector */}
         <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
           <PopoverTrigger asChild>
-            <Button variant="outline" size="sm" className={`gap-1.5 bg-background border-border h-9 px-3 text-sm min-w-[120px] justify-start ${datePreset !== 'all' ? 'rounded-r-none border-r-0' : ''}`}>
+            <button className="flex items-center gap-1.5 h-9 px-3 text-sm text-foreground hover:bg-accent transition-colors">
               <CalendarIcon className="w-4 h-4 text-muted-foreground" />
               <span className="truncate">{getDateRangeLabel()}</span>
-              <ChevronDown className="w-4 h-4 text-muted-foreground ml-auto" />
-            </Button>
+              <ChevronDown className="w-3.5 h-3.5 text-muted-foreground ml-1" />
+            </button>
           </PopoverTrigger>
-        <PopoverContent className="w-[800px] p-0 bg-popover border-border z-50" align="start">
-          <div className="flex">
-            {/* Calendar */}
-            <div className="p-3 border-r border-border">
-              {/* Selected range display - inline above calendars */}
-              <div className="flex items-center justify-center gap-3 text-sm pb-2">
-                <span className="text-foreground font-medium">
-                  {dateRange.from ? format(dateRange.from, 'MMMM dd, yyyy') : '—'}
-                </span>
-                <span className="text-muted-foreground">→</span>
-                <span className="text-foreground font-medium px-2 py-0.5 border border-primary rounded">
-                  {dateRange.to ? format(dateRange.to, 'MMMM dd, yyyy') : '—'}
-                </span>
+          <PopoverContent className="w-[800px] p-0 bg-popover border-border z-50" align="end">
+            <div className="flex">
+              {/* Calendar */}
+              <div className="p-3 border-r border-border">
+                {/* Selected range display - inline above calendars */}
+                <div className="flex items-center justify-center gap-3 text-sm pb-2">
+                  <span className="text-foreground font-medium">
+                    {dateRange.from ? format(dateRange.from, 'MMMM dd, yyyy') : '—'}
+                  </span>
+                  <span className="text-muted-foreground">→</span>
+                  <span className="text-foreground font-medium px-2 py-0.5 border border-primary rounded">
+                    {dateRange.to ? format(dateRange.to, 'MMMM dd, yyyy') : '—'}
+                  </span>
+                </div>
+                <DateRangeCalendar
+                  selected={{ from: dateRange.from, to: dateRange.to }}
+                  onSelect={handleCustomDateChange}
+                />
               </div>
-              <DateRangeCalendar
-                selected={{ from: dateRange.from, to: dateRange.to }}
-                onSelect={handleCustomDateChange}
-              />
-            </div>
-            {/* Presets */}
-            <div className="p-2 min-w-[150px]">
-              <button
-                onClick={() => {
-                  applyDatePreset('all');
-                  setDatePickerOpen(false);
-                }}
-                className={cn(
-                  "w-full text-left px-3 py-2 text-sm rounded-md hover:bg-accent transition-colors",
-                  datePreset === 'all' && "bg-accent font-medium"
-                )}
-              >
-                All time
-              </button>
-              {DATE_PRESETS.map((preset) => (
+              {/* Presets */}
+              <div className="p-2 min-w-[150px]">
                 <button
-                  key={preset.value}
                   onClick={() => {
-                    handlePresetClick(preset.value);
+                    applyDatePreset('all');
                     setDatePickerOpen(false);
                   }}
                   className={cn(
                     "w-full text-left px-3 py-2 text-sm rounded-md hover:bg-accent transition-colors",
-                    datePreset === preset.value && "bg-accent font-medium"
+                    datePreset === 'all' && "bg-accent font-medium"
                   )}
                 >
-                  {preset.label}
+                  All time
                 </button>
-              ))}
+                {DATE_PRESETS.map((preset) => (
+                  <button
+                    key={preset.value}
+                    onClick={() => {
+                      handlePresetClick(preset.value);
+                      setDatePickerOpen(false);
+                    }}
+                    className={cn(
+                      "w-full text-left px-3 py-2 text-sm rounded-md hover:bg-accent transition-colors",
+                      datePreset === preset.value && "bg-accent font-medium"
+                    )}
+                  >
+                    {preset.label}
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
-        </PopoverContent>
-      </Popover>
-        {datePreset !== 'all' && (
-          <Button
-            variant="outline"
-            size="icon"
-            className="rounded-l-none border-l-0 bg-background border-border h-10 w-8"
-            onClick={() => applyDatePreset('all')}
-          >
-            <X className="w-4 h-4 text-muted-foreground hover:text-foreground" />
-          </Button>
-        )}
-      </div>
+          </PopoverContent>
+        </Popover>
 
-      {/* Account Filter - hidden on mobile */}
-      <div className="hidden lg:flex items-center">
+        {/* Divider */}
+        <div className="w-px h-5 bg-border" />
+
+        {/* Account Filter */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm" className={`gap-1.5 bg-background border-border h-9 px-3 text-sm min-w-[130px] justify-start ${!isAllAccountsSelected ? 'rounded-r-none border-r-0' : ''}`}>
+            <button className="flex items-center gap-1.5 h-9 px-3 text-sm text-foreground hover:bg-accent transition-colors rounded-r-[calc(0.375rem-1px)]">
               <Wallet className="w-4 h-4 text-muted-foreground" />
               <span className="truncate">{getAccountsLabel()}</span>
-              <ChevronDown className="w-4 h-4 text-muted-foreground ml-auto" />
-            </Button>
+              <ChevronDown className="w-3.5 h-3.5 text-muted-foreground ml-1" />
+            </button>
           </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" className="bg-popover border-border z-50 min-w-[200px]">
-          <DropdownMenuCheckboxItem
-            checked={isAllAccountsSelected}
-            onCheckedChange={handleAllAccountsToggle}
-            className="cursor-pointer"
-          >
-            All accounts
-          </DropdownMenuCheckboxItem>
-          
-          {activeAccounts.length > 0 && (
-            <>
-              <DropdownMenuSeparator />
-              <DropdownMenuLabel className="text-xs text-muted-foreground font-normal">
-                My accounts
-              </DropdownMenuLabel>
-              {activeAccounts.map((account) => (
-                <DropdownMenuCheckboxItem
-                  key={account.id}
-                  checked={selectedAccounts.includes(account.name)}
-                  onCheckedChange={() => handleAccountToggle(account.name)}
-                  className="cursor-pointer"
-                >
-                  {account.name}
-                </DropdownMenuCheckboxItem>
-              ))}
-            </>
-          )}
-          
-          <DropdownMenuSeparator />
-          <DropdownMenuItem 
-            onClick={() => navigate('/settings?tab=accounts')}
-            className="cursor-pointer"
-          >
-            <Settings className="w-4 h-4 mr-2" />
-            Manage accounts
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-        {!isAllAccountsSelected && (
-          <Button
-            variant="outline"
-            size="icon"
-            className="rounded-l-none border-l-0 bg-background border-border h-10 w-8"
-            onClick={() => setSelectedAccounts([])}
-          >
-            <X className="w-4 h-4 text-muted-foreground hover:text-foreground" />
-          </Button>
-        )}
+          <DropdownMenuContent align="end" className="bg-popover border-border z-50 min-w-[200px]">
+            <DropdownMenuCheckboxItem
+              checked={isAllAccountsSelected}
+              onCheckedChange={handleAllAccountsToggle}
+              className="cursor-pointer"
+            >
+              All accounts
+            </DropdownMenuCheckboxItem>
+            
+            {activeAccounts.length > 0 && (
+              <>
+                <DropdownMenuSeparator />
+                <DropdownMenuLabel className="text-xs text-muted-foreground font-normal">
+                  My accounts
+                </DropdownMenuLabel>
+                {activeAccounts.map((account) => (
+                  <DropdownMenuCheckboxItem
+                    key={account.id}
+                    checked={selectedAccounts.includes(account.name)}
+                    onCheckedChange={() => handleAccountToggle(account.name)}
+                    className="cursor-pointer"
+                  >
+                    {account.name}
+                  </DropdownMenuCheckboxItem>
+                ))}
+              </>
+            )}
+            
+            <DropdownMenuSeparator />
+            <DropdownMenuItem 
+              onClick={() => navigate('/settings?tab=accounts')}
+              className="cursor-pointer"
+            >
+              <Settings className="w-4 h-4 mr-2" />
+              Manage accounts
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </div>
   );
