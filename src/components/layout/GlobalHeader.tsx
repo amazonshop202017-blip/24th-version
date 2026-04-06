@@ -1191,7 +1191,7 @@ export const GlobalHeader = () => {
       <div className="hidden lg:flex items-center">
         <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
           <PopoverTrigger asChild>
-            <Button variant="outline" className={`gap-2 bg-background border-border min-w-[200px] justify-start ${datePreset !== 'all' ? 'rounded-r-none border-r-0' : ''}`}>
+            <Button variant="outline" size="sm" className={`gap-1.5 bg-background border-border h-9 px-3 text-sm min-w-[120px] justify-start ${datePreset !== 'all' ? 'rounded-r-none border-r-0' : ''}`}>
               <CalendarIcon className="w-4 h-4 text-muted-foreground" />
               <span className="truncate">{getDateRangeLabel()}</span>
               <ChevronDown className="w-4 h-4 text-muted-foreground ml-auto" />
