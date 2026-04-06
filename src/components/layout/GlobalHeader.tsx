@@ -1185,12 +1185,7 @@ export const GlobalHeader = () => {
         </PopoverContent>
       </Popover>
 
-      {/* Display Mode Selector */}
-      <div className="hidden lg:block">
-        <DisplayModeSelector />
-      </div>
-
-      <div className="flex-1" />
+      {/* Spacer removed - filters are right-aligned via earlier flex-1 */}
 
       {/* Date Range Selector - hidden on mobile */}
       <div className="hidden lg:flex items-center">
