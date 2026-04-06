@@ -383,7 +383,7 @@ export const GlobalHeader = () => {
   const totalActiveFilters = activeBasicFiltersCount + (hasActiveTagFilters ? 1 : 0) + (datePreset !== 'all' ? 1 : 0) + (!isAllAccountsSelected ? 1 : 0);
 
   return (
-    <div className="flex items-center gap-2 lg:gap-3 px-4 lg:px-6 py-3 lg:py-4 border-b border-border bg-card/50 backdrop-blur-sm pl-14 lg:pl-6 overflow-hidden">
+    <div className="flex items-center gap-2 px-4 lg:px-6 py-2.5 lg:py-3 border-b border-border bg-card/50 backdrop-blur-sm pl-14 lg:pl-6 overflow-hidden">
       {/* Page Title */}
       {pageTitle && (
         <h1 className="text-base md:text-lg lg:text-xl font-semibold text-foreground whitespace-nowrap mr-1 lg:mr-3">
@@ -553,7 +553,7 @@ export const GlobalHeader = () => {
       {/* Basic Filters Dropdown */}
       <DropdownMenu open={basicFiltersOpen} onOpenChange={setBasicFiltersOpen}>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" className="gap-2 bg-background border-border hidden lg:flex">
+          <Button variant="outline" size="sm" className="gap-1.5 bg-background border-border hidden lg:flex h-9 px-3 text-sm">
             <Filter className="w-4 h-4 text-muted-foreground" />
             <span>Filters</span>
             {activeBasicFiltersCount > 0 && (
@@ -1169,7 +1169,7 @@ export const GlobalHeader = () => {
       {/* Advanced Filters Dropdown */}
       <Popover open={advancedFiltersOpen} onOpenChange={setAdvancedFiltersOpen}>
         <PopoverTrigger asChild>
-          <Button variant="outline" className="gap-2 bg-background border-border hidden lg:flex">
+          <Button variant="outline" size="sm" className="gap-1.5 bg-background border-border hidden lg:flex h-9 px-3 text-sm">
             <SlidersHorizontal className="w-4 h-4 text-muted-foreground" />
             <span>Advanced Filters</span>
             {hasActiveTagFilters && (
@@ -1191,7 +1191,7 @@ export const GlobalHeader = () => {
       <div className="hidden lg:flex items-center">
         <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
           <PopoverTrigger asChild>
-            <Button variant="outline" className={`gap-2 bg-background border-border min-w-[200px] justify-start ${datePreset !== 'all' ? 'rounded-r-none border-r-0' : ''}`}>
+            <Button variant="outline" size="sm" className={`gap-1.5 bg-background border-border h-9 px-3 text-sm min-w-[120px] justify-start ${datePreset !== 'all' ? 'rounded-r-none border-r-0' : ''}`}>
               <CalendarIcon className="w-4 h-4 text-muted-foreground" />
               <span className="truncate">{getDateRangeLabel()}</span>
               <ChevronDown className="w-4 h-4 text-muted-foreground ml-auto" />
@@ -1265,7 +1265,7 @@ export const GlobalHeader = () => {
       <div className="hidden lg:flex items-center">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" className={`gap-2 bg-background border-border min-w-[150px] justify-start ${!isAllAccountsSelected ? 'rounded-r-none border-r-0' : ''}`}>
+            <Button variant="outline" size="sm" className={`gap-1.5 bg-background border-border h-9 px-3 text-sm min-w-[130px] justify-start ${!isAllAccountsSelected ? 'rounded-r-none border-r-0' : ''}`}>
               <Wallet className="w-4 h-4 text-muted-foreground" />
               <span className="truncate">{getAccountsLabel()}</span>
               <ChevronDown className="w-4 h-4 text-muted-foreground ml-auto" />
