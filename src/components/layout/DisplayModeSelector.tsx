@@ -64,12 +64,13 @@ export const DisplayModeSelector = () => {
       <PopoverTrigger asChild>
         <button
           className={cn(
-            "w-9 h-9 rounded-full flex items-center justify-center",
+            "h-9 px-3 rounded-md flex items-center gap-1.5",
             "border border-border bg-background hover:bg-accent transition-colors",
-            "text-muted-foreground hover:text-foreground"
+            "text-sm text-muted-foreground hover:text-foreground"
           )}
         >
           {selectedOption.icon}
+          <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />
         </button>
       </PopoverTrigger>
       <PopoverContent 
