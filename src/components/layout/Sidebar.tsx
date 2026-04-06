@@ -295,6 +295,20 @@ export const Sidebar = ({ isCollapsed, setIsCollapsed, isMobileOpen = false, onM
             </CollapsibleContent>
           </Collapsible>
         )}
+
+        {/* Separator before Prop Firm */}
+        <div className="py-2">
+          <Separator className="bg-sidebar-border/50" />
+        </div>
+
+        {/* Prop Firm */}
+        <NavItem
+          icon={Building2}
+          label="Prop Firm"
+          path="/prop-firm"
+          isCollapsed={isCollapsed}
+          isActive={location.pathname === '/prop-firm'}
+        />
       </nav>
 
       {/* Bottom Account */}
