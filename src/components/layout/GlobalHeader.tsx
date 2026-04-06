@@ -551,21 +551,21 @@ export const GlobalHeader = () => {
       </div>
 
       {/* Grouped filter bar with shared border and vertical dividers */}
-      <div className="hidden lg:flex items-center border border-border rounded-md bg-background h-9 overflow-hidden">
+      <div className="hidden lg:flex items-center border border-border rounded-md bg-background h-9 overflow-visible">
         {/* Basic Filters Dropdown */}
         <DropdownMenu open={basicFiltersOpen} onOpenChange={setBasicFiltersOpen}>
           <DropdownMenuTrigger asChild>
-            <button className="gap-1.5 flex items-center h-full px-3 text-sm text-foreground hover:bg-accent transition-colors">
-            <Filter className="w-4 h-4 text-muted-foreground" />
-            <span>Filters</span>
-            {activeBasicFiltersCount > 0 && (
-              <span className="ml-1 px-1.5 py-0.5 text-xs rounded-full bg-primary text-primary-foreground">
-                {activeBasicFiltersCount}
-              </span>
-            )}
-            <ChevronDown className="w-4 h-4 text-muted-foreground" />
-          </Button>
-        </DropdownMenuTrigger>
+            <button className="flex items-center gap-1.5 h-9 px-3 text-sm text-foreground hover:bg-accent transition-colors">
+              <Filter className="w-4 h-4 text-muted-foreground" />
+              <span>Filters</span>
+              {activeBasicFiltersCount > 0 && (
+                <span className="ml-0.5 px-1.5 py-0.5 text-xs rounded-full bg-primary text-primary-foreground">
+                  {activeBasicFiltersCount}
+                </span>
+              )}
+              <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />
+            </button>
+          </DropdownMenuTrigger>
         <DropdownMenuContent align="start" className="w-[calc(100vw-2rem)] lg:w-[900px] p-4 bg-popover border-border z-50 max-h-[80vh] overflow-auto">
           <div className="space-y-4">
             {/* Row 1: Core Trade Context - Symbol, Setup, Checklist of Setup, Outcome, Direction, Starred */}
