@@ -1,4 +1,4 @@
-import { DollarSign, Percent, Eye, Settings } from 'lucide-react';
+import { DollarSign, Percent, Eye, Settings, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useGlobalFilters, DisplayMode } from '@/contexts/GlobalFiltersContext';
 import {
