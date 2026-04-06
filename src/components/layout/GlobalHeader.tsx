@@ -1169,7 +1169,7 @@ export const GlobalHeader = () => {
       {/* Advanced Filters Dropdown */}
       <Popover open={advancedFiltersOpen} onOpenChange={setAdvancedFiltersOpen}>
         <PopoverTrigger asChild>
-          <Button variant="outline" className="gap-2 bg-background border-border hidden lg:flex">
+          <Button variant="outline" size="sm" className="gap-1.5 bg-background border-border hidden lg:flex h-9 px-3 text-sm">
             <SlidersHorizontal className="w-4 h-4 text-muted-foreground" />
             <span>Advanced Filters</span>
             {hasActiveTagFilters && (
