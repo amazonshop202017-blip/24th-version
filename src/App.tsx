@@ -48,6 +48,7 @@ import TagsAnalytics from "./pages/chartroom/TagsAnalytics";
 import RiskDistribution from "./pages/chartroom/RiskDistribution";
 import TradeManagement from "./pages/chartroom/TradeManagement";
 import ExitAnalyzer from "./pages/chartroom/ExitAnalyzer";
+import PropFirm from "./pages/PropFirm";
 
 const queryClient = new QueryClient();
 
