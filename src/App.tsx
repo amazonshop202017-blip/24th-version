@@ -48,6 +48,7 @@ import TagsAnalytics from "./pages/chartroom/TagsAnalytics";
 import RiskDistribution from "./pages/chartroom/RiskDistribution";
 import TradeManagement from "./pages/chartroom/TradeManagement";
 import ExitAnalyzer from "./pages/chartroom/ExitAnalyzer";
+import PropFirm from "./pages/PropFirm";
 
 const queryClient = new QueryClient();
 
@@ -107,6 +108,7 @@ const AuthenticatedApp = () => {
                                   <Route path="/chart-room/risk-distribution" element={<RiskDistribution />} />
                                   <Route path="/chart-room/trade-management" element={<TradeManagement />} />
                                   <Route path="/exit-analyzer" element={<ExitAnalyzer />} />
+                                  <Route path="/prop-firm" element={<PropFirm />} />
                                   <Route path="/entering" element={<Navigate to="/" replace />} />
                                   <Route path="*" element={<NotFound />} />
                                 </Routes>

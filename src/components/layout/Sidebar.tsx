@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { LayoutDashboard, ListOrdered, FileText, Target, Plus, ChevronLeft, ChevronRight, BarChart3, ChevronDown, Crosshair } from 'lucide-react';
+import { LayoutDashboard, ListOrdered, FileText, Target, Plus, ChevronLeft, ChevronRight, BarChart3, ChevronDown, Crosshair, Building2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTradeModal } from '@/contexts/TradeModalContext';
@@ -295,6 +295,20 @@ export const Sidebar = ({ isCollapsed, setIsCollapsed, isMobileOpen = false, onM
             </CollapsibleContent>
           </Collapsible>
         )}
+
+        {/* Separator before Prop Firm */}
+        <div className="py-2">
+          <Separator className="bg-sidebar-border/50" />
+        </div>
+
+        {/* Prop Firm */}
+        <NavItem
+          icon={Building2}
+          label="Prop Firm"
+          path="/prop-firm"
+          isCollapsed={isCollapsed}
+          isActive={location.pathname === '/prop-firm'}
+        />
       </nav>
 
       {/* Bottom Account */}

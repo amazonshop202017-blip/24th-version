@@ -59,6 +59,7 @@ const PAGE_TITLES: Record<string, string> = {
   '/chart-room/tags-analytics': 'Tags Analytics',
   '/chart-room/risk-distribution': 'Risk Distribution',
   '/chart-room/trade-management': 'Trade Management',
+  '/prop-firm': 'Prop Firm',
   '/exit-analyzer': 'Exit Analyzer',
 };
 
