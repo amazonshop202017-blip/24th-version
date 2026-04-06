@@ -541,13 +541,21 @@ export const GlobalHeader = () => {
         </SheetContent>
       </Sheet>
 
+      {/* Spacer to push all desktop filters to the right */}
+      <div className="flex-1 hidden lg:block" />
+
       {/* Desktop: All filter buttons inline */}
+      {/* Display Mode Selector */}
+      <div className="hidden lg:block">
+        <DisplayModeSelector />
+      </div>
+
       {/* Basic Filters Dropdown */}
       <DropdownMenu open={basicFiltersOpen} onOpenChange={setBasicFiltersOpen}>
         <DropdownMenuTrigger asChild>
           <Button variant="outline" className="gap-2 bg-background border-border hidden lg:flex">
             <Filter className="w-4 h-4 text-muted-foreground" />
-            <span>Basic Filters</span>
+            <span>Filters</span>
             {activeBasicFiltersCount > 0 && (
               <span className="ml-1 px-1.5 py-0.5 text-xs rounded-full bg-primary text-primary-foreground">
                 {activeBasicFiltersCount}
