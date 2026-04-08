@@ -199,43 +199,43 @@ export const DashboardMetrics = ({ isEditMode }: DashboardMetricsProps) => {
         );
       case 'tradeWinRate':
         return (
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay }} className="glass-card rounded-xl px-4 py-3 h-full">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay }} className="glass-card rounded-xl px-3 py-2.5 h-full">
             <WinRateGauge value={stats.tradeWinRate} label="Trade Win %" winners={stats.winningTrades} losers={stats.losingTrades} breakeven={stats.breakevenTrades} />
           </motion.div>
         );
       case 'profitFactor':
         return (
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay }} className="glass-card rounded-xl px-4 py-3 h-full">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay }} className="glass-card rounded-xl px-3 py-2.5 h-full">
             <ProfitFactorRing profitFactor={stats.profitFactor} totalProfits={stats.totalProfits} totalLosses={stats.totalLosses} />
           </motion.div>
         );
       case 'dayWinRate':
         return (
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay }} className="glass-card rounded-xl px-4 py-3 h-full">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay }} className="glass-card rounded-xl px-3 py-2.5 h-full">
             <WinRateGauge value={stats.dayWinRate} label="Day Win %" winners={stats.winningDays} losers={stats.losingDays} breakeven={stats.breakevenDays} />
           </motion.div>
         );
       case 'avgWinLoss':
         return (
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay }} className="glass-card rounded-xl px-4 py-3 h-full">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay }} className="glass-card rounded-xl px-3 py-2.5 h-full">
             <AvgWinLossRatio avgWin={stats.avgWin} avgLoss={stats.avgLoss} />
           </motion.div>
         );
       case 'currentStreak':
         return (
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay }} className="glass-card rounded-xl px-4 py-3 h-full">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay }} className="glass-card rounded-xl px-3 py-2.5 h-full">
             <CurrentStreakMetric />
           </motion.div>
         );
       case 'tradeExpectancy':
         return (
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay }} className="glass-card rounded-xl px-4 py-3 h-full">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay }} className="glass-card rounded-xl px-3 py-2.5 h-full">
             <TradeExpectancyMetric />
           </motion.div>
         );
       case 'accountBalancePnl':
         return (
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay }} className="glass-card rounded-xl px-4 py-3 h-full">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay }} className="glass-card rounded-xl px-3 py-2.5 h-full">
             <AccountBalancePnLMetric />
           </motion.div>
         );
