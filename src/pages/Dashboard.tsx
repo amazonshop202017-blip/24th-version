@@ -173,7 +173,7 @@ const Dashboard = () => {
         onDragEnd={handleDragEnd}
       >
         <SortableContext items={chartOrder} strategy={rectSortingStrategy}>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-2">
             {chartOrder.map((chartId) => {
               const config = CHART_CONFIGS[chartId];
               if (!config) return null;
