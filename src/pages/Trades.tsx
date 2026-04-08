@@ -156,7 +156,7 @@ const TableWithStickyHorizontalScroll = ({
                         ? "bg-profit/[0.07] hover:bg-profit/[0.12]"
                         : isLoss
                           ? "bg-loss/[0.07] hover:bg-loss/[0.12]"
-                          : "bg-[hsl(270_50%_98%)]/100 dark:bg-muted/30 hover:bg-secondary/30"
+                          : "bg-muted/20 hover:bg-secondary/30"
                   )}
                 >
                   <TableCell className="w-8 px-2 py-1" onClick={(e) => e.stopPropagation()}>
