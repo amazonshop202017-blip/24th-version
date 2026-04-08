@@ -165,8 +165,8 @@ export const DashboardMetrics = ({ isEditMode }: DashboardMetricsProps) => {
     switch (metricId) {
       case 'netPnl':
         return (
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay }} className="glass-card rounded-xl px-4 py-3 h-full">
-            <div className="flex items-center gap-1.5 mb-1">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay }} className="glass-card rounded-xl px-3 py-2.5 h-full">
+            <div className="flex items-center gap-1.5 mb-0.5">
               <span className="text-xs text-muted-foreground">Net P&L</span>
               <span className="text-[10px] text-muted-foreground bg-secondary px-1.5 py-0.5 rounded">{stats.totalTrades}</span>
             </div>
