@@ -12,7 +12,10 @@ import {
   Square,
   ChevronLeft,
   ChevronRight,
-  Menu
+  Menu,
+  Star,
+  Eye,
+  Image
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
@@ -113,6 +116,7 @@ const TableWithStickyHorizontalScroll = ({
                   aria-label="Select all trades on this page"
                 />
               </TableHead>
+              <TableHead className="w-[90px] px-1"></TableHead>
               {isColumnVisible('symbol') && <TableHead className="px-2">Symbol</TableHead>}
               {isColumnVisible('side') && <TableHead className="px-2">Side</TableHead>}
               {isColumnVisible('volume') && <TableHead className="px-2">Volume</TableHead>}
@@ -137,14 +141,22 @@ const TableWithStickyHorizontalScroll = ({
             {paginatedTrades.map((trade) => {
               const metrics = calculateTradeMetrics(trade);
               const isSelected = selectedTrades.has(trade.id);
+              const isProfit = metrics.netPnl > 0;
+              const isLoss = metrics.netPnl < 0;
 
               return (
                 <TableRow
                   key={trade.id}
                   onClick={() => handleRowClick(trade.id)}
                   className={cn(
-                    "border-border hover:bg-secondary/30 cursor-pointer h-10",
-                    isSelected && "bg-secondary/50"
+                    "border-border cursor-pointer h-10",
+                    isSelected
+                      ? "bg-secondary/50"
+                      : isProfit
+                        ? "bg-profit/[0.07] hover:bg-profit/[0.12]"
+                        : isLoss
+                          ? "bg-loss/[0.07] hover:bg-loss/[0.12]"
+                          : "bg-[hsl(270_50%_98%)]/100 dark:bg-muted/30 hover:bg-secondary/30"
                   )}
                 >
                   <TableCell className="w-8 px-2 py-1" onClick={(e) => e.stopPropagation()}>
@@ -163,6 +175,20 @@ const TableWithStickyHorizontalScroll = ({
                       }}
                       aria-label={`Select trade ${trade.symbol}`}
                     />
+                  </TableCell>
+
+                  <TableCell className="w-[90px] px-1 py-1" onClick={(e) => e.stopPropagation()}>
+                    <div className="flex items-center gap-1">
+                      <button className="p-1 rounded hover:bg-muted/50 transition-colors text-muted-foreground hover:text-yellow-500">
+                        <Star className="w-3.5 h-3.5" />
+                      </button>
+                      <button className="p-1 rounded hover:bg-muted/50 transition-colors text-muted-foreground hover:text-foreground">
+                        <Eye className="w-3.5 h-3.5" />
+                      </button>
+                      <button className="p-1 rounded hover:bg-muted/50 transition-colors text-muted-foreground hover:text-foreground">
+                        <Image className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
                   </TableCell>
 
                   {isColumnVisible('symbol') && (
