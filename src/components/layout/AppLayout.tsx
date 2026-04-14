@@ -42,15 +42,17 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
         onMobileClose={() => setIsMobileMenuOpen(false)}
       />
       <main className={cn(
-        "min-h-screen flex flex-col transition-all duration-300",
+        "min-h-screen flex flex-col transition-all duration-300 p-2 md:p-3 lg:p-4",
         "ml-0 md:ml-16 lg:ml-52",
         !isCollapsed ? "lg:ml-52" : "lg:ml-16",
         isCollapsed ? "md:ml-16" : "md:ml-52"
       )}>
-        <GlobalHeader />
-        <SelectedFiltersBar />
-        <div className="p-4 md:p-6 lg:p-8 flex-1">
-          {children}
+        <div className="flex-1 bg-card rounded-2xl shadow-[0_1px_3px_0_hsl(0_0%_0%/0.06)] border border-border/50 flex flex-col overflow-hidden">
+          <GlobalHeader />
+          <SelectedFiltersBar />
+          <div className="p-4 md:p-6 lg:p-8 flex-1">
+            {children}
+          </div>
         </div>
       </main>
     </div>
