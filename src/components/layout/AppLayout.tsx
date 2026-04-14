@@ -41,20 +41,20 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
         isMobileOpen={isMobileMenuOpen}
         onMobileClose={() => setIsMobileMenuOpen(false)}
       />
-      <main className={cn(
-        "min-h-screen flex flex-col transition-all duration-300 p-2 md:p-3 lg:p-4",
+      <div className={cn(
+        "min-h-screen transition-all duration-300 p-3 md:p-4 lg:p-5",
         "ml-0 md:ml-16 lg:ml-52",
         !isCollapsed ? "lg:ml-52" : "lg:ml-16",
         isCollapsed ? "md:ml-16" : "md:ml-52"
       )}>
-        <div className="flex-1 bg-card rounded-2xl shadow-[0_1px_3px_0_hsl(0_0%_0%/0.06)] border border-border/50 flex flex-col overflow-hidden">
+        <main className="min-h-[calc(100vh-2.5rem)] bg-card rounded-2xl shadow-[0_2px_8px_0_hsl(0_0%_0%/0.07)] border border-border/40 flex flex-col overflow-hidden">
           <GlobalHeader />
           <SelectedFiltersBar />
           <div className="p-4 md:p-6 lg:p-8 flex-1">
             {children}
           </div>
-        </div>
-      </main>
+        </main>
+      </div>
     </div>
   );
 };
