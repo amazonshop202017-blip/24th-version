@@ -384,10 +384,10 @@ export const GlobalHeader = () => {
   const totalActiveFilters = activeBasicFiltersCount + (hasActiveTagFilters ? 1 : 0) + (datePreset !== 'all' ? 1 : 0) + (!isAllAccountsSelected ? 1 : 0);
 
   return (
-    <div className="flex items-center gap-2 px-4 lg:px-6 py-2.5 lg:py-3 border-b border-border bg-card/50 backdrop-blur-sm pl-14 lg:pl-6 overflow-hidden">
+    <div className="flex items-center gap-2 px-4 lg:px-6 py-2.5 lg:py-3 bg-transparent pl-14 lg:pl-6 overflow-hidden">
       {/* Page Title */}
       {pageTitle && (
-        <h1 className="text-base md:text-lg lg:text-xl font-semibold text-foreground whitespace-nowrap mr-1 lg:mr-3">
+        <h1 className="text-sm md:text-base font-semibold text-foreground whitespace-nowrap mr-1 lg:mr-3">
           {pageTitle}
         </h1>
       )}

@@ -42,7 +42,7 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
         onMobileClose={() => setIsMobileMenuOpen(false)}
       />
       <div className={cn(
-        "h-screen transition-all duration-300 p-3 md:p-4 lg:p-5",
+        "h-screen transition-all duration-300 pl-1 md:pl-1 lg:pl-1 pr-3 md:pr-4 lg:pr-5 py-2 md:py-2.5 lg:py-3",
         "ml-0 md:ml-16 lg:ml-52",
         !isCollapsed ? "lg:ml-52" : "lg:ml-16",
         isCollapsed ? "md:ml-16" : "md:ml-52"
