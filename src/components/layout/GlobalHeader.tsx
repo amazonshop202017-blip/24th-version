@@ -129,6 +129,8 @@ const R_MULTIPLE_OPTIONS: { value: RMultipleRange; label: string }[] = [
 export const GlobalHeader = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { isEditMode, toggleEditMode } = useDashboardEdit();
+  const isDashboard = location.pathname === '/';
 
   // Resolve page title from route
   const pageTitle = useMemo(() => {
@@ -1308,6 +1310,19 @@ export const GlobalHeader = () => {
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
+
+      {/* Dashboard Edit Button - after filter bar */}
+      {isDashboard && (
+        <Button
+          variant={isEditMode ? "default" : "ghost"}
+          size="sm"
+          className="h-[2.125rem] gap-1.5 px-2.5 flex-shrink-0 hidden lg:flex"
+          onClick={toggleEditMode}
+        >
+          {isEditMode ? <Check className="h-3.5 w-3.5" /> : <Pencil className="h-3.5 w-3.5" />}
+          <span className="text-xs">{isEditMode ? 'Done' : 'Edit'}</span>
+        </Button>
+      )}
     </div>
   );
 };
