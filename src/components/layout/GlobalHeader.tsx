@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { format } from 'date-fns';
-import { CalendarIcon, ChevronDown, Wallet, Settings, Check, X, Filter, SlidersHorizontal, Globe, TrendingUp, Star, BarChart2, Clock, Percent, Hash, ListFilter, Calendar as CalendarIcon2 } from 'lucide-react';
+import { CalendarIcon, ChevronDown, Wallet, Settings, Check, X, Filter, SlidersHorizontal, Globe, TrendingUp, Star, BarChart2, Clock, Percent, Hash, ListFilter, Calendar as CalendarIcon2, Pencil } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { DateRangeCalendar } from '@/components/layout/DateRangeCalendar';
 import {
@@ -41,6 +41,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { AdvancedFiltersPanel } from './AdvancedFiltersPanel';
 import { DisplayModeSelector } from './DisplayModeSelector';
 import { useLocation } from 'react-router-dom';
+import { useDashboardEdit } from '@/contexts/DashboardEditContext';
 
 const PAGE_TITLES: Record<string, string> = {
   '/': 'Dashboard',
@@ -128,6 +129,8 @@ const R_MULTIPLE_OPTIONS: { value: RMultipleRange; label: string }[] = [
 export const GlobalHeader = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { isEditMode, toggleEditMode } = useDashboardEdit();
+  const isDashboard = location.pathname === '/';
 
   // Resolve page title from route
   const pageTitle = useMemo(() => {
@@ -1307,6 +1310,19 @@ export const GlobalHeader = () => {
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
+
+      {/* Dashboard Edit button - only on dashboard */}
+      {isDashboard && (
+        <Button
+          variant={isEditMode ? "default" : "ghost"}
+          size="sm"
+          className="h-[34px] gap-1.5 px-3 flex-shrink-0 hidden lg:inline-flex"
+          onClick={toggleEditMode}
+        >
+          {isEditMode ? <Check className="h-4 w-4" /> : <Pencil className="h-4 w-4" />}
+          <span className="text-sm">{isEditMode ? 'Done' : 'Edit'}</span>
+        </Button>
+      )}
     </div>
   );
 };
