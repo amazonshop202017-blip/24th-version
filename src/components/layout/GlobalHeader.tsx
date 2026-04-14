@@ -41,6 +41,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { AdvancedFiltersPanel } from './AdvancedFiltersPanel';
 import { DisplayModeSelector } from './DisplayModeSelector';
 import { useLocation } from 'react-router-dom';
+import { useDashboardEdit } from '@/contexts/DashboardEditContext';
 
 const PAGE_TITLES: Record<string, string> = {
   '/': 'Dashboard',
@@ -128,6 +129,8 @@ const R_MULTIPLE_OPTIONS: { value: RMultipleRange; label: string }[] = [
 export const GlobalHeader = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { isEditMode, toggleEditMode } = useDashboardEdit();
+  const isDashboard = location.pathname === '/';
 
   // Resolve page title from route
   const pageTitle = useMemo(() => {
