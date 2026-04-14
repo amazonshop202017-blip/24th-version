@@ -11,7 +11,7 @@
 
   /* Light mode */
   .light, :root:not(.dark) {
-    --background: 210 20% 96%;
+    --background: 0 0% 100%;
     --foreground: 222 47% 11%;
 
     --card: 0 0% 100%;
@@ -46,7 +46,7 @@
     --input: 214 20% 88%;
     --ring: 199 89% 42%;
 
-    --sidebar-background: 210 20% 98%;
+    --sidebar-background: 0 0% 100%;
     --sidebar-foreground: 222 47% 30%;
     --sidebar-primary: 199 89% 42%;
     --sidebar-primary-foreground: 0 0% 100%;
