@@ -14,7 +14,7 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="h-screen overflow-hidden bg-background">
       {/* Mobile overlay */}
       {isMobileMenuOpen && (
         <div
@@ -42,15 +42,17 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
         onMobileClose={() => setIsMobileMenuOpen(false)}
       />
       <div className={cn(
-        "min-h-screen transition-all duration-300 p-3 md:p-4 lg:p-5",
+        "h-screen transition-all duration-300 p-3 md:p-4 lg:p-5",
         "ml-0 md:ml-16 lg:ml-52",
         !isCollapsed ? "lg:ml-52" : "lg:ml-16",
         isCollapsed ? "md:ml-16" : "md:ml-52"
       )}>
-        <main className="min-h-[calc(100vh-2.5rem)] bg-card rounded-2xl shadow-[0_2px_8px_0_hsl(0_0%_0%/0.07)] border border-border/40 flex flex-col overflow-hidden">
-          <GlobalHeader />
-          <SelectedFiltersBar />
-          <div className="p-4 md:p-6 lg:p-8 flex-1">
+        <main className="h-full bg-[hsl(210_20%_96%)] dark:bg-[hsl(222_47%_10%)] rounded-2xl shadow-[0_2px_8px_0_hsl(0_0%_0%/0.07)] border border-border/40 flex flex-col overflow-hidden">
+          <div className="flex-shrink-0">
+            <GlobalHeader />
+            <SelectedFiltersBar />
+          </div>
+          <div className="p-4 md:p-6 lg:p-8 flex-1 overflow-y-auto">
             {children}
           </div>
         </main>
