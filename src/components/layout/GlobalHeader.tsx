@@ -42,7 +42,6 @@ import { AdvancedFiltersPanel } from './AdvancedFiltersPanel';
 import { DisplayModeSelector } from './DisplayModeSelector';
 import { useLocation } from 'react-router-dom';
 import { useDashboardEdit } from '@/contexts/DashboardEditContext';
-import { Button } from '@/components/ui/button';
 
 const PAGE_TITLES: Record<string, string> = {
   '/': 'Dashboard',
