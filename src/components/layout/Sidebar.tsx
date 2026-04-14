@@ -99,7 +99,7 @@ export const Sidebar = ({ isCollapsed, setIsCollapsed, isMobileOpen = false, onM
   return (
     <aside
       className={cn(
-        "fixed left-0 top-0 bg-sidebar border-r border-sidebar-border flex flex-col z-40 transition-all duration-300",
+        "fixed left-0 top-0 bg-sidebar flex flex-col z-40 transition-all duration-300",
         isCollapsed ? "w-16" : "w-52",
         // Mobile: hidden by default, shown when isMobileOpen
         "max-md:-translate-x-full max-md:w-52",
@@ -118,7 +118,7 @@ export const Sidebar = ({ isCollapsed, setIsCollapsed, isMobileOpen = false, onM
       </motion.button>
 
       {/* Logo — extra left padding on mobile to avoid overlap with burger/close button */}
-      <div className="p-4 max-md:pl-14 border-b border-sidebar-border">
+      <div className="p-4 max-md:pl-14">
         <div className="flex flex-col items-center justify-center">
           <AnimatePresence>
             {!isCollapsed ? (
