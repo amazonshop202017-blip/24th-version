@@ -118,6 +118,7 @@ const AuthenticatedApp = () => {
                             } />
                           </Routes>
                           <TradeModal />
+                          </DashboardEditProvider>
                         </TradeModalProvider>
                       </DiaryProvider>
                     </SymbolTickSizeProvider>
