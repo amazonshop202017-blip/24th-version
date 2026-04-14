@@ -552,7 +552,7 @@ export const GlobalHeader = () => {
       </div>
 
       {/* Grouped filter bar with shared border and vertical dividers */}
-      <div className="hidden lg:flex items-center border border-border rounded-md bg-background h-10 overflow-visible">
+      <div className="hidden lg:flex items-center border border-border rounded-md bg-background h-[2.125rem] overflow-visible">
         {/* Basic Filters Dropdown */}
         <DropdownMenu open={basicFiltersOpen} onOpenChange={setBasicFiltersOpen}>
           <DropdownMenuTrigger asChild>
