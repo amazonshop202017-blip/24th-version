@@ -15,6 +15,7 @@ import {
   sortableKeyboardCoordinates,
   rectSortingStrategy,
 } from '@dnd-kit/sortable';
+import { Pencil, Check } from 'lucide-react';
 import { AddWidgetPlaceholder } from '@/components/dashboard/AddWidgetPlaceholder';
 import { ChartLibraryModal } from '@/components/dashboard/ChartLibraryModal';
 import { DashboardMetrics } from '@/components/dashboard/DashboardMetrics';
@@ -32,7 +33,8 @@ import { DraggableChartWrapper } from '@/components/dashboard/DraggableChartWrap
 import { useFilteredTrades } from '@/hooks/useFilteredTrades';
 import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
 import { usePrivacyMode } from '@/hooks/usePrivacyMode';
-import { useDashboardEdit } from '@/contexts/DashboardEditContext';
+import { Button } from '@/components/ui/button';
+import { motion } from 'framer-motion';
 
 interface ChartConfig {
   id: string;
@@ -71,13 +73,14 @@ const Dashboard = () => {
   const { stats } = useFilteredTrades();
   const { formatCurrency } = useGlobalFilters();
   const { isPrivacyMode, maskCurrency } = usePrivacyMode();
-  const { isEditMode } = useDashboardEdit();
+  const [isEditMode, setIsEditMode] = useState(false);
   const [isLibraryOpen, setIsLibraryOpen] = useState(false);
   const [chartOrder, setChartOrder] = useState<string[]>(() => {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
+        // Validate that all charts exist
         if (Array.isArray(parsed) && parsed.every(id => CHART_CONFIGS[id])) {
           return parsed;
         }
@@ -138,13 +141,27 @@ const Dashboard = () => {
 
   return (
     <div className="space-y-6 md:space-y-8">
-      {isEditMode && (
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-muted-foreground bg-secondary px-2 py-1 rounded">
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="flex items-center justify-between gap-2"
+      >
+        {isEditMode && (
+          <span className="text-xs text-muted-foreground bg-secondary px-2 py-1 rounded hidden sm:inline">
             Drag charts to reorder
           </span>
-        </div>
-      )}
+        )}
+        <div className="flex-1" />
+        <Button
+          variant={isEditMode ? "default" : "ghost"}
+          size="sm"
+          className="h-8 gap-1.5 px-3 flex-shrink-0"
+          onClick={() => setIsEditMode(!isEditMode)}
+        >
+          {isEditMode ? <Check className="h-4 w-4" /> : <Pencil className="h-4 w-4" />}
+          <span className="text-sm hidden sm:inline">{isEditMode ? 'Done' : 'Edit'}</span>
+        </Button>
+      </motion.div>
 
       {/* Top metrics - draggable in edit mode */}
       <DashboardMetrics isEditMode={isEditMode} />
@@ -156,7 +173,7 @@ const Dashboard = () => {
         onDragEnd={handleDragEnd}
       >
         <SortableContext items={chartOrder} strategy={rectSortingStrategy}>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-2">
             {chartOrder.map((chartId) => {
               const config = CHART_CONFIGS[chartId];
               if (!config) return null;
