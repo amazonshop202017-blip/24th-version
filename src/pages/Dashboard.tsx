@@ -15,7 +15,7 @@ import {
   sortableKeyboardCoordinates,
   rectSortingStrategy,
 } from '@dnd-kit/sortable';
-import { Pencil, Check } from 'lucide-react';
+import { useDashboardEdit } from '@/contexts/DashboardEditContext';
 import { AddWidgetPlaceholder } from '@/components/dashboard/AddWidgetPlaceholder';
 import { ChartLibraryModal } from '@/components/dashboard/ChartLibraryModal';
 import { DashboardMetrics } from '@/components/dashboard/DashboardMetrics';
@@ -33,7 +33,6 @@ import { DraggableChartWrapper } from '@/components/dashboard/DraggableChartWrap
 import { useFilteredTrades } from '@/hooks/useFilteredTrades';
 import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
 import { usePrivacyMode } from '@/hooks/usePrivacyMode';
-import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 
 interface ChartConfig {
@@ -73,7 +72,7 @@ const Dashboard = () => {
   const { stats } = useFilteredTrades();
   const { formatCurrency } = useGlobalFilters();
   const { isPrivacyMode, maskCurrency } = usePrivacyMode();
-  const [isEditMode, setIsEditMode] = useState(false);
+  const { isEditMode } = useDashboardEdit();
   const [isLibraryOpen, setIsLibraryOpen] = useState(false);
   const [chartOrder, setChartOrder] = useState<string[]>(() => {
     const saved = localStorage.getItem(STORAGE_KEY);
@@ -141,27 +140,17 @@ const Dashboard = () => {
 
   return (
     <div className="space-y-6 md:space-y-8">
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="flex items-center justify-between gap-2"
-      >
-        {isEditMode && (
-          <span className="text-xs text-muted-foreground bg-secondary px-2 py-1 rounded hidden sm:inline">
+      {isEditMode && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex items-center"
+        >
+          <span className="text-xs text-muted-foreground bg-secondary px-2 py-1 rounded">
             Drag charts to reorder
           </span>
-        )}
-        <div className="flex-1" />
-        <Button
-          variant={isEditMode ? "default" : "ghost"}
-          size="sm"
-          className="h-8 gap-1.5 px-3 flex-shrink-0"
-          onClick={() => setIsEditMode(!isEditMode)}
-        >
-          {isEditMode ? <Check className="h-4 w-4" /> : <Pencil className="h-4 w-4" />}
-          <span className="text-sm hidden sm:inline">{isEditMode ? 'Done' : 'Edit'}</span>
-        </Button>
-      </motion.div>
+        </motion.div>
+      )}
 
       {/* Top metrics - draggable in edit mode */}
       <DashboardMetrics isEditMode={isEditMode} />
