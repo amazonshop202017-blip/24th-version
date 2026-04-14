@@ -16,6 +16,7 @@ import { CustomStatsProvider } from "@/contexts/CustomStatsContext";
 import { DiaryProvider } from "@/contexts/DiaryContext";
 import { SymbolTickSizeProvider } from "@/contexts/SymbolTickSizeContext";
 import { InterfaceThemeProvider } from "@/contexts/InterfaceThemeContext";
+import { DashboardEditProvider } from "@/contexts/DashboardEditContext";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { TradeModal } from "@/components/trades/TradeModal";
 import Dashboard from "./pages/Dashboard";
@@ -83,6 +84,7 @@ const AuthenticatedApp = () => {
                   <CustomStatsProvider>
                     <SymbolTickSizeProvider>
                       <DiaryProvider>
+                        <DashboardEditProvider>
                         <TradeModalProvider>
                           <Routes>
                             <Route path="/settings" element={<Settings />} />
@@ -117,6 +119,7 @@ const AuthenticatedApp = () => {
                           </Routes>
                           <TradeModal />
                         </TradeModalProvider>
+                        </DashboardEditProvider>
                       </DiaryProvider>
                     </SymbolTickSizeProvider>
                   </CustomStatsProvider>
